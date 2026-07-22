@@ -1,0 +1,9 @@
+.loader {
+  min-height: 100vh;
+}
+
+.placeholder {
+  display: block;
+  width: calc(var(--ant-size-unit) * 20);
+  height: calc(var(--ant-size-unit) * 12);
+}
