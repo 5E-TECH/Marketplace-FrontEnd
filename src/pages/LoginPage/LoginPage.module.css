@@ -1,0 +1,97 @@
+.page {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 12%, rgb(101 190 255 / 42%), transparent 32%),
+    radial-gradient(circle at 85% 86%, rgb(126 67 226 / 38%), transparent 34%),
+    linear-gradient(135deg, #247fe3 0%, #356ddf 48%, #6950dd 100%);
+  place-items: center;
+}
+
+.page::before,
+.page::after {
+  position: absolute;
+  width: 34rem;
+  height: 34rem;
+  background: rgb(255 255 255 / 12%);
+  border-radius: 50%;
+  content: '';
+  filter: blur(70px);
+}
+
+.page::before {
+  top: -17rem;
+  left: -10rem;
+}
+
+.page::after {
+  right: -13rem;
+  bottom: -19rem;
+}
+
+.auth {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  padding: 1rem;
+  place-items: center;
+}
+
+.card {
+  width: min(100%, 26.25rem);
+  overflow: hidden;
+  background: rgb(255 255 255 / 94%);
+  border: 1px solid rgb(255 255 255 / 72%);
+  border-radius: 1.75rem;
+  box-shadow:
+    0 1.5rem 4rem rgb(31 41 55 / 20%),
+    inset 0 1px 0 rgb(255 255 255 / 85%);
+  backdrop-filter: blur(18px);
+}
+
+.card :global(.ant-card-body) {
+  padding: 0;
+}
+
+.cardContent {
+  padding: 2rem;
+}
+
+.cardContent form {
+  margin-top: 1.75rem;
+}
+
+.security {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.75rem;
+  color: #8d93a6;
+  font-size: 0.8rem;
+  gap: 0.5rem;
+}
+
+@media (max-width: 575px) {
+  .cardContent {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .security {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 576px) {
+  .cardContent {
+    padding-block: 1.25rem;
+  }
+
+  .cardContent form,
+  .security {
+    margin-top: 1.25rem;
+  }
+}

@@ -1,0 +1,31 @@
+.brand {
+  text-align: center;
+}
+
+.iconWrapper {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  color: #fff;
+  font-size: 1.65rem;
+  background: linear-gradient(145deg, #159fea 0%, #5e54e8 60%, #753fdc 100%);
+  border-radius: 0.9rem;
+  box-shadow:
+    0 0.7rem 1.5rem rgb(71 86 218 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 30%);
+  place-items: center;
+}
+
+.name {
+  margin: 1rem 0 0.2rem !important;
+  color: #20263b !important;
+  font-size: 1.9rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.045em;
+  line-height: 1.05 !important;
+}
+
+.tagline {
+  color: #33364a;
+  font-size: 0.85rem;
+}
