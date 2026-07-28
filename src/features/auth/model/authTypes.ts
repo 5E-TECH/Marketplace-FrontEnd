@@ -1,9 +1,3 @@
-export interface AuthUser {
-  id: string;
-  fullName: string;
-  phone: string;
-}
-
 export interface LoginCredentials {
   phone: string;
   password: string;
@@ -11,5 +5,17 @@ export interface LoginCredentials {
 
 export interface LoginResponse {
   accessToken: string;
-  user: AuthUser;
+}
+
+export type UserRole = 'SELLER' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
+
+export interface AuthUser {
+  id: string;
+  role: UserRole;
+  name: string;
+  phone: string;
+  email: string | null;
+  avatarUrl: string | null;
+  isActive: boolean;
+  isDeleted: boolean;
 }

@@ -20,7 +20,7 @@ export function LoginForm({
   return (
     <Form<LoginFormValues>
       layout="vertical"
-      requiredMark={false}
+      requiredMark
       onFinish={onSubmit}
       autoComplete="on"
       size="large"

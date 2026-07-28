@@ -13,6 +13,7 @@ export const appTheme: ThemeConfig = {
     colorTextSecondary: palette.textSecondary,
     colorTextDisabled: palette.textDisabled,
     colorBorder: palette.border,
+    colorBgBase: palette.backgroundContainer,
     colorBgLayout: palette.backgroundLayout,
     colorBgContainer: palette.backgroundContainer,
     borderRadius: 10,
@@ -20,6 +21,7 @@ export const appTheme: ThemeConfig = {
       "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     fontSize: 14,
     controlHeight: 40,
+    wireframe: false,
   },
   components: {
     Layout: {
@@ -28,7 +30,7 @@ export const appTheme: ThemeConfig = {
     },
     Button: {
       controlHeight: 44,
-      borderRadius: 10,
+      borderRadius: 18,
       fontWeight: 500,
       primaryShadow: 'none',
       colorPrimaryHover: palette.primaryHover,
@@ -36,14 +38,14 @@ export const appTheme: ThemeConfig = {
     },
     Input: {
       controlHeight: 44,
-      borderRadius: 10,
+      borderRadius: 16,
     },
     Select: {
       controlHeight: 44,
-      borderRadius: 10,
+      borderRadius: 16,
     },
     Card: {
-      borderRadiusLG: 14,
+      borderRadiusLG: 24,
       paddingLG: 24,
     },
     Table: {
@@ -56,6 +58,12 @@ export const appTheme: ThemeConfig = {
       itemSelectedBg: palette.primaryBackground,
       itemSelectedColor: palette.primary,
       itemBorderRadius: 10,
+    },
+    Tag: {
+      borderRadiusSM: 8,
+    },
+    Modal: {
+      borderRadiusLG: 14,
     },
   },
 };

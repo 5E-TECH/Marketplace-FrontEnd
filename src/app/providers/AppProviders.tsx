@@ -11,7 +11,12 @@ export function AppProviders({ children }: PropsWithChildren) {
     <ReduxProvider store={store}>
       <QueryClientProvider client={queryClient}>
         <ConfigProvider theme={appTheme}>
-          <AntdApp>{children}</AntdApp>
+          <AntdApp
+            message={{ duration: 3.5, maxCount: 3 }}
+            notification={{ duration: 3.5, placement: 'topRight', maxCount: 3 }}
+          >
+            {children}
+          </AntdApp>
         </ConfigProvider>
       </QueryClientProvider>
     </ReduxProvider>

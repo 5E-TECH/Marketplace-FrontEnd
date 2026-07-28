@@ -1,4 +1,4 @@
-import type { InternalAxiosRequestConfig } from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { httpClient } from './httpClient';
 
 interface HttpInterceptorOptions {
@@ -28,15 +28,7 @@ export function setupHttpInterceptors({
   const responseInterceptor = httpClient.interceptors.response.use(
     (response) => response,
     (error: unknown) => {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'response' in error &&
-        typeof error.response === 'object' &&
-        error.response !== null &&
-        'status' in error.response &&
-        error.response.status === 401
-      ) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
         onUnauthorized();
       }
 

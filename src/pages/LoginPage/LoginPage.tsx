@@ -1,5 +1,7 @@
 import { LockFilled } from '@ant-design/icons';
 import { App, Card, Typography } from 'antd';
+import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
+import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { LoginBrand } from './components/LoginBrand/LoginBrand';
 import {
   LoginForm,
@@ -9,12 +11,22 @@ import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
   const { message } = App.useApp();
+  const loginMutation = useLoginMutation();
 
   const handleSubmit = (values: LoginFormValues) => {
-    const phone = `+998${values.phone}`;
-
-    void message.info(
-      `Server ishga tushgach ${phone} uchun kirish faollashadi.`,
+    loginMutation.mutate(
+      {
+        phone: `+998${values.phone}`,
+        password: values.password,
+      },
+      {
+        onSuccess: () => {
+          void message.success('Tizimga muvaffaqiyatli kirdingiz');
+        },
+        onError: (error) => {
+          void message.error(getAuthErrorMessage(error));
+        },
+      },
     );
   };
 
@@ -26,7 +38,7 @@ export default function LoginPage() {
             <LoginBrand />
 
             <LoginForm
-              isSubmitting={false}
+              isSubmitting={loginMutation.isPending}
               onSubmit={handleSubmit}
             />
 
