@@ -1,0 +1,98 @@
+.field {
+  margin-bottom: 0.375rem;
+}
+
+.field :global(.ant-form-item-label) {
+  padding-bottom: 0.25rem;
+}
+
+.field :global(.ant-form-item-label > label) {
+  height: auto;
+  color: #353d5c;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.input,
+.field :global(.ant-input-affix-wrapper) {
+  min-height: 3rem;
+  padding-inline: 0.9rem;
+  color: #30364d;
+  background: rgb(248 249 253 / 90%);
+  border: 1px solid #e1e4ee;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 6px rgb(32 38 59 / 3%);
+  font-size: 0.9rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.input:hover,
+.field :global(.ant-input-affix-wrapper:hover) {
+  background: #fff;
+  border-color: #b9bfea;
+}
+
+.input:focus,
+.field :global(.ant-input-affix-wrapper-focused) {
+  background: #fff;
+  border-color: #6750e7;
+  box-shadow: 0 0 0 3px rgb(103 80 231 / 12%);
+}
+
+.field :global(.ant-input-affix-wrapper input) {
+  color: #30364d;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.field :global(.ant-input::placeholder) {
+  color: #9298aa;
+}
+
+.phonePrefix {
+  padding-right: 0.65rem;
+  color: #444a61;
+  border-right: 1px solid #dfe2ec;
+  line-height: 1.25rem;
+}
+
+.submitButton {
+  width: 100%;
+  height: 3.25rem;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  background: linear-gradient(100deg, #159fe7 0%, #3e72e4 48%, #7042dc 100%);
+  border: 0;
+  border-radius: 0.9rem;
+  box-shadow: 0 0.7rem 1.5rem rgb(63 105 218 / 20%);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.submitButton:not(:disabled):hover {
+  box-shadow: 0 0.9rem 1.8rem rgb(63 105 218 / 28%);
+  filter: saturate(1.08);
+  transform: translateY(-1px);
+}
+
+.submitButton:not(:disabled):active {
+  background: linear-gradient(100deg, #108ed2, #316cd1 47%, #6537c5);
+  box-shadow: 0 0.4rem 1rem rgb(63 105 218 / 20%);
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .field :global(.ant-input-affix-wrapper),
+  .submitButton {
+    transition: none;
+  }
+}

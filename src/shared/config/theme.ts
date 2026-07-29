@@ -9,11 +9,19 @@ export const appTheme: ThemeConfig = {
     colorSuccess: palette.success,
     colorWarning: palette.warning,
     colorError: palette.error,
+    colorTextBase: palette.textPrimary,
+    colorTextSecondary: palette.textSecondary,
+    colorTextDisabled: palette.textDisabled,
+    colorBorder: palette.border,
+    colorBgBase: palette.backgroundContainer,
     colorBgLayout: palette.backgroundLayout,
     colorBgContainer: palette.backgroundContainer,
-    borderRadius: 8,
+    borderRadius: 10,
     fontFamily:
-      "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontSize: 14,
+    controlHeight: 40,
+    wireframe: false,
   },
   components: {
     Layout: {
@@ -21,7 +29,41 @@ export const appTheme: ThemeConfig = {
       bodyBg: palette.backgroundLayout,
     },
     Button: {
-      controlHeight: 40,
+      controlHeight: 44,
+      borderRadius: 18,
+      fontWeight: 500,
+      primaryShadow: 'none',
+      colorPrimaryHover: palette.primaryHover,
+      colorPrimaryActive: palette.primaryActive,
+    },
+    Input: {
+      controlHeight: 44,
+      borderRadius: 16,
+    },
+    Select: {
+      controlHeight: 44,
+      borderRadius: 16,
+    },
+    Card: {
+      borderRadiusLG: 24,
+      paddingLG: 24,
+    },
+    Table: {
+      headerBg: palette.backgroundLayout,
+      borderColor: palette.border,
+      rowHoverBg: palette.primaryBackground,
+      cellPaddingBlock: 14,
+    },
+    Menu: {
+      itemSelectedBg: palette.primaryBackground,
+      itemSelectedColor: palette.primary,
+      itemBorderRadius: 10,
+    },
+    Tag: {
+      borderRadiusSM: 8,
+    },
+    Modal: {
+      borderRadiusLG: 14,
     },
   },
 };

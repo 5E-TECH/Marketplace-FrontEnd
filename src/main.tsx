@@ -2,7 +2,23 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AppProviders } from './app/providers/AppProviders';
 import { AppRouter } from './app/router/AppRouter';
+import { store } from './app/store/store';
+import { loggedOut } from './features/auth/model/authSlice';
+import { queryClient } from './shared/api/queryClient';
+import { setupHttpInterceptors } from './shared/api/setupHttpInterceptors';
 import './styles/global.css';
+
+const ejectHttpInterceptors = setupHttpInterceptors({
+  getAccessToken: () => store.getState().auth.accessToken,
+  onUnauthorized: () => {
+    store.dispatch(loggedOut());
+    queryClient.clear();
+  },
+});
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(ejectHttpInterceptors);
+}
 
 const rootElement = document.getElementById('root');
 

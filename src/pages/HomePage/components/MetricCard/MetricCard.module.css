@@ -1,0 +1,137 @@
+.card {
+  height: 100%;
+  overflow: hidden;
+  background: #151c2f;
+  border: 1px solid #27314a;
+  border-radius: 15px;
+  box-shadow: none;
+  transition:
+    border-color 300ms ease,
+    box-shadow 300ms ease,
+    transform 300ms ease;
+}
+
+.violetCard {
+  border-top: 2px solid #fb923c;
+}
+
+.blueCard {
+  border-top: 2px solid #2dd4bf;
+}
+
+.emeraldCard {
+  border-top: 2px solid #94a3b8;
+}
+
+.amberCard {
+  border-top: 2px solid #fb7185;
+}
+
+.card:hover {
+  border-color: #3a4664;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 18%);
+  transform: translateY(-4px);
+}
+
+.icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  font-size: 19px;
+  border-radius: 12px;
+  place-items: center;
+}
+
+.violet {
+  color: #fb923c;
+  background: rgb(251 146 60 / 14%);
+}
+
+.blue {
+  color: #2dd4bf;
+  background: rgb(45 212 191 / 14%);
+}
+
+.emerald {
+  color: #94a3b8;
+  background: rgb(148 163 184 / 12%);
+}
+
+.amber {
+  color: #fb7185;
+  background: rgb(251 113 133 / 14%);
+}
+
+.trend {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  gap: 3px;
+}
+
+.positive {
+  color: #2dd4bf;
+  background: rgb(45 212 191 / 14%);
+}
+
+.negative {
+  color: #fb7185;
+  background: rgb(251 113 133 / 14%);
+}
+
+.title {
+  display: block;
+  margin-top: 18px;
+  color: #8e9ab2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.value {
+  margin: 3px 0 2px !important;
+  color: #f8fafc !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 27px !important;
+  letter-spacing: -0.035em;
+}
+
+.hint {
+  color: #6f7c96;
+  font-size: 11px;
+}
+
+.sparkline {
+  width: 72px;
+  height: 28px;
+  fill: none;
+  stroke-width: 2;
+}
+
+.sparkline polyline {
+  vector-effect: non-scaling-stroke;
+}
+
+.violetLine {
+  stroke: #fb923c;
+}
+
+.blueLine {
+  stroke: #2dd4bf;
+}
+
+.emeraldLine {
+  stroke: #94a3b8;
+}
+
+.amberLine {
+  stroke: #fb7185;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

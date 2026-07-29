@@ -1,0 +1,68 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  background: #f4f6fa;
+  place-items: center;
+}
+
+.auth {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  padding: 1rem;
+  place-items: center;
+}
+
+.card {
+  width: min(100%, 26.25rem);
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 1.75rem;
+  box-shadow:
+    0 1.25rem 3rem rgb(31 41 55 / 10%),
+    0 2px 8px rgb(31 41 55 / 5%);
+}
+
+.card :global(.ant-card-body) {
+  padding: 0;
+}
+
+.cardContent {
+  padding: 2rem;
+}
+
+.cardContent form {
+  margin-top: 1.75rem;
+}
+
+.security {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.75rem;
+  color: #8d93a6;
+  font-size: 0.8rem;
+  gap: 0.5rem;
+}
+
+@media (max-width: 575px) {
+  .cardContent {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .security {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 576px) {
+  .cardContent {
+    padding-block: 1.25rem;
+  }
+
+  .cardContent form,
+  .security {
+    margin-top: 1.25rem;
+  }
+}
