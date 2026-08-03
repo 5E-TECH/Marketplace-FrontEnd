@@ -1,4 +1,4 @@
-import { DeleteOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Button,
   Divider,
@@ -6,12 +6,11 @@ import {
   Form,
   Input,
   InputNumber,
-  Modal,
   Select,
-  Upload,
-  message,
 } from 'antd';
 import type { Product } from '../../model/sellerTypes';
+import { FormModal } from '../../../../shared/ui/FormModal/FormModal';
+import { ImageUpload } from '../../../../shared/ui/ImageUpload/ImageUpload';
 
 type ProductFormValues = Omit<Product, 'id' | 'status'>;
 
@@ -31,34 +30,14 @@ export function ProductFormModal({
   const [form] = Form.useForm<ProductFormValues>();
 
   return (
-    <Modal
+    <FormModal<ProductFormValues>
       title={product ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}
       open={open}
-      okText="Saqlash"
-      cancelText="Bekor"
-      destroyOnHidden
-      afterOpenChange={(isOpen) => {
-        if (isOpen) {
-          if (product) {
-            form.setFieldsValue(product);
-          } else {
-            form.resetFields();
-          }
-        }
-      }}
+      form={form}
+      initialValues={product ?? { variants: [] }}
       onCancel={onCancel}
-      onOk={() => void form.submit()}
+      onSubmit={(values) => onSave(values)}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        requiredMark
-        initialValues={{ variants: [] }}
-        onFinish={(values) => {
-          onSave(values);
-          form.resetFields();
-        }}
-      >
         <Form.Item
           label="Mahsulot nomi"
           name="name"
@@ -143,24 +122,8 @@ export function ProductFormModal({
           )}
         </Form.List>
         <Form.Item label="Mahsulot rasmlari" extra="JPG, PNG yoki WEBP · maksimum 5 MB">
-          <Upload.Dragger
-            multiple
-            accept="image/jpeg,image/png,image/webp"
-            beforeUpload={(file) => {
-              if (file.size > 5 * 1024 * 1024) {
-                void message.error('Rasm hajmi 5 MB dan oshmasligi kerak');
-                return Upload.LIST_IGNORE;
-              }
-              return false;
-            }}
-          >
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p>Rasmlarni shu yerga tashlang yoki tanlang</p>
-          </Upload.Dragger>
+          <ImageUpload />
         </Form.Item>
-      </Form>
-    </Modal>
+    </FormModal>
   );
 }

@@ -4,7 +4,6 @@ import { selectIsAuthenticated } from '../../model/authSlice';
 import { useCurrentUserQuery } from '../../api/useCurrentUserQuery';
 import { PageLoader } from '../../../../shared/ui/PageLoader/PageLoader';
 import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
-import { isAuthPreviewEnabled } from '../../lib/authPreview';
 
 export function ProtectedRoute() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -13,10 +12,6 @@ export function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
-  if (isAuthPreviewEnabled) {
-    return <Outlet />;
   }
 
   if (currentUserQuery.isPending) {

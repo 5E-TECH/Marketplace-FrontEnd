@@ -19,3 +19,7 @@ export interface AuthUser {
   isActive: boolean;
   isDeleted: boolean;
 }
+
+export interface AuthSession extends LoginResponse {
+  user: AuthUser;
+}

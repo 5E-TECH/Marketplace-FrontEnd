@@ -5,7 +5,6 @@ import {
   selectAccessToken,
 } from '../model/authSlice';
 import { getCurrentUser } from './authApi';
-import { isAuthPreviewEnabled } from '../lib/authPreview';
 
 export function useCurrentUserQuery() {
   const dispatch = useAppDispatch();
@@ -18,7 +17,8 @@ export function useCurrentUserQuery() {
       dispatch(currentUserLoaded(user));
       return user;
     },
-    enabled: Boolean(accessToken) && !isAuthPreviewEnabled,
+    enabled: Boolean(accessToken),
     staleTime: 5 * 60_000,
+    retry: false,
   });
 }

@@ -6,11 +6,15 @@ interface HttpInterceptorOptions {
   onUnauthorized: () => void;
 }
 
+function isLoginRequest(url?: string): boolean {
+  return Boolean(url?.endsWith('/auth/login'));
+}
+
 function attachAccessToken(
   config: InternalAxiosRequestConfig,
   accessToken: string | null,
 ): InternalAxiosRequestConfig {
-  if (accessToken) {
+  if (accessToken && !isLoginRequest(config.url)) {
     config.headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
@@ -28,7 +32,11 @@ export function setupHttpInterceptors({
   const responseInterceptor = httpClient.interceptors.response.use(
     (response) => response,
     (error: unknown) => {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.status === 401 &&
+        !isLoginRequest(error.config?.url)
+      ) {
         onUnauthorized();
       }
 

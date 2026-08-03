@@ -243,6 +243,20 @@
   background: #080d18;
 }
 
+.breadcrumb {
+  margin-bottom: 18px;
+}
+
+.breadcrumb :global(.ant-breadcrumb-link),
+.breadcrumb :global(.ant-breadcrumb-separator) {
+  color: #71809f;
+  font-size: 12px;
+}
+
+.breadcrumb :global(a:hover) {
+  color: #fb923c;
+}
+
 @media (max-width: 991px) {
   .header {
     padding-inline: 16px;

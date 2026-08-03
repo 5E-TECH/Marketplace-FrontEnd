@@ -21,6 +21,7 @@ export function LoginForm({
     <Form<LoginFormValues>
       layout="vertical"
       requiredMark
+      disabled={isSubmitting}
       onFinish={onSubmit}
       autoComplete="on"
       size="large"
@@ -29,7 +30,7 @@ export function LoginForm({
         className={styles.field}
         label="TELEFON RAQAMI"
         name="phone"
-        normalize={(value: string) => value.replace(/\D/g, '').slice(0, 9)}
+        normalize={(value?: string) => (value ?? '').replace(/\D/g, '').slice(0, 9)}
         rules={[
           { required: true, message: 'Telefon raqamini kiriting' },
           {
@@ -43,7 +44,9 @@ export function LoginForm({
           variant="borderless"
           prefix={<span className={styles.phonePrefix}>+998</span>}
           inputMode="numeric"
+          maxLength={9}
           autoComplete="tel"
+          spellCheck={false}
           placeholder="90 123 45 67"
           aria-label="Telefon raqami"
         />
@@ -53,12 +56,17 @@ export function LoginForm({
         className={styles.field}
         label="PAROL"
         name="password"
-        rules={[{ required: true, message: 'Parolni kiriting' }]}
+        rules={[
+          { required: true, message: 'Parolni kiriting' },
+          { max: 128, message: 'Parol 128 belgidan oshmasligi kerak' },
+        ]}
       >
         <Input.Password
           className={styles.input}
           variant="borderless"
           autoComplete="current-password"
+          maxLength={128}
+          spellCheck={false}
           placeholder="Parolingizni kiriting"
           aria-label="Parol"
         />

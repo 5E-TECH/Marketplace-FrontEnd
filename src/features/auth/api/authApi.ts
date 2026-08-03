@@ -1,6 +1,7 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import type {
   AuthUser,
+  AuthSession,
   LoginCredentials,
   LoginResponse,
   UserRole,
@@ -11,6 +12,7 @@ interface LoginApiResponse {
 }
 
 const USER_ROLES: UserRole[] = ['SELLER', 'BUYER', 'ADMIN', 'SUPERADMIN'];
+const SELLER_ROLES = new Set<UserRole>(['SELLER', 'ADMIN', 'SUPERADMIN']);
 
 function isAuthUser(value: unknown): value is AuthUser {
   if (typeof value !== 'object' || value === null) {
@@ -35,7 +37,12 @@ function isAuthUser(value: unknown): value is AuthUser {
 }
 
 function parseLoginResponse(data: LoginApiResponse): LoginResponse {
-  if (typeof data.accessToken !== 'string' || data.accessToken.length === 0) {
+  if (
+    typeof data.accessToken !== 'string' ||
+    data.accessToken.length === 0 ||
+    data.accessToken.length > 16_384 ||
+    /\s/.test(data.accessToken)
+  ) {
     throw new Error('Serverdan kutilmagan javob olindi');
   }
 
@@ -50,10 +57,16 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
   return parseLoginResponse(data);
 }
 
-export async function getCurrentUser(): Promise<AuthUser> {
-  const { data } = await httpClient.get<unknown>('/auth/me');
-  const candidate =
+export async function getCurrentUser(accessToken?: string): Promise<AuthUser> {
+  const { data } = await httpClient.get<unknown>('/auth/me', {
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+  });
+  const unwrapped =
     typeof data === 'object' && data !== null && 'data' in data ? data.data : data;
+  const candidate =
+    typeof unwrapped === 'object' && unwrapped !== null && 'user' in unwrapped
+      ? unwrapped.user
+      : unwrapped;
 
   if (!isAuthUser(candidate)) {
     throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
@@ -70,6 +83,19 @@ export async function getCurrentUser(): Promise<AuthUser> {
         ? candidate.avatarUrl
         : null,
   };
+}
+
+export async function authenticate(
+  credentials: LoginCredentials,
+): Promise<AuthSession> {
+  const authSession = await login(credentials);
+  const user = await getCurrentUser(authSession.accessToken);
+
+  if (!SELLER_ROLES.has(user.role) || user.isDeleted) {
+    throw new Error('Bu akkaunt orqali seller kabinetiga kirish mumkin emas');
+  }
+
+  return { ...authSession, user };
 }
 
 export async function logout(): Promise<void> {

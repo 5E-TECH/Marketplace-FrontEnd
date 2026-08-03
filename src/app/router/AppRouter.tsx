@@ -17,12 +17,18 @@ const OrdersPage = lazy(() => import('../../pages/OrdersPage/OrdersPage'));
 const DeliveryPage = lazy(() => import('../../pages/DeliveryPage/DeliveryPage'));
 const SettingsPage = lazy(() => import('../../pages/SettingsPage/SettingsPage'));
 const SupportPage = lazy(() => import('../../pages/SupportPage/SupportPage'));
+const SharedUiTestPage = import.meta.env.DEV
+  ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
+  : null;
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
+          {SharedUiTestPage ? (
+            <Route path="__test__/shared-ui" element={<SharedUiTestPage />} />
+          ) : null}
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
           </Route>

@@ -1,0 +1,7 @@
+.toolbar {
+  margin-bottom: 16px;
+}
+
+.search {
+  width: min(100%, 360px);
+}
