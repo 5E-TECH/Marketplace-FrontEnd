@@ -1,4 +1,4 @@
-import { LockFilled } from '@ant-design/icons';
+import { LockKeyhole as LockFilled } from 'lucide-react';
 import { App, Card, Typography } from 'antd';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';

@@ -1,7 +1,8 @@
-import type { ThemeConfig } from 'antd';
+import { theme, type ThemeConfig } from 'antd';
 import { palette } from './palette';
 
 export const appTheme: ThemeConfig = {
+  algorithm: theme.darkAlgorithm,
   cssVar: {},
   token: {
     colorPrimary: palette.primary,
@@ -16,7 +17,7 @@ export const appTheme: ThemeConfig = {
     colorBgBase: palette.backgroundContainer,
     colorBgLayout: palette.backgroundLayout,
     colorBgContainer: palette.backgroundContainer,
-    borderRadius: 10,
+    borderRadius: 8,
     fontFamily:
       "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     fontSize: 14,
@@ -30,40 +31,41 @@ export const appTheme: ThemeConfig = {
     },
     Button: {
       controlHeight: 44,
-      borderRadius: 18,
-      fontWeight: 500,
+      borderRadius: 12,
+      fontWeight: 600,
       primaryShadow: 'none',
       colorPrimaryHover: palette.primaryHover,
       colorPrimaryActive: palette.primaryActive,
     },
     Input: {
       controlHeight: 44,
-      borderRadius: 16,
+      borderRadius: 8,
     },
     Select: {
       controlHeight: 44,
-      borderRadius: 16,
+      borderRadius: 8,
     },
     Card: {
-      borderRadiusLG: 24,
+      borderRadiusLG: 16,
       paddingLG: 24,
     },
     Table: {
       headerBg: palette.backgroundLayout,
       borderColor: palette.border,
-      rowHoverBg: palette.primaryBackground,
-      cellPaddingBlock: 14,
+      rowHoverBg: '#192238',
+      cellPaddingBlock: 12,
+      cellPaddingInline: 16,
     },
     Menu: {
       itemSelectedBg: palette.primaryBackground,
       itemSelectedColor: palette.primary,
-      itemBorderRadius: 10,
+      itemBorderRadius: 8,
     },
     Tag: {
       borderRadiusSM: 8,
     },
     Modal: {
-      borderRadiusLG: 14,
+      borderRadiusLG: 16,
     },
   },
 };

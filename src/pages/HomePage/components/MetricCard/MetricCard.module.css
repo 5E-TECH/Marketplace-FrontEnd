@@ -1,14 +1,13 @@
 .card {
   height: 100%;
   overflow: hidden;
-  background: #151c2f;
-  border: 1px solid #27314a;
-  border-radius: 15px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   box-shadow: none;
   transition:
-    border-color 300ms ease,
-    box-shadow 300ms ease,
-    transform 300ms ease;
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .violetCard {
@@ -29,16 +28,14 @@
 
 .card:hover {
   border-color: #3a4664;
-  box-shadow: 0 18px 40px rgb(0 0 0 / 18%);
-  transform: translateY(-4px);
 }
 
 .icon {
   display: grid;
-  width: 42px;
-  height: 42px;
-  font-size: 19px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  border-radius: var(--radius-md);
   place-items: center;
 }
 
@@ -65,11 +62,11 @@
 .trend {
   display: inline-flex;
   align-items: center;
-  padding: 4px 7px;
-  font-size: 11px;
+  padding: var(--space-1) var(--space-2);
+  font: var(--font-label);
   font-weight: 700;
-  border-radius: 999px;
-  gap: 3px;
+  border-radius: var(--radius-full);
+  gap: var(--space-1);
 }
 
 .positive {
@@ -84,23 +81,22 @@
 
 .title {
   display: block;
-  margin-top: 18px;
+  margin-top: var(--space-4);
   color: #8e9ab2;
-  font-size: 12px;
-  font-weight: 600;
+  font: var(--font-label);
 }
 
 .value {
   margin: 3px 0 2px !important;
   color: #f8fafc !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 27px !important;
+  font: var(--font-metric) !important;
   letter-spacing: -0.035em;
 }
 
 .hint {
   color: #6f7c96;
-  font-size: 11px;
+  font: var(--font-caption);
 }
 
 .sparkline {

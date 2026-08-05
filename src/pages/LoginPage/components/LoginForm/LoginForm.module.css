@@ -16,7 +16,9 @@
 
 .input,
 .field :global(.ant-input-affix-wrapper) {
+  height: 3rem;
   min-height: 3rem;
+  padding-block: 0;
   padding-inline: 0.9rem;
   color: #30364d;
   background: rgb(248 249 253 / 90%);
@@ -44,9 +46,38 @@
 }
 
 .field :global(.ant-input-affix-wrapper input) {
+  height: 100%;
+  padding-block: 0;
   color: #30364d;
   background: transparent;
   font-size: 0.9rem;
+}
+
+.field :global(.ant-input-password-icon) {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  margin-inline-end: -0.5rem;
+  color: #667085;
+  font-size: 1.1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  place-items: center;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.field :global(.ant-input-password-icon:hover) {
+  color: #4f46e5;
+  background: #eef2ff;
+}
+
+.field :global(.ant-input-password-icon:focus-visible) {
+  color: #4f46e5;
+  outline: 2px solid #818cf8;
+  outline-offset: 1px;
 }
 
 .field :global(.ant-input::placeholder) {

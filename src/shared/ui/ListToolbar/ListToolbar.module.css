@@ -1,0 +1,44 @@
+.toolbar {
+  display: grid;
+  align-items: center;
+  margin-bottom: var(--space-4);
+  grid-template-columns: minmax(320px, 1fr) auto;
+  gap: var(--space-3);
+}
+
+.search {
+  width: 100%;
+  height: 44px;
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.search :global(svg),
+.actions :global(svg) {
+  width: 17px;
+  height: 17px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.actions :global(.ant-btn) {
+  height: 44px;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 991px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .actions :global(.ant-btn) {
+    flex: 1;
+  }
+}

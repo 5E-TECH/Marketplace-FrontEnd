@@ -1,14 +1,12 @@
 import {
-  BellOutlined,
-  DownOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  SettingOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { Avatar, Badge, Button, Dropdown, Flex, Input, Layout } from 'antd';
+  Bell as BellOutlined,
+  Globe2 as GlobalOutlined,
+  LogOut as LogoutOutlined,
+  PanelLeftClose as MenuFoldOutlined,
+  PanelLeftOpen as MenuUnfoldOutlined,
+  Search as SearchOutlined,
+} from 'lucide-react';
+import { Avatar, Badge, Button, Divider, Flex, Input, Layout, Typography } from 'antd';
 import type { AuthUser } from '../../features/auth/model/authTypes';
 import styles from './MainLayout.module.css';
 
@@ -47,36 +45,43 @@ export function AppHeader({
           />
         </Flex>
 
-        <Flex align="center" gap={12}>
-          <Dropdown
-            trigger={['click']}
-            menu={{
-              items: [
-                { key: 'new-order', label: 'Yangi buyurtma qabul qilindi' },
-                { key: 'low-stock', label: '2 ta mahsulot kam qoldi' },
-              ],
-            }}
+        <Flex className={styles.headerActions} align="center">
+          <Button
+            type="text"
+            className={styles.headerIconButton}
+            icon={<GlobalOutlined />}
+            aria-label="Tilni tanlash"
+          />
+          <Badge dot offset={[-7, 7]}>
+            <Button
+              type="text"
+              className={styles.headerIconButton}
+              icon={<BellOutlined />}
+              aria-label="Bildirishnomalar"
+            />
+          </Badge>
+          <Divider type="vertical" className={styles.headerDivider} />
+          <button
+            className={styles.accountSummary}
+            type="button"
+            aria-label="Do‘kon profiliga o‘tish"
+            onClick={() => onNavigate('/profile')}
           >
-            <Badge dot offset={[-6, 5]}>
-              <Button type="text" icon={<BellOutlined />} aria-label="Bildirishnomalar" />
-            </Badge>
-          </Dropdown>
-          <Dropdown
-            trigger={['click']}
-            menu={{
-              items: [
-                { key: 'profile', icon: <UserOutlined />, label: 'Profil', onClick: () => onNavigate('/settings') },
-                { key: 'settings', icon: <SettingOutlined />, label: 'Sozlamalar', onClick: () => onNavigate('/settings') },
-                { type: 'divider' },
-                { key: 'logout', danger: true, icon: <LogoutOutlined />, label: 'Chiqish', onClick: onLogout },
-              ],
-            }}
-          >
-            <Button type="text" className={styles.userButton}>
-              <Avatar size={34} src={user?.avatarUrl}>{user?.name?.slice(0, 2).toUpperCase() ?? 'AK'}</Avatar>
-              <DownOutlined className={styles.chevron} />
-            </Button>
-          </Dropdown>
+            <Avatar className={styles.accountAvatar} size={34} src={user?.avatarUrl}>
+              {user?.name?.slice(0, 2).toUpperCase() ?? 'AK'}
+            </Avatar>
+            <span className={styles.accountText}>
+              <Typography.Text>{user?.name ?? 'Akkaunt'}</Typography.Text>
+              <Typography.Text>{user?.role ?? 'SELLER'}</Typography.Text>
+            </span>
+          </button>
+          <Button
+            type="text"
+            className={styles.logoutButton}
+            icon={<LogoutOutlined />}
+            aria-label="Tizimdan chiqish"
+            onClick={onLogout}
+          />
         </Flex>
       </Flex>
     </Layout.Header>

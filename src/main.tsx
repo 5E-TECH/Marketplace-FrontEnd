@@ -11,6 +11,10 @@ import './styles/global.css';
 const ejectHttpInterceptors = setupHttpInterceptors({
   getAccessToken: () => store.getState().auth.accessToken,
   onUnauthorized: () => {
+    if (!store.getState().auth.accessToken) {
+      return;
+    }
+
     store.dispatch(loggedOut());
     queryClient.clear();
   },

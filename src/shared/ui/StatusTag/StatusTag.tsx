@@ -1,4 +1,5 @@
 import { Tag } from 'antd';
+import styles from './StatusTag.module.css';
 
 const STATUS_CONFIG = {
   ACTIVE: { color: 'success', label: 'Faol' },
@@ -18,7 +19,7 @@ export function StatusTag({ status }: { status: AppStatus }) {
   const config = STATUS_CONFIG[status];
 
   return (
-    <Tag color={config.color} bordered={false}>
+    <Tag className={styles.tag} color={config.color} bordered={false}>
       {config.label}
     </Tag>
   );

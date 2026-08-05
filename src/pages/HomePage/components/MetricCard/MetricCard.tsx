@@ -1,4 +1,4 @@
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+import { ArrowDown as ArrowDownOutlined, ArrowUp as ArrowUpOutlined } from 'lucide-react';
 import { Card, Flex, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import styles from './MetricCard.module.css';

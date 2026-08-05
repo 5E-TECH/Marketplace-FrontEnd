@@ -1,4 +1,4 @@
-import { InboxOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Inbox as InboxOutlined, RotateCw as ReloadOutlined } from 'lucide-react';
 import { Button, Result, Skeleton } from 'antd';
 
 interface ContentStateProps {

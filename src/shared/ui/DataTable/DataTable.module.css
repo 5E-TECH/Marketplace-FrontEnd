@@ -1,0 +1,14 @@
+.toolbar {
+  margin-bottom: var(--space-4);
+  gap: var(--space-3);
+}
+
+.search {
+  width: min(100%, 360px);
+}
+
+@media (max-width: 575px) {
+  .search {
+    width: 100%;
+  }
+}

@@ -11,8 +11,12 @@ const authPersistence = createListenerMiddleware();
 
 authPersistence.startListening({
   actionCreator: authenticated,
-  effect: ({ payload }) => {
-    authStorage.setAccessToken(payload.accessToken);
+  effect: ({ payload }, { dispatch }) => {
+    try {
+      authStorage.setAccessToken(payload.accessToken);
+    } catch {
+      dispatch(loggedOut());
+    }
   },
 });
 

@@ -3,6 +3,10 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterCredentials extends LoginCredentials {
+  name: string;
+}
+
 export interface LoginResponse {
   accessToken: string;
 }
@@ -18,4 +22,8 @@ export interface AuthUser {
   avatarUrl: string | null;
   isActive: boolean;
   isDeleted: boolean;
+}
+
+export interface AuthSession extends LoginResponse {
+  user: AuthUser;
 }

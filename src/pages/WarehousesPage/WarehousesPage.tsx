@@ -1,11 +1,13 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Card, Form, Input, Modal, Table } from 'antd';
+import { Plus as PlusOutlined } from 'lucide-react';
+import { App, Button, Card, Form, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { warehouses as initialWarehouses } from '../../features/seller/model/sellerData';
 import type { Warehouse } from '../../features/seller/model/sellerTypes';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { DataTable } from '../../shared/ui/DataTable/DataTable';
+import { FormModal } from '../../shared/ui/FormModal/FormModal';
 
 export default function WarehousesPage() {
   const { message } = App.useApp();
@@ -29,24 +31,35 @@ export default function WarehousesPage() {
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>Ombor qo‘shish</Button>}
       />
       <Card>
-        <Table rowKey="id" columns={columns} dataSource={warehouses} scroll={{ x: 760 }} pagination={{ pageSize: 20, showSizeChanger: false }} />
+        <DataTable
+          rowKey="id"
+          columns={columns}
+          dataSource={warehouses}
+          scroll={{ x: 760 }}
+          search={{
+            placeholder: 'Ombor yoki manzil qidirish...',
+            filter: (warehouse, query) =>
+              `${warehouse.name} ${warehouse.address}`
+                .toLocaleLowerCase('uz')
+                .includes(query),
+          }}
+        />
       </Card>
-      <Modal title="Yangi ombor" open={open} okText="Qo‘shish" cancelText="Bekor" onCancel={() => setOpen(false)} onOk={() => void form.submit()}>
-        <Form
-          form={form}
-          layout="vertical"
-          requiredMark
-          onFinish={(values) => {
+      <FormModal
+        title="Yangi ombor"
+        open={open}
+        form={form}
+        submitText="Qo‘shish"
+        onCancel={() => setOpen(false)}
+        onSubmit={(values) => {
             setWarehouses((items) => [...items, { ...values, id: crypto.randomUUID(), products: 0, stock: 0, status: 'ACTIVE' }]);
-            form.resetFields();
             setOpen(false);
             void message.success('Ombor qo‘shildi');
-          }}
-        >
-          <Form.Item label="Ombor nomi" name="name" rules={[{ required: true, message: 'Ombor nomini kiriting' }]}><Input /></Form.Item>
-          <Form.Item label="Manzil" name="address" rules={[{ required: true, message: 'Manzilni kiriting' }]}><Input /></Form.Item>
-        </Form>
-      </Modal>
+        }}
+      >
+        <Form.Item label="Ombor nomi" name="name" rules={[{ required: true, message: 'Ombor nomini kiriting' }]}><Input /></Form.Item>
+        <Form.Item label="Manzil" name="address" rules={[{ required: true, message: 'Manzilni kiriting' }]}><Input /></Form.Item>
+      </FormModal>
     </>
   );
 }

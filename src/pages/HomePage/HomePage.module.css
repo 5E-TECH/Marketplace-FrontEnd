@@ -1,59 +1,51 @@
 .hero {
-  margin-bottom: 28px;
+  margin-bottom: var(--space-6);
 }
 
 .hero h1 {
-  margin: 5px 0 5px !important;
-  color: #f8fafc;
-  font-family: Georgia, serif;
-  font-size: 34px;
-  line-height: 42px;
-  letter-spacing: -0.035em;
+  margin: var(--space-1) 0 !important;
+  color: var(--color-text);
+  font: var(--font-display);
 }
 
 .kicker,
 .panelEyebrow {
-  color: #fb923c;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  color: var(--color-accent);
+  font: var(--font-label);
+  letter-spacing: 0.05em;
 }
 
 .section {
-  margin-top: 20px;
+  margin-top: var(--space-6);
 }
 
 .panel {
   height: 100%;
-  background: #151c2f;
-  border: 1px solid #27314a;
-  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   box-shadow: none;
   transition:
-    border-color 300ms ease,
-    box-shadow 300ms ease,
-    transform 300ms ease;
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .panel:hover {
   border-color: #3a4664;
-  box-shadow: 0 20px 50px rgb(0 0 0 / 18%);
-  transform: translateY(-3px);
 }
 
 .panel :global(.ant-card-head) {
-  min-height: 68px;
-  border-bottom-color: #27314a;
+  min-height: 64px;
+  border-bottom-color: var(--color-border);
 }
 
 .panelSubtitle,
 .productSales,
 .activityMeta {
   display: block;
-  margin-top: 2px;
-  color: #71809f;
-  font-size: 11px;
-  font-weight: 400;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font: var(--font-caption);
 }
 
 .orderRow,
@@ -69,7 +61,7 @@
   color: #fb923c;
   font-weight: 700;
   background: rgb(251 146 60 / 14%);
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   place-items: center;
 }
 
@@ -85,62 +77,56 @@
 
 .stockButton {
   height: 40px;
-  margin-top: 12px;
+  margin-top: var(--space-3);
   color: #fb923c;
   background: rgb(251 146 60 / 10%);
   border: 1px solid rgb(251 146 60 / 15%);
 }
 
 .quickPanel {
-  padding: 4px;
+  padding: var(--space-1);
   background:
     radial-gradient(circle at 100% 0%, rgb(251 146 60 / 8%), transparent 38%),
     #151c2f;
 }
 
 .quickPanel h3 {
-  margin: 6px 0 20px !important;
-  color: #f8fafc;
-  font-family: Georgia, serif;
-  font-size: 20px;
-  letter-spacing: -0.03em;
+  margin: var(--space-2) 0 var(--space-4) !important;
+  color: var(--color-text);
+  font: var(--font-h2);
 }
 
 .quickGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .quickAction {
   display: flex;
   width: 100%;
-  min-height: 78px;
-  padding: 12px;
+  min-height: 80px;
+  padding: var(--space-3);
   color: #d8deea;
   font: inherit;
-  font-size: 12px;
-  font-weight: 650;
+  font: var(--font-label);
   text-align: left;
-  background: #111827;
-  border: 1px solid #27314a;
-  border-radius: 13px;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
   flex-direction: column;
   justify-content: space-between;
   transition:
-    color 300ms ease,
-    border-color 300ms ease,
-    box-shadow 300ms ease,
-    transform 300ms ease;
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .quickAction:hover {
-  color: #fb923c;
-  background: #192136;
-  border-color: #fb923c;
-  box-shadow: 0 12px 26px rgb(0 0 0 / 18%);
-  transform: translateY(-3px);
+  color: var(--color-accent);
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
 }
 
 .quickIcon {
@@ -149,9 +135,9 @@
 }
 
 .inventoryHealth {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid #27314a;
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
 }
 
 .healthValue,
@@ -164,7 +150,7 @@
 .topProducts {
   display: flex;
   flex-direction: column;
-  gap: 19px;
+  gap: var(--space-4);
 }
 
 .topProduct {
@@ -179,7 +165,7 @@
   font-size: 11px;
   font-weight: 800;
   background: rgb(251 146 60 / 14%);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   place-items: center;
 }
 
@@ -190,7 +176,7 @@
 
 .customer {
   min-height: 58px;
-  border-bottom: 1px solid #27314a;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .customer:last-child {
@@ -209,14 +195,10 @@
     flex-direction: column;
   }
 
-  .hero h1 {
-    font-size: 25px;
-  }
-
   .orderRow {
     align-items: flex-start;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-2);
   }
 }
 

@@ -1,7 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { authStorage } from '../lib/authStorage';
 import type { AuthUser, LoginResponse } from './authTypes';
-import { isAuthPreviewEnabled, previewUser } from '../lib/authPreview';
 
 interface AuthState {
   accessToken: string | null;
@@ -12,7 +11,7 @@ const persistedAccessToken = authStorage.getAccessToken();
 
 const initialState: AuthState = {
   accessToken: persistedAccessToken,
-  user: isAuthPreviewEnabled && persistedAccessToken ? previewUser : null,
+  user: null,
 };
 
 const authSlice = createSlice({
