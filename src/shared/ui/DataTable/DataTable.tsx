@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { EmptyState } from '../EmptyState/EmptyState';
 import styles from './DataTable.module.css';
+import { createTablePagination } from './tablePagination';
 
 interface DataTableSearch<RecordType> {
   placeholder?: string;
@@ -22,11 +23,7 @@ interface DataTableProps<RecordType extends object>
   emptyState?: ReactNode;
 }
 
-const defaultPagination: TablePaginationConfig = {
-  pageSize: 20,
-  showSizeChanger: false,
-  showTotal: (total) => `Jami ${total} ta`,
-};
+const defaultPagination = createTablePagination();
 
 export function DataTable<RecordType extends object>({
   dataSource,
@@ -34,9 +31,11 @@ export function DataTable<RecordType extends object>({
   toolbarExtra,
   pagination = defaultPagination,
   emptyState,
+  onChange,
   ...tableProps
 }: DataTableProps<RecordType>) {
   const [query, setQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase('uz'));
 
   const filteredData = useMemo(
@@ -63,7 +62,10 @@ export function DataTable<RecordType extends object>({
               className={styles.search}
               placeholder={search.placeholder ?? 'Qidirish...'}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setCurrentPage(1);
+              }}
             />
           ) : (
             <span />
@@ -74,7 +76,20 @@ export function DataTable<RecordType extends object>({
       <Table<RecordType>
         {...tableProps}
         dataSource={filteredData}
-        pagination={pagination}
+        pagination={
+          pagination === false
+            ? false
+            : {
+                ...pagination,
+                current: pagination.current ?? currentPage,
+              }
+        }
+        onChange={(nextPagination, filters, sorter, extra) => {
+          if (pagination !== false && pagination.current === undefined) {
+            setCurrentPage(nextPagination.current ?? 1);
+          }
+          onChange?.(nextPagination, filters, sorter, extra);
+        }}
         locale={{
           emptyText: emptyState ?? <EmptyState compact />,
         }}

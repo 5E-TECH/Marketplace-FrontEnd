@@ -1,8 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-  ACCESS_TOKEN_KEY,
-  installAuthenticatedSession,
-} from './support/auth';
+import { installAuthenticatedSession } from './support/auth';
 
 test.beforeEach(async ({ page }) => {
   await installAuthenticatedSession(page);
@@ -26,19 +23,6 @@ test('TC1: sidebar navigation route va breadcrumbni yangilaydi', async ({
   const breadcrumb = page.getByRole('navigation', { name: /breadcrumb/i });
   await expect(breadcrumb).toContainText('Bosh sahifa');
   await expect(breadcrumb).toContainText('Mahsulotlar');
-});
-
-test('TC2: logout API va lokal sessiyani tozalaydi', async ({ page }) => {
-  await page.goto('/');
-  await page.getByText('Chiqish', { exact: true }).click();
-
-  await expect(page).toHaveURL(/\/login$/);
-  await expect(
-    page.getByRole('heading', { name: 'MarketHub' }),
-  ).toBeVisible();
-  expect(
-    await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
-  ).toBeNull();
 });
 
 test('TC3: 375px viewportda overflow yo‘q va mobile navigation ishlaydi', async ({

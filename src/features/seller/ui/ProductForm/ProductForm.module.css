@@ -1,0 +1,16 @@
+.form { display: grid; gap: 18px; }
+.card { padding: 24px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.sectionHeader { display: flex; justify-content: space-between; margin-bottom: 22px; }
+.sectionHeader h2 { margin: 0 0 5px; color: var(--color-text); font-size: 18px; line-height: 1.4; }
+.sectionHeader p { margin: 0; color: var(--color-text-muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; }
+.fullWidth { grid-column: 1 / -1; }
+.variants { display: grid; gap: 14px; }
+.variant { padding: 0 16px 4px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.variantGrid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+.removeVariant { margin-bottom: 24px; }
+.addVariant { height: 44px; }
+.actions { position: sticky; bottom: 16px; z-index: 2; display: flex; justify-content: flex-end; gap: 10px; padding: 14px; background: rgb(15 23 42 / 92%); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); backdrop-filter: blur(14px); }
+.actions button { min-width: 148px; }
+@media (max-width: 767px) { .card { padding: 18px; } .grid, .variantGrid { grid-template-columns: 1fr; } .fullWidth { grid-column: auto; } .removeVariant { justify-self: end; margin: -10px 0 10px; } }
+@media (max-width: 575px) { .actions { bottom: 8px; } .actions button { min-width: 0; flex: 1; } }

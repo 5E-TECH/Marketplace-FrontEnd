@@ -1,11 +1,4 @@
-import {
-  App,
-  ConfigProvider,
-  Drawer,
-  Grid,
-  Layout,
-  theme as antdTheme,
-} from 'antd';
+import { App, Drawer, Grid, Layout } from 'antd';
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/store/hooks';
@@ -21,8 +14,8 @@ import styles from './MainLayout.module.css';
 
 export default function MainLayout() {
   const { message } = App.useApp();
-  const screens = Grid.useBreakpoint();
   const navigate = useNavigate();
+  const screens = Grid.useBreakpoint();
   const user = useAppSelector(selectAuthUser);
   const logoutMutation = useLogoutMutation();
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
@@ -42,31 +35,13 @@ export default function MainLayout() {
   };
 
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: antdTheme.darkAlgorithm,
-        token: {
-          colorPrimary: '#FB923C',
-          colorInfo: '#FB923C',
-          colorSuccess: '#2DD4BF',
-          colorWarning: '#FBBF24',
-          colorError: '#FB7185',
-          colorBgBase: '#080D18',
-          colorBgLayout: '#080D18',
-          colorBgContainer: '#151C2F',
-          colorBorder: '#27314A',
-          colorTextBase: '#F8FAFC',
-          borderRadius: 14,
-        },
-      }}
-    >
       <Layout className={styles.layout}>
         {showSidebar ? (
-          <AppSidebar collapsed={collapsed} onLogout={handleLogout} />
+          <AppSidebar collapsed={collapsed} />
         ) : null}
         <Drawer
           placement="left"
-          width={272}
+          width={288}
           open={!showSidebar && mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           styles={{ body: { padding: 0, background: '#0E1424' } }}
@@ -74,7 +49,6 @@ export default function MainLayout() {
         >
           <AppNavigation
             onNavigate={() => setMobileMenuOpen(false)}
-            onLogout={handleLogout}
           />
         </Drawer>
 
@@ -102,6 +76,5 @@ export default function MainLayout() {
           </Layout.Content>
         </Layout>
       </Layout>
-    </ConfigProvider>
   );
 }

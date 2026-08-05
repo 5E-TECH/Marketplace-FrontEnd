@@ -1,36 +1,62 @@
 import {
-  DeleteOutlined,
-  EditOutlined,
-  PictureOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { App, Button, Card, Flex, Select, Space, Typography } from 'antd';
+  Download,
+  Filter,
+  Image as PictureOutlined,
+  Pencil as EditOutlined,
+  Plus as PlusOutlined,
+  Trash2 as DeleteOutlined,
+  Upload,
+} from 'lucide-react';
+import { App, Card, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
-import { ProductFormModal } from '../../features/seller/ui/ProductFormModal/ProductFormModal';
+import { useNavigate } from 'react-router-dom';
 import { initialProducts } from '../../features/seller/model/sellerData';
 import type { Product } from '../../features/seller/model/sellerTypes';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
+import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
 import styles from './ProductsPage.module.css';
+import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
+import { FilterTabs } from '../../shared/ui/FilterTabs/FilterTabs';
+import { ToolbarButton } from '../../shared/ui/ToolbarButton/ToolbarButton';
+import { ActionMenu } from '../../shared/ui/ActionMenu/ActionMenu';
+import { SummaryCard } from '../../shared/ui/SummaryCard/SummaryCard';
+import { normalizeSearchText } from '../../shared/lib/search';
+
+type ProductStatusFilter = 'ALL' | Product['status'];
+
+const STATUS_FILTERS = [
+  { value: 'ALL', label: 'Barcha mahsulotlar' },
+  { value: 'ACTIVE', label: 'Faol' },
+  { value: 'LOW', label: 'Kam qoldiq' },
+  { value: 'INACTIVE', label: 'Nofaol' },
+] as const satisfies readonly { value: ProductStatusFilter; label: string }[];
 
 export default function ProductsPage() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [products, setProducts] = useState(initialProducts);
-  const [status, setStatus] = useState('ALL');
+  const [status, setStatus] = useState<ProductStatusFilter>('ALL');
+  const [query, setQuery] = useState('');
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const filteredProducts = useMemo(
     () =>
       products.filter(
-        (product) => status === 'ALL' || product.status === status,
+        (product) =>
+          (status === 'ALL' || product.status === status) &&
+          normalizeSearchText(`${product.name} ${product.sku}`).includes(
+            normalizeSearchText(query),
+          ),
       ),
-    [products, status],
+    [products, query, status],
   );
+
+  const activeCount = products.filter(({ status: value }) => value === 'ACTIVE').length;
+  const lowStockCount = products.filter(({ status: value }) => value === 'LOW').length;
 
   const removeProduct = (product: Product) => {
     setProducts((items) => items.filter(({ id }) => id !== product.id));
@@ -55,79 +81,70 @@ export default function ProductsPage() {
       title: 'Amallar',
       width: 110,
       render: (_, product) => (
-        <Space size={4}>
-          <Button type="text" icon={<EditOutlined />} aria-label="Mahsulotni tahrirlash" onClick={() => { setEditingProduct(product); setModalOpen(true); }} />
-          <Button type="text" danger icon={<DeleteOutlined />} aria-label="Mahsulotni o‘chirish" onClick={() => setDeletingProduct(product)} />
-        </Space>
+        <ActionMenu
+          ariaLabel={`${product.name} amallari`}
+          items={[
+            {
+              key: 'edit',
+              label: 'Tahrirlash',
+              icon: <EditOutlined />,
+              onClick: () => void navigate(`/products/${product.id}/edit`),
+            },
+            {
+              key: 'delete',
+              label: 'O‘chirish',
+              icon: <DeleteOutlined />,
+              danger: true,
+              onClick: () => setDeletingProduct(product),
+            },
+          ]}
+        />
       ),
     },
   ];
 
   return (
-    <>
-      <header className={styles.pageHeader}>
-        <Typography.Text className={styles.eyebrow}>Katalog</Typography.Text>
-        <Typography.Title level={1}>Mahsulotlar</Typography.Title>
-        <Typography.Text type="secondary">
-          Jami {products.length} ta mahsulot katalogda.
-        </Typography.Text>
-      </header>
+    <main className={styles.page}>
+      <Typography.Title level={1} className={styles.srOnly}>
+        Mahsulotlar
+      </Typography.Title>
+      <ListToolbar
+        value={query}
+        placeholder="Mahsulot yoki SKU qidirish..."
+        onChange={setQuery}
+        actions={
+          <>
+          <ToolbarButton icon={<Filter />}>Filter</ToolbarButton>
+          <ToolbarButton icon={<Download />} onClick={() => void message.info('Eksport tayyorlanmoqda')}>Eksport</ToolbarButton>
+          <ToolbarButton icon={<Upload />} onClick={() => void message.info('Import oynasi tayyorlanmoqda')}>Import</ToolbarButton>
+          <ToolbarButton type="primary" icon={<PlusOutlined />} onClick={() => void navigate('/products/new')}>
+            Mahsulot qo‘shish
+          </ToolbarButton>
+          </>
+        }
+      />
+
+      <section className={styles.stats} aria-label="Mahsulot statistikasi">
+        <SummaryCard title="Jami mahsulotlar" value={products.length} caption="Katalogdagi barcha mahsulotlar" icon={<PictureOutlined />} />
+        <SummaryCard title="Faol mahsulotlar" value={activeCount} caption="Sotuv uchun faol holatda" icon={<PictureOutlined />} tone="success" />
+        <SummaryCard title="Kam qolgan" value={lowStockCount} caption="Qoldiqni yangilash talab qilinadi" icon={<PictureOutlined />} tone="warning" />
+      </section>
+
       <Card className={styles.tableCard}>
+        <FilterTabs
+          value={status}
+          options={STATUS_FILTERS}
+          ariaLabel="Mahsulot holati"
+          onChange={setStatus}
+        />
         <DataTable
           rowKey="id"
           columns={columns}
           dataSource={filteredProducts}
           scroll={{ x: 900 }}
-          search={{
-            placeholder: 'Mahsulot yoki SKU qidirish...',
-            filter: (product, query) =>
-              `${product.name} ${product.sku}`
-                .toLocaleLowerCase('uz')
-                .includes(query),
-          }}
-          toolbarExtra={
-            <Flex gap={10} wrap>
-              <Select
-                value={status}
-                className={styles.filter}
-                onChange={setStatus}
-                options={[
-                  { value: 'ALL', label: 'Barchasi' },
-                  { value: 'ACTIVE', label: 'Faol' },
-                  { value: 'LOW', label: 'Kam qoldiq' },
-                  { value: 'INACTIVE', label: 'Nofaol' },
-                ]}
-              />
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingProduct(null); setModalOpen(true); }}>
-                Mahsulot qo‘shish
-              </Button>
-            </Flex>
-          }
+          pagination={createTablePagination(8)}
         />
       </Card>
-      <ProductFormModal
-        open={modalOpen}
-        product={editingProduct}
-        onCancel={() => setModalOpen(false)}
-        onSave={(values) => {
-          setProducts((items) =>
-            editingProduct
-              ? items.map((item) =>
-                  item.id === editingProduct.id ? { ...item, ...values } : item,
-                )
-              : [
-                  {
-                    ...values,
-                    id: crypto.randomUUID(),
-                    status: values.stock > 5 ? 'ACTIVE' : 'LOW',
-                  },
-                  ...items,
-                ],
-          );
-          setModalOpen(false);
-          void message.success('Mahsulot saqlandi');
-        }}
-      />
       <ConfirmDialog
         open={Boolean(deletingProduct)}
         title="Mahsulot o‘chirilsinmi?"
@@ -139,6 +156,6 @@ export default function ProductsPage() {
           if (deletingProduct) removeProduct(deletingProduct);
         }}
       />
-    </>
+    </main>
   );
 }

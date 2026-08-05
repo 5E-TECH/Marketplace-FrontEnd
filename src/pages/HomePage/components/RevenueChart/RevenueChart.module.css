@@ -1,37 +1,33 @@
 .card {
   height: 100%;
   overflow: hidden;
-  background: #151c2f;
-  border: 1px solid #27314a;
-  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   box-shadow: none;
 }
 
 .eyebrow {
   color: #fb923c;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font: var(--font-label);
+  letter-spacing: 0.05em;
 }
 
 .value {
-  margin: 7px 0 2px !important;
+  margin: var(--space-2) 0 var(--space-1) !important;
   color: #f8fafc !important;
-  font-family: Georgia, serif;
-  font-size: clamp(22px, 2vw, 28px) !important;
-  letter-spacing: -0.04em;
+  font: var(--font-metric) !important;
 }
 
 .growth {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
+  padding: var(--space-1) var(--space-2);
   color: #2dd4bf;
-  font-size: 11px;
-  font-weight: 700;
+  font: var(--font-label);
   background: rgb(45 212 191 / 14%);
-  border-radius: 999px;
-  gap: 3px;
+  border-radius: var(--radius-full);
+  gap: var(--space-1);
 }
 
 .period {
@@ -41,7 +37,7 @@
 .chart {
   position: relative;
   height: 250px;
-  margin-top: 28px;
+  margin-top: var(--space-6);
   padding-left: 42px;
 }
 

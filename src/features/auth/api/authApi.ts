@@ -4,15 +4,17 @@ import type {
   AuthSession,
   LoginCredentials,
   LoginResponse,
+  RegisterCredentials,
   UserRole,
 } from '../model/authTypes';
+import { canAccessSellerCabinet } from '../lib/sellerAccess';
 
 interface LoginApiResponse {
   accessToken?: unknown;
 }
 
+
 const USER_ROLES: UserRole[] = ['SELLER', 'BUYER', 'ADMIN', 'SUPERADMIN'];
-const SELLER_ROLES = new Set<UserRole>(['SELLER', 'ADMIN', 'SUPERADMIN']);
 
 function isAuthUser(value: unknown): value is AuthUser {
   if (typeof value !== 'object' || value === null) {
@@ -57,6 +59,12 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
   return parseLoginResponse(data);
 }
 
+export async function register(
+  credentials: RegisterCredentials,
+): Promise<void> {
+  await httpClient.post('/auth/register', credentials);
+}
+
 export async function getCurrentUser(accessToken?: string): Promise<AuthUser> {
   const { data } = await httpClient.get<unknown>('/auth/me', {
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
@@ -91,7 +99,7 @@ export async function authenticate(
   const authSession = await login(credentials);
   const user = await getCurrentUser(authSession.accessToken);
 
-  if (!SELLER_ROLES.has(user.role) || user.isDeleted) {
+  if (!canAccessSellerCabinet(user)) {
     throw new Error('Bu akkaunt orqali seller kabinetiga kirish mumkin emas');
   }
 

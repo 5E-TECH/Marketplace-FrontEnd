@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { Plus as PlusOutlined } from 'lucide-react';
 import { Button, Empty } from 'antd';
 import type { ReactNode } from 'react';
 

@@ -1,4 +1,4 @@
-import { CloseOutlined, WarningOutlined } from '@ant-design/icons';
+import { TriangleAlert as WarningOutlined, X as CloseOutlined } from 'lucide-react';
 import { Button } from 'antd';
 import { useState } from 'react';
 import styles from './MainLayout.module.css';

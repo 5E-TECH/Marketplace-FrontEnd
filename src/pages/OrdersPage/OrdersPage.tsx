@@ -1,4 +1,4 @@
-import { EyeOutlined } from '@ant-design/icons';
+import { Eye as EyeOutlined } from 'lucide-react';
 import { Button, Card, Descriptions, Drawer, Input, Select, Space, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';

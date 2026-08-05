@@ -1,43 +1,32 @@
-.pageHeader {
-  margin-bottom: 24px;
+.page {
+  width: min(100%, 1200px);
+  margin-inline: auto;
 }
 
-.eyebrow {
-  display: block;
-  margin-bottom: 2px;
-  color: #fb923c;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+.srOnly {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.pageHeader h1 {
-  margin: 0 0 2px !important;
-  color: #f8fafc;
-  font-family: Georgia, serif;
-  font-size: 34px;
-  line-height: 42px;
-  letter-spacing: -0.035em;
-}
-
-.toolbar {
+.stats {
   display: grid;
-  margin-bottom: 16px;
-  grid-template-columns: minmax(240px, 1fr) 130px auto;
-  gap: 10px;
-}
-
-.search,
-.filter {
-  width: 100%;
+  margin-bottom: var(--space-6);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
 }
 
 .tableCard {
   overflow: hidden;
-  background: #151c2f;
-  border-color: #27314a;
-  border-radius: 16px;
-  box-shadow: none;
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .tableCard :global(.ant-card-body) {
@@ -45,32 +34,60 @@
 }
 
 .tableCard :global(.ant-table-thead > tr > th) {
-  color: #71809f;
+  height: 48px;
+  color: var(--color-text-muted);
+  background: #101827;
+  border-bottom-color: var(--color-border);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .tableCard :global(.ant-table-tbody > tr > td) {
-  border-bottom-color: #27314a;
+  height: 58px;
+  border-bottom-color: var(--color-border);
+}
+
+.tableCard :global(.ant-table-tbody > tr:hover > td) {
+  background: var(--color-surface-hover) !important;
+}
+
+.tableCard :global(.ant-table-cell.ant-table-column-sort) {
+  background: transparent !important;
+}
+
+.tableCard :global(.ant-table-tbody > tr:hover > .ant-table-column-sort) {
+  background: var(--color-surface-hover) !important;
+}
+
+.tableCard :global(.ant-pagination) {
+  padding: 0 var(--space-4) var(--space-4);
 }
 
 .imagePlaceholder {
   display: grid;
-  width: 34px;
-  height: 34px;
-  color: #fb923c;
-  background: rgb(251 146 60 / 14%);
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  color: var(--color-accent);
+  background: rgb(245 158 11 / 12%);
+  border-radius: var(--radius-sm);
   place-items: center;
 }
 
-@media (max-width: 767px) {
-  .toolbar {
-    grid-template-columns: 1fr 120px;
+.imagePlaceholder svg {
+  width: 17px;
+  height: 17px;
+}
+
+@media (max-width: 991px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .stats {
+    grid-template-columns: 1fr;
   }
 
-  .toolbar > :global(.ant-btn) {
-    grid-column: 1 / -1;
-  }
 }

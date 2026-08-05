@@ -1,12 +1,12 @@
 import {
-  AppstoreOutlined,
-  BarChartOutlined,
-  CustomerServiceOutlined,
-  HomeOutlined,
-  ProfileOutlined,
-  SettingOutlined,
-  ShopOutlined,
-} from '@ant-design/icons';
+  ChartNoAxesCombined as BarChartOutlined,
+  Package as AppstoreOutlined,
+  ClipboardList as ProfileOutlined,
+  Headphones as CustomerServiceOutlined,
+  Warehouse as HomeOutlined,
+  Settings as SettingOutlined,
+  Store as ShopOutlined,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export interface AppRouteMeta {
@@ -14,15 +14,17 @@ export interface AppRouteMeta {
   label: string;
   icon: ReactNode;
   section: 'main' | 'utility';
+  showInSidebar?: boolean;
 }
 
 export const appRouteConfig: AppRouteMeta[] = [
   { path: '/', label: 'Bosh sahifa', icon: <BarChartOutlined />, section: 'main' },
-  { path: '/shop', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main' },
+  { path: '/shop', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
+  { path: '/profile', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
   { path: '/products', label: 'Mahsulotlar', icon: <AppstoreOutlined />, section: 'main' },
   { path: '/warehouses', label: 'Sklad', icon: <HomeOutlined />, section: 'main' },
   { path: '/orders', label: 'Buyurtmalar', icon: <ProfileOutlined />, section: 'main' },
-  { path: '/settings', label: 'Sozlamalar', icon: <SettingOutlined />, section: 'utility' },
+  { path: '/settings', label: 'Sozlamalar', icon: <SettingOutlined />, section: 'utility', showInSidebar: false },
   { path: '/support', label: 'Yordam', icon: <CustomerServiceOutlined />, section: 'utility' },
 ];
 

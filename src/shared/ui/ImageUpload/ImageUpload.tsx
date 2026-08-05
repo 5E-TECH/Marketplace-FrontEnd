@@ -1,4 +1,4 @@
-import { InboxOutlined } from '@ant-design/icons';
+import { ImageUp as InboxOutlined } from 'lucide-react';
 import { App, Modal, Upload } from 'antd';
 import type { UploadFile, UploadProps } from 'antd';
 import { useEffect, useState } from 'react';

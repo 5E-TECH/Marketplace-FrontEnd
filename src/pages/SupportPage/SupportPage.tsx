@@ -1,4 +1,4 @@
-import { CustomerServiceOutlined, MessageOutlined } from '@ant-design/icons';
+import { Headphones as CustomerServiceOutlined, MessageCircle as MessageOutlined } from 'lucide-react';
 import { Button, Card, Col, Row, Typography } from 'antd';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 

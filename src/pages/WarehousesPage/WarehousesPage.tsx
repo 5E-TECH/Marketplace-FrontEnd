@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { Plus as PlusOutlined } from 'lucide-react';
 import { App, Button, Card, Form, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';

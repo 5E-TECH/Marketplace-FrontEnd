@@ -11,6 +11,12 @@ test('TC1: DataTable pagination, sort va search ishlaydi', async ({ page }) => {
   await expect(page.getByRole('cell', { name: 'Item 11' })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Item 01' })).toHaveCount(0);
 
+  await page
+    .getByPlaceholder('Test yozuvini qidirish')
+    .fill('Item 07');
+  await expect(page.getByRole('cell', { name: 'Item 07' })).toBeVisible();
+  await page.getByPlaceholder('Test yozuvini qidirish').clear();
+
   await page.getByTitle('1').click();
   await page.getByRole('columnheader', { name: /Summa/ }).click();
   await page.getByRole('columnheader', { name: /Summa/ }).click();

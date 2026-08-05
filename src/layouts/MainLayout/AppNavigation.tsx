@@ -1,4 +1,3 @@
-import { LogoutOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -8,24 +7,21 @@ import {
 
 interface AppNavigationProps {
   onNavigate?: () => void;
-  onLogout?: () => void;
 }
 
-export function AppNavigation({ onNavigate, onLogout }: AppNavigationProps) {
+export function AppNavigation({ onNavigate }: AppNavigationProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedRoute = findRouteMeta(location.pathname);
   const toMenuItems = (section: 'main' | 'utility') =>
     appRouteConfig
-      .filter((route) => route.section === section)
+      .filter(
+        (route) => route.section === section && route.showInSidebar !== false,
+      )
       .map(({ path, label, icon }) => ({ key: path, label, icon }));
 
   const handleClick = (key: string) => {
-    if (key === 'logout') {
-      onLogout?.();
-    } else {
-      void navigate(key);
-    }
+    void navigate(key);
     onNavigate?.();
   };
 
@@ -46,15 +42,7 @@ export function AppNavigation({ onNavigate, onLogout }: AppNavigationProps) {
         selectedKeys={
           selectedRoute?.section === 'utility' ? [selectedRoute.path] : []
         }
-        items={[
-          ...toMenuItems('utility'),
-          {
-            key: 'logout',
-            icon: <LogoutOutlined />,
-            label: 'Chiqish',
-            danger: true,
-          },
-        ]}
+        items={toMenuItems('utility')}
         onClick={({ key }) => handleClick(key)}
       />
     </div>

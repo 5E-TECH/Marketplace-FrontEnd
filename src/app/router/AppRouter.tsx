@@ -7,8 +7,10 @@ import { PublicOnlyRoute } from '../../features/auth/ui/PublicOnlyRoute/PublicOn
 const MainLayout = lazy(() => import('../../layouts/MainLayout/MainLayout'));
 const HomePage = lazy(() => import('../../pages/HomePage/HomePage'));
 const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
+const RegisterPage = lazy(() => import('../../pages/RegisterPage/RegisterPage'));
 const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'));
 const ProductsPage = lazy(() => import('../../pages/ProductsPage/ProductsPage'));
+const ProductEditorPage = lazy(() => import('../../pages/ProductEditorPage/ProductEditorPage'));
 const ShopPage = lazy(() => import('../../pages/ShopPage/ShopPage'));
 const WarehousesPage = lazy(
   () => import('../../pages/WarehousesPage/WarehousesPage'),
@@ -31,16 +33,20 @@ export function AppRouter() {
           ) : null}
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
               <Route index element={<HomePage />} />
               <Route path="products" element={<ProductsPage />} />
+              <Route path="products/new" element={<ProductEditorPage />} />
+              <Route path="products/:productId/edit" element={<ProductEditorPage />} />
               <Route path="warehouses" element={<WarehousesPage />} />
               <Route path="orders" element={<OrdersPage />} />
               <Route path="delivery" element={<DeliveryPage />} />
               <Route path="shop" element={<ShopPage />} />
+              <Route path="profile" element={<ShopPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="support" element={<SupportPage />} />
             </Route>

@@ -1,4 +1,4 @@
-import { ArrowUpOutlined, MoreOutlined } from '@ant-design/icons';
+import { ArrowUp as ArrowUpOutlined, Ellipsis as MoreOutlined } from 'lucide-react';
 import { Button, Card, Flex, Select, Typography } from 'antd';
 import styles from './RevenueChart.module.css';
 

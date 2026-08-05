@@ -1,4 +1,4 @@
-import { CarOutlined, CheckCircleOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { Car as CarOutlined, CircleCheck as CheckCircleOutlined, MapPin as EnvironmentOutlined } from 'lucide-react';
 import { Card, Col, Row, Steps, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { orders } from '../../features/seller/model/sellerData';

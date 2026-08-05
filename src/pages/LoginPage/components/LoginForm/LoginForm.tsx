@@ -1,4 +1,5 @@
 import { Button, Form, Input } from 'antd';
+import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import styles from './LoginForm.module.css';
 
 export interface LoginFormValues {
@@ -61,7 +62,7 @@ export function LoginForm({
           { max: 128, message: 'Parol 128 belgidan oshmasligi kerak' },
         ]}
       >
-        <Input.Password
+        <PasswordInput
           className={styles.input}
           variant="borderless"
           autoComplete="current-password"

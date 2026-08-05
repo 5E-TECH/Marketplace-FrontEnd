@@ -1,16 +1,16 @@
 import {
-  AppstoreOutlined,
-  ArrowRightOutlined,
-  CalendarOutlined,
-  CheckCircleOutlined,
-  DollarOutlined,
-  PlusOutlined,
-  RiseOutlined,
-  ShopOutlined,
-  ShoppingCartOutlined,
-  TeamOutlined,
-  WarningOutlined,
-} from '@ant-design/icons';
+  ArrowRight as ArrowRightOutlined,
+  CalendarDays as CalendarOutlined,
+  CircleCheck as CheckCircleOutlined,
+  CircleDollarSign as DollarOutlined,
+  Package as AppstoreOutlined,
+  Plus as PlusOutlined,
+  ShoppingCart as ShoppingCartOutlined,
+  Store as ShopOutlined,
+  TrendingUp as RiseOutlined,
+  TriangleAlert as WarningOutlined,
+  Users as TeamOutlined,
+} from 'lucide-react';
 import {
   Avatar,
   Button,

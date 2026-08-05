@@ -1,0 +1,75 @@
+.card {
+  min-width: 0;
+  padding: var(--space-4);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(255 255 255 / 4%), transparent 38%),
+    var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 160ms ease;
+}
+
+.card:hover {
+  border-color: #3a4968;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  gap: var(--space-2);
+}
+
+.icon {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  place-items: center;
+}
+
+.icon svg,
+.more {
+  width: 17px;
+  height: 17px;
+}
+
+.more {
+  color: var(--color-text-muted);
+}
+
+.card strong {
+  display: block;
+  margin: var(--space-4) 0 var(--space-1);
+  color: var(--color-text);
+  font: var(--font-metric);
+}
+
+.card small {
+  color: var(--color-text-muted);
+  font: var(--font-caption);
+}
+
+.info .icon {
+  color: #60a5fa;
+  background: rgb(59 130 246 / 13%);
+}
+
+.success .icon {
+  color: var(--color-success);
+  background: rgb(16 185 129 / 13%);
+}
+
+.warning .icon {
+  color: var(--color-accent);
+  background: rgb(245 158 11 / 13%);
+}
+
+@media (max-width: 575px) {
+  .card {
+    padding: var(--space-3);
+  }
+}
