@@ -12,6 +12,8 @@ import {
   type ShopProfileFormValues,
 } from '../../features/shop/model/shopProfile';
 import { ShopProfileForm } from '../../features/shop/ui/ShopProfileForm';
+import { ShopProfileHero } from '../../features/shop/ui/ShopProfileHero';
+import { useShopMediaDraft } from '../../features/shop/model/useShopMediaDraft';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import styles from './ShopPage.module.css';
@@ -23,6 +25,7 @@ export default function ShopPage() {
   const sellerAccess = user?.role === 'SELLER';
   const [form] = Form.useForm<ShopProfileFormValues>();
   const [editing, setEditing] = useState(false);
+  const mediaDraft = useShopMediaDraft();
   const shopQuery = useSellerShopQuery(sellerAccess);
   const updateShopMutation = useUpdateSellerShopMutation();
 
@@ -42,6 +45,12 @@ export default function ShopPage() {
         <PageHeader
           title="Do‘kon profili"
           description="Xaridorlarga ko‘rinadigan do‘kon ma’lumotlarini boshqaring"
+        />
+        <ShopProfileHero
+          profile={{ ...previewProfile, logoUrl: null, bannerUrl: null }}
+          editing={false}
+          status="ACTIVE"
+          onImageSelect={() => undefined}
         />
         <ShopProfileForm
           form={form}
@@ -81,10 +90,12 @@ export default function ShopPage() {
 
   const cancelEditing = () => {
     form.setFieldsValue(profile);
+    mediaDraft.reset();
     setEditing(false);
   };
 
   const saveProfile = (values: ShopProfileFormValues) => {
+    // Upload API ulanganda mediaDraft.files shu yagona save oqimida yuboriladi.
     const payload: UpdateSellerShopPayload = {
       name: values.name.trim(),
       description: values.description.trim(),
@@ -92,6 +103,8 @@ export default function ShopPage() {
       regionId: values.regionId,
       districtId: values.districtId,
       address: values.address.trim(),
+      ...(mediaDraft.preview.logoUrl ? { logoUrl: mediaDraft.preview.logoUrl } : {}),
+      ...(mediaDraft.preview.bannerUrl ? { bannerUrl: mediaDraft.preview.bannerUrl } : {}),
     };
 
     updateShopMutation.mutate(payload, {
@@ -109,15 +122,23 @@ export default function ShopPage() {
         title="Do‘kon profili"
         description="Xaridorlarga ko‘rinadigan do‘kon ma’lumotlarini boshqaring"
       />
-      <ShopProfileForm
-        form={form}
-        initialValues={profile}
-        editing={editing}
-        saving={updateShopMutation.isPending}
-        onEdit={startEditing}
-        onCancel={cancelEditing}
-        onSubmit={saveProfile}
-      />
+      <div className={styles.profileLayout}>
+        <ShopProfileHero
+          profile={{ ...profile, ...mediaDraft.preview }}
+          editing={editing}
+          status={shopQuery.data.status}
+          onImageSelect={mediaDraft.select}
+        />
+        <ShopProfileForm
+          form={form}
+          initialValues={profile}
+          editing={editing}
+          saving={updateShopMutation.isPending}
+          onEdit={startEditing}
+          onCancel={cancelEditing}
+          onSubmit={saveProfile}
+        />
+      </div>
     </div>
   );
 }

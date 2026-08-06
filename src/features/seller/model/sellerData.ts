@@ -1,4 +1,5 @@
-import type { Order, Product, Warehouse } from './sellerTypes';
+import type { Order, Warehouse } from './sellerTypes';
+import type { Product } from '../../products/model/productTypes';
 
 export const initialProducts: Product[] = [
   { id: '1', name: 'Simsiz quloqchin Pro', sku: 'AUD-001', category: 'Elektronika', price: 349000, stock: 24, status: 'ACTIVE', variants: [] },

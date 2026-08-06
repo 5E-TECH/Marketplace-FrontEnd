@@ -71,6 +71,37 @@ test('do‘kon profilini read-only ko‘rish, tahrirlash va PATCH saqlash ishlay
   });
 });
 
+test('joriy do‘kon ma’lumotlari API javobidan to‘ldiriladi', async ({ page }) => {
+  await mockSellerShopApi(page);
+  await page.goto('/shop');
+
+  await expect(page.getByLabel('Do‘kon nomi')).toHaveValue(sellerShop.name);
+  await expect(page.getByLabel('Telefon')).toHaveValue(sellerShop.phone);
+  await expect(page.getByLabel('Manzil')).toHaveValue(sellerShop.address);
+  await expect(page.getByLabel('Tavsif')).toHaveValue(sellerShop.description);
+});
+
+test('logo preview ko‘rinadi va save payload bilan saqlanadi', async ({ page }) => {
+  const apiState = await mockSellerShopApi(page);
+  await page.goto('/shop');
+  await page.getByRole('button', { name: 'Tahrirlash' }).click();
+
+  const logoChooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Logo rasmini almashtirish' }).click();
+  await (await logoChooser).setFiles({
+    name: 'store-logo.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('market-logo'),
+  });
+
+  const logo = page.getByRole('img', { name: /MarketHub Store logotipi/i });
+  await expect(logo).toHaveAttribute('src', /^data:image\/png;base64,/);
+  await page.getByRole('button', { name: 'Saqlash' }).click();
+
+  expect(apiState.patchBody?.logoUrl).toMatch(/^data:image\/png;base64,/);
+  await expect(logo).toHaveAttribute('src', /^data:image\/png;base64,/);
+});
+
 test('do‘kon profili 375px ekranda horizontal overflow bermaydi', async ({
   page,
 }) => {

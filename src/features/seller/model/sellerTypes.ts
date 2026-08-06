@@ -1,23 +1,5 @@
 import type { AppStatus } from '../../../shared/ui/StatusTag/StatusTag';
 
-export interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: Extract<AppStatus, 'ACTIVE' | 'INACTIVE' | 'LOW'>;
-  variants: ProductVariant[];
-}
-
-export interface ProductVariant {
-  name: string;
-  sku: string;
-  price: number;
-  stock: number;
-}
-
 export interface Warehouse {
   id: string;
   name: string;

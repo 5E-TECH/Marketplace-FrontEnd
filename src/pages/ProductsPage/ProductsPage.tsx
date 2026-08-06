@@ -11,8 +11,9 @@ import { App, Card, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { initialProducts } from '../../features/seller/model/sellerData';
-import type { Product } from '../../features/seller/model/sellerTypes';
+import type { Product } from '../../features/products/model/productTypes';
+import { useDeleteProductMutation, useMyProductsQuery } from '../../features/products/api/productQueries';
+import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
@@ -25,8 +26,10 @@ import { ToolbarButton } from '../../shared/ui/ToolbarButton/ToolbarButton';
 import { ActionMenu } from '../../shared/ui/ActionMenu/ActionMenu';
 import { SummaryCard } from '../../shared/ui/SummaryCard/SummaryCard';
 import { normalizeSearchText } from '../../shared/lib/search';
+import { ContentState } from '../../shared/ui/ContentState/ContentState';
 
 type ProductStatusFilter = 'ALL' | Product['status'];
+const EMPTY_PRODUCTS: Product[] = [];
 
 const STATUS_FILTERS = [
   { value: 'ALL', label: 'Barcha mahsulotlar' },
@@ -38,7 +41,9 @@ const STATUS_FILTERS = [
 export default function ProductsPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
-  const [products, setProducts] = useState(initialProducts);
+  const productsQuery = useMyProductsQuery();
+  const deleteMutation = useDeleteProductMutation();
+  const products = productsQuery.data ?? EMPTY_PRODUCTS;
   const [status, setStatus] = useState<ProductStatusFilter>('ALL');
   const [query, setQuery] = useState('');
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
@@ -59,10 +64,19 @@ export default function ProductsPage() {
   const lowStockCount = products.filter(({ status: value }) => value === 'LOW').length;
 
   const removeProduct = (product: Product) => {
-    setProducts((items) => items.filter(({ id }) => id !== product.id));
-    setDeletingProduct(null);
-    void message.success('Mahsulot o‘chirildi');
+    deleteMutation.mutate(product.id, {
+      onSuccess: () => {
+        setDeletingProduct(null);
+        void message.success('Mahsulot o‘chirildi');
+      },
+      onError: (error) => void message.error(getAuthErrorMessage(error)),
+    });
   };
+
+  if (productsQuery.isPending) return <ContentState state="loading" />;
+  if (productsQuery.isError) {
+    return <ContentState state="error" title="Mahsulotlarni yuklab bo‘lmadi" description={getAuthErrorMessage(productsQuery.error)} onAction={() => void productsQuery.refetch()} />;
+  }
 
   const columns: ColumnsType<Product> = [
     {
@@ -75,7 +89,6 @@ export default function ProductsPage() {
     { title: 'Kategoriya', dataIndex: 'category' },
     { title: 'Narxi', dataIndex: 'price', render: (price: number) => <MoneyText value={price} />, sorter: (a, b) => a.price - b.price },
     { title: 'Qoldiq', dataIndex: 'stock', width: 100, sorter: (a, b) => a.stock - b.stock },
-    { title: 'Variant', dataIndex: 'variants', width: 90, render: (variants: Product['variants']) => variants.length },
     { title: 'Holati', dataIndex: 'status', render: (status: Product['status']) => <StatusTag status={status} /> },
     {
       title: 'Amallar',
@@ -151,6 +164,7 @@ export default function ProductsPage() {
         description={`${deletingProduct?.name ?? 'Mahsulot'} ro‘yxatdan olib tashlanadi.`}
         confirmText="O‘chirish"
         danger
+        loading={deleteMutation.isPending}
         onCancel={() => setDeletingProduct(null)}
         onConfirm={() => {
           if (deletingProduct) removeProduct(deletingProduct);

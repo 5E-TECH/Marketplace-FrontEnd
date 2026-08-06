@@ -1,6 +1,5 @@
 .page {
-  width: min(100%, 1200px);
-  margin-inline: auto;
+  width: 100%;
 }
 
 .srOnly {
