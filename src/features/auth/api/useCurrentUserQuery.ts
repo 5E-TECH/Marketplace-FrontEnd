@@ -12,8 +12,8 @@ export function useCurrentUserQuery() {
 
   return useQuery({
     queryKey: ['auth', 'me'],
-    queryFn: async () => {
-      const user = await getCurrentUser();
+    queryFn: async ({ signal }) => {
+      const user = await getCurrentUser(undefined, signal);
       dispatch(currentUserLoaded(user));
       return user;
     },

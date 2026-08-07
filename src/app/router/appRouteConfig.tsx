@@ -20,7 +20,7 @@ export interface AppRouteMeta {
 export const appRouteConfig: AppRouteMeta[] = [
   { path: '/', label: 'Bosh sahifa', icon: <BarChartOutlined />, section: 'main' },
   { path: '/shop', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main' },
-  { path: '/profile', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
+  { path: '/profile', label: 'Mening profilim', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
   { path: '/products', label: 'Mahsulotlar', icon: <AppstoreOutlined />, section: 'main' },
   { path: '/warehouses', label: 'Sklad', icon: <HomeOutlined />, section: 'main' },
   { path: '/orders', label: 'Buyurtmalar', icon: <ProfileOutlined />, section: 'main' },

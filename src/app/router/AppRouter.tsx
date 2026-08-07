@@ -12,6 +12,7 @@ const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'))
 const ProductsPage = lazy(() => import('../../pages/ProductsPage/ProductsPage'));
 const ProductEditorPage = lazy(() => import('../../pages/ProductEditorPage/ProductEditorPage'));
 const ShopPage = lazy(() => import('../../pages/ShopPage/ShopPage'));
+const ProfilePage = lazy(() => import('../../pages/ProfilePage/ProfilePage'));
 const WarehousesPage = lazy(
   () => import('../../pages/WarehousesPage/WarehousesPage'),
 );
@@ -46,7 +47,7 @@ export function AppRouter() {
               <Route path="orders" element={<OrdersPage />} />
               <Route path="delivery" element={<DeliveryPage />} />
               <Route path="shop" element={<ShopPage />} />
-              <Route path="profile" element={<ShopPage />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="support" element={<SupportPage />} />
             </Route>

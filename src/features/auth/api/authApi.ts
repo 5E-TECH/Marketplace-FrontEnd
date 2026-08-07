@@ -65,9 +65,13 @@ export async function register(
   await httpClient.post('/auth/register', credentials);
 }
 
-export async function getCurrentUser(accessToken?: string): Promise<AuthUser> {
+export async function getCurrentUser(
+  accessToken?: string,
+  signal?: AbortSignal,
+): Promise<AuthUser> {
   const { data } = await httpClient.get<unknown>('/auth/me', {
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    signal,
   });
   const unwrapped =
     typeof data === 'object' && data !== null && 'data' in data ? data.data : data;

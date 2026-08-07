@@ -52,12 +52,26 @@ export function ProductForm({
               className={styles.fullWidth}
               label="Mahsulot nomi"
               name="name"
-              rules={[{ required: true, message: 'Mahsulot nomini kiriting' }]}
+              rules={[
+                { required: true, whitespace: true, message: 'Mahsulot nomini kiriting' },
+                { max: 120, message: 'Mahsulot nomi 120 belgidan oshmasligi kerak' },
+              ]}
             >
-              <Input placeholder="Masalan, Simsiz quloqchin Pro" />
+              <Input maxLength={120} placeholder="Masalan, Simsiz quloqchin Pro" />
             </Form.Item>
-            <Form.Item label="SKU" name="sku" rules={[{ required: true, message: 'SKU kiriting' }]}>
-              <Input placeholder="PRD-001" />
+            <Form.Item
+              label="SKU"
+              name="sku"
+              rules={[
+                { required: true, whitespace: true, message: 'SKU kiriting' },
+                { max: 64, message: 'SKU 64 belgidan oshmasligi kerak' },
+                {
+                  pattern: /^[A-Za-z0-9._-]+$/,
+                  message: 'SKU faqat harf, raqam, nuqta, chiziq va pastki chiziqdan iborat bo‘lsin',
+                },
+              ]}
+            >
+              <Input maxLength={64} placeholder="PRD-001" />
             </Form.Item>
             <Form.Item
               label="Kategoriya"
@@ -67,14 +81,14 @@ export function ProductForm({
               <Select placeholder="Kategoriyani tanlang" options={categories} />
             </Form.Item>
             <Form.Item label="Narxi" name="price" rules={[{ required: true, message: 'Narxni kiriting' }]}>
-              <InputNumber min={0} addonAfter="so‘m" style={{ width: '100%' }} />
+              <InputNumber min={1} precision={0} addonAfter="so‘m" style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item
               label="Boshlang‘ich qoldiq"
               name="stock"
               rules={[{ required: true, message: 'Qoldiqni kiriting' }]}
             >
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber min={0} precision={0} style={{ width: '100%' }} />
             </Form.Item>
           </div>
         </section>

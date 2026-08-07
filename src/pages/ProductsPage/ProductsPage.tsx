@@ -47,6 +47,7 @@ export default function ProductsPage() {
   const [status, setStatus] = useState<ProductStatusFilter>('ALL');
   const [query, setQuery] = useState('');
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const normalizedQuery = useMemo(() => normalizeSearchText(query), [query]);
 
   const filteredProducts = useMemo(
     () =>
@@ -54,14 +55,24 @@ export default function ProductsPage() {
         (product) =>
           (status === 'ALL' || product.status === status) &&
           normalizeSearchText(`${product.name} ${product.sku}`).includes(
-            normalizeSearchText(query),
+            normalizedQuery,
           ),
       ),
-    [products, query, status],
+    [normalizedQuery, products, status],
   );
 
-  const activeCount = products.filter(({ status: value }) => value === 'ACTIVE').length;
-  const lowStockCount = products.filter(({ status: value }) => value === 'LOW').length;
+  const { activeCount, lowStockCount } = useMemo(
+    () =>
+      products.reduce(
+        (counts, product) => {
+          if (product.status === 'ACTIVE') counts.activeCount += 1;
+          if (product.status === 'LOW') counts.lowStockCount += 1;
+          return counts;
+        },
+        { activeCount: 0, lowStockCount: 0 },
+      ),
+    [products],
+  );
 
   const removeProduct = (product: Product) => {
     deleteMutation.mutate(product.id, {
@@ -73,9 +84,30 @@ export default function ProductsPage() {
     });
   };
 
-  if (productsQuery.isPending) return <ContentState state="loading" />;
+  if (productsQuery.isPending) {
+    return (
+      <main className={styles.page}>
+        <Typography.Title level={1} className={styles.srOnly}>
+          Mahsulotlar
+        </Typography.Title>
+        <ContentState state="loading" />
+      </main>
+    );
+  }
   if (productsQuery.isError) {
-    return <ContentState state="error" title="Mahsulotlarni yuklab bo‘lmadi" description={getAuthErrorMessage(productsQuery.error)} onAction={() => void productsQuery.refetch()} />;
+    return (
+      <main className={styles.page}>
+        <Typography.Title level={1} className={styles.srOnly}>
+          Mahsulotlar
+        </Typography.Title>
+        <ContentState
+          state="error"
+          title="Mahsulotlarni yuklab bo‘lmadi"
+          description={getAuthErrorMessage(productsQuery.error)}
+          onAction={() => void productsQuery.refetch()}
+        />
+      </main>
+    );
   }
 
   const columns: ColumnsType<Product> = [

@@ -27,7 +27,11 @@ export default function ProductEditorPage() {
 
   const handleSubmit = (values: ProductFormValues) => {
     const mutation = isEditing ? updateMutation : createMutation;
-    mutation.mutate(values, {
+    mutation.mutate({
+      ...values,
+      name: values.name.trim(),
+      sku: values.sku.trim(),
+    }, {
       onSuccess: () => {
         void message.success(isEditing ? 'Mahsulot yangilandi' : 'Mahsulot yaratildi');
         void navigate('/products', { replace: true });

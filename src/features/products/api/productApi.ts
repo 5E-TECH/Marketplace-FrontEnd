@@ -61,13 +61,15 @@ function parseProductList(value: unknown): Product[] {
   return list.map(parseProduct);
 }
 
-export async function getMyProducts(): Promise<Product[]> {
-  const { data } = await httpClient.get<unknown>('/products/my');
+export async function getMyProducts(signal?: AbortSignal): Promise<Product[]> {
+  const { data } = await httpClient.get<unknown>('/products/my', { signal });
   return parseProductList(data);
 }
 
-export async function getProduct(id: string): Promise<Product> {
-  const { data } = await httpClient.get<unknown>(`/products/${encodeURIComponent(id)}`);
+export async function getProduct(id: string, signal?: AbortSignal): Promise<Product> {
+  const { data } = await httpClient.get<unknown>(`/products/${encodeURIComponent(id)}`, {
+    signal,
+  });
   return parseProduct(data);
 }
 
