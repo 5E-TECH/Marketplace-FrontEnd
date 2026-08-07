@@ -52,8 +52,19 @@ export async function mockLogout(page: Page): Promise<void> {
   });
 }
 
+export async function mockProducts(page: Page): Promise<void> {
+  await page.route('**/api/v1/products/my', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: [] }),
+    });
+  });
+}
+
 export async function installAuthenticatedSession(page: Page): Promise<void> {
   await seedAccessToken(page);
   await mockCurrentUser(page);
   await mockLogout(page);
+  await mockProducts(page);
 }

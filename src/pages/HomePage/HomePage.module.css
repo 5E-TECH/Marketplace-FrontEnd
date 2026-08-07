@@ -76,11 +76,16 @@
 }
 
 .stockButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 40px;
   margin-top: var(--space-3);
   color: #fb923c;
   background: rgb(251 146 60 / 10%);
   border: 1px solid rgb(251 146 60 / 15%);
+  border-radius: var(--radius-md);
+  text-decoration: none;
 }
 
 .quickPanel {
@@ -106,6 +111,7 @@
   display: flex;
   width: 100%;
   min-height: 80px;
+  text-decoration: none;
   padding: var(--space-3);
   color: #d8deea;
   font: inherit;

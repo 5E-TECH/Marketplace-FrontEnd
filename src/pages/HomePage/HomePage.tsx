@@ -104,29 +104,21 @@ export default function HomePage() {
             <Typography.Text className={styles.panelEyebrow}>TEZKOR AMALLAR</Typography.Text>
             <Typography.Title level={3}>Bugun nimadan boshlaymiz?</Typography.Title>
             <div className={styles.quickGrid}>
-              <Link to="/products">
-                <button className={styles.quickAction}>
-                  <span className={styles.quickIcon}><PlusOutlined /></span>
-                  <span>Mahsulot qo‘shish</span>
-                </button>
+              <Link to="/products/new" className={styles.quickAction}>
+                <span className={styles.quickIcon}><PlusOutlined /></span>
+                <span>Mahsulot qo‘shish</span>
               </Link>
-              <Link to="/orders">
-                <button className={styles.quickAction}>
-                  <span className={styles.quickIcon}><ShoppingCartOutlined /></span>
-                  <span>Buyurtmalar</span>
-                </button>
+              <Link to="/orders" className={styles.quickAction}>
+                <span className={styles.quickIcon}><ShoppingCartOutlined /></span>
+                <span>Buyurtmalar</span>
               </Link>
-              <Link to="/warehouses">
-                <button className={styles.quickAction}>
-                  <span className={styles.quickIcon}><AppstoreOutlined /></span>
-                  <span>Qoldiq kiritish</span>
-                </button>
+              <Link to="/warehouses" className={styles.quickAction}>
+                <span className={styles.quickIcon}><AppstoreOutlined /></span>
+                <span>Qoldiq kiritish</span>
               </Link>
-              <Link to="/shop">
-                <button className={styles.quickAction}>
-                  <span className={styles.quickIcon}><ShopOutlined /></span>
-                  <span>Do‘kon profili</span>
-                </button>
+              <Link to="/shop" className={styles.quickAction}>
+                <span className={styles.quickIcon}><ShopOutlined /></span>
+                <span>Do‘kon profili</span>
               </Link>
             </div>
             <div className={styles.inventoryHealth}>
@@ -204,8 +196,8 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <Link to="/products">
-              <Button block className={styles.stockButton}>Barcha mahsulotlar</Button>
+            <Link to="/products" className={styles.stockButton}>
+              Barcha mahsulotlar
             </Link>
           </Card>
         </Col>

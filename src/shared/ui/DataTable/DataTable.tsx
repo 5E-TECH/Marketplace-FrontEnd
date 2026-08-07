@@ -46,6 +46,14 @@ export function DataTable<RecordType extends object>({
     [dataSource, deferredQuery, search],
   );
 
+  const effectiveCurrentPage =
+    pagination === false
+      ? 1
+      : Math.min(
+          currentPage,
+          Math.max(1, Math.ceil(filteredData.length / (pagination.pageSize ?? 10))),
+        );
+
   return (
     <>
       {search || toolbarExtra ? (
@@ -81,7 +89,7 @@ export function DataTable<RecordType extends object>({
             ? false
             : {
                 ...pagination,
-                current: pagination.current ?? currentPage,
+                current: pagination.current ?? effectiveCurrentPage,
               }
         }
         onChange={(nextPagination, filters, sorter, extra) => {

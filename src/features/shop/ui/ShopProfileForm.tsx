@@ -10,7 +10,7 @@ import {
 import { Button, Card, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
 import type { FormInstance } from 'antd';
 import type { ShopProfileFormValues } from '../model/shopProfile';
-import styles from '../../../pages/ShopPage/ShopPage.module.css';
+import styles from './ShopProfileForm.module.css';
 
 interface ShopProfileFormProps {
   form: FormInstance<ShopProfileFormValues>;

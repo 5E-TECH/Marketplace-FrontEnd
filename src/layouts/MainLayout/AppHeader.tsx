@@ -64,7 +64,7 @@ export function AppHeader({
           <button
             className={styles.accountSummary}
             type="button"
-            aria-label="Do‘kon profiliga o‘tish"
+            aria-label="Akkaunt profiliga o‘tish"
             onClick={() => onNavigate('/profile')}
           >
             <Avatar className={styles.accountAvatar} size={34} src={user?.avatarUrl}>

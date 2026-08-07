@@ -44,7 +44,7 @@ export default function RegisterPage() {
               Akkauntingiz bormi? <Link to="/login">Kirish</Link>
             </Typography.Paragraph>
             <Typography.Text className={styles.security}>
-              <LockFilled aria-hidden /> Hammasi shifrlangan va xavfsiz
+              <LockFilled aria-hidden /> Parolingiz brauzer xotirasida saqlanmaydi
             </Typography.Text>
           </div>
         </Card>

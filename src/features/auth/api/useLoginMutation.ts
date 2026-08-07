@@ -1,11 +1,11 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppDispatch } from '../../../app/store/hooks';
-import { queryClient } from '../../../shared/api/queryClient';
 import { authenticate } from './authApi';
 import { authenticated, currentUserLoaded } from '../model/authSlice';
 
 export function useLoginMutation() {
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: authenticate,

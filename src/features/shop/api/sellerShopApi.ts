@@ -34,6 +34,17 @@ export interface UpdateSellerShopPayload {
   address?: string;
 }
 
+export interface CreateSellerShopPayload {
+  name: string;
+  description: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  phone: string;
+  regionId: string;
+  districtId: string;
+  address: string;
+}
+
 function nullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
@@ -84,8 +95,8 @@ function parseSellerShop(response: unknown): SellerShop {
   return candidate as SellerShop;
 }
 
-export async function getSellerShop(): Promise<SellerShop> {
-  const { data } = await httpClient.get<unknown>('/sellers/me');
+export async function getSellerShop(signal?: AbortSignal): Promise<SellerShop> {
+  const { data } = await httpClient.get<unknown>('/sellers/me', { signal });
   return parseSellerShop(data);
 }
 
@@ -93,5 +104,12 @@ export async function updateSellerShop(
   payload: UpdateSellerShopPayload,
 ): Promise<SellerShop> {
   const { data } = await httpClient.patch<unknown>('/sellers/me', payload);
+  return parseSellerShop(data);
+}
+
+export async function createSellerShop(
+  payload: CreateSellerShopPayload,
+): Promise<SellerShop> {
+  const { data } = await httpClient.post<unknown>('/sellers', payload);
   return parseSellerShop(data);
 }
