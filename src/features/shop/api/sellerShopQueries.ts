@@ -20,13 +20,8 @@ export function useSellerShopQuery(enabled = true) {
 }
 
 export function useCreateSellerShopMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (payload: CreateSellerShopPayload) => createSellerShop(payload),
-    onSuccess: (shop) => {
-      queryClient.setQueryData(sellerShopQueryKey, shop);
-    },
   });
 }
 

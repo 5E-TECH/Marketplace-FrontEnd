@@ -5,6 +5,10 @@ export interface LoginCredentials {
 
 export interface RegisterCredentials extends LoginCredentials {
   name: string;
+  email?: string;
+  shopName: string;
+  shopDescription?: string;
+  address?: string;
 }
 
 export interface LoginResponse {

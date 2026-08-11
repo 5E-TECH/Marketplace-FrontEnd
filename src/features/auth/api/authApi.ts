@@ -62,7 +62,16 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
 export async function register(
   credentials: RegisterCredentials,
 ): Promise<void> {
-  await httpClient.post('/auth/register', credentials);
+  const { name, phone, password, email, shopName, shopDescription, address } = credentials;
+  await httpClient.post('/sellers/register', {
+    name,
+    phone,
+    password,
+    ...(email ? { email } : {}),
+    shopName,
+    ...(shopDescription ? { shopDescription } : {}),
+    ...(address ? { address } : {}),
+  });
 }
 
 export async function getCurrentUser(
@@ -95,6 +104,16 @@ export async function getCurrentUser(
         ? candidate.avatarUrl
         : null,
   };
+}
+
+export interface UpdateSellerProfilePayload {
+  name: string;
+  phone: string;
+}
+
+export async function updateSellerProfile(payload: UpdateSellerProfilePayload): Promise<AuthUser> {
+  await httpClient.patch('/sellers/me', payload);
+  return getCurrentUser();
 }
 
 export async function authenticate(

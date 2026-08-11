@@ -36,13 +36,12 @@ export interface UpdateSellerShopPayload {
 
 export interface CreateSellerShopPayload {
   name: string;
-  description: string;
-  logoUrl?: string;
-  bannerUrl?: string;
   phone: string;
-  regionId: string;
-  districtId: string;
-  address: string;
+  password: string;
+  email?: string;
+  shopName: string;
+  shopDescription?: string;
+  address?: string;
 }
 
 function nullableString(value: unknown): value is string | null {
@@ -109,7 +108,15 @@ export async function updateSellerShop(
 
 export async function createSellerShop(
   payload: CreateSellerShopPayload,
-): Promise<SellerShop> {
-  const { data } = await httpClient.post<unknown>('/sellers', payload);
-  return parseSellerShop(data);
+): Promise<void> {
+  const { name, phone, password, email, shopName, shopDescription, address } = payload;
+  await httpClient.post('/sellers/register', {
+    name,
+    phone,
+    password,
+    ...(email ? { email } : {}),
+    shopName,
+    ...(shopDescription ? { shopDescription } : {}),
+    ...(address ? { address } : {}),
+  });
 }

@@ -4,6 +4,7 @@ import {
   appRouteConfig,
   findRouteMeta,
 } from '../../app/router/appRouteConfig';
+import { prefetchRoute } from '../../app/router/routePreload';
 
 interface AppNavigationProps {
   onNavigate?: () => void;
@@ -18,9 +19,21 @@ export function AppNavigation({ onNavigate }: AppNavigationProps) {
       .filter(
         (route) => route.section === section && route.showInSidebar !== false,
       )
-      .map(({ path, label, icon }) => ({ key: path, label, icon }));
+      .map(({ path, label, icon }) => ({
+        key: path,
+        label: (
+          <span
+            onPointerEnter={() => prefetchRoute(path)}
+            onFocus={() => prefetchRoute(path)}
+          >
+            {label}
+          </span>
+        ),
+        icon,
+      }));
 
   const handleClick = (key: string) => {
+    prefetchRoute(key);
     void navigate(key);
     onNavigate?.();
   };

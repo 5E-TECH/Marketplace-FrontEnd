@@ -1,68 +1,105 @@
-import { Eye as EyeOutlined } from 'lucide-react';
-import { Button, Card, Descriptions, Drawer, Input, Select, Space, Table } from 'antd';
+import { Check, Eye, RotateCcw } from 'lucide-react';
+import { App, Button, Descriptions, Drawer, Input, Select, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useMemo, useState } from 'react';
-import { formatPrice, orders } from '../../features/seller/model/sellerData';
-import type { Order } from '../../features/seller/model/sellerTypes';
+import { useDeferredValue, useState } from 'react';
+import type { SellerOrder, SellerOrderStatus } from '../../features/orders/model/orderTypes';
+import { useSellerOrdersQuery, useUpdateSellerOrderStatusMutation } from '../../features/orders/api/orderQueries';
+import { ElchiTimeline } from '../../features/orders/ui/ElchiTimeline/ElchiTimeline';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
+import { DataTable } from '../../shared/ui/DataTable/DataTable';
+import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
+import { ContentState } from '../../shared/ui/ContentState/ContentState';
+import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import styles from './OrdersPage.module.css';
+
+type StatusFilter = 'ALL' | SellerOrderStatus;
+const money = new Intl.NumberFormat('uz-UZ');
+const formatMoney = (value: number) => `${money.format(value).replaceAll(',', ' ')} so‘m`;
+const formatDate = (value: string) => new Date(value).toLocaleString('uz-UZ', { dateStyle: 'medium', timeStyle: 'short' });
+const statusOptions: Array<{ value: StatusFilter; label: string }> = [
+  { value: 'ALL', label: 'Barcha holatlar' }, { value: 'NEW', label: 'Yangi' },
+  { value: 'CONFIRMED', label: 'Tasdiqlangan' }, { value: 'PENDING', label: 'Kutilmoqda' },
+  { value: 'SHIPMENT_CREATED', label: 'Elchi yaratildi' }, { value: 'ON_THE_ROAD', label: 'Yo‘lda' },
+  { value: 'DELIVERED', label: 'Yetkazildi' }, { value: 'CANCELLED', label: 'Bekor qilindi' },
+  { value: 'RETURNED', label: 'Qaytarildi' },
+];
 
 export default function OrdersPage() {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [status, setStatus] = useState<string>('ALL');
+  const { message } = App.useApp();
+  const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
+  const [nextStatus, setNextStatus] = useState<SellerOrderStatus | null>(null);
+  const [status, setStatus] = useState<StatusFilter>('ALL');
   const [search, setSearch] = useState('');
-  const filteredOrders = useMemo(
-    () =>
-      orders.filter(
-        (order) =>
-          (status === 'ALL' || order.status === status) &&
-          `${order.id} ${order.customer}`.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [search, status],
-  );
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [page, setPage] = useState(1);
+  const deferredSearch = useDeferredValue(search.trim());
+  const ordersQuery = useSellerOrdersQuery({
+    page, limit: 20,
+    ...(deferredSearch ? { search: deferredSearch } : {}),
+    ...(status !== 'ALL' ? { status } : {}),
+    ...(dateFrom ? { dateFrom } : {}),
+    ...(dateTo ? { dateTo } : {}),
+  });
+  const updateStatusMutation = useUpdateSellerOrderStatusMutation();
+  const orders = ordersQuery.data?.items ?? [];
 
-  const columns: ColumnsType<Order> = [
-    { title: 'Buyurtma', dataIndex: 'id', sorter: (a, b) => a.id.localeCompare(b.id) },
-    { title: 'Mijoz', dataIndex: 'customer' },
-    { title: 'Telefon', dataIndex: 'phone' },
-    { title: 'Sana', dataIndex: 'createdAt' },
-    { title: 'Summa', dataIndex: 'total', render: formatPrice, sorter: (a, b) => a.total - b.total },
-    { title: 'Holati', dataIndex: 'status', render: (value: Order['status']) => <StatusTag status={value} /> },
-    { title: '', width: 48, render: (_, order) => <Button type="text" icon={<EyeOutlined />} aria-label="Buyurtmani ko‘rish" onClick={() => setSelectedOrder(order)} /> },
+  const resetPage = () => setPage(1);
+  const resetFilters = () => { setSearch(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); };
+  const columns: ColumnsType<SellerOrder> = [
+    { title: 'Buyurtma', width: 130, render: (_, order) => <span className={styles.orderId}><strong>#{order.salesOrderId}</strong><small>Ichki ID: {order.id}</small></span> },
+    { title: 'Xaridor', dataIndex: 'buyerName', render: (name: string | null) => name || <span className={styles.muted}>Noma’lum xaridor</span> },
+    { title: 'Tovarlar', dataIndex: 'itemsCount', align: 'center', width: 80, render: (count: number) => `${count} ta` },
+    { title: 'To‘lov', width: 190, render: (_, order) => <span className={styles.amount}><strong>{formatMoney(order.subtotal)}</strong>{order.codAmount > 0 ? <small>COD: {formatMoney(order.codAmount)}</small> : <small>Oldindan to‘langan</small>}</span> },
+    { title: 'Sana', dataIndex: 'createdAt', width: 150, render: formatDate },
+    { title: 'Holati', dataIndex: 'status', width: 140, render: (value: SellerOrderStatus) => <StatusTag status={value} /> },
+    { title: '', width: 48, render: (_, order) => <Button type="text" icon={<Eye size={17} />} aria-label={`#${order.salesOrderId} buyurtmani ko‘rish`} onClick={() => { setSelectedOrder(order); setNextStatus(order.status); }} /> },
   ];
 
-  return (
-    <>
-      <PageHeader title="Buyurtmalar" description="Buyurtmalarni qabul qiling va holatini kuzating" />
-      <Card>
-        <Space wrap size={12} style={{ marginBottom: 16 }}>
-          <Input.Search placeholder="Buyurtma yoki mijoz" allowClear onChange={(event) => setSearch(event.target.value)} />
-          <Select
-            value={status}
-            style={{ width: 180 }}
-            onChange={setStatus}
-            options={[
-              { value: 'ALL', label: 'Barcha holatlar' },
-              { value: 'NEW', label: 'Yangi' },
-              { value: 'PROCESSING', label: 'Tayyorlanmoqda' },
-              { value: 'SHIPPED', label: 'Yo‘lda' },
-              { value: 'DELIVERED', label: 'Yetkazildi' },
-            ]}
-          />
-        </Space>
-        <Table rowKey="id" columns={columns} dataSource={filteredOrders} scroll={{ x: 900 }} pagination={{ pageSize: 20, showSizeChanger: false }} />
-      </Card>
-      <Drawer title={`Buyurtma ${selectedOrder?.id ?? ''}`} width={420} open={Boolean(selectedOrder)} onClose={() => setSelectedOrder(null)}>
-        {selectedOrder ? (
-          <Descriptions column={1} bordered size="small">
-            <Descriptions.Item label="Mijoz">{selectedOrder.customer}</Descriptions.Item>
-            <Descriptions.Item label="Telefon">{selectedOrder.phone}</Descriptions.Item>
-            <Descriptions.Item label="Sana">{selectedOrder.createdAt}</Descriptions.Item>
-            <Descriptions.Item label="Summa">{formatPrice(selectedOrder.total)}</Descriptions.Item>
-            <Descriptions.Item label="Holati"><StatusTag status={selectedOrder.status} /></Descriptions.Item>
-          </Descriptions>
-        ) : null}
-      </Drawer>
-    </>
-  );
+  if (ordersQuery.isPending) return <ContentState state="loading" />;
+  if (ordersQuery.isError) return <ContentState state="error" title="Buyurtmalarni yuklab bo‘lmadi" description={getAuthErrorMessage(ordersQuery.error)} onAction={() => void ordersQuery.refetch()} />;
+
+  return <main className={styles.page}>
+    <PageHeader title="Buyurtmalar" description="Buyurtmalar va Elchi yetkazib berish holatini kuzating" />
+    <ListToolbar value={search} placeholder="Order ID, sales order ID yoki xaridor ismi..." onChange={(value) => { setSearch(value); resetPage(); }} actions={<>
+      <Select<StatusFilter> className={styles.statusFilter} value={status} options={statusOptions} title="Buyurtma holati" onChange={(value) => { setStatus(value); resetPage(); }} />
+      <label className={styles.dateField}><span>Dan</span><Input className={styles.dateFilter} type="date" aria-label="Boshlanish sanasi" value={dateFrom} max={dateTo || undefined} onChange={(event) => { setDateFrom(event.target.value); resetPage(); }} /></label>
+      <label className={styles.dateField}><span>Gacha</span><Input className={styles.dateFilter} type="date" aria-label="Tugash sanasi" value={dateTo} min={dateFrom || undefined} onChange={(event) => { setDateTo(event.target.value); resetPage(); }} /></label>
+      {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>Tozalash</Button> : null}
+    </>} />
+    <section className={styles.tableCard}>
+      <div className={styles.tableHeader}><div><strong>Buyurtmalar ro‘yxati</strong><span>{ordersQuery.data.total} ta natija</span></div></div>
+      <DataTable rowKey="id" columns={columns} dataSource={orders} scroll={{ x: 760 }} emptyState={<EmptyState compact title="Buyurtmalar topilmadi" description="Yangi buyurtmalar kelganda shu yerda ko‘rinadi." />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+    </section>
+    <Drawer title={`Buyurtma #${selectedOrder?.salesOrderId ?? ''}`} width={480} open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending) setSelectedOrder(null); }}>
+      {selectedOrder ? <>
+        <Typography.Text className={styles.drawerCaption}>Buyurtma va yetkazib berish ma’lumotlari</Typography.Text>
+        <Descriptions className={styles.details} column={1} bordered size="small">
+          <Descriptions.Item label="Xaridor">{selectedOrder.buyerName || 'Noma’lum'}</Descriptions.Item>
+          <Descriptions.Item label="Tovarlar">{selectedOrder.itemsCount} ta</Descriptions.Item>
+          <Descriptions.Item label="Summa">{formatMoney(selectedOrder.subtotal)}</Descriptions.Item>
+          <Descriptions.Item label="Yetkazishda undirish">{formatMoney(selectedOrder.codAmount)}</Descriptions.Item>
+          <Descriptions.Item label="Holati"><StatusTag status={selectedOrder.status} /></Descriptions.Item>
+        </Descriptions>
+        <section className={styles.statusEditor} aria-label="Buyurtma statusini yangilash">
+          <div><strong>Statusni yangilash</strong><span>Seller yoki operator buyurtma holatini o‘zgartirishi mumkin.</span></div>
+          <Select<SellerOrderStatus> aria-label="Yangi status" value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} onChange={setNextStatus} />
+          <Button type="primary" icon={<Check size={16} />} loading={updateStatusMutation.isPending} disabled={!nextStatus || nextStatus === selectedOrder.status} onClick={() => {
+            if (!nextStatus) return;
+            updateStatusMutation.mutate({ id: selectedOrder.id, status: nextStatus }, {
+              onSuccess: () => {
+                setSelectedOrder((current) => current ? { ...current, status: nextStatus } : current);
+                void message.success('Buyurtma statusi yangilandi');
+              },
+              onError: (error) => void message.error(getAuthErrorMessage(error)),
+            });
+          }}>Statusni saqlash</Button>
+        </section>
+        <ElchiTimeline order={selectedOrder} />
+      </> : null}
+    </Drawer>
+  </main>;
 }

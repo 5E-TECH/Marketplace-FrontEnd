@@ -1,76 +1,58 @@
-import { Mail, Phone, Settings, ShieldCheck, UserRound } from 'lucide-react';
-import { Avatar, Button, Card, Descriptions, Tag, Typography } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Pencil, Phone, ShieldCheck, UserRound } from 'lucide-react';
+import { App, Avatar, Button, Form, Tag, Typography } from 'antd';
+import { useState } from 'react';
 import { useAppSelector } from '../../app/store/hooks';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
+import { useUpdateSellerProfileMutation } from '../../features/auth/api/useUpdateSellerProfileMutation';
+import type { UpdateSellerProfilePayload } from '../../features/auth/api/authApi';
+import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
+import { FormModal } from '../../shared/ui/FormModal/FormModal';
+import { TextControl } from '../../shared/ui/FormControls/FormControls';
 import styles from './ProfilePage.module.css';
 
-const roleLabels = {
-  SELLER: 'Sotuvchi',
-  BUYER: 'Xaridor',
-  ADMIN: 'Administrator',
-  SUPERADMIN: 'Super administrator',
-} as const;
+const roleLabels = { SELLER: 'Sotuvchi', BUYER: 'Xaridor', ADMIN: 'Administrator', SUPERADMIN: 'Super administrator' } as const;
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
+  const { message } = App.useApp();
   const user = useAppSelector(selectAuthUser);
-
+  const [open, setOpen] = useState(false);
+  const [form] = Form.useForm<UpdateSellerProfilePayload>();
+  const updateMutation = useUpdateSellerProfileMutation();
   if (!user) return null;
 
-  return (
-    <main className={styles.page}>
-      <PageHeader
-        title="Mening profilim"
-        description="Shaxsiy akkaunt va kirish ma’lumotlaringiz"
-        extra={
-          <Button icon={<Settings />} onClick={() => void navigate('/settings')}>
-            Sozlamalar
-          </Button>
-        }
-      />
+  const startEditing = () => {
+    form.setFieldsValue({ name: user.name, phone: user.phone });
+    setOpen(true);
+  };
+  const save = (values: UpdateSellerProfilePayload) => {
+    updateMutation.mutate({
+      name: values.name.trim(),
+      phone: values.phone.replace(/\s/g, ''),
+    }, {
+      onSuccess: () => { setOpen(false); void message.success('Profil yangilandi'); },
+      onError: (error) => void message.error(getAuthErrorMessage(error)),
+    });
+  };
 
-      <Card className={styles.profileCard}>
-        <section className={styles.identity}>
-          <div className={styles.avatarRing}>
-            <Avatar size={104} src={user.avatarUrl}>
-              {user.name.slice(0, 2).toUpperCase()}
-            </Avatar>
-          </div>
-          <div className={styles.identityCopy}>
-            <span className={styles.eyebrow}>AKKAUNT PROFILI</span>
-            <Typography.Title level={2}>{user.name}</Typography.Title>
-            <div className={styles.tags}>
-              <Tag color="gold">{roleLabels[user.role]}</Tag>
-              <Tag color={user.isActive ? 'success' : 'warning'}>
-                {user.isActive ? 'Faol akkaunt' : 'Tekshiruvda'}
-              </Tag>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.details}>
-          <header>
-            <div><UserRound /><span>Shaxsiy ma’lumotlar</span></div>
-            <p>Bu ma’lumotlar akkauntingizga tegishli. Do‘kon ma’lumotlari alohida “Do‘kon profili” bo‘limida boshqariladi.</p>
-          </header>
-          <Descriptions column={{ xs: 1, md: 2 }} bordered>
-            <Descriptions.Item label={<span className={styles.label}><UserRound /> Ism</span>}>
-              {user.name}
-            </Descriptions.Item>
-            <Descriptions.Item label={<span className={styles.label}><Phone /> Telefon</span>}>
-              {user.phone}
-            </Descriptions.Item>
-            <Descriptions.Item label={<span className={styles.label}><Mail /> Email</span>}>
-              {user.email ?? 'Kiritilmagan'}
-            </Descriptions.Item>
-            <Descriptions.Item label={<span className={styles.label}><ShieldCheck /> Rol</span>}>
-              {roleLabels[user.role]}
-            </Descriptions.Item>
-          </Descriptions>
-        </section>
-      </Card>
-    </main>
-  );
+  return <main className={styles.page}>
+    <PageHeader title="Mening profilim" description="Shaxsiy akkaunt va kirish ma’lumotlari" extra={<Button type="primary" icon={<Pencil />} onClick={startEditing}>Tahrirlash</Button>} />
+    <section className={styles.profile}>
+      <header className={styles.identity}>
+        <Avatar size={72} src={user.avatarUrl}>{user.name.slice(0, 2).toUpperCase()}</Avatar>
+        <div><Typography.Title level={2}>{user.name}</Typography.Title><div className={styles.tags}><Tag color="gold">{roleLabels[user.role]}</Tag><Tag color={user.isActive ? 'success' : 'warning'}>{user.isActive ? 'Faol akkaunt' : 'Tekshiruvda'}</Tag></div></div>
+      </header>
+      <div className={styles.sectionTitle}><UserRound /><div><strong>Shaxsiy ma’lumotlar</strong><span>Akkaunt egasiga tegishli ma’lumotlar</span></div></div>
+      <dl className={styles.infoGrid}>
+        <div><dt><UserRound /> Ism</dt><dd>{user.name}</dd></div>
+        <div><dt><Phone /> Telefon</dt><dd>{user.phone}</dd></div>
+        <div><dt><ShieldCheck /> Rol</dt><dd>{roleLabels[user.role]}</dd></div>
+      </dl>
+    </section>
+    <FormModal<UpdateSellerProfilePayload> open={open} title="Profilni tahrirlash" form={form} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
+      <p className={styles.modalDescription}>Ism va telefon raqamingizni yangilang.</p>
+      <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { max: 100 }]}><TextControl autoComplete="name" /></Form.Item>
+      <Form.Item label="Telefon" name="phone" rules={[{ required: true, message: 'Telefonni kiriting' }, { pattern: /^\+998(?:\s?\d){9}$/, message: '+998901234567 formatida kiriting' }]}><TextControl autoComplete="tel" placeholder="+998901234567" /></Form.Item>
+    </FormModal>
+  </main>;
 }

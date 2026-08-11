@@ -1,44 +1,31 @@
-import { ImagePlus, Store } from 'lucide-react';
-import { App, Button, Col, Form, Input, Modal, Row, Select, Upload } from 'antd';
-import type { UploadProps } from 'antd';
-import type { ShopMediaKind } from '../model/useShopMediaDraft';
-import type { ShopProfileFormValues } from '../model/shopProfile';
+import { Store } from 'lucide-react';
+import { Button, Col, Form, Input, Modal, Row } from 'antd';
 import styles from './CreateShopModal.module.css';
 
 interface CreateShopModalProps {
   open: boolean;
   saving: boolean;
-  preview: { logoUrl?: string; bannerUrl?: string };
-  onImageSelect: (kind: ShopMediaKind, file: File) => Promise<void>;
   onCancel: () => void;
-  onSubmit: (values: ShopProfileFormValues) => void;
+  onSubmit: (values: SellerRegistrationFormValues) => void;
 }
 
-const regionOptions = [{ value: '1', label: 'Toshkent shahri' }];
-const districtOptions = [{ value: '10', label: 'Yashnobod tumani' }];
+export interface SellerRegistrationFormValues {
+  name: string;
+  phone: string;
+  password: string;
+  email?: string;
+  shopName: string;
+  shopDescription?: string;
+  address?: string;
+}
 
 export function CreateShopModal({
   open,
   saving,
-  preview,
-  onImageSelect,
   onCancel,
   onSubmit,
 }: CreateShopModalProps) {
-  const { message } = App.useApp();
-  const [form] = Form.useForm<ShopProfileFormValues>();
-  const uploadProps = (kind: ShopMediaKind): UploadProps => ({
-    accept: 'image/jpeg,image/png,image/webp',
-    showUploadList: false,
-    beforeUpload: async (file) => {
-      try {
-        await onImageSelect(kind, file);
-      } catch (error) {
-        void message.error(error instanceof Error ? error.message : 'Rasmni o‘qib bo‘lmadi');
-      }
-      return false;
-    },
-  });
+  const [form] = Form.useForm<SellerRegistrationFormValues>();
 
   return (
     <Modal
@@ -62,26 +49,7 @@ export function CreateShopModal({
         </div>
       </div>
 
-      <div className={styles.mediaGrid}>
-        <Upload {...uploadProps('banner')}>
-          <button
-            type="button"
-            className={`${styles.mediaButton} ${styles.bannerButton}`}
-            style={preview.bannerUrl ? { backgroundImage: `url(${preview.bannerUrl})` } : undefined}
-          >
-            <span><ImagePlus /> Banner tanlash</span>
-            <small>JPG, PNG yoki WEBP · 5 MB gacha</small>
-          </button>
-        </Upload>
-        <Upload {...uploadProps('logo')}>
-          <button type="button" className={styles.logoButton}>
-            {preview.logoUrl ? <img src={preview.logoUrl} alt="Logo ko‘rinishi" /> : <Store />}
-            <span>Logo tanlash</span>
-          </button>
-        </Upload>
-      </div>
-
-      <Form<ShopProfileFormValues>
+      <Form<SellerRegistrationFormValues>
         form={form}
         layout="vertical"
         requiredMark
@@ -90,8 +58,8 @@ export function CreateShopModal({
       >
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            <Form.Item name="name" label="Do‘kon nomi" rules={[{ required: true, whitespace: true, max: 80 }]}>
-              <Input maxLength={80} placeholder="Masalan, MarketHub Store" />
+            <Form.Item name="name" label="Ism va familiya" rules={[{ required: true, whitespace: true, max: 80 }]}>
+              <Input maxLength={80} placeholder="Ali Valiyev" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -100,20 +68,25 @@ export function CreateShopModal({
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item name="regionId" label="Viloyat" rules={[{ required: true, message: 'Viloyatni tanlang' }]}>
-              <Select options={regionOptions} placeholder="Viloyatni tanlang" />
+            <Form.Item name="password" label="Parol" rules={[{ required: true, message: 'Parolni kiriting' }, { min: 8, message: 'Parol kamida 8 belgi bo‘lsin' }]}>
+              <Input.Password maxLength={128} autoComplete="new-password" placeholder="Kamida 8 belgi" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item name="districtId" label="Tuman" rules={[{ required: true, message: 'Tumanni tanlang' }]}>
-              <Select options={districtOptions} placeholder="Tumanni tanlang" />
+            <Form.Item name="email" label="Email" rules={[{ type: 'email', message: 'Emailni to‘g‘ri kiriting' }]}>
+              <Input maxLength={120} placeholder="seller@example.com" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item name="shopName" label="Do‘kon nomi" rules={[{ required: true, whitespace: true, message: 'Do‘kon nomini kiriting' }, { max: 80 }]}>
+              <Input maxLength={80} placeholder="Ali Market" />
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="address" label="Manzil" rules={[{ required: true, whitespace: true }]}>
+        <Form.Item name="address" label="Manzil" rules={[{ max: 180 }]}>
           <Input maxLength={180} placeholder="Ko‘cha, uy va mo‘ljal" />
         </Form.Item>
-        <Form.Item name="description" label="Do‘kon haqida" rules={[{ required: true, whitespace: true }, { max: 500 }]}>
+        <Form.Item name="shopDescription" label="Do‘kon haqida" rules={[{ max: 500 }]}>
           <Input.TextArea rows={3} maxLength={500} showCount placeholder="Mahsulotlaringiz va do‘kon afzalliklarini yozing" />
         </Form.Item>
         <div className={styles.actions}>

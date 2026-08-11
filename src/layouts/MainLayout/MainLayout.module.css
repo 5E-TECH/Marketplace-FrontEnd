@@ -297,23 +297,6 @@
   margin-inline-start: 0;
 }
 
-.approvalBanner {
-  display: grid;
-  min-height: 46px;
-  padding: 8px 24px;
-  color: #92400e;
-  background: linear-gradient(90deg, #fff7e6, #fffbeb);
-  border-bottom: 1px solid #fde3ad;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 10px;
-}
-
-.approvalBanner :global(.ant-btn-link) {
-  color: #92400e;
-  font-weight: 700;
-}
-
 .content {
   width: 100%;
   max-width: 1600px;
@@ -349,16 +332,6 @@
 @media (max-width: 767px) {
   .content {
     padding: var(--space-4) var(--space-3) var(--space-6);
-  }
-
-  .approvalBanner {
-    padding-inline: 14px;
-    font-size: 12px;
-    grid-template-columns: auto 1fr auto;
-  }
-
-  .approvalBanner :global(.ant-btn-link) {
-    display: none;
   }
 
   .globalSearch {

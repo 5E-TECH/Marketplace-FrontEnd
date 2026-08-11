@@ -1,7 +1,7 @@
 import { httpClient } from '../../../shared/api/httpClient';
-import type { Product, ProductStatus, ProductUpsertPayload } from '../model/productTypes';
+import type { Product, ProductListParams, ProductPage, ProductStatus, ProductUpsertPayload, ProductVariant } from '../model/productTypes';
 
-const productStatuses: ProductStatus[] = ['ACTIVE', 'LOW', 'INACTIVE'];
+const productStatuses: ProductStatus[] = ['ACTIVE', 'LOW', 'INACTIVE', 'DRAFT', 'ARCHIVED', 'OUT_OF_STOCK'];
 
 function unwrap(value: unknown): unknown {
   return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
@@ -15,6 +15,45 @@ function toNumber(value: unknown, field: string): number {
   return parsed;
 }
 
+function optionalString(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function parseImages(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((image): image is string => typeof image === 'string')
+    : [];
+}
+
+function parseAttributes(value: unknown): Record<string, string> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string',
+    ),
+  );
+}
+
+function parseVariants(value: unknown): ProductVariant[] {
+  if (!Array.isArray(value)) return [];
+  const items: unknown[] = value;
+  return items.flatMap((item) => {
+    if (typeof item !== 'object' || item === null || !('sku' in item) || typeof item.sku !== 'string') return [];
+    return [{
+      id: optionalString('id' in item ? item.id : '') || undefined,
+      productId: optionalString('productId' in item ? item.productId : '') || undefined,
+      name: optionalString('name' in item ? item.name : ''),
+      sku: item.sku,
+      attributes: parseAttributes('attributes' in item ? item.attributes : {}),
+      price: 'price' in item && item.price !== null ? toNumber(item.price, 'variant narxi') : null,
+      oldPrice: 'oldPrice' in item && item.oldPrice !== null ? toNumber(item.oldPrice, 'variant eski narxi') : null,
+      barcode: optionalString('barcode' in item ? item.barcode : ''),
+      imageUrl: optionalString('imageUrl' in item ? item.imageUrl : '') || null,
+      isActive: !('isActive' in item) || item.isActive === true,
+    }];
+  });
+}
+
 function parseProduct(value: unknown): Product {
   const candidate = unwrap(value);
   if (typeof candidate !== 'object' || candidate === null) {
@@ -24,7 +63,8 @@ function parseProduct(value: unknown): Product {
     throw new Error('Mahsulotning majburiy maydonlari mavjud emas');
   }
 
-  const categoryValue = 'category' in candidate ? candidate.category : '';
+  const categoryId = optionalString('categoryId' in candidate ? candidate.categoryId : '');
+  const categoryValue = 'category' in candidate ? candidate.category : categoryId;
   const category = typeof categoryValue === 'string'
     ? categoryValue
     : typeof categoryValue === 'object' && categoryValue !== null && 'name' in categoryValue && typeof categoryValue.name === 'string'
@@ -34,21 +74,39 @@ function parseProduct(value: unknown): Product {
   const rawStatus = 'status' in candidate ? String(candidate.status).toUpperCase() : '';
   const status = productStatuses.includes(rawStatus as ProductStatus)
     ? rawStatus as ProductStatus
-    : stock === 0 ? 'INACTIVE' : stock <= 5 ? 'LOW' : 'ACTIVE';
+    : 'DRAFT';
+  const images = parseImages('images' in candidate ? candidate.images : []);
+  const imageUrl = optionalString('imageUrl' in candidate ? candidate.imageUrl : '') || null;
 
   return {
     id: candidate.id,
+    shopId: optionalString('shopId' in candidate ? candidate.shopId : ''),
+    ownerUserId: optionalString('ownerUserId' in candidate ? candidate.ownerUserId : ''),
+    categoryId,
     name: candidate.name,
-    sku: 'sku' in candidate && typeof candidate.sku === 'string' ? candidate.sku : '',
+    slug: optionalString('slug' in candidate ? candidate.slug : ''),
+    description: optionalString('description' in candidate ? candidate.description : ''),
+    sku: optionalString('sku' in candidate ? candidate.sku : '') || optionalString('slug' in candidate ? candidate.slug : ''),
     category,
     price: toNumber('price' in candidate ? candidate.price : 0, 'narx'),
+    oldPrice:
+      'oldPrice' in candidate && candidate.oldPrice !== null
+        ? toNumber(candidate.oldPrice, 'eski narx')
+        : null,
+    imageUrl,
+    images,
+    attributes: parseAttributes('attributes' in candidate ? candidate.attributes : {}),
+    hasVariants: 'hasVariants' in candidate && candidate.hasVariants === true,
     stock,
     status,
-    variants: [],
+    isDeleted: 'isDeleted' in candidate && candidate.isDeleted === true,
+    createdAt: optionalString('createdAt' in candidate ? candidate.createdAt : ''),
+    updatedAt: optionalString('updatedAt' in candidate ? candidate.updatedAt : ''),
+    variants: parseVariants('variants' in candidate ? candidate.variants : []),
   };
 }
 
-function parseProductList(value: unknown): Product[] {
+function parseProductPage(value: unknown, fallback: ProductListParams): ProductPage {
   const unwrapped = unwrap(value);
   const list = Array.isArray(unwrapped)
     ? unwrapped
@@ -58,12 +116,29 @@ function parseProductList(value: unknown): Product[] {
         ? unwrapped.products
         : null;
   if (!list) throw new Error('Mahsulotlar ro‘yxati noto‘g‘ri formatda keldi');
-  return list.map(parseProduct);
+  const record = typeof unwrapped === 'object' && unwrapped !== null ? unwrapped : {};
+  const items = list.map(parseProduct);
+  return {
+    items,
+    total: 'total' in record ? toNumber(record.total, 'jami') : items.length,
+    page: 'page' in record ? toNumber(record.page, 'sahifa') : fallback.page,
+    limit: 'limit' in record ? toNumber(record.limit, 'limit') : fallback.limit,
+    totalPages: 'totalPages' in record ? toNumber(record.totalPages, 'jami sahifa') : Math.max(1, Math.ceil(items.length / fallback.limit)),
+  };
 }
 
-export async function getMyProducts(signal?: AbortSignal): Promise<Product[]> {
-  const { data } = await httpClient.get<unknown>('/products/my', { signal });
-  return parseProductList(data);
+export async function getMyProducts(params: ProductListParams, signal?: AbortSignal): Promise<ProductPage> {
+  const { data } = await httpClient.get<unknown>('/products/my', {
+    signal,
+    params: {
+      page: params.page,
+      limit: params.limit,
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.status ? { status: params.status } : {}),
+      ...(params.categoryId ? { categoryId: params.categoryId } : {}),
+    },
+  });
+  return parseProductPage(data, params);
 }
 
 export async function getProduct(id: string, signal?: AbortSignal): Promise<Product> {

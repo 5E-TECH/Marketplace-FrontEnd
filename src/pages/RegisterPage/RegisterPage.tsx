@@ -15,9 +15,17 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const registerMutation = useRegisterMutation();
 
-  const handleSubmit = ({ name, phone, password }: RegisterFormValues) => {
+  const handleSubmit = ({ name, phone, password, email, shopName, shopDescription, address }: RegisterFormValues) => {
     registerMutation.mutate(
-      { name: name.trim(), phone: `+998${phone}`, password },
+      {
+        name: name.trim(),
+        phone: `+998${phone}`,
+        password,
+        shopName: shopName.trim(),
+        ...(email?.trim() ? { email: email.trim() } : {}),
+        ...(shopDescription?.trim() ? { shopDescription: shopDescription.trim() } : {}),
+        ...(address?.trim() ? { address: address.trim() } : {}),
+      },
       {
         onSuccess: () => {
           void message.success('Ro‘yxatdan muvaffaqiyatli o‘tdingiz');

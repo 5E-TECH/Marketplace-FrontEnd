@@ -53,7 +53,7 @@ export async function mockLogout(page: Page): Promise<void> {
 }
 
 export async function mockProducts(page: Page): Promise<void> {
-  await page.route('**/api/v1/products/my', async (route) => {
+  await page.route('**/api/v1/products/my**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

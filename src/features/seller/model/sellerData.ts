@@ -1,10 +1,32 @@
 import type { Order, Warehouse } from './sellerTypes';
 import type { Product } from '../../products/model/productTypes';
 
+function demoProduct(
+  product: Pick<Product, 'id' | 'name' | 'sku' | 'category' | 'price' | 'stock' | 'status'>,
+): Product {
+  return {
+    ...product,
+    shopId: 'demo-shop',
+    ownerUserId: 'demo-seller',
+    categoryId: product.category === 'Elektronika' ? '1' : '2',
+    slug: product.sku.toLowerCase(),
+    description: '',
+    oldPrice: null,
+    imageUrl: null,
+    images: [],
+    attributes: {},
+    hasVariants: false,
+    isDeleted: false,
+    createdAt: '',
+    updatedAt: '',
+    variants: [],
+  };
+}
+
 export const initialProducts: Product[] = [
-  { id: '1', name: 'Simsiz quloqchin Pro', sku: 'AUD-001', category: 'Elektronika', price: 349000, stock: 24, status: 'ACTIVE', variants: [] },
-  { id: '2', name: 'Smart Watch S8', sku: 'WTC-008', category: 'Elektronika', price: 589000, stock: 4, status: 'LOW', variants: [] },
-  { id: '3', name: 'Charm ryukzak', sku: 'BAG-014', category: 'Aksessuarlar', price: 279000, stock: 0, status: 'INACTIVE', variants: [] },
+  demoProduct({ id: '1', name: 'Simsiz quloqchin Pro', sku: 'AUD-001', category: 'Elektronika', price: 349000, stock: 24, status: 'ACTIVE' }),
+  demoProduct({ id: '2', name: 'Smart Watch S8', sku: 'WTC-008', category: 'Elektronika', price: 589000, stock: 4, status: 'LOW' }),
+  demoProduct({ id: '3', name: 'Charm ryukzak', sku: 'BAG-014', category: 'Aksessuarlar', price: 279000, stock: 0, status: 'INACTIVE' }),
 ];
 
 export const warehouses: Warehouse[] = [

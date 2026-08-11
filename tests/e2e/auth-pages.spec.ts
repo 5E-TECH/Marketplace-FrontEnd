@@ -13,6 +13,7 @@ test('TC1: bo‘sh register submit majburiy maydonlarni validatsiya qiladi', asy
 
   await expect(page.getByText('Ism va familiyangizni kiriting')).toBeVisible();
   await expect(page.getByText('Telefon raqamini kiriting')).toBeVisible();
+  await expect(page.getByText('Do‘kon nomini kiriting')).toBeVisible();
   await expect(page.getByText('Parolni kiriting')).toBeVisible();
   await expect(page.getByText('Parolni qayta kiriting')).toBeVisible();
 });
@@ -21,7 +22,7 @@ test('TC2: to‘g‘ri register so‘rovi muvaffaqiyatdan keyin login sahifasiga
   page,
 }) => {
   let requestBody: unknown;
-  await page.route('**/api/v1/auth/register', async (route) => {
+  await page.route('**/api/v1/sellers/register', async (route) => {
     requestBody = route.request().postDataJSON();
     await route.fulfill({
       status: 201,
@@ -33,6 +34,10 @@ test('TC2: to‘g‘ri register so‘rovi muvaffaqiyatdan keyin login sahifasiga
   await page.goto('/register');
   await page.getByLabel('Ism va familiya').fill('Ali Valiyev');
   await page.getByLabel('Telefon raqami').fill('901234567');
+  await page.getByLabel('Email').fill('seller@example.com');
+  await page.getByLabel('Do‘kon nomi').fill('Ali Market');
+  await page.getByLabel('Do‘kon tavsifi').fill('Maishiy texnika do‘koni');
+  await page.getByLabel('Manzil').fill('Toshkent shahri');
   await page.getByLabel('Parol', { exact: true }).fill('Secure123');
   await page.getByLabel('Parolni tasdiqlash').fill('Secure123');
   await page.getByRole('button', { name: 'RO‘YXATDAN O‘TISH' }).click();
@@ -42,6 +47,10 @@ test('TC2: to‘g‘ri register so‘rovi muvaffaqiyatdan keyin login sahifasiga
     name: 'Ali Valiyev',
     phone: '+998901234567',
     password: 'Secure123',
+    email: 'seller@example.com',
+    shopName: 'Ali Market',
+    shopDescription: 'Maishiy texnika do‘koni',
+    address: 'Toshkent shahri',
   });
 });
 

@@ -1,8 +1,10 @@
 import { Form, Modal } from 'antd';
 import type { FormInstance } from 'antd';
 import type { ReactNode } from 'react';
+import styles from './FormModal.module.css';
 
 interface FormModalProps<Values extends object> {
+  className?: string;
   open: boolean;
   title: ReactNode;
   form: FormInstance<Values>;
@@ -18,6 +20,7 @@ interface FormModalProps<Values extends object> {
 }
 
 export function FormModal<Values extends object>({
+  className,
   open,
   title,
   form,
@@ -37,6 +40,8 @@ export function FormModal<Values extends object>({
 
   return (
     <Modal
+      className={className}
+      rootClassName={styles.modal}
       open={open}
       title={title}
       okText={submitText}

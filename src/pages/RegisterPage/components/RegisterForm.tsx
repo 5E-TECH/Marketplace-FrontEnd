@@ -5,6 +5,10 @@ import styles from '../../LoginPage/components/LoginForm/LoginForm.module.css';
 export interface RegisterFormValues {
   name: string;
   phone: string;
+  email: string;
+  shopName: string;
+  shopDescription: string;
+  address: string;
   password: string;
   confirmPassword: string;
 }
@@ -45,6 +49,22 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
           placeholder="Ism Familiya"
           aria-label="Ism va familiya"
         />
+      </Form.Item>
+
+      <Form.Item className={styles.field} label="EMAIL" name="email" rules={[{ type: 'email', message: 'Email manzilini to‘g‘ri kiriting' }]}>
+        <Input className={styles.input} variant="borderless" autoComplete="email" maxLength={120} placeholder="seller@example.com" aria-label="Email" />
+      </Form.Item>
+
+      <Form.Item className={styles.field} label="DO‘KON NOMI" name="shopName" rules={[{ required: true, whitespace: true, message: 'Do‘kon nomini kiriting' }, { max: 80 }]}>
+        <Input className={styles.input} variant="borderless" maxLength={80} placeholder="Ali Market" aria-label="Do‘kon nomi" />
+      </Form.Item>
+
+      <Form.Item className={styles.field} label="DO‘KON TAVSIFI" name="shopDescription" rules={[{ max: 500 }]}>
+        <Input className={styles.input} variant="borderless" maxLength={500} placeholder="Maishiy texnika do‘koni" aria-label="Do‘kon tavsifi" />
+      </Form.Item>
+
+      <Form.Item className={styles.field} label="MANZIL" name="address" rules={[{ max: 180 }]}>
+        <Input className={styles.input} variant="borderless" maxLength={180} placeholder="Toshkent shahri" aria-label="Manzil" />
       </Form.Item>
 
       <Form.Item
