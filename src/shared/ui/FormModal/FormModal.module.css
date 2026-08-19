@@ -6,15 +6,15 @@
 .modal :global(.ant-modal-container) {
   overflow: hidden;
   padding: 24px;
-  background: #151619 !important;
-  border: 1px solid #303238;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: 0 28px 90px rgb(0 0 0 / 52%);
 }
 
 .modal :global(.ant-modal-header) {
   margin-bottom: 20px;
-  background: #151619 !important;
+  background: var(--color-surface) !important;
 }
 
 .modal :global(.ant-modal-title) {
@@ -30,10 +30,13 @@
 
 .modal :global(.ant-modal-close:hover) {
   color: var(--color-text);
-  background: #24262b;
+  background: var(--color-surface-hover);
 }
 
 .modal :global(.ant-modal-body) {
+  max-height: min(68vh, 640px);
+  overflow-y: auto;
+  padding-right: 4px;
   color: var(--color-text-secondary);
 }
 
@@ -51,8 +54,8 @@
 .modal :global(.ant-input-number),
 .modal :global(.ant-select-selector) {
   color: var(--color-text) !important;
-  background: #0e0f12 !important;
-  border-color: #34363d !important;
+  background: var(--color-surface-subtle) !important;
+  border-color: var(--color-border) !important;
   border-radius: var(--radius-md) !important;
   box-shadow: none !important;
 }
@@ -86,7 +89,7 @@
   margin-top: 24px;
   justify-content: flex-end;
   gap: 10px;
-  background: #151619 !important;
+  background: var(--color-surface) !important;
 }
 
 .modal :global(.ant-modal-footer .ant-btn) {

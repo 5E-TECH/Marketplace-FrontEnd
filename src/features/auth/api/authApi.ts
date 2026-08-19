@@ -14,7 +14,13 @@ interface LoginApiResponse {
 }
 
 
-const USER_ROLES: UserRole[] = ['SELLER', 'BUYER', 'ADMIN', 'SUPERADMIN'];
+const USER_ROLES: UserRole[] = [
+  'SELLER',
+  'OPERATOR',
+  'BUYER',
+  'ADMIN',
+  'SUPERADMIN',
+];
 
 function isAuthUser(value: unknown): value is AuthUser {
   if (typeof value !== 'object' || value === null) {
@@ -104,16 +110,6 @@ export async function getCurrentUser(
         ? candidate.avatarUrl
         : null,
   };
-}
-
-export interface UpdateSellerProfilePayload {
-  name: string;
-  phone: string;
-}
-
-export async function updateSellerProfile(payload: UpdateSellerProfilePayload): Promise<AuthUser> {
-  await httpClient.patch('/sellers/me', payload);
-  return getCurrentUser();
 }
 
 export async function authenticate(

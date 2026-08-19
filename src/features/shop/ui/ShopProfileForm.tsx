@@ -141,6 +141,7 @@ export function ShopProfileForm({
         >
           <Input.TextArea rows={editing ? 3 : 1} maxLength={500} showCount={editing} />
         </Form.Item>
+
       </Form>
     </section>
   );

@@ -145,7 +145,6 @@ test('do‘kon mavjud bo‘lmasa popup orqali yangi do‘kon yaratiladi', async 
   await dialog.getByLabel('Ism va familiya').fill('Bahodir Nabijanov');
   await dialog.getByLabel('Telefon').fill('+998901234567');
   await dialog.getByLabel('Parol').fill('Secure123');
-  await dialog.getByLabel('Email').fill('seller@example.com');
   await dialog.getByLabel('Do‘kon nomi').fill('Yangi Seller Store');
   await dialog.getByLabel('Manzil').fill('Toshkent shahri');
   await dialog.getByLabel('Do‘kon haqida').fill('Sifatli mahsulotlar do‘koni');
@@ -157,7 +156,6 @@ test('do‘kon mavjud bo‘lmasa popup orqali yangi do‘kon yaratiladi', async 
     name: 'Bahodir Nabijanov',
     phone: '+998901234567',
     password: 'Secure123',
-    email: 'seller@example.com',
     shopName: 'Yangi Seller Store',
     shopDescription: 'Sifatli mahsulotlar do‘koni',
     address: 'Toshkent shahri',

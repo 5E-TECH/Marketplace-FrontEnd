@@ -38,7 +38,6 @@ export interface CreateSellerShopPayload {
   name: string;
   phone: string;
   password: string;
-  email?: string;
   shopName: string;
   shopDescription?: string;
   address?: string;
@@ -109,12 +108,11 @@ export async function updateSellerShop(
 export async function createSellerShop(
   payload: CreateSellerShopPayload,
 ): Promise<void> {
-  const { name, phone, password, email, shopName, shopDescription, address } = payload;
+  const { name, phone, password, shopName, shopDescription, address } = payload;
   await httpClient.post('/sellers/register', {
     name,
     phone,
     password,
-    ...(email ? { email } : {}),
     shopName,
     ...(shopDescription ? { shopDescription } : {}),
     ...(address ? { address } : {}),

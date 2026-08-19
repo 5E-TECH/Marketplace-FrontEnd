@@ -71,7 +71,6 @@ export default function ShopPage() {
       phone: values.phone.replace(/\s/g, ''),
       password: values.password,
       shopName: values.shopName.trim(),
-      ...(values.email?.trim() ? { email: values.email.trim() } : {}),
       ...(values.shopDescription?.trim() ? { shopDescription: values.shopDescription.trim() } : {}),
       ...(values.address?.trim() ? { address: values.address.trim() } : {}),
     };
@@ -127,13 +126,12 @@ export default function ShopPage() {
   if (!profile || !shopQuery.data) return <ContentState state="loading" />;
 
   const saveProfile = (values: ShopProfileFormValues) => {
-    // Upload API ulanganda mediaDraft.files shu yagona save oqimida yuboriladi.
     const payload: UpdateSellerShopPayload = {
       name: values.name.trim(),
       description: values.description.trim(),
       phone: values.phone.replace(/\s/g, ''),
-      regionId: values.regionId,
-      districtId: values.districtId,
+      regionId: values.regionId.trim(),
+      districtId: values.districtId.trim(),
       address: values.address.trim(),
     };
 

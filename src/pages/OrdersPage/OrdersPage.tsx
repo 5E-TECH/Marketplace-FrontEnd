@@ -86,12 +86,13 @@ export default function OrdersPage() {
         </Descriptions>
         <section className={styles.statusEditor} aria-label="Buyurtma statusini yangilash">
           <div><strong>Statusni yangilash</strong><span>Seller yoki operator buyurtma holatini o‘zgartirishi mumkin.</span></div>
-          <Select<SellerOrderStatus> aria-label="Yangi status" value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} onChange={setNextStatus} />
+          <Select<SellerOrderStatus> aria-label="Yangi status" value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} disabled={updateStatusMutation.isPending} onChange={setNextStatus} />
           <Button type="primary" icon={<Check size={16} />} loading={updateStatusMutation.isPending} disabled={!nextStatus || nextStatus === selectedOrder.status} onClick={() => {
             if (!nextStatus) return;
-            updateStatusMutation.mutate({ id: selectedOrder.id, status: nextStatus }, {
+            const submittedStatus = nextStatus;
+            updateStatusMutation.mutate({ id: selectedOrder.id, status: submittedStatus }, {
               onSuccess: () => {
-                setSelectedOrder((current) => current ? { ...current, status: nextStatus } : current);
+                setSelectedOrder((current) => current ? { ...current, status: submittedStatus } : current);
                 void message.success('Buyurtma statusi yangilandi');
               },
               onError: (error) => void message.error(getAuthErrorMessage(error)),

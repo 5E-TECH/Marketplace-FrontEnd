@@ -13,7 +13,6 @@ export interface SellerRegistrationFormValues {
   name: string;
   phone: string;
   password: string;
-  email?: string;
   shopName: string;
   shopDescription?: string;
   address?: string;
@@ -29,6 +28,7 @@ export function CreateShopModal({
 
   return (
     <Modal
+      rootClassName={styles.modal}
       open={open}
       width={760}
       title={null}
@@ -70,11 +70,6 @@ export function CreateShopModal({
           <Col xs={24} md={12}>
             <Form.Item name="password" label="Parol" rules={[{ required: true, message: 'Parolni kiriting' }, { min: 8, message: 'Parol kamida 8 belgi bo‘lsin' }]}>
               <Input.Password maxLength={128} autoComplete="new-password" placeholder="Kamida 8 belgi" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={12}>
-            <Form.Item name="email" label="Email" rules={[{ type: 'email', message: 'Emailni to‘g‘ri kiriting' }]}>
-              <Input maxLength={120} placeholder="seller@example.com" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>

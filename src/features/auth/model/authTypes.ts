@@ -15,7 +15,7 @@ export interface LoginResponse {
   accessToken: string;
 }
 
-export type UserRole = 'SELLER' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
+export type UserRole = 'SELLER' | 'OPERATOR' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
 
 export interface AuthUser {
   id: string;

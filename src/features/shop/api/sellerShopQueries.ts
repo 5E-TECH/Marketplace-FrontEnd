@@ -20,8 +20,12 @@ export function useSellerShopQuery(enabled = true) {
 }
 
 export function useCreateSellerShopMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (payload: CreateSellerShopPayload) => createSellerShop(payload),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: sellerShopQueryKey }),
   });
 }
 
@@ -31,8 +35,8 @@ export function useUpdateSellerShopMutation() {
   return useMutation({
     mutationFn: (payload: UpdateSellerShopPayload) =>
       updateSellerShop(payload),
-    onSuccess: (shop) => {
-      queryClient.setQueryData(sellerShopQueryKey, shop);
+    onSuccess: (shop, payload) => {
+      queryClient.setQueryData(sellerShopQueryKey, { ...shop, ...payload });
     },
   });
 }
