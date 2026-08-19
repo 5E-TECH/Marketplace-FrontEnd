@@ -1,0 +1,12 @@
+.manager, .defaultVariant { grid-column: 1 / -1; margin-top: 4px; padding: 18px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-subtle); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.header h3 { margin: 0 0 4px; color: var(--color-text); font-size: 15px; }
+.header p { margin: 0; color: var(--color-text-muted); font-size: 12px; }
+.actions { display: flex; justify-content: flex-end; }
+.defaultVariant { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.defaultVariant > div { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 8px; }
+.defaultVariant span { grid-column: 2; color: var(--color-text-muted); font-size: 12px; }
+.defaultVariant b { white-space: nowrap; color: var(--color-text); }
+.modalForm { padding-top: 12px; }
+.modalGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 650px) { .header, .defaultVariant { align-items: stretch; flex-direction: column; } .modalGrid { grid-template-columns: 1fr; gap: 0; } }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CircleCheck, PackageCheck, Plus, Star, Store } from 'lucide-react';
+import { CircleCheck, Plus, Store } from 'lucide-react';
 import { App, Button, Form } from 'antd';
 import { useState } from 'react';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
@@ -18,7 +18,7 @@ import {
 } from '../../features/shop/model/shopProfile';
 import { ShopProfileForm } from '../../features/shop/ui/ShopProfileForm';
 import { ShopProfileHero } from '../../features/shop/ui/ShopProfileHero';
-import { CreateShopModal } from '../../features/shop/ui/CreateShopModal';
+import { CreateShopModal, type SellerRegistrationFormValues } from '../../features/shop/ui/CreateShopModal';
 import { useShopMediaDraft } from '../../features/shop/model/useShopMediaDraft';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
@@ -65,23 +65,21 @@ export default function ShopPage() {
     setEditing(false);
   };
 
-  const createProfile = (values: ShopProfileFormValues) => {
+  const createProfile = (values: SellerRegistrationFormValues) => {
     const payload: CreateSellerShopPayload = {
       name: values.name.trim(),
-      description: values.description.trim(),
       phone: values.phone.replace(/\s/g, ''),
-      regionId: values.regionId,
-      districtId: values.districtId,
-      address: values.address.trim(),
-      ...(mediaDraft.preview.logoUrl ? { logoUrl: mediaDraft.preview.logoUrl } : {}),
-      ...(mediaDraft.preview.bannerUrl ? { bannerUrl: mediaDraft.preview.bannerUrl } : {}),
+      password: values.password,
+      shopName: values.shopName.trim(),
+      ...(values.shopDescription?.trim() ? { shopDescription: values.shopDescription.trim() } : {}),
+      ...(values.address?.trim() ? { address: values.address.trim() } : {}),
     };
 
     createShopMutation.mutate(payload, {
       onSuccess: () => {
         setCreateOpen(false);
         mediaDraft.reset();
-        void message.success('Do‘kon muvaffaqiyatli yaratildi');
+        void message.success('Seller va do‘kon muvaffaqiyatli yaratildi');
       },
       onError: (error) => void message.error(getAuthErrorMessage(error)),
     });
@@ -115,8 +113,6 @@ export default function ShopPage() {
         <CreateShopModal
           open={createOpen}
           saving={createShopMutation.isPending}
-          preview={mediaDraft.preview}
-          onImageSelect={mediaDraft.select}
           onCancel={() => {
             setCreateOpen(false);
             mediaDraft.reset();
@@ -130,21 +126,19 @@ export default function ShopPage() {
   if (!profile || !shopQuery.data) return <ContentState state="loading" />;
 
   const saveProfile = (values: ShopProfileFormValues) => {
-    // Upload API ulanganda mediaDraft.files shu yagona save oqimida yuboriladi.
     const payload: UpdateSellerShopPayload = {
       name: values.name.trim(),
       description: values.description.trim(),
       phone: values.phone.replace(/\s/g, ''),
-      regionId: values.regionId,
-      districtId: values.districtId,
+      regionId: values.regionId.trim(),
+      districtId: values.districtId.trim(),
       address: values.address.trim(),
-      ...(mediaDraft.preview.logoUrl ? { logoUrl: mediaDraft.preview.logoUrl } : {}),
-      ...(mediaDraft.preview.bannerUrl ? { bannerUrl: mediaDraft.preview.bannerUrl } : {}),
     };
 
     updateShopMutation.mutate(payload, {
       onSuccess: () => {
         setEditing(false);
+        mediaDraft.reset();
         void message.success('Do‘kon ma’lumotlari saqlandi');
       },
       onError: (error) => void message.error(getAuthErrorMessage(error)),
@@ -164,11 +158,6 @@ export default function ShopPage() {
           status={shopQuery.data.status}
           onImageSelect={mediaDraft.select}
         />
-        <section className={styles.shopStats} aria-label="Do‘kon statistikasi">
-          <div><span><Star /></span><small>Reyting</small><strong>{shopQuery.data.rating.toFixed(1)}</strong></div>
-          <div><span><PackageCheck /></span><small>Buyurtmalar</small><strong>{shopQuery.data.ordersCount}</strong></div>
-          <div><span><CircleCheck /></span><small>Holati</small><strong>{shopQuery.data.status === 'ACTIVE' ? 'Faol' : 'Tekshiruvda'}</strong></div>
-        </section>
         <ShopProfileForm
           form={form}
           initialValues={profile}

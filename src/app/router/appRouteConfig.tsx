@@ -4,6 +4,7 @@ import {
   ClipboardList as ProfileOutlined,
   Headphones as CustomerServiceOutlined,
   Warehouse as HomeOutlined,
+  Boxes,
   Settings as SettingOutlined,
   Store as ShopOutlined,
 } from 'lucide-react';
@@ -22,7 +23,8 @@ export const appRouteConfig: AppRouteMeta[] = [
   { path: '/shop', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main' },
   { path: '/profile', label: 'Mening profilim', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
   { path: '/products', label: 'Mahsulotlar', icon: <AppstoreOutlined />, section: 'main' },
-  { path: '/warehouses', label: 'Sklad', icon: <HomeOutlined />, section: 'main' },
+  { path: '/warehouses', label: 'Omborlar', icon: <HomeOutlined />, section: 'main' },
+  { path: '/stock', label: 'Qoldiq', icon: <Boxes />, section: 'main' },
   { path: '/orders', label: 'Buyurtmalar', icon: <ProfileOutlined />, section: 'main' },
   { path: '/settings', label: 'Sozlamalar', icon: <SettingOutlined />, section: 'utility', showInSidebar: false },
   { path: '/support', label: 'Yordam', icon: <CustomerServiceOutlined />, section: 'utility' },

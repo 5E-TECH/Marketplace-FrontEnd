@@ -71,6 +71,12 @@
   font-size: 10px;
 }
 
+.empty {
+  display: grid;
+  min-height: 280px;
+  place-items: center;
+}
+
 @media (max-width: 575px) {
   .chart {
     height: 190px;

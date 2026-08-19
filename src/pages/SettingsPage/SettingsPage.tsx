@@ -37,7 +37,7 @@ export default function SettingsPage() {
           <Form.Item
             label="Yangi parol"
             name="newPassword"
-            rules={[{ required: true, min: 8, message: 'Kamida 8 ta belgi kiriting' }]}
+            rules={[{ required: true, min: 4, message: 'Kamida 4 ta belgi kiriting' }]}
           >
             <PasswordInput autoComplete="new-password" />
           </Form.Item>

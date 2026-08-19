@@ -19,11 +19,13 @@ export function FilterTabs<Value extends string>({
   onChange,
 }: FilterTabsProps<Value>) {
   return (
-    <nav className={styles.tabs} aria-label={ariaLabel}>
+    <nav className={styles.tabs} aria-label={ariaLabel} role="tablist">
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
+          role="tab"
+          aria-selected={value === option.value}
           className={value === option.value ? styles.active : undefined}
           onClick={() => onChange(option.value)}
         >

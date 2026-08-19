@@ -1,88 +1,39 @@
-import { ArrowUp as ArrowUpOutlined, Ellipsis as MoreOutlined } from 'lucide-react';
-import { Button, Card, Flex, Select, Typography } from 'antd';
+import { Card, Empty, Flex, Typography } from 'antd';
+import type { DashboardSalesPoint } from '../../../../features/dashboard/model/dashboardTypes';
+import { formatMoney } from '../../../../shared/ui/MoneyText/formatMoney';
 import styles from './RevenueChart.module.css';
 
-const points = [
-  [0, 148],
-  [45, 130],
-  [90, 139],
-  [135, 92],
-  [180, 109],
-  [225, 66],
-  [270, 83],
-  [315, 42],
-  [360, 58],
-  [405, 25],
-  [450, 44],
-  [500, 16],
-] as const;
+interface RevenueChartProps { data: DashboardSalesPoint[]; revenue: number }
+const WIDTH = 500;
+const HEIGHT = 180;
+const formatDate = (value: string) => new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'short' }).format(new Date(value));
 
-const linePath = points
-  .map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`)
-  .join(' ');
-const areaPath = `${linePath} L 500 180 L 0 180 Z`;
+export function RevenueChart({ data, revenue }: RevenueChartProps) {
+  const maxAmount = Math.max(...data.map(({ amount }) => amount), 1);
+  const points = data.map(({ amount }, index) => ({
+    x: data.length === 1 ? WIDTH / 2 : (index / (data.length - 1)) * WIDTH,
+    y: HEIGHT - (amount / maxAmount) * (HEIGHT - 16),
+  }));
+  const linePath = points.map(({ x, y }, index) => `${index ? 'L' : 'M'} ${x} ${y}`).join(' ');
+  const areaPath = points.length ? `${linePath} L ${points.at(-1)?.x ?? WIDTH} ${HEIGHT} L ${points[0]?.x ?? 0} ${HEIGHT} Z` : '';
+  const labels = data.filter((_point, index) => index === 0 || index === data.length - 1 || index === Math.floor(data.length / 2));
 
-export function RevenueChart() {
-  return (
-    <Card className={styles.card}>
-      <Flex justify="space-between" align="flex-start" gap={16}>
-        <div>
-          <Typography.Text className={styles.eyebrow}>DAROMAD ANALITIKASI</Typography.Text>
-          <Flex align="baseline" gap={10} wrap>
-            <Typography.Title level={2} className={styles.value}>
-              24 520 000 so‘m
-            </Typography.Title>
-            <span className={styles.growth}><ArrowUpOutlined /> 18.2%</span>
-          </Flex>
-          <Typography.Text type="secondary">
-            O‘tgan oyga nisbatan +3 780 000 so‘m
-          </Typography.Text>
-        </div>
-        <Flex gap={8}>
-          <Select
-            defaultValue="30"
-            className={styles.period}
-            options={[
-              { value: '7', label: '7 kun' },
-              { value: '30', label: '30 kun' },
-              { value: '90', label: '3 oy' },
-            ]}
-          />
-          <Button type="text" icon={<MoreOutlined />} aria-label="Chart amallari" />
-        </Flex>
-      </Flex>
-
+  return <Card className={styles.card}>
+    <Typography.Text className={styles.eyebrow}>DAROMAD ANALITIKASI</Typography.Text>
+    <Typography.Title level={2} className={styles.value}>{formatMoney(revenue)} so‘m</Typography.Title>
+    <Typography.Text type="secondary">Kunlik savdo dinamikasi</Typography.Text>
+    {data.length ? <>
       <div className={styles.chart}>
-        <div className={styles.yAxis}>
-          <span>30M</span><span>20M</span><span>10M</span><span>0</span>
-        </div>
-        <svg
-          viewBox="0 0 500 180"
-          preserveAspectRatio="none"
-          role="img"
-          aria-label="Oxirgi 30 kundagi daromad o‘sish grafigi"
-        >
-          <defs>
-            <linearGradient id="revenue-area" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FB923C" stopOpacity="0.24" />
-              <stop offset="100%" stopColor="#FB923C" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="revenue-line" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#FB923C" />
-              <stop offset="100%" stopColor="#F97316" />
-            </linearGradient>
-          </defs>
-          {[20, 60, 100, 140, 180].map((y) => (
-            <line key={y} x1="0" y1={y} x2="500" y2={y} className={styles.gridLine} />
-          ))}
+        <div className={styles.yAxis}><span>{formatMoney(maxAmount)}</span><span>{formatMoney(Math.round(maxAmount / 2))}</span><span>0</span></div>
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" role="img" aria-label="Kunlik daromad grafigi">
+          <defs><linearGradient id="revenue-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#FB923C" stopOpacity="0.24" /><stop offset="100%" stopColor="#FB923C" stopOpacity="0" /></linearGradient></defs>
+          {[20, 60, 100, 140, 180].map((y) => <line key={y} x1="0" y1={y} x2={WIDTH} y2={y} className={styles.gridLine} />)}
           <path d={areaPath} fill="url(#revenue-area)" />
-          <path d={linePath} fill="none" stroke="url(#revenue-line)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-          <circle cx="500" cy="16" r="5" fill="#151C2F" stroke="#FB923C" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+          <path d={linePath} fill="none" stroke="#FB923C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          {points.map((point, index) => <circle key={`${data[index]?.date}-${index}`} cx={point.x} cy={point.y} r="4" fill="#151C2F" stroke="#FB923C" strokeWidth="2" vectorEffect="non-scaling-stroke" />)}
         </svg>
       </div>
-      <Flex justify="space-between" className={styles.xAxis}>
-        <span>1-iyul</span><span>7-iyul</span><span>14-iyul</span><span>21-iyul</span><span>27-iyul</span>
-      </Flex>
-    </Card>
-  );
+      <Flex justify="space-between" className={styles.xAxis}>{labels.map(({ date }) => <span key={date}>{formatDate(date)}</span>)}</Flex>
+    </> : <div className={styles.empty}><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Savdo ma’lumoti hali mavjud emas" /></div>}
+  </Card>;
 }

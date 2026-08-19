@@ -52,8 +52,28 @@ export async function mockLogout(page: Page): Promise<void> {
   });
 }
 
+export async function mockDashboard(page: Page): Promise<void> {
+  await page.route('**/api/v1/seller/dashboard', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          ordersTotal: 42,
+          revenue: 5_400_000,
+          pendingShipments: 3,
+          delivered: 30,
+          lowStockCount: 5,
+          topProducts: [{ productId: '88', name: 'Telefon', sold: 21 }],
+          salesByDay: [{ date: '2026-07-20', amount: 320_000 }],
+        },
+      }),
+    });
+  });
+}
+
 export async function mockProducts(page: Page): Promise<void> {
-  await page.route('**/api/v1/products/my', async (route) => {
+  await page.route('**/api/v1/products/my**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -67,4 +87,5 @@ export async function installAuthenticatedSession(page: Page): Promise<void> {
   await mockCurrentUser(page);
   await mockLogout(page);
   await mockProducts(page);
+  await mockDashboard(page);
 }
