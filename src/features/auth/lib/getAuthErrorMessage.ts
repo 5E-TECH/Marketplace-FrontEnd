@@ -62,3 +62,18 @@ export function getAuthErrorMessage(error: unknown): string {
 
   return error instanceof Error ? error.message : CONNECTION_ERROR_MESSAGE;
 }
+
+export function getApiFieldErrors(error: unknown): Array<{ name: string; errors: string[] }> {
+  if (!axios.isAxiosError(error)) return [];
+  const data: unknown = error.response?.data as unknown;
+  if (typeof data !== 'object' || data === null || !('details' in data) || !Array.isArray(data.details)) return [];
+
+  const details: unknown[] = data.details;
+  return details.flatMap((detail: unknown) => {
+    if (typeof detail !== 'object' || detail === null) return [];
+    const record = detail as Record<string, unknown>;
+    const field = typeof record.field === 'string' ? record.field.trim() : '';
+    const message = typeof record.error === 'string' ? record.error.trim() : '';
+    return field && message ? [{ name: field, errors: [message] }] : [];
+  });
+}

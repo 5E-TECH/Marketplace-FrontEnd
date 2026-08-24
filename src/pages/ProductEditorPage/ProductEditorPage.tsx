@@ -58,7 +58,7 @@ export default function ProductEditorPage() {
       }
       if (!targetProductId) throw new Error('Mahsulot IDsi olinmadi');
 
-      for (const upload of uploads) {
+      await Promise.all(uploads.map(async (upload) => {
         updateUpload(upload.uid, { status: 'uploading', percent: 1 });
         try {
           const url = await uploadFile(upload.file, targetProductId, upload.isCover, (percent) => {
@@ -69,16 +69,17 @@ export default function ProductEditorPage() {
           updateUpload(upload.uid, { status: 'error', percent: 0 });
           throw error;
         }
-      }
+      }));
 
       const initialVariants = product?.variants ?? [];
       const retainedIds = new Set(variants.flatMap((variant) => variant.id ? [variant.id] : []));
-      for (const variant of initialVariants) {
-        if (variant.id && !retainedIds.has(variant.id)) {
-          await deleteProductVariant(targetProductId, variant.id);
-        }
-      }
-      for (const variant of variants) {
+      const deletedVariantIds = initialVariants.flatMap((variant) =>
+        variant.id && !retainedIds.has(variant.id) ? [variant.id] : [],
+      );
+      await Promise.all(deletedVariantIds.map((variantId) =>
+        deleteProductVariant(targetProductId, variantId),
+      ));
+      await Promise.all(variants.map(async (variant) => {
         const variantPayload = {
           sku: variant.sku,
           name: variant.name || '',
@@ -91,7 +92,7 @@ export default function ProductEditorPage() {
         };
         if (variant.id) await updateProductVariant(targetProductId, variant.id, variantPayload);
         else await createProductVariant(targetProductId, variantPayload);
-      }
+      }));
 
       await queryClient.invalidateQueries({ queryKey: productKeys.mine() });
       void message.success(isEditing ? 'Mahsulot yangilandi' : 'Mahsulot yaratildi');

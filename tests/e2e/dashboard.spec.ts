@@ -35,3 +35,14 @@ test('dashboard bo‘sh ma’lumotda chiroyli empty state ko‘rsatadi', async (
   await expect(page.getByText('Sotuvlar boshlangach top mahsulotlar chiqadi')).toBeVisible();
   await expect(page.getByRole('heading', { name: '0 so‘m', level: 3 })).toBeVisible();
 });
+
+test('desktop viewportga sig‘gan dashboard keraksiz scrollbar chiqarmaydi', async ({ page }) => {
+  await page.setViewportSize({ width: 1365, height: 900 });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+
+  await expect.poll(() => page.evaluate(() => ({
+    horizontal: document.documentElement.scrollWidth - window.innerWidth,
+    vertical: document.documentElement.scrollHeight - window.innerHeight,
+  }))).toEqual({ horizontal: 0, vertical: 0 });
+});

@@ -26,6 +26,15 @@ export interface AuthUser {
   avatarUrl: string | null;
   isActive: boolean;
   isDeleted: boolean;
+  isBlocked: boolean;
+}
+
+export interface UpdateAuthProfilePayload {
+  name?: string;
+  phone?: string;
+  email?: string;
+  avatarUrl?: string;
+  password?: string;
 }
 
 export interface AuthSession extends LoginResponse {

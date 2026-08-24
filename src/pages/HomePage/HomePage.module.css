@@ -1,5 +1,5 @@
 .hero {
-  margin-bottom: var(--space-6);
+  margin-bottom: 18px;
 }
 
 .hero h1 {
@@ -16,7 +16,7 @@
 }
 
 .section {
-  margin-top: var(--space-6);
+  margin-top: 16px;
 }
 
 .panel {
@@ -35,8 +35,12 @@
 }
 
 .panel :global(.ant-card-head) {
-  min-height: 64px;
+  min-height: 56px;
   border-bottom-color: var(--color-border);
+}
+
+.panel :global(.ant-card-body) {
+  padding: 18px 20px;
 }
 
 .panelSubtitle,

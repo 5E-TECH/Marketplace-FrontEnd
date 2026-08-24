@@ -1,16 +1,13 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type { Warehouse, WarehousePayload } from '../model/warehouseTypes';
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
-}
 
 function nullableString(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
 }
 
 function parseWarehouse(value: unknown): Warehouse {
-  const item = unwrap(value);
+  const item = unwrapApiData(value);
   if (typeof item !== 'object' || item === null || !('id' in item) || typeof item.id !== 'string' || !('name' in item) || typeof item.name !== 'string') {
     throw new Error('Ombor serverdan noto‘g‘ri formatda keldi');
   }
@@ -30,7 +27,7 @@ function parseWarehouse(value: unknown): Warehouse {
 
 export async function getWarehouses(signal?: AbortSignal): Promise<Warehouse[]> {
   const { data } = await httpClient.get<unknown>('/inventory/warehouses', { signal });
-  const list = unwrap(data);
+  const list = unwrapApiData(data);
   if (!Array.isArray(list)) throw new Error('Omborlar ro‘yxati noto‘g‘ri formatda keldi');
   return list.map(parseWarehouse);
 }

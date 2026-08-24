@@ -1,7 +1,9 @@
+const moneyFormatter = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 2,
+});
+
 export function formatMoney(value: number | bigint): string {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 2,
-  })
+  return moneyFormatter
     .formatToParts(value)
     .map((part) => {
       if (part.type === 'group') return ' ';

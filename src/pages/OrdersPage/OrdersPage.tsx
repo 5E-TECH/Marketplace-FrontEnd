@@ -1,7 +1,7 @@
 import { Check, Eye, RotateCcw } from 'lucide-react';
 import { App, Button, Descriptions, Drawer, Input, Select, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useDeferredValue, useState } from 'react';
+import { useState } from 'react';
 import type { SellerOrder, SellerOrderStatus } from '../../features/orders/model/orderTypes';
 import { useSellerOrdersQuery, useUpdateSellerOrderStatusMutation } from '../../features/orders/api/orderQueries';
 import { ElchiTimeline } from '../../features/orders/ui/ElchiTimeline/ElchiTimeline';
@@ -14,10 +14,12 @@ import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import styles from './OrdersPage.module.css';
+import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
+import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
+import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 
 type StatusFilter = 'ALL' | SellerOrderStatus;
-const money = new Intl.NumberFormat('uz-UZ');
-const formatMoney = (value: number) => `${money.format(value).replaceAll(',', ' ')} so‘m`;
+const formatPrice = (value: number) => `${formatMoney(value)} so‘m`;
 const formatDate = (value: string) => new Date(value).toLocaleString('uz-UZ', { dateStyle: 'medium', timeStyle: 'short' });
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
   { value: 'ALL', label: 'Barcha holatlar' }, { value: 'NEW', label: 'Yangi' },
@@ -36,7 +38,7 @@ export default function OrdersPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
-  const deferredSearch = useDeferredValue(search.trim());
+  const deferredSearch = useDebouncedValue(search.trim());
   const ordersQuery = useSellerOrdersQuery({
     page, limit: 20,
     ...(deferredSearch ? { search: deferredSearch } : {}),
@@ -53,7 +55,7 @@ export default function OrdersPage() {
     { title: 'Buyurtma', width: 130, render: (_, order) => <span className={styles.orderId}><strong>#{order.salesOrderId}</strong><small>Ichki ID: {order.id}</small></span> },
     { title: 'Xaridor', dataIndex: 'buyerName', render: (name: string | null) => name || <span className={styles.muted}>Noma’lum xaridor</span> },
     { title: 'Tovarlar', dataIndex: 'itemsCount', align: 'center', width: 80, render: (count: number) => `${count} ta` },
-    { title: 'To‘lov', width: 190, render: (_, order) => <span className={styles.amount}><strong>{formatMoney(order.subtotal)}</strong>{order.codAmount > 0 ? <small>COD: {formatMoney(order.codAmount)}</small> : <small>Oldindan to‘langan</small>}</span> },
+    { title: 'To‘lov', width: 190, render: (_, order) => <span className={styles.amount}><strong>{formatPrice(order.subtotal)}</strong>{order.codAmount > 0 ? <small>COD: {formatPrice(order.codAmount)}</small> : <small>Oldindan to‘langan</small>}</span> },
     { title: 'Sana', dataIndex: 'createdAt', width: 150, render: formatDate },
     { title: 'Holati', dataIndex: 'status', width: 140, render: (value: SellerOrderStatus) => <StatusTag status={value} /> },
     { title: '', width: 48, render: (_, order) => <Button type="text" icon={<Eye size={17} />} aria-label={`#${order.salesOrderId} buyurtmani ko‘rish`} onClick={() => { setSelectedOrder(order); setNextStatus(order.status); }} /> },
@@ -70,18 +72,17 @@ export default function OrdersPage() {
       <label className={styles.dateField}><span>Gacha</span><Input className={styles.dateFilter} type="date" aria-label="Tugash sanasi" value={dateTo} min={dateFrom || undefined} onChange={(event) => { setDateTo(event.target.value); resetPage(); }} /></label>
       {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>Tozalash</Button> : null}
     </>} />
-    <section className={styles.tableCard}>
-      <div className={styles.tableHeader}><div><strong>Buyurtmalar ro‘yxati</strong><span>{ordersQuery.data.total} ta natija</span></div></div>
+    <TablePanel className={styles.tableCard} title="Buyurtmalar ro‘yxati" caption={`${ordersQuery.data.total} ta natija`}>
       <DataTable rowKey="id" columns={columns} dataSource={orders} scroll={{ x: 760 }} emptyState={<EmptyState compact title="Buyurtmalar topilmadi" description="Yangi buyurtmalar kelganda shu yerda ko‘rinadi." />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
-    </section>
+    </TablePanel>
     <Drawer title={`Buyurtma #${selectedOrder?.salesOrderId ?? ''}`} width={480} open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>
         <Typography.Text className={styles.drawerCaption}>Buyurtma va yetkazib berish ma’lumotlari</Typography.Text>
         <Descriptions className={styles.details} column={1} bordered size="small">
           <Descriptions.Item label="Xaridor">{selectedOrder.buyerName || 'Noma’lum'}</Descriptions.Item>
           <Descriptions.Item label="Tovarlar">{selectedOrder.itemsCount} ta</Descriptions.Item>
-          <Descriptions.Item label="Summa">{formatMoney(selectedOrder.subtotal)}</Descriptions.Item>
-          <Descriptions.Item label="Yetkazishda undirish">{formatMoney(selectedOrder.codAmount)}</Descriptions.Item>
+          <Descriptions.Item label="Summa">{formatPrice(selectedOrder.subtotal)}</Descriptions.Item>
+          <Descriptions.Item label="Yetkazishda undirish">{formatPrice(selectedOrder.codAmount)}</Descriptions.Item>
           <Descriptions.Item label="Holati"><StatusTag status={selectedOrder.status} /></Descriptions.Item>
         </Descriptions>
         <section className={styles.statusEditor} aria-label="Buyurtma statusini yangilash">

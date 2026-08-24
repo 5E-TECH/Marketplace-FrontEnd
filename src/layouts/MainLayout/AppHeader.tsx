@@ -1,6 +1,7 @@
 import {
-  Bell as BellOutlined,
-  Globe2 as GlobalOutlined,
+  BellRing as NotificationOutlined,
+  ChevronDown,
+  Languages as LanguageOutlined,
   LogOut as LogoutOutlined,
   PanelLeftClose as MenuFoldOutlined,
   PanelLeftOpen as MenuUnfoldOutlined,
@@ -46,17 +47,16 @@ export function AppHeader({
         </Flex>
 
         <Flex className={styles.headerActions} align="center">
-          <Button
-            type="text"
-            className={styles.headerIconButton}
-            icon={<GlobalOutlined />}
-            aria-label="Tilni tanlash"
-          />
-          <Badge dot offset={[-7, 7]}>
+          <Button type="text" className={styles.languageButton} aria-label="Tilni tanlash">
+            <LanguageOutlined />
+            <span>UZ</span>
+            <ChevronDown className={styles.languageChevron} />
+          </Button>
+          <Badge dot className={styles.notificationBadge} offset={[-7, 7]}>
             <Button
               type="text"
-              className={styles.headerIconButton}
-              icon={<BellOutlined />}
+              className={styles.notificationButton}
+              icon={<NotificationOutlined />}
               aria-label="Bildirishnomalar"
             />
           </Badge>

@@ -1,13 +1,14 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type {
   AuthUser,
   AuthSession,
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
+  UpdateAuthProfilePayload,
   UserRole,
 } from '../model/authTypes';
-import { canAccessSellerCabinet } from '../lib/sellerAccess';
 
 interface LoginApiResponse {
   accessToken?: unknown;
@@ -22,12 +23,12 @@ const USER_ROLES: UserRole[] = [
   'SUPERADMIN',
 ];
 
-function isAuthUser(value: unknown): value is AuthUser {
+function parseAuthUser(value: unknown): AuthUser {
   if (typeof value !== 'object' || value === null) {
-    return false;
+    throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
   }
 
-  return (
+  const valid = (
     'id' in value &&
     typeof value.id === 'string' &&
     'role' in value &&
@@ -39,12 +40,27 @@ function isAuthUser(value: unknown): value is AuthUser {
     typeof value.phone === 'string' &&
     'isActive' in value &&
     typeof value.isActive === 'boolean' &&
-    'isDeleted' in value &&
-    typeof value.isDeleted === 'boolean'
+    (!('isDeleted' in value) || typeof value.isDeleted === 'boolean') &&
+    (!('isBlocked' in value) || typeof value.isBlocked === 'boolean')
   );
+
+  if (!valid) throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
+
+  return {
+    id: value.id as string,
+    role: value.role as UserRole,
+    name: value.name as string,
+    phone: value.phone as string,
+    email: 'email' in value && typeof value.email === 'string' ? value.email : null,
+    avatarUrl: 'avatarUrl' in value && typeof value.avatarUrl === 'string' ? value.avatarUrl : null,
+    isActive: value.isActive as boolean,
+    isDeleted: 'isDeleted' in value && typeof value.isDeleted === 'boolean' ? value.isDeleted : false,
+    isBlocked: 'isBlocked' in value && typeof value.isBlocked === 'boolean' ? value.isBlocked : false,
+  };
 }
 
-function parseLoginResponse(data: LoginApiResponse): LoginResponse {
+function parseLoginResponse(value: unknown): LoginResponse {
+  const data = unwrapApiData(value) as LoginApiResponse;
   if (
     typeof data.accessToken !== 'string' ||
     data.accessToken.length === 0 ||
@@ -60,7 +76,7 @@ function parseLoginResponse(data: LoginApiResponse): LoginResponse {
 }
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
-  const { data } = await httpClient.post<LoginApiResponse>('/auth/login', credentials);
+  const { data } = await httpClient.post<unknown>('/auth/login', credentials);
 
   return parseLoginResponse(data);
 }
@@ -88,28 +104,13 @@ export async function getCurrentUser(
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     signal,
   });
-  const unwrapped =
-    typeof data === 'object' && data !== null && 'data' in data ? data.data : data;
+  const unwrapped = unwrapApiData(data);
   const candidate =
     typeof unwrapped === 'object' && unwrapped !== null && 'user' in unwrapped
       ? unwrapped.user
       : unwrapped;
 
-  if (!isAuthUser(candidate)) {
-    throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
-  }
-
-  return {
-    ...candidate,
-    email:
-      'email' in candidate && typeof candidate.email === 'string'
-        ? candidate.email
-        : null,
-    avatarUrl:
-      'avatarUrl' in candidate && typeof candidate.avatarUrl === 'string'
-        ? candidate.avatarUrl
-        : null,
-  };
+  return parseAuthUser(candidate);
 }
 
 export async function authenticate(
@@ -118,11 +119,14 @@ export async function authenticate(
   const authSession = await login(credentials);
   const user = await getCurrentUser(authSession.accessToken);
 
-  if (!canAccessSellerCabinet(user)) {
-    throw new Error('Bu akkaunt orqali seller kabinetiga kirish mumkin emas');
-  }
-
   return { ...authSession, user };
+}
+
+export async function updateAuthProfile(
+  payload: UpdateAuthProfilePayload,
+): Promise<AuthUser> {
+  const { data } = await httpClient.patch<unknown>('/auth/profile', payload);
+  return parseAuthUser(unwrapApiData(data));
 }
 
 export async function logout(): Promise<void> {

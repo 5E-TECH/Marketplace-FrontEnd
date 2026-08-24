@@ -4,7 +4,6 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/store/hooks';
 import { useLogoutMutation } from '../../features/auth/api/useLogoutMutation';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
-import { SellerAccessGuard } from '../../features/auth/ui/SellerAccessGuard/SellerAccessGuard';
 import { AppBreadcrumb } from './AppBreadcrumb';
 import { AppHeader } from './AppHeader';
 import { AppNavigation } from './AppNavigation';
@@ -73,11 +72,9 @@ export default function MainLayout() {
           />
           <Layout.Content className={styles.content}>
             <AppBreadcrumb />
-            <SellerAccessGuard>
-              <Suspense fallback={<PageLoader compact />}>
-                <Outlet />
-              </Suspense>
-            </SellerAccessGuard>
+            <Suspense fallback={<PageLoader compact />}>
+              <Outlet />
+            </Suspense>
           </Layout.Content>
         </Layout>
       </Layout>

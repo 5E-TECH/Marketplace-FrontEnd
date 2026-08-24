@@ -1,0 +1,19 @@
+{
+  "name": "MarketHub Seller",
+  "short_name": "MarketHub",
+  "description": "Marketplace sotuvchilari uchun mahsulot, buyurtma, ombor va savdoni boshqarish platformasi.",
+  "lang": "uz-Latn",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080c16",
+  "theme_color": "#080c16",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

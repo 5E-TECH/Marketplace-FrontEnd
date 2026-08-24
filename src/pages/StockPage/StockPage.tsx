@@ -1,7 +1,7 @@
 import { ArrowDownToLine, SlidersHorizontal } from 'lucide-react';
 import { App, Button, Card, Form, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useDeferredValue, useState } from 'react';
+import { useState } from 'react';
 import { useAdjustStockMutation, useInboundStockMutation, useStockQuery } from '../../features/stock/api/stockQueries';
 import type { StockItem } from '../../features/stock/model/stockTypes';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
@@ -14,6 +14,7 @@ import { NumberControl, TextAreaControl } from '../../shared/ui/FormControls/For
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import styles from './StockPage.module.css';
+import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 
 type StockAction = { type: 'inbound' | 'adjust'; item: StockItem } | null;
 type MutationForm = { amount: number | null; reason: string };
@@ -25,7 +26,7 @@ export default function StockPage() {
   const [page, setPage] = useState(1);
   const [lowOnly, setLowOnly] = useState(false);
   const [action, setAction] = useState<StockAction>(null);
-  const search = useDeferredValue(query.trim());
+  const search = useDebouncedValue(query.trim());
   const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}) });
   const inboundMutation = useInboundStockMutation();
   const adjustMutation = useAdjustStockMutation();

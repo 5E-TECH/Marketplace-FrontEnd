@@ -1,11 +1,8 @@
 import { httpClient } from './httpClient';
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
-}
+import { unwrapApiData } from './apiResponse';
 
 function parseUploadedFileUrl(value: unknown): string {
-  const result = unwrap(value);
+  const result = unwrapApiData(value);
   if (typeof result === 'string' && result.trim()) return result;
   if (typeof result === 'object' && result !== null) {
     const record = result as Record<string, unknown>;

@@ -1,13 +1,11 @@
-.page { width: min(100%, 1120px); margin: 0 auto; }
+.page { width: 100%; min-width: 0; }
 .statusFilter { width: 180px; height: 44px; }
 .statusFilter :global(.ant-select-selector), .dateFilter { background: var(--color-surface-subtle) !important; border-color: var(--color-border) !important; border-radius: var(--radius-sm) !important; }
 .dateField { position: relative; display: block; }
 .dateField > span { position: absolute; z-index: 1; left: 11px; top: -7px; padding: 0 4px; color: var(--color-text-muted); background: var(--color-bg); font-size: 10px; line-height: 14px; }
 .dateFilter { width: 150px; height: 44px; padding-top: 6px; }
-.tableCard { overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; }
-.tableHeader { display: flex; min-height: 60px; padding: 12px 18px; align-items: center; border-bottom: 1px solid var(--color-border); }
-.tableHeader > div, .orderId, .amount { display: grid; gap: 3px; }
-.tableHeader span, .orderId small, .muted, .drawerCaption { color: var(--color-text-muted); font-size: 12px; }
+.orderId, .amount { display: grid; gap: 3px; }
+.orderId small, .muted, .drawerCaption { color: var(--color-text-muted); font-size: 12px; }
 .amount small { color: var(--color-text-muted); font-size: 11px; }
 .tableCard :global(.ant-table-thead > tr > th) { color: var(--color-text-muted); background: #101827; border-bottom-color: var(--color-border); font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .tableCard :global(.ant-table-tbody > tr > td) { height: 64px; border-bottom-color: var(--color-border); }

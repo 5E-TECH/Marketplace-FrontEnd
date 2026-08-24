@@ -1,11 +1,12 @@
 import { App } from 'antd';
+import { Outlet } from 'react-router-dom';
 import { useAppSelector } from '../../../../app/store/hooks';
 import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
 import { selectAuthUser } from '../../model/authSlice';
 import { canAccessSellerCabinet } from '../../lib/sellerAccess';
 import { useLogoutMutation } from '../../api/useLogoutMutation';
 
-export function SellerAccessGuard({ children }: { children: React.ReactNode }) {
+export function SellerAccessGuard({ children }: { children?: React.ReactNode }) {
   const { message } = App.useApp();
   const user = useAppSelector(selectAuthUser);
   const logoutMutation = useLogoutMutation();
@@ -41,5 +42,5 @@ export function SellerAccessGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return children;
+  return children ?? <Outlet />;
 }

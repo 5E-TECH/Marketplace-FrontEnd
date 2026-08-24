@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ProductVariant } from '../../model/productTypes';
 import { NumberControl, TextControl } from '../../../../shared/ui/FormControls/FormControls';
 import styles from './VariantManager.module.css';
+import { formatMoney } from '../../../../shared/ui/MoneyText/formatMoney';
 
 interface VariantManagerProps {
   enabled: boolean;
@@ -13,9 +14,6 @@ interface VariantManagerProps {
 }
 
 type VariantFormValues = ProductVariant;
-
-const money = new Intl.NumberFormat('uz-UZ');
-const formatMoney = (value: number) => money.format(value).replaceAll(',', ' ');
 
 export function VariantManager({ enabled, basePrice, value = [], onChange }: VariantManagerProps) {
   const [form] = Form.useForm<VariantFormValues>();

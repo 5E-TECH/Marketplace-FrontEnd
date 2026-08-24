@@ -9,8 +9,8 @@ interface AppSidebarProps {
 export function AppSidebar({ collapsed }: AppSidebarProps) {
   return (
     <Layout.Sider
-      width={288}
-      collapsedWidth={84}
+      width={264}
+      collapsedWidth={76}
       collapsed={collapsed}
       trigger={null}
       theme="dark"

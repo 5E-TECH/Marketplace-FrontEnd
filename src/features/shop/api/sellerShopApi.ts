@@ -1,4 +1,5 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 
 export type SellerShopStatus =
   | 'PENDING'
@@ -48,10 +49,7 @@ function nullableString(value: unknown): value is string | null {
 }
 
 function parseSellerShop(response: unknown): SellerShop {
-  const candidate =
-    typeof response === 'object' && response !== null && 'data' in response
-      ? response.data
-      : response;
+  const candidate = unwrapApiData(response);
 
   if (
     typeof candidate !== 'object' ||

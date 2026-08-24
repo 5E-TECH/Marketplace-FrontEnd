@@ -30,10 +30,12 @@ export const appRouteConfig: AppRouteMeta[] = [
   { path: '/support', label: 'Yordam', icon: <CustomerServiceOutlined />, section: 'utility' },
 ];
 
+const routesBySpecificity = [...appRouteConfig].sort(
+  (first, second) => second.path.length - first.path.length,
+);
+
 export function findRouteMeta(pathname: string): AppRouteMeta | undefined {
-  return [...appRouteConfig]
-    .sort((first, second) => second.path.length - first.path.length)
-    .find(({ path }) =>
+  return routesBySpecificity.find(({ path }) =>
       path === '/'
         ? pathname === '/'
         : pathname === path || pathname.startsWith(`${path}/`),

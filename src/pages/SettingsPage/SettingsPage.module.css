@@ -5,10 +5,6 @@
   box-shadow: 0 18px 50px rgb(0 0 0 / 12%);
 }
 
-.securityForm {
-  max-width: 560px;
-}
-
 .profileToolbar {
   display: flex;
   align-items: center;
@@ -21,24 +17,6 @@
   margin: 0 0 3px !important;
 }
 
-.profileForm {
-  padding: 20px;
-  background: rgb(255 255 255 / 2%);
-  border: 1px solid #27314a;
-  border-radius: 16px;
-}
-
-.profileForm :global(.ant-input[disabled]),
-.profileForm :global(.ant-input-affix-wrapper-disabled) {
-  color: #e2e8f0;
-  background: rgb(255 255 255 / 2%);
-  cursor: default;
-}
-
-.sessionCard {
-  margin-top: 16px;
-}
-
 @media (max-width: 575px) {
   .profileToolbar {
     align-items: stretch;
@@ -46,15 +24,7 @@
   }
 
   .profileToolbar > :global(.ant-btn),
-  .profileToolbar > :global(.ant-space) {
-    width: 100%;
-  }
-
   .profileToolbar :global(.ant-btn) {
     flex: 1;
-  }
-
-  .profileForm {
-    padding: 14px;
   }
 }

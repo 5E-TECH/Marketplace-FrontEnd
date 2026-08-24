@@ -35,8 +35,8 @@ export function useUpdateSellerShopMutation() {
   return useMutation({
     mutationFn: (payload: UpdateSellerShopPayload) =>
       updateSellerShop(payload),
-    onSuccess: (shop, payload) => {
-      queryClient.setQueryData(sellerShopQueryKey, { ...shop, ...payload });
+    onSuccess: (shop) => {
+      queryClient.setQueryData(sellerShopQueryKey, shop);
     },
   });
 }

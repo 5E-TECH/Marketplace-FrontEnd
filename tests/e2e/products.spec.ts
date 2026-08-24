@@ -102,8 +102,7 @@ test('jadval backenddan kelgan cover rasmni ko‘rsatadi', async ({ page }) => {
 });
 
 test('TC3: delete tasdiqlangach mahsulot ro‘yxatdan yo‘qoladi', async ({ page }) => {
-  await page.getByRole('button', { name: 'Mahsulot 01 amallari' }).click();
-  await page.getByRole('menuitem', { name: 'O‘chirish' }).click();
+  await page.getByRole('button', { name: 'Mahsulot 01 mahsulotini o‘chirish' }).click();
 
   const dialog = page.getByRole('dialog', { name: 'Mahsulot o‘chirilsinmi?' });
   await expect(dialog).toContainText('Mahsulot 01');
@@ -169,8 +168,7 @@ test('product DELETE /products/12 orqali Bearer token bilan o‘chiriladi', asyn
     await route.fulfill({ status: 204 });
   });
 
-  await page.getByRole('button', { name: 'Mahsulot 01 amallari' }).click();
-  await page.getByRole('menuitem', { name: 'O‘chirish' }).click();
+  await page.getByRole('button', { name: 'Mahsulot 01 mahsulotini o‘chirish' }).click();
   await page.getByRole('dialog', { name: 'Mahsulot o‘chirilsinmi?' }).getByRole('button', { name: 'O‘chirish' }).click();
 
   await expect(page.getByText('Mahsulot o‘chirildi')).toBeVisible();

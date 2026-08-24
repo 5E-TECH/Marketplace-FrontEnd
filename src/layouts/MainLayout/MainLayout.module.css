@@ -36,7 +36,7 @@
 .sidebarBrand {
   position: relative;
   display: flex;
-  height: 88px;
+  height: 76px;
   padding: var(--space-4) var(--space-6);
   overflow: hidden;
   align-items: center;
@@ -58,9 +58,9 @@
 .sidebarLogo {
   z-index: 1;
   display: grid;
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   color: #111827;
   font-family: Georgia, serif;
   font-size: 16px;
@@ -92,7 +92,7 @@
 }
 
 :global(.ant-layout-sider-collapsed) .sidebarBrand {
-  padding-inline: 23px;
+  padding-inline: 17px;
 }
 
 :global(.ant-layout-sider-collapsed) .sidebarBrandText {
@@ -107,14 +107,14 @@
 }
 
 :global(.app-navigation .ant-menu-item) {
-  height: 52px;
+  height: 48px;
   margin: var(--space-1) 0;
   padding-inline: var(--space-4) !important;
   color: #91a0be !important;
   border-radius: var(--radius-sm);
   font-size: 15px;
   font-weight: 600;
-  line-height: 52px;
+  line-height: 48px;
   transition:
     color 160ms ease,
     background-color 160ms ease;
@@ -171,9 +171,9 @@
   position: sticky;
   z-index: 15;
   top: 0;
-  height: 68px;
+  height: 72px;
   padding-inline: var(--space-8);
-  background: rgb(10 16 29 / 94%);
+  background: rgb(8 12 22 / 88%);
   border-bottom: 1px solid var(--color-border);
   box-shadow: 0 8px 28px rgb(0 0 0 / 12%);
   backdrop-filter: blur(20px);
@@ -199,38 +199,82 @@
 }
 
 .headerActions {
-  height: 44px;
-  padding: var(--space-1);
-  background: rgb(17 24 39 / 62%);
-  border: 1px solid rgb(39 49 74 / 72%);
-  border-radius: var(--radius-md);
+  min-width: 0;
+  padding: 3px;
+  background: rgb(17 24 39 / 38%);
+  border: 1px solid rgb(255 255 255 / 6%);
+  border-radius: 12px;
   flex: 0 0 auto;
-  gap: var(--space-1);
+  gap: 3px;
 }
 
-.headerIconButton,
+.languageButton,
+.notificationButton,
 .logoutButton {
-  width: 36px;
   height: 36px;
-  padding: 0;
   color: var(--color-text-secondary);
-  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
   transition:
     color 160ms ease,
-    background-color 160ms ease;
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
-.headerIconButton svg,
+.languageButton {
+  display: inline-flex;
+  width: auto;
+  padding-inline: 10px 8px;
+  align-items: center;
+  gap: 7px;
+}
+
+.languageButton span {
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.notificationButton,
+.logoutButton {
+  width: 36px;
+  padding: 0;
+}
+
+.languageButton svg,
+.notificationButton svg,
 .logoutButton svg {
   width: 17px;
   height: 17px;
   stroke-width: 1.8;
 }
 
-.headerIconButton:hover,
+.languageButton .languageChevron {
+  width: 13px;
+  height: 13px;
+  color: var(--color-text-muted);
+}
+
+.languageButton:hover,
+.notificationButton:hover,
 .logoutButton:hover {
   color: var(--color-accent) !important;
-  background: rgb(245 158 11 / 10%) !important;
+  background: rgb(245 158 11 / 8%) !important;
+  border-color: rgb(245 158 11 / 18%) !important;
+}
+
+.notificationButton {
+  position: relative;
+}
+
+.notificationBadge :global(.ant-badge-dot) {
+  width: 7px;
+  min-width: 7px;
+  height: 7px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-surface-subtle);
 }
 
 .headerDivider {
@@ -301,7 +345,7 @@
   width: 100%;
   max-width: 1600px;
   margin-inline: auto;
-  padding: var(--space-8) var(--space-8) var(--space-12);
+  padding: 24px clamp(20px, 3vw, 44px) 20px;
   background: var(--color-bg);
 }
 
@@ -325,13 +369,18 @@
   }
 
   .content {
-    padding: var(--space-6) var(--space-4) var(--space-8);
+    padding: var(--space-5) var(--space-4);
   }
 }
 
 @media (max-width: 767px) {
+  .header {
+    height: 64px;
+    padding-inline: var(--space-3);
+  }
+
   .content {
-    padding: var(--space-4) var(--space-3) var(--space-6);
+    padding: var(--space-4) var(--space-3);
   }
 
   .globalSearch {
@@ -339,15 +388,32 @@
   }
 
   .headerActions {
+    height: 40px;
     gap: 0;
   }
 
-  .headerIconButton,
+  .languageButton,
+  .notificationButton,
   .headerDivider,
   .accountText,
   .accountSummary {
     min-width: auto;
     padding: var(--space-1);
+  }
+
+  .headerDivider {
+    display: none;
+  }
+
+  .languageButton {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .languageButton span,
+  .languageChevron {
+    display: none;
   }
 }
 

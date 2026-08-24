@@ -1,11 +1,8 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type { SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
-}
 
 function numberField(record: Record<string, unknown>, key: string): number {
   const value = record[key];
@@ -38,7 +35,7 @@ function parseOrder(value: unknown): SellerOrder {
 
 export async function getSellerOrders(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
   const { data } = await httpClient.get<unknown>('/seller/orders', { signal, params });
-  const value = unwrap(data);
+  const value = unwrapApiData(data);
   if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error('Buyurtmalar ro‘yxati noto‘g‘ri formatda');
   const page = value as Record<string, unknown>;
   return {

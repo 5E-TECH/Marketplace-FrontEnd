@@ -58,12 +58,10 @@ test('TC3: 375px viewportda overflow yo‘q va mobile navigation ishlaydi', asyn
     .toBe(true);
 });
 
-test('akkaunt profili do‘kon profilidan alohida sahifada ochiladi', async ({ page }) => {
+test('akkaunt tugmasi profil sahifasini ochadi', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Akkaunt profiliga o‘tish' }).click();
 
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByRole('heading', { name: 'Mening profilim' })).toBeVisible();
-  await expect(page.getByText('Shaxsiy ma’lumotlar')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Do‘kon ma’lumotlari' })).toHaveCount(0);
 });

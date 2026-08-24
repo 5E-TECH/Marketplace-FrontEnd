@@ -1,46 +1,37 @@
-import { Car as CarOutlined, CircleCheck as CheckCircleOutlined, MapPin as EnvironmentOutlined } from 'lucide-react';
-import { Card, Col, Row, Steps, Table, Typography } from 'antd';
+import { Card, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { orders } from '../../features/seller/model/sellerData';
-import type { Order } from '../../features/seller/model/sellerTypes';
+import { useSellerOrdersQuery } from '../../features/orders/api/orderQueries';
+import type { SellerOrder } from '../../features/orders/model/orderTypes';
+import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { ContentState } from '../../shared/ui/ContentState/ContentState';
+
+const DELIVERY_STATUSES = new Set(['SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED']);
 
 export default function DeliveryPage() {
-  const deliveryOrders = orders.filter(({ status }) =>
-    ['PROCESSING', 'SHIPPED', 'DELIVERED'].includes(status),
+  const ordersQuery = useSellerOrdersQuery({ page: 1, limit: 100 });
+  const deliveryOrders = (ordersQuery.data?.items ?? []).filter(({ status }) =>
+    DELIVERY_STATUSES.has(status),
   );
-  const columns: ColumnsType<Order> = [
-    { title: 'Buyurtma', dataIndex: 'id' },
-    { title: 'Qabul qiluvchi', dataIndex: 'customer' },
-    { title: 'Telefon', dataIndex: 'phone' },
-    { title: 'Holati', dataIndex: 'status', render: (value: Order['status']) => <StatusTag status={value} /> },
+  const columns: ColumnsType<SellerOrder> = [
+    { title: 'Buyurtma', render: (_, order) => `#${order.salesOrderId}` },
+    { title: 'Qabul qiluvchi', dataIndex: 'buyerName', render: (name: string | null) => name || 'Noma’lum' },
+    { title: 'Tovarlar', dataIndex: 'itemsCount', render: (count: number) => `${count} ta` },
+    { title: 'Jo‘natma ID', dataIndex: 'elchiShipmentId', render: (id: string | null) => id || '—' },
+    { title: 'Holati', dataIndex: 'status', render: (value: SellerOrder['status']) => <StatusTag status={value} /> },
   ];
+
+  if (ordersQuery.isPending) return <ContentState state="loading" />;
+  if (ordersQuery.isError) return <ContentState state="error" title="Jo‘natmalarni yuklab bo‘lmadi" description={getAuthErrorMessage(ordersQuery.error)} onAction={() => void ordersQuery.refetch()} />;
 
   return (
     <>
       <PageHeader title="Yetkazib berish" description="Jo‘natmalar va yetkazish jarayonini kuzating" />
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={9}>
-          <Card title="Yetkazish jarayoni">
-            <Steps
-              direction="vertical"
-              current={1}
-              items={[
-                { title: 'Buyurtma tayyor', description: 'Omborda qadoqlandi', icon: <CheckCircleOutlined /> },
-                { title: 'Kuryer yo‘lda', description: 'Taxminiy vaqt: 35 daqiqa', icon: <CarOutlined /> },
-                { title: 'Yetkaziladi', description: 'Mijoz manzili', icon: <EnvironmentOutlined /> },
-              ]}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={15}>
-          <Card title="Faol jo‘natmalar">
-            <Table rowKey="id" columns={columns} dataSource={deliveryOrders} pagination={{ pageSize: 20, showSizeChanger: false }} scroll={{ x: 600 }} />
-            <Typography.Text type="secondary">Yetkazish ma’lumotlari buyurtma holati yangilanganda avtomatik o‘zgaradi.</Typography.Text>
-          </Card>
-        </Col>
-      </Row>
+      <Card title="Jo‘natmalar">
+        <Table rowKey="id" columns={columns} dataSource={deliveryOrders} pagination={{ pageSize: 20, showSizeChanger: false }} scroll={{ x: 720 }} locale={{ emptyText: 'Jo‘natmalar topilmadi' }} />
+        <Typography.Text type="secondary">Ma’lumotlar seller buyurtmalari API’idan olinadi.</Typography.Text>
+      </Card>
     </>
   );
 }
