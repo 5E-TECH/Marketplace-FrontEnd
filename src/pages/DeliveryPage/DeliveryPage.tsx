@@ -1,4 +1,4 @@
-import { Card, Table, Typography } from 'antd';
+import { Card, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useSellerOrdersQuery } from '../../features/orders/api/orderQueries';
 import type { SellerOrder } from '../../features/orders/model/orderTypes';
@@ -6,6 +6,8 @@ import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
+import { DataTable } from '../../shared/ui/DataTable/DataTable';
+import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 
 const DELIVERY_STATUSES = new Set(['SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED']);
 
@@ -16,9 +18,9 @@ export default function DeliveryPage() {
   );
   const columns: ColumnsType<SellerOrder> = [
     { title: 'Buyurtma', render: (_, order) => `#${order.salesOrderId}` },
-    { title: 'Qabul qiluvchi', dataIndex: 'buyerName', render: (name: string | null) => name || 'Noma’lum' },
-    { title: 'Tovarlar', dataIndex: 'itemsCount', render: (count: number) => `${count} ta` },
-    { title: 'Jo‘natma ID', dataIndex: 'elchiShipmentId', render: (id: string | null) => id || '—' },
+    { title: 'Qabul qiluvchi', dataIndex: 'buyerName', responsive: ['sm'], render: (name: string | null) => name || 'Noma’lum' },
+    { title: 'Tovarlar', dataIndex: 'itemsCount', responsive: ['md'], render: (count: number) => `${count} ta` },
+    { title: 'Jo‘natma ID', dataIndex: 'elchiShipmentId', responsive: ['lg'], render: (id: string | null) => id || '—' },
     { title: 'Holati', dataIndex: 'status', render: (value: SellerOrder['status']) => <StatusTag status={value} /> },
   ];
 
@@ -29,7 +31,7 @@ export default function DeliveryPage() {
     <>
       <PageHeader title="Yetkazib berish" description="Jo‘natmalar va yetkazish jarayonini kuzating" />
       <Card title="Jo‘natmalar">
-        <Table rowKey="id" columns={columns} dataSource={deliveryOrders} pagination={{ pageSize: 20, showSizeChanger: false }} scroll={{ x: 720 }} locale={{ emptyText: 'Jo‘natmalar topilmadi' }} />
+        <DataTable rowKey="id" columns={columns} dataSource={deliveryOrders} pagination={{ pageSize: 20, showSizeChanger: false }} emptyState={<EmptyState compact title="Jo‘natmalar topilmadi" description="" />} />
         <Typography.Text type="secondary">Ma’lumotlar seller buyurtmalari API’idan olinadi.</Typography.Text>
       </Card>
     </>

@@ -1,10 +1,12 @@
-import { Button, Empty, Form, Modal, Popconfirm, Switch, Table, Tag } from 'antd';
+import { Button, Form, Modal, Popconfirm, Switch, Tag } from 'antd';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import type { ProductVariant } from '../../model/productTypes';
 import { NumberControl, TextControl } from '../../../../shared/ui/FormControls/FormControls';
 import styles from './VariantManager.module.css';
 import { formatMoney } from '../../../../shared/ui/MoneyText/formatMoney';
+import { DataTable } from '../../../../shared/ui/DataTable/DataTable';
+import { EmptyState } from '../../../../shared/ui/EmptyState/EmptyState';
 
 interface VariantManagerProps {
   enabled: boolean;
@@ -77,16 +79,16 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
         <Button type="primary" icon={<Plus size={16} />} onClick={addVariant}>Variant qo‘shish</Button>
       </div>
 
-      <Table<ProductVariant>
+      <DataTable<ProductVariant>
         rowKey={(variant) => `${variant.sku}-${variant.name}`}
         dataSource={value}
         pagination={false}
-        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Hali variant qo‘shilmagan" /> }}
+        emptyState={<EmptyState compact title="Hali variant qo‘shilmagan" description="" />}
         columns={[
           { title: 'Variant', dataIndex: 'name' },
-          { title: 'SKU', dataIndex: 'sku', render: (sku: string) => <code>{sku}</code> },
+          { title: 'SKU', dataIndex: 'sku', responsive: ['sm'], render: (sku: string) => <code>{sku}</code> },
           { title: 'Narx', dataIndex: 'price', align: 'right', render: (price: number | null) => price === null ? 'Asosiy narx' : `${formatMoney(price)} so‘m` },
-          { title: 'Holati', dataIndex: 'isActive', align: 'center', render: (active: boolean) => <Tag color={active ? 'success' : 'default'}>{active ? 'Faol' : 'Nofaol'}</Tag> },
+          { title: 'Holati', dataIndex: 'isActive', align: 'center', responsive: ['md'], render: (active: boolean) => <Tag color={active ? 'success' : 'default'}>{active ? 'Faol' : 'Nofaol'}</Tag> },
           {
             title: '', width: 92, align: 'right',
             render: (_value, variant, index) => (

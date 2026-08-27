@@ -11,6 +11,7 @@ import { productKeys } from '../../features/products/api/productQueries';
 import { uploadFile } from '../../shared/api/fileApi';
 import { createProductVariant, deleteProductVariant, updateProductVariant } from '../../features/products/api/productVariantApi';
 import styles from './ProductEditorPage.module.css';
+import { BackButton } from '../../shared/ui/BackButton/BackButton';
 
 const emptyProduct: ProductFormValues = {
   name: '', categoryId: '', description: '', price: null, oldPrice: null,
@@ -112,6 +113,7 @@ export default function ProductEditorPage() {
   return (
     <main className={styles.page}>
       <PageHeader
+        before={<BackButton fallback="/products" disabled={saving} />}
         title={isEditing ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}
         description={isEditing ? 'Mahsulot ma’lumotlari va variantlarini yangilang.' : 'Katalog uchun yangi mahsulot ma’lumotlarini kiriting.'}
       />

@@ -1,0 +1,44 @@
+.page :global(.ant-table-wrapper),
+.page :global(.ant-table),
+.page :global(.ant-table-container) {
+  background: transparent;
+}
+
+.addButton,
+.filter {
+  color: var(--color-text);
+  background: rgb(255 255 255 / 4%) !important;
+  border-color: rgb(255 255 255 / 10%) !important;
+  box-shadow: none;
+}
+
+.addButton:hover {
+  color: var(--color-accent) !important;
+  background: rgb(245 158 11 / 9%) !important;
+  border-color: rgb(245 158 11 / 28%) !important;
+}
+
+.page :global(.ant-table-tbody > tr > td) {
+  background: rgb(15 23 42 / 22%);
+}
+
+.page :global(.ant-table-tbody > tr:hover > td) {
+  background: rgb(255 255 255 / 4%) !important;
+}
+
+.rowActions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.rowActions :global(.ant-btn) {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  flex: 0 0 36px;
+}

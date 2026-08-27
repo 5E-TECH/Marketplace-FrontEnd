@@ -7,27 +7,31 @@ import {
   Boxes,
   Settings as SettingOutlined,
   Store as ShopOutlined,
+  UserRoundCog,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import type { TranslationKey } from '../../shared/i18n/translations';
 
 export interface AppRouteMeta {
   path: string;
-  label: string;
+  label: TranslationKey;
   icon: ReactNode;
   section: 'main' | 'utility';
   showInSidebar?: boolean;
 }
 
 export const appRouteConfig: AppRouteMeta[] = [
-  { path: '/', label: 'Bosh sahifa', icon: <BarChartOutlined />, section: 'main' },
-  { path: '/shop', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main' },
-  { path: '/profile', label: 'Mening profilim', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
-  { path: '/products', label: 'Mahsulotlar', icon: <AppstoreOutlined />, section: 'main' },
-  { path: '/warehouses', label: 'Omborlar', icon: <HomeOutlined />, section: 'main' },
-  { path: '/stock', label: 'Qoldiq', icon: <Boxes />, section: 'main' },
-  { path: '/orders', label: 'Buyurtmalar', icon: <ProfileOutlined />, section: 'main' },
-  { path: '/settings', label: 'Sozlamalar', icon: <SettingOutlined />, section: 'utility', showInSidebar: false },
-  { path: '/support', label: 'Yordam', icon: <CustomerServiceOutlined />, section: 'utility' },
+  { path: '/', label: 'nav.home', icon: <BarChartOutlined />, section: 'main' },
+  { path: '/users', label: 'nav.users', icon: <UserRoundCog />, section: 'main' },
+  { path: '/shop', label: 'nav.shop', icon: <ShopOutlined />, section: 'main' },
+  { path: '/products', label: 'nav.products', icon: <AppstoreOutlined />, section: 'main' },
+  { path: '/warehouses', label: 'nav.warehouses', icon: <HomeOutlined />, section: 'main' },
+  { path: '/stock', label: 'nav.stock', icon: <Boxes />, section: 'main' },
+  { path: '/orders', label: 'nav.orders', icon: <ProfileOutlined />, section: 'main' },
+  { path: '/delivery', label: 'nav.delivery', icon: <ProfileOutlined />, section: 'main', showInSidebar: false },
+  { path: '/profile', label: 'nav.profile', icon: <ShopOutlined />, section: 'main', showInSidebar: false },
+  { path: '/settings', label: 'nav.settings', icon: <SettingOutlined />, section: 'utility', showInSidebar: false },
+  { path: '/support', label: 'nav.support', icon: <CustomerServiceOutlined />, section: 'utility' },
 ];
 
 const routesBySpecificity = [...appRouteConfig].sort(

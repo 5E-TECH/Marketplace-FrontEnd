@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
+import { Plus, Save, Trash2 } from 'lucide-react';
 import { App, Button, Form, Switch } from 'antd';
 import type { FormInstance, UploadFile } from 'antd';
 import { useMemo, useState } from 'react';
@@ -227,7 +227,7 @@ export function ProductForm({
       </div>
 
       <div className={styles.actions}>
-        <Button icon={<ArrowLeft />} onClick={onCancel}>Bekor qilish</Button>
+        <Button onClick={onCancel}>Bekor qilish</Button>
         <Button type="primary" htmlType="submit" icon={<Save />} loading={submitting} disabled={images.some((file) => file.status === 'uploading')}>{submitLabel}</Button>
       </div>
     </Form>

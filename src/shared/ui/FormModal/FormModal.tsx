@@ -2,6 +2,7 @@ import { Form, Modal } from 'antd';
 import type { FormInstance } from 'antd';
 import type { ReactNode } from 'react';
 import styles from './FormModal.module.css';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface FormModalProps<Values extends object> {
   className?: string;
@@ -26,14 +27,15 @@ export function FormModal<Values extends object>({
   form,
   children,
   initialValues,
-  submitText = 'Saqlash',
-  cancelText = 'Bekor',
+  submitText,
+  cancelText,
   loading = false,
   resetOnClose = true,
   scrollToFirstError = { focus: true },
   onSubmit,
   onCancel,
 }: FormModalProps<Values>) {
+  const { t } = useTranslation();
   const close = () => {
     if (!loading) onCancel();
   };
@@ -44,8 +46,8 @@ export function FormModal<Values extends object>({
       rootClassName={styles.modal}
       open={open}
       title={title}
-      okText={submitText}
-      cancelText={cancelText}
+      okText={submitText ?? t('common.save')}
+      cancelText={cancelText ?? t('common.cancel')}
       confirmLoading={loading}
       closable={!loading}
       maskClosable={!loading}

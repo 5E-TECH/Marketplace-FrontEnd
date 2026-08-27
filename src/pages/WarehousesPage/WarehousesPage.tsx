@@ -8,6 +8,7 @@ import { WarehouseTable } from '../../features/warehouses/ui/WarehouseTable';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 
 function toPayload(values: WarehouseFormValues): WarehousePayload {
   return {
@@ -21,6 +22,7 @@ function toPayload(values: WarehouseFormValues): WarehousePayload {
 
 export default function WarehousesPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [form] = Form.useForm<WarehouseFormValues>();
   const [createOpen, setCreateOpen] = useState(false);
   const warehousesQuery = useWarehousesQuery();
@@ -46,7 +48,7 @@ export default function WarehousesPage() {
   if (warehousesQuery.isError) return <ContentState state="error" title="Omborlarni yuklab bo‘lmadi" description={getAuthErrorMessage(warehousesQuery.error)} onAction={() => void warehousesQuery.refetch()} />;
 
   return <main>
-    <PageHeader title="Omborlar" description="Mahsulot qoldiqlarini omborlar bo‘yicha boshqaring" extra={<Button type="primary" icon={<Plus />} onClick={() => setCreateOpen(true)}>Ombor qo‘shish</Button>} />
+    <PageHeader title={t('warehouse.title')} description={t('warehouse.description')} extra={<Button type="primary" icon={<Plus />} onClick={() => setCreateOpen(true)}>{t('warehouse.add')}</Button>} />
     <WarehouseTable warehouses={warehousesQuery.data} changingDefaultId={defaultMutation.isPending ? defaultMutation.variables : undefined} onMakeDefault={makeDefault} />
     <WarehouseFormModal open={createOpen} loading={createMutation.isPending} makeDefaultInitially={warehousesQuery.data.length === 0} form={form} onCancel={() => setCreateOpen(false)} onSubmit={create} />
   </main>;

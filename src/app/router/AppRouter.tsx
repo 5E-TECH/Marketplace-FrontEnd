@@ -6,6 +6,7 @@ import { PublicOnlyRoute } from '../../features/auth/ui/PublicOnlyRoute/PublicOn
 import { routeImports } from './routePreload';
 import { SeoManager } from '../../shared/seo/SeoManager';
 import { SellerAccessGuard } from '../../features/auth/ui/SellerAccessGuard/SellerAccessGuard';
+import { SellerOnlyRoute } from '../../features/auth/ui/SellerOnlyRoute/SellerOnlyRoute';
 
 const MainLayout = lazy(() => import('../../layouts/MainLayout/MainLayout'));
 const HomePage = lazy(routeImports.home);
@@ -22,6 +23,8 @@ const OrdersPage = lazy(routeImports.orders);
 const DeliveryPage = lazy(routeImports.delivery);
 const SettingsPage = lazy(routeImports.settings);
 const SupportPage = lazy(routeImports.support);
+const UsersPage = lazy(routeImports.users);
+const UserEditorPage = lazy(routeImports.userEditor);
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
   : null;
@@ -54,6 +57,10 @@ export function AppRouter() {
                 <Route path="stock" element={<StockPage />} />
                 <Route path="orders" element={<OrdersPage />} />
                 <Route path="delivery" element={<DeliveryPage />} />
+                <Route element={<SellerOnlyRoute />}>
+                  <Route path="users" element={<UsersPage />} />
+                  <Route path="users/new" element={<UserEditorPage />} />
+                </Route>
                 <Route path="shop" element={<ShopPage />} />
               </Route>
             </Route>

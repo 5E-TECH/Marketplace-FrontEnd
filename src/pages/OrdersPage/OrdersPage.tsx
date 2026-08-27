@@ -53,10 +53,10 @@ export default function OrdersPage() {
   const resetFilters = () => { setSearch(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); };
   const columns: ColumnsType<SellerOrder> = [
     { title: 'Buyurtma', width: 130, render: (_, order) => <span className={styles.orderId}><strong>#{order.salesOrderId}</strong><small>Ichki ID: {order.id}</small></span> },
-    { title: 'Xaridor', dataIndex: 'buyerName', render: (name: string | null) => name || <span className={styles.muted}>Noma’lum xaridor</span> },
-    { title: 'Tovarlar', dataIndex: 'itemsCount', align: 'center', width: 80, render: (count: number) => `${count} ta` },
-    { title: 'To‘lov', width: 190, render: (_, order) => <span className={styles.amount}><strong>{formatPrice(order.subtotal)}</strong>{order.codAmount > 0 ? <small>COD: {formatPrice(order.codAmount)}</small> : <small>Oldindan to‘langan</small>}</span> },
-    { title: 'Sana', dataIndex: 'createdAt', width: 150, render: formatDate },
+    { title: 'Xaridor', dataIndex: 'buyerName', responsive: ['md'], render: (name: string | null) => name || <span className={styles.muted}>Noma’lum xaridor</span> },
+    { title: 'Tovarlar', dataIndex: 'itemsCount', align: 'center', width: 80, responsive: ['lg'], render: (count: number) => `${count} ta` },
+    { title: 'To‘lov', width: 190, responsive: ['sm'], render: (_, order) => <span className={styles.amount}><strong>{formatPrice(order.subtotal)}</strong>{order.codAmount > 0 ? <small>COD: {formatPrice(order.codAmount)}</small> : <small>Oldindan to‘langan</small>}</span> },
+    { title: 'Sana', dataIndex: 'createdAt', width: 150, responsive: ['xl'], render: formatDate },
     { title: 'Holati', dataIndex: 'status', width: 140, render: (value: SellerOrderStatus) => <StatusTag status={value} /> },
     { title: '', width: 48, render: (_, order) => <Button type="text" icon={<Eye size={17} />} aria-label={`#${order.salesOrderId} buyurtmani ko‘rish`} onClick={() => { setSelectedOrder(order); setNextStatus(order.status); }} /> },
   ];
@@ -73,7 +73,7 @@ export default function OrdersPage() {
       {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>Tozalash</Button> : null}
     </>} />
     <TablePanel className={styles.tableCard} title="Buyurtmalar ro‘yxati" caption={`${ordersQuery.data.total} ta natija`}>
-      <DataTable rowKey="id" columns={columns} dataSource={orders} scroll={{ x: 760 }} emptyState={<EmptyState compact title="Buyurtmalar topilmadi" description="Yangi buyurtmalar kelganda shu yerda ko‘rinadi." />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+      <DataTable rowKey="id" columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title="Buyurtmalar topilmadi" description="Yangi buyurtmalar kelganda shu yerda ko‘rinadi." />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
     </TablePanel>
     <Drawer title={`Buyurtma #${selectedOrder?.salesOrderId ?? ''}`} width={480} open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>

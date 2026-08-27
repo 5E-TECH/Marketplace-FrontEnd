@@ -10,6 +10,8 @@ export const routeImports = {
   delivery: () => import('../../pages/DeliveryPage/DeliveryPage'),
   settings: () => import('../../pages/SettingsPage/SettingsPage'),
   support: () => import('../../pages/SupportPage/SupportPage'),
+  users: () => import('../../pages/UsersPage/UsersPage'),
+  userEditor: () => import('../../pages/UserEditorPage/UserEditorPage'),
 };
 
 export const routePreloaders: Array<[
@@ -27,6 +29,8 @@ export const routePreloaders: Array<[
   ['/profile', routeImports.profile],
   ['/settings', routeImports.settings],
   ['/support', routeImports.support],
+  ['/users/new', routeImports.userEditor],
+  ['/users', routeImports.users],
   ['/', routeImports.home],
 ];
 

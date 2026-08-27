@@ -20,13 +20,12 @@ interface ProfileFormValues {
   name: string;
   phone: string;
   email?: string;
-  avatarUrl?: string;
   password?: string;
   confirmPassword?: string;
 }
 
 const EDITABLE_FIELDS = new Set<keyof ProfileFormValues>([
-  'name', 'phone', 'email', 'avatarUrl', 'password', 'confirmPassword',
+  'name', 'phone', 'email', 'password', 'confirmPassword',
 ]);
 const normalizedOptional = (value?: string | null) => value?.trim() || '';
 
@@ -48,7 +47,6 @@ export default function ProfilePage() {
     name: user.name,
     phone: user.phone,
     email: user.email ?? '',
-    avatarUrl: user.avatarUrl ?? '',
     password: '',
     confirmPassword: '',
   };
@@ -58,12 +56,12 @@ export default function ProfilePage() {
     const name = values.name.trim();
     const phone = values.phone.replace(/\s/g, '');
     const email = normalizedOptional(values.email);
-    const avatarUrl = normalizedOptional(values.avatarUrl);
     if (name !== user.name) payload.name = name;
     if (phone !== user.phone) payload.phone = phone;
     if (email && email !== normalizedOptional(user.email)) payload.email = email;
-    if (avatarUrl && avatarUrl !== normalizedOptional(user.avatarUrl)) payload.avatarUrl = avatarUrl;
-    if (values.password) payload.password = values.password;
+    // Backend DTO bo‘sh/whitespace parolni `undefined`ga aylantiradi.
+    // Uni umuman yubormaslik frontend kontraktini ham shu xulqqa moslaydi.
+    if (values.password?.trim()) payload.password = values.password;
     return payload;
   };
 
@@ -115,10 +113,9 @@ export default function ProfilePage() {
       </dl>
     </section>
     <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
-      <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { max: 100 }]}><TextControl autoComplete="name" /></Form.Item>
+      <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { min: 1 }, { max: 255, message: 'Ism 255 belgidan oshmasligi kerak' }]}><TextControl autoComplete="name" maxLength={255} /></Form.Item>
       <Form.Item label="Telefon" name="phone" rules={[{ required: true, message: 'Telefon raqamini kiriting' }, { pattern: /^\+998\d{9}$/, message: '+998901234567 formatida kiriting' }]}><TextControl autoComplete="tel" placeholder="+998901234567" /></Form.Item>
-      <Form.Item label="Email" name="email" rules={[{ type: 'email', message: 'Email manzilini to‘g‘ri kiriting' }, { max: 120 }]}><TextControl autoComplete="email" placeholder="ali@example.com" /></Form.Item>
-      <Form.Item label="Avatar URL" name="avatarUrl" rules={[{ type: 'url', message: 'To‘g‘ri URL kiriting' }, { max: 2048 }]}><TextControl autoComplete="url" placeholder="https://cdn.example.com/avatar.jpg" /></Form.Item>
+      <Form.Item label="Email" name="email" rules={[{ type: 'email', message: 'Email manzilini to‘g‘ri kiriting' }, { max: 255, message: 'Email 255 belgidan oshmasligi kerak' }]}><TextControl autoComplete="email" placeholder="ali@example.com" maxLength={255} /></Form.Item>
       <div className={styles.passwordHeading}><LockKeyhole /><div><strong>Yangi parol</strong><span>Ixtiyoriy — o‘zgartirmasangiz bo‘sh qoldiring</span></div></div>
       <Form.Item label="Yangi parol" name="password" dependencies={['confirmPassword']} rules={[{ min: 4, message: 'Parol kamida 4 ta belgi bo‘lishi kerak' }]}><PasswordInput autoComplete="new-password" /></Form.Item>
       <Form.Item label="Yangi parolni tasdiqlash" name="confirmPassword" dependencies={['password']} rules={[({ getFieldValue }) => ({ validator: (_, value: string | undefined) => { const password = getFieldValue('password') as string | undefined; if (!password && !value) return Promise.resolve(); return value === password ? Promise.resolve() : Promise.reject(new Error('Parollar bir xil emas')); } })]}><PasswordInput autoComplete="new-password" /></Form.Item>

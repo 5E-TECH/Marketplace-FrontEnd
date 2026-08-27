@@ -5,6 +5,7 @@ import { useDeferredValue, useMemo, useState } from 'react';
 import { EmptyState } from '../EmptyState/EmptyState';
 import styles from './DataTable.module.css';
 import { createTablePagination } from './tablePagination';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface DataTableSearch<RecordType> {
   placeholder?: string;
@@ -34,9 +35,10 @@ export function DataTable<RecordType extends object>({
   onChange,
   ...tableProps
 }: DataTableProps<RecordType>) {
+  const { language, t } = useTranslation();
   const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase('uz'));
+  const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase(language));
 
   const filteredData = useMemo(
     () =>
@@ -68,7 +70,7 @@ export function DataTable<RecordType extends object>({
             <Input.Search
               allowClear
               className={styles.search}
-              placeholder={search.placeholder ?? 'Qidirish...'}
+              placeholder={search.placeholder ?? t('common.search')}
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);

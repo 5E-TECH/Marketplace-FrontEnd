@@ -113,12 +113,12 @@ export default function ProductsPage() {
         ? <img className={styles.productImage} src={product.imageUrl} alt="" loading="lazy" />
         : <span className={styles.imagePlaceholder}><PictureOutlined /></span>,
     },
-    { title: 'Mahsulot', dataIndex: 'name', width: 240, sorter: (a, b) => a.name.localeCompare(b.name), render: (name: string, product) => <span className={styles.productInfo}><Typography.Text strong>{name}</Typography.Text><small>ID: {product.id}</small></span> },
+    { title: 'Mahsulot', dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name), render: (name: string, product) => <span className={styles.productInfo}><Typography.Text strong>{name}</Typography.Text><small>ID: {product.id}</small></span> },
     { title: 'Slug', dataIndex: 'slug', width: 170, responsive: ['xl'], render: (slug: string) => <code className={styles.sku}>{slug || '—'}</code> },
     { title: 'Kategoriya', dataIndex: 'category', width: 150, responsive: ['lg'], ellipsis: true, render: (category: string) => category || <span className={styles.muted}>Kategoriyasiz</span> },
     { title: 'Narxi', dataIndex: 'price', width: 130, render: (price: number) => <MoneyText value={price} />, sorter: (a, b) => a.price - b.price },
-    { title: 'Qoldiq', dataIndex: 'stock', width: 90, sorter: (a, b) => a.stock - b.stock },
-    { title: 'Holati', dataIndex: 'status', width: 120, render: (status: Product['status']) => <StatusTag status={status} /> },
+    { title: 'Qoldiq', dataIndex: 'stock', width: 90, responsive: ['md'], sorter: (a, b) => a.stock - b.stock },
+    { title: 'Holati', dataIndex: 'status', width: 120, responsive: ['sm'], render: (status: Product['status']) => <StatusTag status={status} /> },
     {
       title: 'Amallar',
       width: 116,
@@ -179,7 +179,7 @@ export default function ProductsPage() {
           rowKey="id"
           columns={columns}
           dataSource={products}
-          scroll={{ x: 760 }}
+          tableLayout="auto"
           pagination={{ ...createTablePagination(8), current: page, total: productsQuery.data?.total ?? 0 }}
           onChange={(pagination) => setPage(pagination.current ?? 1)}
         />

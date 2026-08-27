@@ -5,6 +5,9 @@ import {
   findRouteMeta,
 } from '../../app/router/appRouteConfig';
 import { prefetchRoute } from '../../app/router/routePreload';
+import { useTranslation } from '../../shared/i18n/useTranslation';
+import { useAppSelector } from '../../app/store/hooks';
+import { selectAuthUser } from '../../features/auth/model/authSlice';
 
 interface AppNavigationProps {
   onNavigate?: () => void;
@@ -13,11 +16,13 @@ interface AppNavigationProps {
 export function AppNavigation({ onNavigate }: AppNavigationProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const user = useAppSelector(selectAuthUser);
   const selectedRoute = findRouteMeta(location.pathname);
   const toMenuItems = (section: 'main' | 'utility') =>
     appRouteConfig
       .filter(
-        (route) => route.section === section && route.showInSidebar !== false,
+        (route) => route.section === section && route.showInSidebar !== false && (route.path !== '/users' || user?.role === 'SELLER'),
       )
       .map(({ path, label, icon }) => ({
         key: path,
@@ -26,7 +31,7 @@ export function AppNavigation({ onNavigate }: AppNavigationProps) {
             onPointerEnter={() => prefetchRoute(path)}
             onFocus={() => prefetchRoute(path)}
           >
-            {label}
+            {t(label)}
           </span>
         ),
         icon,

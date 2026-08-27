@@ -2,6 +2,11 @@
   margin-bottom: var(--space-6);
 }
 
+.heading { min-width: 0; }
+.before { margin-bottom: 8px; }
+.before :global(.ant-btn) { margin-inline-start: -12px; color: var(--color-text-secondary); }
+.before :global(.ant-btn:hover) { color: var(--color-accent) !important; }
+
 .title {
   margin: 0 0 var(--space-1) !important;
   font: var(--font-display) !important;
