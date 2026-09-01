@@ -8,6 +8,7 @@ import {
   Search as SearchOutlined,
 } from 'lucide-react';
 import { Avatar, Badge, Button, Divider, Dropdown, Flex, Input, Layout, Typography } from 'antd';
+import { useState } from 'react';
 import type { AuthUser } from '../../features/auth/model/authTypes';
 import { useAppDispatch } from '../../app/store/hooks';
 import { languageChanged, type Language } from '../../features/preferences/model/preferencesSlice';
@@ -21,6 +22,7 @@ interface AppHeaderProps {
   onMenuToggle: () => void;
   onLogout: () => void;
   onNavigate: (path: string) => void;
+  onGlobalSearch: (query: string) => void;
 }
 
 export function AppHeader({
@@ -30,9 +32,11 @@ export function AppHeader({
   onMenuToggle,
   onLogout,
   onNavigate,
+  onGlobalSearch,
 }: AppHeaderProps) {
   const dispatch = useAppDispatch();
   const { language, t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
   const languages: Array<{ key: Language; label: string }> = [
     { key: 'uz', label: "O‘zbekcha" },
     { key: 'ru', label: 'Русский' },
@@ -48,11 +52,18 @@ export function AppHeader({
             aria-label={mobile || collapsed ? t('header.openMenu') : t('header.closeMenu')}
             onClick={onMenuToggle}
           />
-          <Input
+          <Input.Search
             className={styles.globalSearch}
             prefix={<SearchOutlined />}
             placeholder={t('header.search')}
             aria-label={t('header.globalSearch')}
+            value={searchQuery}
+            enterButton
+            onChange={(event) => setSearchQuery(event.target.value)}
+            onSearch={(value) => {
+              const normalizedQuery = value.trim();
+              if (normalizedQuery) onGlobalSearch(normalizedQuery);
+            }}
           />
         </Flex>
 

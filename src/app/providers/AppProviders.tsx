@@ -1,5 +1,5 @@
 import { App as AntdApp, ConfigProvider } from 'antd';
-import type { PropsWithChildren } from 'react';
+import { useEffect, type PropsWithChildren } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../../shared/api/queryClient';
@@ -14,6 +14,10 @@ import { selectLanguage } from '../../features/preferences/model/preferencesSlic
 function LocalizedProviders({ children }: PropsWithChildren) {
   const language = useAppSelector(selectLanguage);
   const locale = language === 'ru' ? ruRU : language === 'en' ? enUS : uzUZ;
+
+  useEffect(() => {
+    document.documentElement.lang = language === 'uz' ? 'uz-Latn' : language;
+  }, [language]);
 
   return (
     <QueryClientProvider client={queryClient}>

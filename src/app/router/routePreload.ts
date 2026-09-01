@@ -12,6 +12,8 @@ export const routeImports = {
   support: () => import('../../pages/SupportPage/SupportPage'),
   users: () => import('../../pages/UsersPage/UsersPage'),
   userEditor: () => import('../../pages/UserEditorPage/UserEditorPage'),
+  adminShops: () => import('../../pages/AdminShopsPage/AdminShopsPage'),
+  adminOrders: () => import('../../pages/AdminOrdersPage/AdminOrdersPage'),
 };
 
 export const routePreloaders: Array<[
@@ -31,6 +33,8 @@ export const routePreloaders: Array<[
   ['/support', routeImports.support],
   ['/users/new', routeImports.userEditor],
   ['/users', routeImports.users],
+  ['/admin/shops', routeImports.adminShops],
+  ['/admin/orders', routeImports.adminOrders],
   ['/', routeImports.home],
 ];
 

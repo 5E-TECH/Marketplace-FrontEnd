@@ -1,0 +1,8 @@
+.page { width: 100%; min-width: 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; }
+.filter { width: 170px; }
+.shop { width: 130px; }
+.amount { font-weight: 700; }
+.details { margin-top: 14px; }
+.details :global(.ant-descriptions-view) { overflow: hidden; border-color: var(--color-border) !important; border-radius: var(--radius-md); }
+@media (max-width: 575px) { .filter, .shop { width: 100%; } }

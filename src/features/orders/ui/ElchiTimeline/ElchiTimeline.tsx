@@ -12,6 +12,7 @@ const stages = [
 ] as const;
 
 export function ElchiTimeline({ order }: { order: SellerOrder }) {
+  <></>
   const currentIndex = stages.findIndex((stage) => (stage.statuses as readonly string[]).includes(order.status));
   const terminal = order.status === 'CANCELLED' ? { title: 'Bekor qilindi', color: 'red' } : order.status === 'RETURNED' ? { title: 'Qaytarildi', color: 'orange' } : null;
   const items = stages.map((stage, index) => ({

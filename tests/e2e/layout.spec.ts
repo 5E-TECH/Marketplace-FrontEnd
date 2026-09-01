@@ -65,3 +65,21 @@ test('akkaunt tugmasi profil sahifasini ochadi', async ({ page }) => {
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByRole('heading', { name: 'Mening profilim' })).toBeVisible();
 });
+
+test('global qidiruv mahsulotlar sahifasiga so‘rov bilan o‘tadi', async ({ page }) => {
+  await page.route('**/api/v1/seller/products**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 8 } }),
+    });
+  });
+
+  await page.goto('/');
+  const search = page.getByRole('searchbox', { name: 'Global qidiruv' });
+  await search.fill('telefon');
+  await search.press('Enter');
+
+  await expect(page).toHaveURL(/\/products\?search=telefon$/);
+  await expect(page.getByPlaceholder('Mahsulot nomi yoki slug bo‘yicha qidirish...')).toHaveValue('telefon');
+});

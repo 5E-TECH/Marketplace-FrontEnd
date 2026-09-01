@@ -10,7 +10,7 @@ import {
 import { App, Button, Select, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { Product } from '../../features/products/model/productTypes';
 import { useDeleteProductMutation, useMyProductsQuery } from '../../features/products/api/productQueries';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
@@ -42,8 +42,11 @@ const STATUS_FILTERS = [
 export default function ProductsPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const routeSearch = searchParams.get('search')?.trim() ?? '';
   const [status, setStatus] = useState<ProductStatusFilter>('ALL');
-  const [query, setQuery] = useState('');
+  const [localQuery, setLocalQuery] = useState('');
+  const query = routeSearch || localQuery;
   const [page, setPage] = useState(1);
   const deferredQuery = useDebouncedValue(query.trim());
   const productsQuery = useMyProductsQuery({
@@ -146,7 +149,11 @@ export default function ProductsPage() {
       <ListToolbar
         value={query}
         placeholder="Mahsulot nomi yoki slug bo‘yicha qidirish..."
-        onChange={(value) => { setQuery(value); setPage(1); }}
+        onChange={(value) => {
+          if (routeSearch) setSearchParams({}, { replace: true });
+          setLocalQuery(value);
+          setPage(1);
+        }}
         actions={
           <>
           <Select<ProductStatusFilter>
@@ -173,7 +180,7 @@ export default function ProductsPage() {
         className={styles.tableCard}
         title="Mahsulotlar ro‘yxati"
         caption={`${productsQuery.data?.total ?? 0} ta natija${deferredQuery ? ` · “${deferredQuery}” bo‘yicha` : ''}`}
-        action={status !== 'ALL' || query ? <Button type="text" onClick={() => { setStatus('ALL'); setQuery(''); setPage(1); }}>Filterlarni tozalash</Button> : null}
+        action={status !== 'ALL' || query ? <Button type="text" onClick={() => { setStatus('ALL'); setLocalQuery(''); setSearchParams({}, { replace: true }); setPage(1); }}>Filterlarni tozalash</Button> : null}
       >
         <DataTable
           rowKey="id"

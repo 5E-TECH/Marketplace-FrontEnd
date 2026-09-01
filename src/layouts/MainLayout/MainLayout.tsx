@@ -65,6 +65,11 @@ export default function MainLayout() {
                 : setMobileMenuOpen(true)
             }
             onLogout={handleLogout}
+            onGlobalSearch={(query) => {
+              const destination = `/products?search=${encodeURIComponent(query)}`;
+              prefetchRoute(destination);
+              void navigate(destination);
+            }}
             onNavigate={(path) => {
               prefetchRoute(path);
               void navigate(path);

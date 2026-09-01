@@ -8,6 +8,7 @@ import {
   Settings as SettingOutlined,
   Store as ShopOutlined,
   UserRoundCog,
+  ShieldCheck,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -18,10 +19,13 @@ export interface AppRouteMeta {
   icon: ReactNode;
   section: 'main' | 'utility';
   showInSidebar?: boolean;
+  roles?: Array<'SELLER' | 'OPERATOR' | 'BUYER' | 'ADMIN' | 'SUPERADMIN'>;
 }
 
 export const appRouteConfig: AppRouteMeta[] = [
   { path: '/', label: 'nav.home', icon: <BarChartOutlined />, section: 'main' },
+  { path: '/admin/shops', label: 'nav.adminShops', icon: <ShieldCheck />, section: 'main', roles: ['ADMIN', 'SUPERADMIN'] },
+  { path: '/admin/orders', label: 'nav.adminOrders', icon: <ProfileOutlined />, section: 'main', roles: ['ADMIN', 'SUPERADMIN'] },
   { path: '/users', label: 'nav.users', icon: <UserRoundCog />, section: 'main' },
   { path: '/shop', label: 'nav.shop', icon: <ShopOutlined />, section: 'main' },
   { path: '/products', label: 'nav.products', icon: <AppstoreOutlined />, section: 'main' },
