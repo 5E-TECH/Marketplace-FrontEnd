@@ -1,15 +1,10 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapData } from '../../../shared/api/unwrapData';
 import type {
   DashboardSalesPoint,
   DashboardTopProduct,
   SellerDashboard,
 } from '../model/dashboardTypes';
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value
-    ? value.data
-    : value;
-}
 
 function finiteNumber(record: Record<string, unknown>, key: string): number {
   const value = record[key];
@@ -46,7 +41,7 @@ function parseSalesPoint(value: unknown): DashboardSalesPoint {
 }
 
 function parseDashboard(value: unknown): SellerDashboard {
-  const data = unwrap(value);
+  const data = unwrapData(value);
   if (typeof data !== 'object' || data === null) {
     throw new Error('Statistika serverdan noto‘g‘ri formatda keldi');
   }

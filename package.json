@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
     "preview": "vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc -b --force",
+    "contract:check": "node scripts/check-contract.mjs",
     "test": "playwright test",
     "test:e2e": "playwright test"
   },

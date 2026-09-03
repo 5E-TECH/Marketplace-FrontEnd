@@ -24,16 +24,22 @@ export async function seedAccessToken(
   );
 }
 
-export async function mockCurrentUser(page: Page): Promise<void> {
+export const operatorUser = {
+  ...authenticatedUser,
+  id: 'operator-e2e',
+  role: 'OPERATOR',
+  name: 'E2E Operator',
+} as const;
+
+export async function mockCurrentUser(
+  page: Page,
+  user: Record<string, unknown> = authenticatedUser,
+): Promise<void> {
   await page.route('**/api/v1/auth/me', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        statusCode: 200,
-        message: 'OK',
-        data: authenticatedUser,
-      }),
+      body: JSON.stringify({ statusCode: 200, message: 'OK', data: user }),
     });
   });
 }
@@ -72,6 +78,38 @@ export async function mockDashboard(page: Page): Promise<void> {
   });
 }
 
+/** Do'kon profili — kabinetning ko'p sahifasi shu ma'lumotga tayanadi. */
+export const authenticatedShop = {
+  id: '15',
+  ownerUserId: 'seller-e2e',
+  name: 'MarketHub Store',
+  slug: 'markethub-store',
+  status: 'ACTIVE',
+  description: 'Original va sifatli mahsulotlar do‘koni',
+  logoUrl: null,
+  bannerUrl: null,
+  phone: '+998 90 000 00 00',
+  regionId: '1',
+  districtId: '10',
+  address: 'Toshkent shahri, Chilonzor tumani',
+  rating: 4.8,
+  ordersCount: 128,
+} as const;
+
+export async function mockSellerShop(page: Page): Promise<void> {
+  await page.route('**/api/v1/sellers/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        statusCode: 200,
+        message: 'OK',
+        data: authenticatedShop,
+      }),
+    });
+  });
+}
+
 export async function mockProducts(page: Page): Promise<void> {
   await page.route('**/api/v1/products/my**', async (route) => {
     await route.fulfill({
@@ -82,10 +120,16 @@ export async function mockProducts(page: Page): Promise<void> {
   });
 }
 
-export async function installAuthenticatedSession(page: Page): Promise<void> {
+export async function installAuthenticatedSession(
+  page: Page,
+  user: Record<string, unknown> = authenticatedUser,
+): Promise<void> {
   await seedAccessToken(page);
-  await mockCurrentUser(page);
+  await mockCurrentUser(page, user);
   await mockLogout(page);
   await mockProducts(page);
   await mockDashboard(page);
+  // Test o'zi `page.route` qo'shsa, Playwright keyingi qo'shilganini
+  // birinchi ishlatadi — shuning uchun bu umumiy mock ustidan yozilaveradi.
+  await mockSellerShop(page);
 }

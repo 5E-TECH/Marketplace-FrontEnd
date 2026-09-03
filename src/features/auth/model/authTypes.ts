@@ -31,3 +31,11 @@ export interface AuthUser {
 export interface AuthSession extends LoginResponse {
   user: AuthUser;
 }
+
+/** `PATCH /auth/profile` — barcha maydon ixtiyoriy (UpdateProfileDto). */
+export interface UpdateProfilePayload {
+  name?: string;
+  phone?: string;
+  avatarUrl?: string;
+  password?: string;
+}

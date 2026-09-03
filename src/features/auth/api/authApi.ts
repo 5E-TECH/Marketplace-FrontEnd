@@ -1,10 +1,12 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapData } from '../../../shared/api/unwrapData';
 import type {
   AuthUser,
   AuthSession,
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
+  UpdateProfilePayload,
   UserRole,
 } from '../model/authTypes';
 import { canAccessSellerCabinet } from '../lib/sellerAccess';
@@ -44,6 +46,21 @@ function isAuthUser(value: unknown): value is AuthUser {
   );
 }
 
+/** Ixtiyoriy maydonlarni bir xil ko'rinishga keltiradi (yo'q bo'lsa null). */
+function toAuthUser(candidate: AuthUser): AuthUser {
+  return {
+    ...candidate,
+    email:
+      'email' in candidate && typeof candidate.email === 'string'
+        ? candidate.email
+        : null,
+    avatarUrl:
+      'avatarUrl' in candidate && typeof candidate.avatarUrl === 'string'
+        ? candidate.avatarUrl
+        : null,
+  };
+}
+
 function parseLoginResponse(data: LoginApiResponse): LoginResponse {
   if (
     typeof data.accessToken !== 'string' ||
@@ -80,6 +97,16 @@ export async function register(
   });
 }
 
+/**
+ * Access token muddati tugaganda yangisini oladi. Refresh token HttpOnly
+ * cookie'da (backend `POST /auth/login` da qo'yadi), shuning uchun body bo'sh.
+ */
+export async function refreshAccessToken(): Promise<LoginResponse> {
+  const { data } = await httpClient.post<LoginApiResponse>('/auth/refresh', {});
+
+  return parseLoginResponse(data);
+}
+
 export async function getCurrentUser(
   accessToken?: string,
   signal?: AbortSignal,
@@ -88,8 +115,7 @@ export async function getCurrentUser(
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     signal,
   });
-  const unwrapped =
-    typeof data === 'object' && data !== null && 'data' in data ? data.data : data;
+  const unwrapped = unwrapData(data);
   const candidate =
     typeof unwrapped === 'object' && unwrapped !== null && 'user' in unwrapped
       ? unwrapped.user
@@ -99,17 +125,25 @@ export async function getCurrentUser(
     throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
   }
 
-  return {
-    ...candidate,
-    email:
-      'email' in candidate && typeof candidate.email === 'string'
-        ? candidate.email
-        : null,
-    avatarUrl:
-      'avatarUrl' in candidate && typeof candidate.avatarUrl === 'string'
-        ? candidate.avatarUrl
-        : null,
-  };
+  return toAuthUser(candidate);
+}
+
+/** Joriy foydalanuvchining o'z akkaunt ma'lumotini yangilaydi. */
+export async function updateProfile(
+  payload: UpdateProfilePayload,
+): Promise<AuthUser> {
+  const { data } = await httpClient.patch<unknown>('/auth/profile', payload);
+  const unwrapped = unwrapData(data);
+  const candidate =
+    typeof unwrapped === 'object' && unwrapped !== null && 'user' in unwrapped
+      ? unwrapped.user
+      : unwrapped;
+
+  if (!isAuthUser(candidate)) {
+    throw new Error('Profil ma’lumoti noto‘g‘ri formatda qaytdi');
+  }
+
+  return toAuthUser(candidate);
 }
 
 export async function authenticate(

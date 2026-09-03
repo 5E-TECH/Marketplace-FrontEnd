@@ -1,9 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapData } from '../../../shared/api/unwrapData';
 import type { StockAdjustPayload, StockInboundPayload, StockItem, StockListParams, StockPage } from '../model/stockTypes';
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
-}
 
 function numberField(record: Record<string, unknown>, key: string): number {
   const value = record[key];
@@ -33,7 +30,7 @@ function parseItem(value: unknown): StockItem {
 
 export async function getStock(params: StockListParams, signal?: AbortSignal): Promise<StockPage> {
   const { data } = await httpClient.get<unknown>('/inventory/stock', { signal, params: { page: params.page, limit: params.limit, ...(params.search ? { search: params.search } : {}), ...(params.lowOnly ? { lowOnly: true } : {}) } });
-  const value = unwrap(data);
+  const value = unwrapData(data);
   if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error('Stock ro‘yxati noto‘g‘ri formatda');
   const record = value as Record<string, unknown>;
   return { items: value.items.map(parseItem), total: numberField(record, 'total'), page: numberField(record, 'page'), limit: numberField(record, 'limit'), totalPages: numberField(record, 'totalPages') };
