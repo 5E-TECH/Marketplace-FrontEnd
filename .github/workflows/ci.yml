@@ -97,16 +97,20 @@ jobs:
             --exclude 'dist/' \
             --exclude 'playwright-report/' \
             --exclude 'test-results/' \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
-            ./ "$DEPLOY_USER@$DEPLOY_HOST:/srv/marketplace-frontend/"
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+                 -o ServerAliveInterval=30 -o ServerAliveCountMax=20" \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:/home/deploy/marketplace-frontend/"
 
       - name: Konteynerni yangilash
         run: |
+          # Keepalive: build uzoq davom etadi va ulanish jim turadi.
+          # Backend deploy'ida aynan shu sabab uzilishlar bo'lgan.
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=20 \
             "$DEPLOY_USER@$DEPLOY_HOST" <<'REMOTE'
           set -euo pipefail
-          cd /srv/marketplace-frontend
+          cd /home/deploy/marketplace-frontend
           test -f .env.production
 
           # Backend stack'i `marketplace_edge` tarmog'ini yaratadi.

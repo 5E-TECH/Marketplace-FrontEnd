@@ -5,11 +5,24 @@ ishlaydi. TLS sertifikati, HSTS va CSP kabi sarlavhalarni **backend
 stack'idagi Caddy** beradi va `marketplace_edge` tarmog'i orqali shu
 konteynerga proxy qiladi.
 
+Domen bor bo'lsa:
+
 ```
 Internet ──► Caddy (backend stack, :443)
                ├── {$DOMAIN}      ──► api-gateway:3000
                └── {$APP_DOMAIN}  ──► frontend:8080   ← shu repo
 ```
+
+Domen hali yo'q bo'lsa SPA to'g'ridan-to'g'ri o'z portida ochiladi:
+
+```
+Internet ──► :8080 ──► frontend konteyneri     (SPA)
+Internet ──► :80   ──► Caddy ──► api-gateway   (API)
+```
+
+Bu holda `.env.production` da `VITE_ALLOW_INSECURE_API=true` bo'lishi shart,
+aks holda production build HTTPS talab qilib to'xtaydi. Token va parollar
+shifrlanmagan ketadi — faqat sinov uchun.
 
 ## Bir marta bajariladigan sozlash
 
@@ -35,7 +48,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up -d
 
 ### 3. Frontend muhiti
 
-Serverda `/srv/marketplace-frontend/.env.production`:
+Serverda `/home/deploy/marketplace-frontend/.env.production`:
 
 ```env
 VITE_API_URL=https://api.marketplace.uz/api/v1
@@ -69,7 +82,7 @@ konteynerni qayta quradi va `/healthz` javob berishini tekshiradi.
 ## Qo'lda deploy
 
 ```bash
-cd /srv/marketplace-frontend
+cd /home/deploy/marketplace-frontend
 docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
 ```
 
@@ -84,7 +97,7 @@ docker compose -f docker-compose.prod.yml logs -f frontend
 ## Orqaga qaytarish
 
 ```bash
-cd /srv/marketplace-frontend
+cd /home/deploy/marketplace-frontend
 git checkout <oldingi-commit>
 docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
 ```
