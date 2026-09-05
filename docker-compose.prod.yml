@@ -1,0 +1,30 @@
+# Sotuvchi kabineti (SPA). Backend stack'idagi Caddy TLS'ni ushlab turadi va
+# `marketplace_edge` tarmog'i orqali shu konteynerga proxy qiladi
+# (Elchi-Marketplace/deploy/Caddyfile → {$APP_DOMAIN}).
+#
+# Tarmoq backend stack'i ko'tarilganda yaratiladi, shuning uchun avval
+# backend'ni ishga tushiring.
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:?VITE_API_URL kerak — masalan https://api.example.com/api/v1}
+    image: marketplace-frontend:latest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      edge:
+        aliases:
+          - frontend
+
+networks:
+  edge:
+    external: true
+    name: marketplace_edge

@@ -43,7 +43,7 @@ export default function LoginPage() {
             />
 
             <Typography.Text className={styles.security}>
-              <LockFilled aria-hidden /> Hammasi shifrlangan va xavfsiz
+              <LockFilled aria-hidden /> Parolingiz brauzer xotirasida saqlanmaydi
             </Typography.Text>
           </div>
         </Card>

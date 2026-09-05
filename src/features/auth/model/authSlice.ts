@@ -22,6 +22,14 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.user = null;
     },
+    /**
+     * Token yangilandi (refresh cookie orqali). Bu login emas — yuklangan
+     * foydalanuvchi ma'lumoti saqlanib qoladi, aks holda kabinet har
+     * yangilanishda "profil olinmadi" holatiga tushardi.
+     */
+    accessTokenRefreshed(state, action: PayloadAction<LoginResponse>) {
+      state.accessToken = action.payload.accessToken;
+    },
     currentUserLoaded(state, action: PayloadAction<AuthUser>) {
       state.user = action.payload;
     },
@@ -37,7 +45,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { authenticated, currentUserLoaded, loggedOut } = authSlice.actions;
+export const {
+  accessTokenRefreshed,
+  authenticated,
+  currentUserLoaded,
+  loggedOut,
+} = authSlice.actions;
 export const { selectAccessToken, selectAuthUser, selectIsAuthenticated } =
   authSlice.selectors;
 export const authReducer = authSlice.reducer;

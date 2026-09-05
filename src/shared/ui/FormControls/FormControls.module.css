@@ -1,0 +1,24 @@
+.control { width: 100%; }
+.control:global(.ant-input),
+.textAreaControl:global(.ant-input),
+.numberControl:global(.ant-input-number),
+.selectControl:global(.ant-select) :global(.ant-select-selector) { min-height: 48px !important; color: var(--color-text) !important; background: #0d1525 !important; border-color: #2d3a55 !important; border-radius: 12px !important; box-shadow: none !important; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+.control:global(.ant-input) { padding-inline: 14px; }
+.textAreaControl:global(.ant-input) { min-height: 104px; padding: 12px 14px; resize: vertical; }
+.control:global(.ant-input):hover,
+.numberControl:global(.ant-input-number):hover,
+.selectControl:global(.ant-select):hover :global(.ant-select-selector) { background: #101a2d !important; border-color: #50617e !important; }
+.control:global(.ant-input):focus,
+.numberControl:global(.ant-input-number-focused),
+.selectControl:global(.ant-select-focused) :global(.ant-select-selector) { background: #101a2d !important; border-color: #fb923c !important; box-shadow: 0 0 0 3px rgb(251 146 60 / 11%) !important; }
+.numberControl :global(.ant-input-number-input) { height: 46px; padding-inline: 14px; }
+.numberControl :global(.ant-input-number-group-addon) { color: #c5cfdf; background: #263149; border-color: #2d3a55; }
+.selectControl :global(.ant-select-selection-placeholder) { color: #5f6d85; }
+.selectedOption { display: inline-flex; align-items: center; gap: 8px; }
+.selectedOption svg { width: 16px; height: 16px; color: #fb923c; }
+.option { display: flex; min-height: 52px; padding: 5px 2px; align-items: center; gap: 11px; }
+.optionIcon { display: grid; width: 36px; height: 36px; color: #fb923c; background: rgb(251 146 60 / 10%); border-radius: 10px; flex: 0 0 auto; place-items: center; }
+.optionIcon svg { width: 17px; height: 17px; }
+.optionCopy { display: grid; min-width: 0; gap: 2px; }
+.optionCopy strong { color: #e7edf7; font-size: 13px; font-weight: 600; }
+.optionCopy small { overflow: hidden; color: #7f8da5; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }

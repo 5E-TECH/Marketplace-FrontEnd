@@ -7,10 +7,10 @@ import {
   Store as ShopOutlined,
   X as CloseOutlined,
 } from 'lucide-react';
-import { Button, Card, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
+import { Button, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
 import type { FormInstance } from 'antd';
 import type { ShopProfileFormValues } from '../model/shopProfile';
-import styles from '../../../pages/ShopPage/ShopPage.module.css';
+import styles from './ShopProfileForm.module.css';
 
 interface ShopProfileFormProps {
   form: FormInstance<ShopProfileFormValues>;
@@ -35,7 +35,7 @@ export function ShopProfileForm({
   onSubmit,
 }: ShopProfileFormProps) {
   return (
-    <Card className={styles.profileCard}>
+    <section className={styles.profileCard}>
       <header className={styles.cardHeader}>
         <div>
           <Typography.Title level={3}>Do‘kon ma’lumotlari</Typography.Title>
@@ -141,7 +141,8 @@ export function ShopProfileForm({
         >
           <Input.TextArea rows={editing ? 3 : 1} maxLength={500} showCount={editing} />
         </Form.Item>
+
       </Form>
-    </Card>
+    </section>
   );
 }

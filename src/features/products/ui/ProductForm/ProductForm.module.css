@@ -1,0 +1,30 @@
+.form {
+  display: grid;
+  gap: 18px;
+}
+.contentGrid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(300px, .8fr); gap: 18px; align-items: start; }
+.card { padding: 24px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.sectionHeader { display: flex; justify-content: space-between; margin-bottom: 22px; }
+.sectionHeader h2 { margin: 0 0 5px; color: var(--color-text); font-size: 18px; line-height: 1.4; }
+.sectionHeader p { margin: 0; color: var(--color-text-muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; }
+.fullWidth { grid-column: 1 / -1; }
+.uploadCard { min-width: 0; align-self: start; }
+.attributes { display: grid; gap: 10px; padding-top: 4px; }
+.attributesHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 2px; }
+.attributesHeader strong, .attributesHeader span { display: block; }
+.attributesHeader strong { color: var(--color-text); font-size: 14px; }
+.attributesHeader span { margin-top: 3px; color: var(--color-text-muted); font-size: 12px; }
+.attributeRow { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) 36px; gap: 10px; align-items: start; }
+.attributeRow :global(.ant-form-item) { margin-bottom: 0; }
+.removeAttribute { margin-top: 3px; }
+.uploadCard :global(.ant-upload-wrapper .ant-upload-drag) { box-sizing: border-box; height: auto; background: var(--color-surface-subtle); }
+.uploadCard :global(.ant-upload-wrapper .ant-upload-btn) { padding: 0 !important; }
+.uploadCard :global(.ant-upload-drag p) { margin-bottom: 8px; }
+.uploadCard :global(.ant-upload-drag .ant-upload-hint) { margin-bottom: 0; font-size: 12px; line-height: 1.5; }
+.uploadCard :global(.ant-upload-drag-icon svg) { width: 32px; height: 32px; }
+.actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 2px; }
+.actions button { min-width: 148px; }
+@media (max-width: 991px) { .contentGrid { grid-template-columns: 1fr; } .uploadCard :global(.ant-upload-wrapper .ant-upload-drag) { width: 100%; } }
+@media (max-width: 767px) { .card { padding: 18px; } .grid { grid-template-columns: 1fr; } .fullWidth { grid-column: auto; } }
+@media (max-width: 575px) { .actions button { min-width: 0; flex: 1; } .attributesHeader { align-items: flex-start; flex-direction: column; } .attributeRow { grid-template-columns: 1fr 36px; } .attributeRow :global(.ant-form-item):first-child { grid-column: 1 / -1; } }

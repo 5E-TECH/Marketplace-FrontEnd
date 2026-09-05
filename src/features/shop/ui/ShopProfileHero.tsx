@@ -1,15 +1,15 @@
 import { Camera as CameraOutlined, CircleCheckBig as CheckCircleFilled, Store as ShopOutlined } from 'lucide-react';
-import { Button, Tag, Typography, Upload } from 'antd';
+import { App, Button, Tag, Typography, Upload } from 'antd';
 import type { UploadProps } from 'antd';
 import type { ShopProfile } from '../model/shopProfile';
 import type { SellerShopStatus } from '../api/sellerShopApi';
-import styles from '../../../pages/ShopPage/ShopPage.module.css';
+import styles from './ShopProfileHero.module.css';
 
 interface ShopProfileHeroProps {
   profile: ShopProfile;
   editing: boolean;
   status: SellerShopStatus;
-  onImageSelect: (kind: 'logo' | 'banner', file: File) => void;
+  onImageSelect: (kind: 'logo' | 'banner', file: File) => void | Promise<void>;
 }
 
 export function ShopProfileHero({
@@ -18,13 +18,18 @@ export function ShopProfileHero({
   status,
   onImageSelect,
 }: ShopProfileHeroProps) {
+  const { message } = App.useApp();
   const createUploadProps = (
     kind: 'logo' | 'banner',
   ): UploadProps => ({
     accept: 'image/jpeg,image/png,image/webp',
     showUploadList: false,
-    beforeUpload: (file) => {
-      onImageSelect(kind, file);
+    beforeUpload: async (file) => {
+      try {
+        await onImageSelect(kind, file);
+      } catch (error) {
+        void message.error(error instanceof Error ? error.message : 'Rasmni yuklab bo‘lmadi');
+      }
       return false;
     },
   });
@@ -40,6 +45,12 @@ export function ShopProfileHero({
         }
       >
         <div className={styles.bannerOverlay} />
+        {!profile.bannerUrl ? (
+          <div className={styles.bannerPlaceholder}>
+            <ShopOutlined />
+            <span>Do‘kon banneri</span>
+          </div>
+        ) : null}
         {editing ? (
           <Upload {...createUploadProps('banner')}>
             <Button
@@ -92,7 +103,7 @@ export function ShopProfileHero({
             </Tag>
           </div>
           <Typography.Text className={styles.storeUrl}>
-            market.elchi.uz/{profile.slug}
+            market.elchi.uz/{profile.slug || 'dokon'}
           </Typography.Text>
           <Typography.Paragraph ellipsis={{ rows: 2 }}>
             {profile.description}

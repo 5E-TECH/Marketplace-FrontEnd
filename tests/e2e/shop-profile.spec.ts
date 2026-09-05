@@ -71,6 +71,37 @@ test('do‘kon profilini read-only ko‘rish, tahrirlash va PATCH saqlash ishlay
   });
 });
 
+test('joriy do‘kon ma’lumotlari API javobidan to‘ldiriladi', async ({ page }) => {
+  await mockSellerShopApi(page);
+  await page.goto('/shop');
+
+  await expect(page.getByLabel('Do‘kon nomi')).toHaveValue(sellerShop.name);
+  await expect(page.getByLabel('Telefon')).toHaveValue(sellerShop.phone);
+  await expect(page.getByLabel('Manzil')).toHaveValue(sellerShop.address);
+  await expect(page.getByLabel('Tavsif')).toHaveValue(sellerShop.description);
+});
+
+test('logo Base64 preview bo‘lib qoladi va PATCH payloadga yuborilmaydi', async ({ page }) => {
+  const apiState = await mockSellerShopApi(page);
+  await page.goto('/shop');
+  await page.getByRole('button', { name: 'Tahrirlash' }).click();
+
+  const logoChooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Logo rasmini almashtirish' }).click();
+  await (await logoChooser).setFiles({
+    name: 'store-logo.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('market-logo'),
+  });
+
+  const logo = page.getByRole('img', { name: /MarketHub Store logotipi/i });
+  await expect(logo).toHaveAttribute('src', /^data:image\/png;base64,/);
+  await page.getByRole('button', { name: 'Saqlash' }).click();
+
+  expect(apiState.patchBody?.logoUrl).toBeUndefined();
+  await expect(logo).toHaveCount(0);
+});
+
 test('do‘kon profili 375px ekranda horizontal overflow bermaydi', async ({
   page,
 }) => {
@@ -86,4 +117,47 @@ test('do‘kon profili 375px ekranda horizontal overflow bermaydi', async ({
       ),
     )
     .toBe(true);
+});
+
+test('do‘kon mavjud bo‘lmasa popup orqali yangi do‘kon yaratiladi', async ({ page }) => {
+  let createBody: Record<string, unknown> | null = null;
+  await page.route('**/api/v1/sellers/me', async (route) => {
+    await route.fulfill({
+      status: 404,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Shop not found' }),
+    });
+  });
+  await page.route('**/api/v1/sellers/register', async (route) => {
+    createBody = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({ statusCode: 201, message: 'OK', data: { user: { id: '42' }, shop: { id: '15' } } }),
+    });
+  });
+
+  await page.goto('/shop');
+  await expect(page.getByRole('heading', { name: 'Sizning do‘koningiz shu yerdan boshlanadi' })).toBeVisible();
+  await page.getByRole('button', { name: 'Birinchi do‘konni yaratish' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Yangi do‘kon yaratish' })).toBeVisible();
+  await dialog.getByLabel('Ism va familiya').fill('Bahodir Nabijanov');
+  await dialog.getByLabel('Telefon').fill('+998901234567');
+  await dialog.getByLabel('Parol').fill('Secure123');
+  await dialog.getByLabel('Do‘kon nomi').fill('Yangi Seller Store');
+  await dialog.getByLabel('Manzil').fill('Toshkent shahri');
+  await dialog.getByLabel('Do‘kon haqida').fill('Sifatli mahsulotlar do‘koni');
+  await dialog.getByRole('button', { name: 'Do‘konni yaratish' }).click();
+
+  await expect(page.getByText('Seller va do‘kon muvaffaqiyatli yaratildi')).toBeVisible();
+  await expect(page).toHaveURL(/\/shop$/);
+  expect(createBody).toEqual({
+    name: 'Bahodir Nabijanov',
+    phone: '+998901234567',
+    password: 'Secure123',
+    shopName: 'Yangi Seller Store',
+    shopDescription: 'Sifatli mahsulotlar do‘koni',
+    address: 'Toshkent shahri',
+  });
 });

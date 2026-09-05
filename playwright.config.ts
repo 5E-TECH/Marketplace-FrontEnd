@@ -4,7 +4,12 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: true,
-  retries: 0,
+  // ProductEditor testlari og'ir (forma + rasm yuklash). Ko'p worker bilan
+  // parallel ishlaganda ular resurs yetishmasligidan timeout'ga uchraydi —
+  // CI'da worker sonini cheklab, tasodifiy yiqilishga qayta urinish beramiz.
+  // Lokalda retry yo'q: xato darhol ko'rinsin.
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 2 : undefined,
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:5173',

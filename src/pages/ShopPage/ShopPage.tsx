@@ -1,67 +1,46 @@
-import { App, Form } from 'antd';
+import axios from 'axios';
+import { CircleCheck, Plus, Store } from 'lucide-react';
+import { App, Button, Form } from 'antd';
 import { useState } from 'react';
-import { useAppSelector } from '../../app/store/hooks';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import {
+  useCreateSellerShopMutation,
   useSellerShopQuery,
   useUpdateSellerShopMutation,
 } from '../../features/shop/api/sellerShopQueries';
-import type { UpdateSellerShopPayload } from '../../features/shop/api/sellerShopApi';
+import type {
+  CreateSellerShopPayload,
+  UpdateSellerShopPayload,
+} from '../../features/shop/api/sellerShopApi';
 import {
   toShopProfile,
   type ShopProfileFormValues,
 } from '../../features/shop/model/shopProfile';
 import { ShopProfileForm } from '../../features/shop/ui/ShopProfileForm';
+import { ShopProfileHero } from '../../features/shop/ui/ShopProfileHero';
+import { CreateShopModal, type SellerRegistrationFormValues } from '../../features/shop/ui/CreateShopModal';
+import { useShopMediaDraft } from '../../features/shop/model/useShopMediaDraft';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import styles from './ShopPage.module.css';
-import { selectAuthUser } from '../../features/auth/model/authSlice';
 
 export default function ShopPage() {
   const { message } = App.useApp();
-  const user = useAppSelector(selectAuthUser);
-  const sellerAccess = user?.role === 'SELLER';
   const [form] = Form.useForm<ShopProfileFormValues>();
   const [editing, setEditing] = useState(false);
-  const shopQuery = useSellerShopQuery(sellerAccess);
+  const [createOpen, setCreateOpen] = useState(false);
+  const mediaDraft = useShopMediaDraft();
+  const shopQuery = useSellerShopQuery();
   const updateShopMutation = useUpdateSellerShopMutation();
-
-  if (!sellerAccess && user) {
-    const previewProfile: ShopProfileFormValues = {
-      name: user.name,
-      slug: '',
-      description: 'Do‘kon tavsifi SELLER profilida ko‘rsatiladi',
-      phone: user.phone,
-      regionId: '1',
-      districtId: '10',
-      address: 'Manzil SELLER profilida ko‘rsatiladi',
-    };
-
-    return (
-      <div className={styles.page}>
-        <PageHeader
-          title="Do‘kon profili"
-          description="Xaridorlarga ko‘rinadigan do‘kon ma’lumotlarini boshqaring"
-        />
-        <ShopProfileForm
-          form={form}
-          initialValues={previewProfile}
-          editing={false}
-          onEdit={() =>
-            void message.warning(
-              'Do‘kon profilini faqat SELLER akkaunti tahrirlay oladi',
-            )
-          }
-          onCancel={() => undefined}
-          onSubmit={() => undefined}
-        />
-      </div>
-    );
-  }
+  const createShopMutation = useCreateSellerShopMutation();
+  const shopMissing =
+    shopQuery.isError &&
+    axios.isAxiosError(shopQuery.error) &&
+    shopQuery.error.response?.status === 404;
 
   if (shopQuery.isPending) return <ContentState state="loading" />;
 
-  if (shopQuery.isError) {
+  if (shopQuery.isError && !shopMissing) {
     return (
       <ContentState
         state="error"
@@ -72,31 +51,94 @@ export default function ShopPage() {
     );
   }
 
-  const profile = toShopProfile(shopQuery.data);
+  const profile = shopQuery.data ? toShopProfile(shopQuery.data) : null;
 
   const startEditing = () => {
+    if (!profile) return;
     form.setFieldsValue(profile);
     setEditing(true);
   };
 
   const cancelEditing = () => {
-    form.setFieldsValue(profile);
+    if (profile) form.setFieldsValue(profile);
+    mediaDraft.reset();
     setEditing(false);
   };
+
+  const createProfile = (values: SellerRegistrationFormValues) => {
+    const payload: CreateSellerShopPayload = {
+      name: values.name.trim(),
+      phone: values.phone.replace(/\s/g, ''),
+      password: values.password,
+      shopName: values.shopName.trim(),
+      ...(values.shopDescription?.trim() ? { shopDescription: values.shopDescription.trim() } : {}),
+      ...(values.address?.trim() ? { address: values.address.trim() } : {}),
+    };
+
+    createShopMutation.mutate(payload, {
+      onSuccess: () => {
+        setCreateOpen(false);
+        mediaDraft.reset();
+        void message.success('Seller va do‘kon muvaffaqiyatli yaratildi');
+      },
+      onError: (error) => void message.error(getAuthErrorMessage(error)),
+    });
+  };
+
+  if (shopMissing) {
+    return (
+      <div className={styles.page}>
+        <PageHeader
+          title="Do‘kon profili"
+          description="Marketplace’da savdoni boshlash uchun do‘koningizni yarating"
+          extra={<Button type="primary" icon={<Plus />} onClick={() => setCreateOpen(true)}>Do‘kon yaratish</Button>}
+        />
+        <section className={styles.emptyShop}>
+          <div className={styles.emptyArtwork}>
+            <span className={styles.emptyGlow} />
+            <Store />
+          </div>
+          <span className={styles.eyebrow}>SELLER SPACE</span>
+          <h2>Sizning do‘koningiz shu yerdan boshlanadi</h2>
+          <p>Logo va banner yuklang, aloqa ma’lumotlarini kiriting va mahsulotlaringizni xaridorlarga namoyish eting.</p>
+          <div className={styles.steps}>
+            <span><CircleCheck /> Profil ma’lumotlari</span>
+            <span><CircleCheck /> Logo va banner</span>
+            <span><CircleCheck /> Tekshiruvga yuborish</span>
+          </div>
+          <Button size="large" type="primary" icon={<Plus />} onClick={() => setCreateOpen(true)}>
+            Birinchi do‘konni yaratish
+          </Button>
+        </section>
+        <CreateShopModal
+          open={createOpen}
+          saving={createShopMutation.isPending}
+          onCancel={() => {
+            setCreateOpen(false);
+            mediaDraft.reset();
+          }}
+          onSubmit={createProfile}
+        />
+      </div>
+    );
+  }
+
+  if (!profile || !shopQuery.data) return <ContentState state="loading" />;
 
   const saveProfile = (values: ShopProfileFormValues) => {
     const payload: UpdateSellerShopPayload = {
       name: values.name.trim(),
       description: values.description.trim(),
       phone: values.phone.replace(/\s/g, ''),
-      regionId: values.regionId,
-      districtId: values.districtId,
+      regionId: values.regionId.trim(),
+      districtId: values.districtId.trim(),
       address: values.address.trim(),
     };
 
     updateShopMutation.mutate(payload, {
       onSuccess: () => {
         setEditing(false);
+        mediaDraft.reset();
         void message.success('Do‘kon ma’lumotlari saqlandi');
       },
       onError: (error) => void message.error(getAuthErrorMessage(error)),
@@ -109,15 +151,23 @@ export default function ShopPage() {
         title="Do‘kon profili"
         description="Xaridorlarga ko‘rinadigan do‘kon ma’lumotlarini boshqaring"
       />
-      <ShopProfileForm
-        form={form}
-        initialValues={profile}
-        editing={editing}
-        saving={updateShopMutation.isPending}
-        onEdit={startEditing}
-        onCancel={cancelEditing}
-        onSubmit={saveProfile}
-      />
+      <div className={styles.profileLayout}>
+        <ShopProfileHero
+          profile={{ ...profile, ...mediaDraft.preview }}
+          editing={editing}
+          status={shopQuery.data.status}
+          onImageSelect={mediaDraft.select}
+        />
+        <ShopProfileForm
+          form={form}
+          initialValues={profile}
+          editing={editing}
+          saving={updateShopMutation.isPending}
+          onEdit={startEditing}
+          onCancel={cancelEditing}
+          onSubmit={saveProfile}
+        />
+      </div>
     </div>
   );
 }

@@ -7,6 +7,19 @@ import {
   seedAccessToken,
 } from './support/auth';
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/v1/seller/dashboard', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: {
+        ordersTotal: 0, revenue: 0, pendingShipments: 0, delivered: 0,
+        lowStockCount: 0, topProducts: [], salesByDay: [],
+      } }),
+    });
+  });
+});
+
 test('TC1: token Authorization headerga Bearer formatida qo‘shiladi', async ({
   page,
 }) => {
@@ -82,6 +95,31 @@ test('TC4: sahifa yangilanganda token va autentifikatsiya saqlanadi', async ({
   ).toBeVisible();
 
   await page.reload();
+
+  await expect(page).toHaveURL('/');
+  await expect(
+    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
+  ).toBe(TEST_ACCESS_TOKEN);
+});
+
+test('TC5: pending seller sessiyasi saqlanadi va kabinetga kiradi', async ({
+  page,
+}) => {
+  await seedAccessToken(page);
+  await page.route('**/api/v1/auth/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: { ...authenticatedUser, isActive: false },
+      }),
+    });
+  });
+
+  await page.goto('/');
 
   await expect(page).toHaveURL('/');
   await expect(

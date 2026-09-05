@@ -2,6 +2,10 @@
   min-height: 100vh;
 }
 
+.compact {
+  min-height: min(52vh, 520px);
+}
+
 .placeholder {
   display: block;
   width: calc(var(--ant-size-unit) * 20);

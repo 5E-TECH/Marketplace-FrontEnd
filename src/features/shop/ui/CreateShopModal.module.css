@@ -1,0 +1,118 @@
+.modal :global(.ant-modal-content) {
+  padding: 24px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.modal :global(.ant-modal-close) {
+  color: var(--color-text-secondary);
+}
+
+.modal :global(.ant-modal-close:hover) {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  margin: 0 0 24px;
+  gap: 14px;
+}
+
+.headingIcon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  color: var(--color-accent);
+  background: rgb(245 158 11 / 12%);
+  border: 1px solid rgb(245 158 11 / 24%);
+  border-radius: var(--radius-md);
+  place-items: center;
+}
+
+.heading h2 {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--font-h2);
+}
+
+.heading p {
+  margin: 3px 0 0;
+  color: var(--color-text-secondary);
+}
+
+.form :global(.ant-form-item-label > label) {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.form :global(.ant-input),
+.form :global(.ant-input-affix-wrapper) {
+  min-height: 46px;
+  color: var(--color-text);
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.form :global(.ant-input-affix-wrapper .ant-input) {
+  min-height: auto;
+  background: transparent;
+}
+
+.form :global(textarea.ant-input) {
+  min-height: 96px;
+  padding-top: 12px;
+}
+
+.form :global(.ant-input::placeholder),
+.form :global(textarea.ant-input::placeholder) {
+  color: var(--color-text-muted);
+}
+
+.form :global(.ant-input:hover),
+.form :global(.ant-input-affix-wrapper:hover) {
+  border-color: #526581;
+}
+
+.form :global(.ant-input:focus),
+.form :global(.ant-input-affix-wrapper-focused) {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgb(245 158 11 / 12%);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  gap: 10px;
+}
+
+.actions :global(.ant-btn-default) {
+  color: var(--color-text);
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border);
+}
+
+@media (max-width: 575px) {
+  .modal :global(.ant-modal-content) {
+    padding: 18px;
+  }
+
+  .heading {
+    align-items: flex-start;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions :global(.ant-btn) {
+    width: 100%;
+  }
+}

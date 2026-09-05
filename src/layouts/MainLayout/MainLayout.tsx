@@ -1,5 +1,5 @@
 import { App, Drawer, Grid, Layout } from 'antd';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/store/hooks';
 import { useLogoutMutation } from '../../features/auth/api/useLogoutMutation';
@@ -8,9 +8,10 @@ import { SellerAccessGuard } from '../../features/auth/ui/SellerAccessGuard/Sell
 import { AppBreadcrumb } from './AppBreadcrumb';
 import { AppHeader } from './AppHeader';
 import { AppNavigation } from './AppNavigation';
-import { ApprovalBanner } from './ApprovalBanner';
 import { AppSidebar } from './AppSidebar';
 import styles from './MainLayout.module.css';
+import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
+import { prefetchRoute } from '../../app/router/routePreload';
 
 export default function MainLayout() {
   const { message } = App.useApp();
@@ -65,13 +66,17 @@ export default function MainLayout() {
                 : setMobileMenuOpen(true)
             }
             onLogout={handleLogout}
-            onNavigate={(path) => void navigate(path)}
+            onNavigate={(path) => {
+              prefetchRoute(path);
+              void navigate(path);
+            }}
           />
-          <ApprovalBanner pending={user?.role === 'SELLER' && !user.isActive} />
           <Layout.Content className={styles.content}>
             <AppBreadcrumb />
             <SellerAccessGuard>
-              <Outlet />
+              <Suspense fallback={<PageLoader compact />}>
+                <Outlet />
+              </Suspense>
             </SellerAccessGuard>
           </Layout.Content>
         </Layout>

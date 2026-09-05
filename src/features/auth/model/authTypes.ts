@@ -5,13 +5,17 @@ export interface LoginCredentials {
 
 export interface RegisterCredentials extends LoginCredentials {
   name: string;
+  email?: string;
+  shopName: string;
+  shopDescription?: string;
+  address?: string;
 }
 
 export interface LoginResponse {
   accessToken: string;
 }
 
-export type UserRole = 'SELLER' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
+export type UserRole = 'SELLER' | 'OPERATOR' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
 
 export interface AuthUser {
   id: string;
@@ -26,4 +30,12 @@ export interface AuthUser {
 
 export interface AuthSession extends LoginResponse {
   user: AuthUser;
+}
+
+/** `PATCH /auth/profile` — barcha maydon ixtiyoriy (UpdateProfileDto). */
+export interface UpdateProfilePayload {
+  name?: string;
+  phone?: string;
+  avatarUrl?: string;
+  password?: string;
 }

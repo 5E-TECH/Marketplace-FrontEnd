@@ -1,7 +1,9 @@
 import { Button, Result } from 'antd';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function NotFoundPage() {
+  const navigate = useNavigate();
+
   return (
     <main>
       <Result
@@ -9,9 +11,9 @@ export default function NotFoundPage() {
         title="404"
         subTitle="Sahifa topilmadi"
         extra={
-          <Link to="/">
-            <Button type="primary">Bosh sahifaga qaytish</Button>
-          </Link>
+          <Button type="primary" onClick={() => void navigate('/')}>
+            Bosh sahifaga qaytish
+          </Button>
         }
       />
     </main>

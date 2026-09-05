@@ -1,0 +1,21 @@
+.profileCard { overflow: hidden; padding: 24px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0 0 18px 18px; }
+.cardHeader { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 20px; }
+.cardHeader h3 { margin: 0 0 var(--space-1) !important; color: #f8fafc !important; font-size: 20px !important; line-height: 28px !important; font-weight: 600 !important; }
+.cardHeader > div > span { color: var(--color-text-secondary); font-size: 14px; }
+.cardHeader :global(.ant-btn-primary) { min-width: 118px; background: #f59e0b; border-color: #f59e0b; box-shadow: none; border-radius: var(--radius-md); }
+.cardHeader :global(.ant-btn-primary:hover) { background: #fbbf24 !important; border-color: #fbbf24 !important; box-shadow: 0 8px 22px rgb(245 158 11 / 18%) !important; }
+.cardHeader :global(.ant-btn:focus-visible) { outline: 2px solid rgb(245 158 11 / 45%); outline-offset: 2px; box-shadow: none !important; }
+.form :global(.ant-form-item) { margin-bottom: 18px; }
+.form :global(.ant-form-item-label) { padding-bottom: var(--space-2); }
+.form :global(.ant-form-item-label > label) { height: auto; color: #a8b4ca; font-size: 14px; font-weight: 600; gap: var(--space-2); }
+.form :global(.ant-form-item-label svg) { width: 15px; height: 15px; color: #71809f; }
+.form :global(.ant-input), .form :global(.ant-input-affix-wrapper), .form :global(.ant-select-selector) { min-height: 48px !important; color: #e2e8f0; background: #0d1525 !important; border-color: #2d3a55 !important; border-radius: var(--radius-md) !important; box-shadow: none !important; font-size: 15px; }
+.form :global(textarea.ant-input) { min-height: 96px !important; padding-top: var(--space-3); resize: vertical; }
+.form :global(.ant-input:hover), .form :global(.ant-select-selector:hover) { border-color: #526581 !important; }
+.form :global(.ant-input:focus), .form :global(.ant-select-focused .ant-select-selector) { border-color: #fb923c !important; box-shadow: 0 0 0 2px rgb(245 158 11 / 12%) !important; }
+.form :global(.ant-input[disabled]), .form :global(.ant-select-disabled .ant-select-selector), .form :global(textarea.ant-input[disabled]) { color: #d6deeb !important; background: #0d1525 !important; border-color: #27344c !important; cursor: default; opacity: 1; -webkit-text-fill-color: #d6deeb; }
+.readonlyForm :global(textarea.ant-input) { min-height: 48px !important; height: 48px !important; padding-block: 12px; overflow: hidden; resize: none; }
+.form :global(.ant-select-disabled) { opacity: 1; }
+.form :global(.ant-select-disabled .ant-select-selection-item) { color: #d6deeb !important; -webkit-text-fill-color: #d6deeb; }
+.form :global(.ant-select-disabled .ant-select-arrow) { color: #71809f; }
+@media (max-width: 767px) { .profileCard { padding: 16px; border-radius: 0 0 16px 16px; } .cardHeader { margin-bottom: 20px; align-items: stretch; flex-direction: column; } .cardHeader > :global(.ant-btn), .cardHeader > :global(.ant-space) { width: 100%; } .cardHeader :global(.ant-btn) { flex: 1; } }

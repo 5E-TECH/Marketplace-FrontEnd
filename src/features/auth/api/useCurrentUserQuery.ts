@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '../../../app/store/hooks';
 import {
   currentUserLoaded,
+  loggedOut,
   selectAccessToken,
 } from '../model/authSlice';
+import { canAccessSellerCabinet } from '../lib/sellerAccess';
 import { getCurrentUser } from './authApi';
 
 export function useCurrentUserQuery() {
@@ -12,8 +14,14 @@ export function useCurrentUserQuery() {
 
   return useQuery({
     queryKey: ['auth', 'me'],
-    queryFn: async () => {
-      const user = await getCurrentUser();
+    queryFn: async ({ signal }) => {
+      const user = await getCurrentUser(undefined, signal);
+
+      if (!canAccessSellerCabinet(user)) {
+        dispatch(loggedOut());
+        throw new Error('Bu akkaunt orqali seller kabinetiga kirish mumkin emas');
+      }
+
       dispatch(currentUserLoaded(user));
       return user;
     },

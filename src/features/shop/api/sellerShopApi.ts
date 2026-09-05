@@ -1,4 +1,5 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapData } from '../../../shared/api/unwrapData';
 
 export type SellerShopStatus =
   | 'PENDING'
@@ -34,15 +35,21 @@ export interface UpdateSellerShopPayload {
   address?: string;
 }
 
+export interface CreateSellerShopPayload {
+  name: string;
+  phone: string;
+  password: string;
+  shopName: string;
+  shopDescription?: string;
+  address?: string;
+}
+
 function nullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
 
 function parseSellerShop(response: unknown): SellerShop {
-  const candidate =
-    typeof response === 'object' && response !== null && 'data' in response
-      ? response.data
-      : response;
+  const candidate = unwrapData(response);
 
   if (
     typeof candidate !== 'object' ||
@@ -84,8 +91,8 @@ function parseSellerShop(response: unknown): SellerShop {
   return candidate as SellerShop;
 }
 
-export async function getSellerShop(): Promise<SellerShop> {
-  const { data } = await httpClient.get<unknown>('/sellers/me');
+export async function getSellerShop(signal?: AbortSignal): Promise<SellerShop> {
+  const { data } = await httpClient.get<unknown>('/sellers/me', { signal });
   return parseSellerShop(data);
 }
 
@@ -94,4 +101,18 @@ export async function updateSellerShop(
 ): Promise<SellerShop> {
   const { data } = await httpClient.patch<unknown>('/sellers/me', payload);
   return parseSellerShop(data);
+}
+
+export async function createSellerShop(
+  payload: CreateSellerShopPayload,
+): Promise<void> {
+  const { name, phone, password, shopName, shopDescription, address } = payload;
+  await httpClient.post('/sellers/register', {
+    name,
+    phone,
+    password,
+    shopName,
+    ...(shopDescription ? { shopDescription } : {}),
+    ...(address ? { address } : {}),
+  });
 }
