@@ -14,9 +14,10 @@ export const appTheme: ThemeConfig = {
     colorTextSecondary: palette.textSecondary,
     colorTextDisabled: palette.textDisabled,
     colorBorder: palette.border,
-    colorBgBase: palette.backgroundContainer,
+    colorBgBase: palette.backgroundLayout,
     colorBgLayout: palette.backgroundLayout,
     colorBgContainer: palette.backgroundContainer,
+    colorBgElevated: palette.backgroundContainer,
     borderRadius: 8,
     fontFamily:
       "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -66,6 +67,14 @@ export const appTheme: ThemeConfig = {
     },
     Modal: {
       borderRadiusLG: 16,
+      contentBg: palette.backgroundContainer,
+      headerBg: palette.backgroundContainer,
+    },
+    Drawer: {
+      colorBgElevated: palette.backgroundContainer,
+    },
+    Popover: {
+      colorBgElevated: palette.backgroundContainer,
     },
   },
 };

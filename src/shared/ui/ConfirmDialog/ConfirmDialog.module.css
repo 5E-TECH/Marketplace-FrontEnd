@@ -1,0 +1,62 @@
+.modal :global(.ant-modal-mask) {
+  background: var(--color-overlay) !important;
+  backdrop-filter: blur(3px);
+}
+
+.modal :global(.ant-modal-container) {
+  overflow: hidden;
+  padding: var(--space-6);
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.modal :global(.ant-modal-header),
+.modal :global(.ant-modal-footer) {
+  background: var(--color-surface) !important;
+}
+
+.modal :global(.ant-modal-title) {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.modal :global(.ant-modal-body) {
+  padding-block: var(--space-3) var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.modal :global(.ant-modal-close) {
+  color: var(--color-text-secondary);
+}
+
+.modal :global(.ant-modal-close:hover) {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.modal :global(.ant-modal-footer) {
+  display: flex;
+  margin-top: var(--space-4);
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.modal :global(.ant-modal-footer .ant-btn) {
+  min-width: 96px;
+  margin-inline-start: 0 !important;
+}
+
+@media (max-width: 575px) {
+  .modal {
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+  }
+
+  .modal :global(.ant-modal-container) {
+    padding: var(--space-4);
+  }
+}

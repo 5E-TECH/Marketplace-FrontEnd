@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAdminUser, getAdminUsers, setAdminUserBlocked } from './adminUserApi';
-import type { AdminUserListParams } from '../model/adminUserTypes';
+import { createAdminUser, deleteAdminUser, getAdminUser, getAdminUsers, setAdminUserBlocked, updateAdminUser } from './adminUserApi';
+import type { AdminUserListParams, CreateAdminUserPayload, UpdateAdminUserPayload } from '../model/adminUserTypes';
 
 export const adminUserKeys = {
   all: ['admin-users'] as const,
@@ -13,4 +13,28 @@ export const useAdminUserQuery = (id: string | null) => useQuery({ queryKey: adm
 export function useSetAdminUserBlockedMutation() {
   const client = useQueryClient();
   return useMutation({ mutationFn: setAdminUserBlocked, onSuccess: () => client.invalidateQueries({ queryKey: adminUserKeys.all }) });
+}
+
+export function useCreateAdminUserMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateAdminUserPayload) => createAdminUser(payload),
+    onSuccess: () => client.invalidateQueries({ queryKey: adminUserKeys.all }),
+  });
+}
+
+export function useUpdateAdminUserMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateAdminUserPayload) => updateAdminUser(payload),
+    onSuccess: () => client.invalidateQueries({ queryKey: adminUserKeys.all }),
+  });
+}
+
+export function useDeleteAdminUserMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteAdminUser(id),
+    onSuccess: () => client.invalidateQueries({ queryKey: adminUserKeys.all }),
+  });
 }

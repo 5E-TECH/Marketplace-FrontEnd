@@ -182,6 +182,74 @@
   --color-token-rgb-245-158-11-13: rgb(245 158 11 / 13%);
 }
 
+/*
+ * Ant Design overlaylari portal orqali body ichiga render qilinadi. CSS module
+ * scope ularga doim yetib bormaydi, shuning uchun barcha popup yuzalari shu
+ * markaziy dark palette bilan bir xil qilinadi.
+ */
+:where(.ant-modal-root) .ant-modal-mask,
+:where(.ant-drawer-root) .ant-drawer-mask {
+  background: var(--color-overlay) !important;
+  backdrop-filter: blur(3px);
+}
+
+:where(.ant-modal-root) .ant-modal-content,
+:where(.ant-modal-root) .ant-modal-container,
+:where(.ant-modal-root) .ant-modal-header,
+:where(.ant-modal-root) .ant-modal-footer,
+:where(.ant-drawer-root) .ant-drawer-content,
+:where(.ant-drawer-root) .ant-drawer-header,
+:where(.ant-drawer-root) .ant-drawer-body,
+:where(.ant-popover) .ant-popover-inner,
+:where(.ant-select-dropdown),
+:where(.ant-dropdown) .ant-dropdown-menu,
+:where(.ant-picker-dropdown) .ant-picker-panel-container {
+  color: var(--color-text) !important;
+  background: var(--color-surface) !important;
+}
+
+:where(.ant-modal-root) .ant-modal-content,
+:where(.ant-modal-root) .ant-modal-container,
+:where(.ant-popover) .ant-popover-inner,
+:where(.ant-select-dropdown),
+:where(.ant-dropdown) .ant-dropdown-menu,
+:where(.ant-picker-dropdown) .ant-picker-panel-container {
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md) !important;
+}
+
+:where(.ant-modal-root) .ant-modal-title,
+:where(.ant-popover) .ant-popover-title {
+  color: var(--color-text) !important;
+}
+
+:where(.ant-modal-root) .ant-modal-body,
+:where(.ant-popover) .ant-popover-inner-content {
+  color: var(--color-text-secondary) !important;
+}
+
+:where(.ant-modal-root) .ant-input,
+:where(.ant-modal-root) .ant-input-affix-wrapper,
+:where(.ant-modal-root) .ant-input-number,
+:where(.ant-modal-root) .ant-input-number-input,
+:where(.ant-modal-root) .ant-select-selector,
+:where(.ant-modal-root) textarea.ant-input {
+  color: var(--color-text) !important;
+  background: var(--color-surface-subtle) !important;
+  border-color: var(--color-border) !important;
+}
+
+:where(.ant-select-dropdown) .ant-select-item-option-active:not(.ant-select-item-option-disabled),
+:where(.ant-dropdown) .ant-dropdown-menu-item:hover,
+:where(.ant-dropdown) .ant-dropdown-menu-submenu-title:hover {
+  background: var(--color-surface-hover) !important;
+}
+
+:where(.ant-select-dropdown) .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  color: var(--color-accent) !important;
+  background: var(--color-accent-soft) !important;
+}
+
 * {
   box-sizing: border-box;
 }

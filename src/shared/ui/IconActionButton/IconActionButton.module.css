@@ -1,0 +1,24 @@
+.button {
+  display: inline-grid !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  color: var(--color-text-secondary) !important;
+  border-radius: var(--radius-sm) !important;
+  place-items: center;
+}
+
+.button:hover:not(:disabled) {
+  color: var(--color-accent) !important;
+  background: var(--color-accent-soft) !important;
+}
+
+.button:global(.ant-btn-dangerous) {
+  color: var(--color-error) !important;
+}
+
+.button:global(.ant-btn-dangerous):hover:not(:disabled) {
+  color: var(--color-error) !important;
+  background: var(--color-error-soft) !important;
+}

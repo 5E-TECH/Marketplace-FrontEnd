@@ -6,23 +6,111 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/v1/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { id: 'admin-e2e', role: 'SUPERADMIN', name: 'Super Admin', phone: '+998901234567', isActive: true, isDeleted: false } }) }));
 });
 
-test('admin users list, detail va block/unblock endpointlari ishlaydi', async ({ page }) => {
-  const user = { id: '17', name: 'Ali Valiyev', phone: '+998901112233', role: 'BUYER', isBlocked: false, createdAt: '2026-09-04T08:00:00.000Z' };
+test('admin user list, detail, edit, block va delete oqimlari ishlaydi', async ({ page }) => {
+  let user = { id: '17', name: 'Ali Valiyev', phone: '+998901112233', email: 'ali@example.com', avatarUrl: null, role: 'BUYER', isActive: true, isBlocked: false, isDeleted: false, shopId: null, createdAt: '2026-09-04T08:00:00.000Z', updatedAt: '2026-09-05T09:30:00.000Z' };
   let blocked = false;
+  let deleted = false;
+  let updateBody: Record<string, unknown> | undefined;
   await page.route('**/api/v1/admin/users**', async route => {
     const request = route.request();
-    if (request.url().endsWith('/17/block')) { blocked = true; await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' }); return; }
+    if (request.url().endsWith('/17/block')) {
+      blocked = true;
+      user = { ...user, isBlocked: true };
+      await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
+      return;
+    }
+    if (request.url().endsWith('/17') && request.method() === 'PATCH') {
+      updateBody = request.postDataJSON() as Record<string, unknown>;
+      user = { ...user, ...updateBody, updatedAt: '2026-09-05T10:00:00.000Z' };
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: user }) });
+      return;
+    }
+    if (request.url().endsWith('/17') && request.method() === 'DELETE') {
+      deleted = true;
+      await route.fulfill({ status: 204 });
+      return;
+    }
     if (request.url().endsWith('/17')) { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: user }) }); return; }
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [user], total: 1, page: 1, limit: 20, totalPages: 1 } }) });
+    const items = deleted ? [] : [user];
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items, total: items.length, page: 1, limit: 20, totalPages: items.length } }) });
   });
   await page.goto('/admin/users');
-  await page.getByRole('button', { name: 'Foydalanuvchi tafsilotlari' }).click();
-  await expect(page.getByRole('dialog')).toContainText('Ali Valiyev');
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toBeHidden();
+
+  await expect(page.getByRole('button', { name: 'Bloklash' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'O‘chirish' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Tafsilotlar' })).toBeVisible();
   await page.getByRole('button', { name: 'Bloklash' }).click();
   await page.getByRole('button', { name: 'Bloklash', exact: true }).last().click();
   await expect.poll(() => blocked).toBe(true);
+
+  await page.getByRole('button', { name: 'Tafsilotlar' }).click();
+  await expect(page).toHaveURL(/\/admin\/users\/17$/);
+  await expect(page.getByRole('heading', { name: 'Foydalanuvchi tafsilotlari' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ali Valiyev' })).toBeVisible();
+  await expect(page.getByText('ali@example.com').first()).toBeVisible();
+  await expect(page.getByText('Biriktirilmagan')).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Tahrirlash' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Foydalanuvchini tahrirlash' });
+  await expect(editDialog).toBeVisible();
+  await editDialog.getByLabel('To‘liq ism').fill('Ali Valiyev Updated');
+  await editDialog.getByLabel('Email').fill('updated@example.com');
+  await editDialog.getByRole('button', { name: 'O‘zgarishlarni saqlash' }).click();
+  await expect.poll(() => updateBody).toEqual({
+    name: 'Ali Valiyev Updated',
+    phone: '+998901112233',
+    email: 'updated@example.com',
+    role: 'BUYER',
+  });
+  await expect(page.getByRole('heading', { name: 'Ali Valiyev Updated' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'O‘chirish' }).click();
+  const deleteDialog = page.getByRole('dialog', { name: 'Foydalanuvchi o‘chirilsinmi?' });
+  await expect(deleteDialog).toBeVisible();
+  await deleteDialog.getByRole('button', { name: 'O‘chirish', exact: true }).click();
+  await expect.poll(() => deleted).toBe(true);
+  await expect(page).toHaveURL(/\/admin\/users$/);
+});
+
+test('admin alohida sahifada yangi foydalanuvchi yaratadi', async ({ page }) => {
+  let requestBody: Record<string, unknown> | undefined;
+  await page.route('**/api/v1/admin/users**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 } }),
+  }));
+  await page.route('**/api/v1/auth/register', async route => {
+    requestBody = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { accessToken: 'created-user-token' } }),
+    });
+  });
+
+  await page.goto('/admin/users');
+  await page.getByRole('button', { name: 'Foydalanuvchi qo‘shish' }).click();
+  await expect(page).toHaveURL(/\/admin\/users\/new$/);
+  await expect(page.getByRole('heading', { name: 'Yangi foydalanuvchi' })).toBeVisible();
+
+  await page.getByLabel('To‘liq ism').fill('Yangi Operator');
+  await page.getByLabel('Telefon raqami').fill('+998901234568');
+  await page.getByLabel('Email').fill('operator@example.com');
+  await page.getByLabel('Foydalanuvchi roli').click();
+  await page.locator('.ant-select-item-option').filter({ hasText: 'Operator' }).click();
+  await page.getByLabel('Parol', { exact: true }).fill('Secret123');
+  await page.getByLabel('Parolni tasdiqlash').fill('Secret123');
+  await page.getByRole('button', { name: 'Foydalanuvchi yaratish' }).click();
+
+  await expect(page).toHaveURL(/\/admin\/users$/);
+  expect(requestBody).toEqual({
+    name: 'Yangi Operator',
+    phone: '+998901234568',
+    email: 'operator@example.com',
+    role: 'OPERATOR',
+    password: 'Secret123',
+  });
 });
 
 test('admin payout action va report endpointlari ishlaydi', async ({ page }) => {

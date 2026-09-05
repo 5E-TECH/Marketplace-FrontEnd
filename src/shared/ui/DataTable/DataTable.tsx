@@ -33,6 +33,7 @@ export function DataTable<RecordType extends object>({
   pagination = defaultPagination,
   emptyState,
   onChange,
+  className,
   ...tableProps
 }: DataTableProps<RecordType>) {
   const { language, t } = useTranslation();
@@ -85,6 +86,7 @@ export function DataTable<RecordType extends object>({
       ) : null}
       <Table<RecordType>
         {...tableProps}
+        className={`${styles.table} ${className ?? ''}`.trim()}
         dataSource={filteredData}
         pagination={
           pagination === false

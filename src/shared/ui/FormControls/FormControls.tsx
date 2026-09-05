@@ -47,7 +47,7 @@ interface SelectControlProps {
   defaultValue?: string;
   placeholder?: string;
   disabled?: boolean;
-  options: SelectControlOption[];
+  options: readonly SelectControlOption[];
   onChange?: (value: string) => void;
 }
 
@@ -56,7 +56,7 @@ export function SelectControl({ options, ...props }: SelectControlProps) {
     <Select
       {...props}
       className={`${styles.control} ${styles.selectControl}`}
-      options={options}
+      options={[...options]}
       optionRender={(option) => {
         const item = options.find(({ value }) => value === option.value);
         return (

@@ -8,13 +8,36 @@ export interface AdminUserListParams {
   limit: number;
 }
 
+export interface CreateAdminUserPayload {
+  name: string;
+  phone: string;
+  email?: string;
+  password: string;
+  role: AdminUserRole;
+}
+
+export interface UpdateAdminUserPayload {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  role: AdminUserRole;
+}
+
 export interface AdminUser {
   id: string;
   name: string;
   phone: string;
+  email: string | null;
+  avatarUrl: string | null;
   role: AdminUserRole;
+  isActive: boolean;
+  isBlocked: boolean;
+  isDeleted: boolean;
+  shopId: string | null;
   blocked: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface AdminUsersPage {
