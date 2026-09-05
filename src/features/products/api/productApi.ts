@@ -1,11 +1,8 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapData } from '../../../shared/api/unwrapData';
 import type { Product, ProductListParams, ProductPage, ProductStatus, ProductUpsertPayload, ProductVariant } from '../model/productTypes';
 
 const productStatuses: ProductStatus[] = ['ACTIVE', 'LOW', 'INACTIVE', 'DRAFT', 'ARCHIVED', 'OUT_OF_STOCK'];
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
-}
 
 function toNumber(value: unknown, field: string): number {
   const parsed = typeof value === 'string' ? Number(value) : value;
@@ -55,7 +52,7 @@ function parseVariants(value: unknown): ProductVariant[] {
 }
 
 function parseProduct(value: unknown): Product {
-  const candidate = unwrap(value);
+  const candidate = unwrapData(value);
   if (typeof candidate !== 'object' || candidate === null) {
     throw new Error('Mahsulot serverdan noto‘g‘ri formatda keldi');
   }
@@ -107,7 +104,7 @@ function parseProduct(value: unknown): Product {
 }
 
 function parseProductPage(value: unknown, fallback: ProductListParams): ProductPage {
-  const unwrapped = unwrap(value);
+  const unwrapped = unwrapData(value);
   const list = Array.isArray(unwrapped)
     ? unwrapped
     : typeof unwrapped === 'object' && unwrapped !== null && 'items' in unwrapped && Array.isArray(unwrapped.items)

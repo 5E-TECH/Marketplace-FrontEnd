@@ -1,11 +1,8 @@
 import { httpClient } from '../../../shared/api/httpClient';
+import { unwrapData } from '../../../shared/api/unwrapData';
 import type { SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
-
-function unwrap(value: unknown): unknown {
-  return typeof value === 'object' && value !== null && 'data' in value ? value.data : value;
-}
 
 function numberField(record: Record<string, unknown>, key: string): number {
   const value = record[key];
@@ -36,10 +33,9 @@ function parseOrder(value: unknown): SellerOrder {
   };
 }
 
-export async function getSellerOrders(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
-  const { data } = await httpClient.get<unknown>('/seller/orders', { signal, params });
-  const value = unwrap(data);
-  if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error('Buyurtmalar ro‘yxati noto‘g‘ri formatda');
+function parseOrdersPage(data: unknown, label: string): SellerOrdersPage {
+  const value = unwrapData(data);
+  if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error(`${label} noto‘g‘ri formatda`);
   const page = value as Record<string, unknown>;
   return {
     items: value.items.map(parseOrder),
@@ -48,6 +44,20 @@ export async function getSellerOrders(params: SellerOrderListParams, signal?: Ab
     limit: numberField(page, 'limit'),
     totalPages: numberField(page, 'totalPages'),
   };
+}
+
+export async function getSellerOrders(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
+  const { data } = await httpClient.get<unknown>('/seller/orders', { signal, params });
+  return parseOrdersPage(data, 'Buyurtmalar ro‘yxati');
+}
+
+/**
+ * Yetkazib berishga topshirilgan buyurtmalar. Backend `GET /seller/shipments`
+ * buyurtma ro'yxati bilan bir xil qobiqni qaytaradi (faqat jo'natmalar filtri).
+ */
+export async function getSellerShipments(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
+  const { data } = await httpClient.get<unknown>('/seller/shipments', { signal, params });
+  return parseOrdersPage(data, 'Jo‘natmalar ro‘yxati');
 }
 
 export async function updateSellerOrderStatus({ id, status }: UpdateSellerOrderStatusPayload): Promise<void> {

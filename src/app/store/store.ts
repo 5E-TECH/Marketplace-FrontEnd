@@ -1,6 +1,7 @@
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import {
+  accessTokenRefreshed,
   authenticated,
   authReducer,
   loggedOut,
@@ -11,6 +12,17 @@ const authPersistence = createListenerMiddleware();
 
 authPersistence.startListening({
   actionCreator: authenticated,
+  effect: ({ payload }, { dispatch }) => {
+    try {
+      authStorage.setAccessToken(payload.accessToken);
+    } catch {
+      dispatch(loggedOut());
+    }
+  },
+});
+
+authPersistence.startListening({
+  actionCreator: accessTokenRefreshed,
   effect: ({ payload }, { dispatch }) => {
     try {
       authStorage.setAccessToken(payload.accessToken);
