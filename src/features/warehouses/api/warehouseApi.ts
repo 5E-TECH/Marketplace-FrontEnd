@@ -8,11 +8,11 @@ function nullableString(value: unknown): string | null {
 
 function parseWarehouse(value: unknown): Warehouse {
   const item = unwrapApiData(value);
-  if (typeof item !== 'object' || item === null || !('id' in item) || typeof item.id !== 'string' || !('name' in item) || typeof item.name !== 'string') {
+  if (typeof item !== 'object' || item === null || !('id' in item) || (typeof item.id !== 'string' && typeof item.id !== 'number') || !('name' in item) || typeof item.name !== 'string') {
     throw new Error('Ombor serverdan noto‘g‘ri formatda keldi');
   }
   return {
-    id: item.id,
+    id: String(item.id),
     ownerId: 'ownerId' in item && typeof item.ownerId === 'string' ? item.ownerId : '',
     name: item.name,
     regionId: nullableString('regionId' in item ? item.regionId : null),
@@ -35,6 +35,20 @@ export async function getWarehouses(signal?: AbortSignal): Promise<Warehouse[]> 
 export async function createWarehouse(payload: WarehousePayload): Promise<Warehouse> {
   const { data } = await httpClient.post<unknown>('/inventory/warehouses', payload);
   return parseWarehouse(data);
+}
+
+export async function getWarehouse(id: string, signal?: AbortSignal): Promise<Warehouse> {
+  const { data } = await httpClient.get<unknown>(`/inventory/warehouses/${encodeURIComponent(id)}`, { signal });
+  return parseWarehouse(data);
+}
+
+export async function updateWarehouse(id: string, payload: WarehousePayload): Promise<Warehouse> {
+  const { data } = await httpClient.patch<unknown>(`/inventory/warehouses/${encodeURIComponent(id)}`, payload);
+  return parseWarehouse(data);
+}
+
+export async function deleteWarehouse(id: string): Promise<void> {
+  await httpClient.delete(`/inventory/warehouses/${encodeURIComponent(id)}`);
 }
 
 export async function setDefaultWarehouse(id: string): Promise<Warehouse> {

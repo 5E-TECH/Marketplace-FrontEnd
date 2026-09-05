@@ -7,23 +7,23 @@
 .addButton,
 .filter {
   color: var(--color-text);
-  background: rgb(255 255 255 / 4%) !important;
-  border-color: rgb(255 255 255 / 10%) !important;
+  background: var(--color-white-soft) !important;
+  border-color: var(--color-token-rgb-255-255-255-10) !important;
   box-shadow: none;
 }
 
 .addButton:hover {
   color: var(--color-accent) !important;
-  background: rgb(245 158 11 / 9%) !important;
-  border-color: rgb(245 158 11 / 28%) !important;
+  background: var(--color-token-rgb-245-158-11-9) !important;
+  border-color: var(--color-token-rgb-245-158-11-28) !important;
 }
 
 .page :global(.ant-table-tbody > tr > td) {
-  background: rgb(15 23 42 / 22%);
+  background: var(--color-token-rgb-15-23-42-22);
 }
 
 .page :global(.ant-table-tbody > tr:hover > td) {
-  background: rgb(255 255 255 / 4%) !important;
+  background: var(--color-white-soft) !important;
 }
 
 .rowActions {

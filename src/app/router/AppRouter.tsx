@@ -30,13 +30,23 @@ const UsersPage = lazy(routeImports.users);
 const UserEditorPage = lazy(routeImports.userEditor);
 const AdminShopsPage = lazy(routeImports.adminShops);
 const AdminOrdersPage = lazy(routeImports.adminOrders);
+const AdminUsersPage = lazy(routeImports.adminUsers);
+const AdminFinancePage = lazy(routeImports.adminFinance);
+const AdminSystemHealthPage = lazy(routeImports.adminSystemHealth);
+const CheckoutPage = lazy(routeImports.checkout);
+const AdminOverviewPage = lazy(routeImports.adminOverview);
+const AdminResourcePage = lazy(routeImports.adminResource);
+const AuthRecoveryPage = lazy(routeImports.authRecovery);
+const AccountRegisterPage = lazy(() => import('../../pages/AccountRegisterPage/AccountRegisterPage'));
+const AdminCategoriesPage = lazy(() => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
   : null;
 
 function RoleHomeRoute() {
   const role = useAppSelector(selectAuthUser)?.role;
-  if (role === 'ADMIN' || role === 'SUPERADMIN') return <Navigate to="/admin/shops" replace />;
+  if (role === 'ADMIN' || role === 'SUPERADMIN') return <Navigate to="/admin/overview" replace />;
+  if (role === 'BUYER') return <Navigate to="/checkout" replace />;
   return <SellerAccessGuard><HomePage /></SellerAccessGuard>;
 }
 
@@ -52,6 +62,10 @@ export function AppRouter() {
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
+            <Route path="register/account" element={<AccountRegisterPage />} />
+            <Route path="forgot-password" element={<AuthRecoveryPage />} />
+            <Route path="reset-password" element={<AuthRecoveryPage />} />
+            <Route path="verify-phone" element={<AuthRecoveryPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
@@ -60,9 +74,16 @@ export function AppRouter() {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="support" element={<SupportPage />} />
+              <Route path="checkout" element={<CheckoutPage />} />
               <Route element={<AdminOnlyRoute />}>
+                <Route path="admin/overview" element={<AdminOverviewPage />} />
                 <Route path="admin/shops" element={<AdminShopsPage />} />
                 <Route path="admin/orders" element={<AdminOrdersPage />} />
+                <Route path="admin/users" element={<AdminUsersPage />} />
+                <Route path="admin/finance" element={<AdminFinancePage />} />
+                <Route path="admin/system-settings" element={<AdminSystemHealthPage />} />
+                <Route path="admin/categories" element={<AdminCategoriesPage />} />
+                <Route path="admin/:module" element={<AdminResourcePage />} />
               </Route>
               <Route element={<SellerAccessGuard />}>
                 <Route path="products" element={<ProductsPage />} />

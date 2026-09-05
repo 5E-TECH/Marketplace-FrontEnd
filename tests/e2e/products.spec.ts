@@ -151,11 +151,15 @@ test('product PATCH /products/12 orqali Bearer token bilan yangilanadi', async (
   expect(method).toBe('PATCH');
   expect(authorization).toBe('Bearer e2e.access.token');
   expect(requestBody).toEqual({
+    categoryId: '1',
     name: 'Yangi nom',
     description: 'Yangilangan tavsif',
     price: 125000,
+    oldPrice: null,
+    imageUrl: null,
     images: [],
     attributes: {},
+    status: 'DRAFT',
   });
 });
 
@@ -224,8 +228,10 @@ test('product create yangi API contractiga mos payload yuboradi', async ({ page 
   let requestBody: Record<string, unknown> | undefined;
   let uploadContentType = '';
   let uploadBody = '';
+  let uploadAuthorization = '';
   await page.route('**/api/v1/files/upload', async (route) => {
     uploadContentType = route.request().headers()['content-type'] ?? '';
+    uploadAuthorization = route.request().headers().authorization ?? '';
     uploadBody = route.request().postData() ?? '';
     await route.fulfill({
       status: 201,
@@ -274,14 +280,19 @@ test('product create yangi API contractiga mos payload yuboradi', async ({ page 
 
   await expect(page.getByText('Mahsulot yaratildi')).toBeVisible();
   expect(requestBody).toEqual({
+    categoryId: null,
     name: 'iPhone 16 Pro',
     description: 'Titanium, 256 GB',
     price: 14999000,
     oldPrice: 15999000,
+    imageUrl: null,
     images: [],
     attributes: { brand: 'Apple', storage: '256 GB' },
+    status: 'DRAFT',
   });
   expect(uploadContentType).toContain('multipart/form-data');
+  expect(uploadAuthorization).toBe('Bearer e2e.access.token');
+  expect(uploadBody).toContain('name="file"; filename="iphone.png"');
   expect(uploadBody).toContain('name="productId"');
   expect(uploadBody).toContain('12');
   expect(uploadBody).toContain('name="isCover"');

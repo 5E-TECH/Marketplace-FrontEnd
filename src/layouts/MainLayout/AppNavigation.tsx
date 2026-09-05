@@ -8,6 +8,7 @@ import { prefetchRoute } from '../../app/router/routePreload';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { useAppSelector } from '../../app/store/hooks';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
+import { adminNavigation } from '../../features/adminDashboard/model/adminNavigation';
 
 interface AppNavigationProps {
   onNavigate?: () => void;
@@ -46,6 +47,11 @@ export function AppNavigation({ onNavigate }: AppNavigationProps) {
     void navigate(key);
     onNavigate?.();
   };
+
+  if (isAdmin) {
+    const selectedGroup = adminNavigation.find(({ items }) => items.some(({ path }) => location.pathname === path || location.pathname.startsWith(`${path}/`)));
+    return <div className="app-navigation-shell admin-navigation-shell"><Menu mode="inline" className="app-navigation admin-navigation" selectedKeys={selectedGroup ? [selectedGroup.items[0].path] : []} items={adminNavigation.map((group) => ({ key: group.items[0].path, label: group.label, icon: group.icon }))} onClick={({ key }) => handleClick(key)} /></div>;
+  }
 
   return (
     <div className="app-navigation-shell">

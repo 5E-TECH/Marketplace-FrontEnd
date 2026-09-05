@@ -8,6 +8,10 @@ import type {
   RegisterCredentials,
   UpdateAuthProfilePayload,
   UserRole,
+  PhonePayload,
+  VerifyPhonePayload,
+  ResetPasswordPayload,
+  AuthDeviceSession,
 } from '../model/authTypes';
 
 interface LoginApiResponse {
@@ -132,3 +136,21 @@ export async function updateAuthProfile(
 export async function logout(): Promise<void> {
   await httpClient.post('/auth/logout');
 }
+
+export async function refreshAccessToken(refreshToken?: string): Promise<LoginResponse> {
+  const { data } = await httpClient.post<unknown>('/auth/refresh', refreshToken ? { refreshToken } : {});
+  return parseLoginResponse(data);
+}
+export async function forgotPassword(payload: PhonePayload): Promise<void> { await httpClient.post('/auth/forgot-password', payload); }
+export async function resetPassword(payload: ResetPasswordPayload): Promise<void> { await httpClient.post('/auth/reset-password', payload); }
+export async function verifyPhone(payload: VerifyPhonePayload): Promise<void> { await httpClient.post('/auth/verify-phone', payload); }
+export async function resendCode(payload: PhonePayload): Promise<void> { await httpClient.post('/auth/resend-code', payload); }
+export async function registerAccount(payload: { name: string; phone: string; password: string; email?: string; role?: UserRole }): Promise<LoginResponse> { const { data } = await httpClient.post<unknown>('/auth/register', payload); return parseLoginResponse(data); }
+
+function parseSessions(value: unknown): AuthDeviceSession[] {
+  const data = unwrapApiData(value); const list = Array.isArray(data) ? data : data && typeof data === 'object' && 'items' in data && Array.isArray(data.items) ? data.items : null;
+  if (!list) throw new Error('Sessiyalar noto‘g‘ri formatda keldi');
+  return list.map((item: unknown, index) => { const row = item && typeof item === 'object' ? item as Record<string, unknown> : {}; const text = (key: string, fallback = '') => typeof row[key] === 'string' ? row[key] : fallback; return { id: text('id', String(index)), userAgent: text('userAgent', 'Noma’lum qurilma'), ipAddress: text('ipAddress', text('ip', '—')), createdAt: text('createdAt', new Date().toISOString()), lastUsedAt: text('lastUsedAt') || null, current: row.current === true || row.isCurrent === true }; });
+}
+export async function getAuthSessions(signal?: AbortSignal): Promise<AuthDeviceSession[]> { const { data } = await httpClient.get<unknown>('/auth/sessions', { signal }); return parseSessions(data); }
+export async function revokeAuthSession(id: string): Promise<void> { await httpClient.delete(`/auth/sessions/${encodeURIComponent(id)}`); }

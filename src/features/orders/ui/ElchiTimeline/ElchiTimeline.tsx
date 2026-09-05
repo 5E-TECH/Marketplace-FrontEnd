@@ -2,6 +2,7 @@ import { Button, Timeline } from 'antd';
 import { ExternalLink, MapPin } from 'lucide-react';
 import type { SellerOrder } from '../../model/orderTypes';
 import styles from './ElchiTimeline.module.css';
+import { formatDateTime } from '../../../../shared/lib/date';
 
 const stages = [
   { statuses: ['NEW', 'PENDING'], title: 'Buyurtma qabul qilindi', description: 'Sotuvchi tasdiqlashi kutilmoqda' },
@@ -17,7 +18,7 @@ export function ElchiTimeline({ order }: { order: SellerOrder }) {
   const terminal = order.status === 'CANCELLED' ? { title: 'Bekor qilindi', color: 'red' } : order.status === 'RETURNED' ? { title: 'Qaytarildi', color: 'orange' } : null;
   const items = stages.map((stage, index) => ({
     color: terminal ? (index === 0 ? 'green' : 'gray') : index <= currentIndex ? 'green' : 'gray',
-    children: <div className={styles.stage}><strong>{stage.title}</strong><span>{stage.description}</span>{index === 0 ? <time>{new Date(order.createdAt).toLocaleString('uz-UZ')}</time> : null}</div>,
+    children: <div className={styles.stage}><strong>{stage.title}</strong><span>{stage.description}</span>{index === 0 ? <time>{formatDateTime(order.createdAt)}</time> : null}</div>,
   }));
   if (terminal) items.push({ color: terminal.color, children: <div className={styles.stage}><strong>{terminal.title}</strong><span>Elchi yetkazib berish jarayoni yakunlandi</span></div> });
 

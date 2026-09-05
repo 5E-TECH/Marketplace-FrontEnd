@@ -15,23 +15,23 @@
 }
 
 .violetCard {
-  border-top: 2px solid #fb923c;
+  border-top: 2px solid var(--color-accent-bright);
 }
 
 .blueCard {
-  border-top: 2px solid #2dd4bf;
+  border-top: 2px solid var(--color-teal);
 }
 
 .emeraldCard {
-  border-top: 2px solid #94a3b8;
+  border-top: 2px solid var(--color-text-secondary);
 }
 
 .amberCard {
-  border-top: 2px solid #fb7185;
+  border-top: 2px solid var(--color-danger-soft);
 }
 
 .card:hover {
-  border-color: #3a4664;
+  border-color: var(--color-token-3a4664);
 }
 
 .icon {
@@ -44,23 +44,23 @@
 }
 
 .violet {
-  color: #fb923c;
-  background: rgb(251 146 60 / 14%);
+  color: var(--color-accent-bright);
+  background: var(--color-token-rgb-251-146-60-14);
 }
 
 .blue {
-  color: #2dd4bf;
-  background: rgb(45 212 191 / 14%);
+  color: var(--color-teal);
+  background: var(--color-token-rgb-45-212-191-14);
 }
 
 .emerald {
-  color: #94a3b8;
-  background: rgb(148 163 184 / 12%);
+  color: var(--color-text-secondary);
+  background: var(--color-token-rgb-148-163-184-12);
 }
 
 .amber {
-  color: #fb7185;
-  background: rgb(251 113 133 / 14%);
+  color: var(--color-danger-soft);
+  background: var(--color-token-rgb-251-113-133-14);
 }
 
 .trend {
@@ -74,32 +74,32 @@
 }
 
 .positive {
-  color: #2dd4bf;
-  background: rgb(45 212 191 / 14%);
+  color: var(--color-teal);
+  background: var(--color-token-rgb-45-212-191-14);
 }
 
 .negative {
-  color: #fb7185;
-  background: rgb(251 113 133 / 14%);
+  color: var(--color-danger-soft);
+  background: var(--color-token-rgb-251-113-133-14);
 }
 
 .title {
   display: block;
   margin-top: 12px;
-  color: #8e9ab2;
+  color: var(--color-token-8e9ab2);
   font: var(--font-label);
 }
 
 .value {
   margin: 3px 0 2px !important;
-  color: #f8fafc !important;
+  color: var(--color-text) !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font: var(--font-metric) !important;
   letter-spacing: -0.035em;
 }
 
 .hint {
-  color: #6f7c96;
+  color: var(--color-token-6f7c96);
   font: var(--font-caption);
 }
 
@@ -115,19 +115,19 @@
 }
 
 .violetLine {
-  stroke: #fb923c;
+  stroke: var(--color-accent-bright);
 }
 
 .blueLine {
-  stroke: #2dd4bf;
+  stroke: var(--color-teal);
 }
 
 .emeraldLine {
-  stroke: #94a3b8;
+  stroke: var(--color-text-secondary);
 }
 
 .amberLine {
-  stroke: #fb7185;
+  stroke: var(--color-danger-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {

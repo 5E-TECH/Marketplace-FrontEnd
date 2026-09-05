@@ -5,6 +5,7 @@ import { useRegisterMutation } from '../../features/auth/api/useRegisterMutation
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { LoginBrand } from '../LoginPage/components/LoginBrand/LoginBrand';
 import styles from '../LoginPage/LoginPage.module.css';
+import { normalizeUzPhone } from '../../shared/lib/phone';
 import {
   RegisterForm,
   type RegisterFormValues,
@@ -19,7 +20,7 @@ export default function RegisterPage() {
     registerMutation.mutate(
       {
         name: name.trim(),
-        phone: `+998${phone}`,
+        phone: normalizeUzPhone(phone),
         password,
         shopName: shopName.trim(),
         ...(email?.trim() ? { email: email.trim() } : {}),

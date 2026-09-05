@@ -20,6 +20,7 @@ import { TextControl } from '../../shared/ui/FormControls/FormControls';
 import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput';
 import { getApiFieldErrors } from '../../features/auth/lib/getAuthErrorMessage';
 import styles from './UsersPage.module.css';
+import { formatDate } from '../../shared/lib/date';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'INACTIVE';
 interface EditUserValues { name: string; phone: string; password?: string }
@@ -32,7 +33,7 @@ export default function UsersPage() {
     { title: t('users.phone'), dataIndex: 'phone', responsive: ['sm'] },
     { title: t('users.role'), dataIndex: 'role', width: 120, responsive: ['md'], render: (role: string) => <Tag>{role}</Tag> },
     { title: t('users.status'), width: 110, render: (_, user) => <Tag color={user.isBlocked ? 'error' : user.isActive ? 'success' : 'default'}>{user.isBlocked ? 'BLOCKED' : user.isActive ? t('users.active') : t('users.inactive')}</Tag> },
-    { title: t('users.createdAt'), dataIndex: 'createdAt', responsive: ['lg'], render: (value: string) => new Date(value).toLocaleDateString(language) },
+    { title: t('users.createdAt'), dataIndex: 'createdAt', responsive: ['lg'], render: (value: string) => formatDate(value, language) },
     { title: t('users.actions'), width: 104, align: 'center', render: (_, user) => <span className={styles.rowActions}><Button type="text" icon={<Pencil size={16}/>} aria-label={t('users.edit')} onClick={() => { setEditing(user); editForm.setFieldsValue({ name: user.name, phone: user.phone, password: '' }); }} /><Button type="text" danger icon={<Trash2 size={16}/>} aria-label={t('users.delete')} onClick={() => setDeleting(user)} /></span> },
   ];
   if (query.isPending) return <ContentState state="loading" />;

@@ -8,11 +8,11 @@ const warehouse = (id: string, name: string, isDefault: boolean) => ({
   createdAt: '2026-08-11T08:00:00.000Z', updatedAt: '2026-08-11T08:00:00.000Z',
 });
 
-const apiStates = new WeakMap<Page, { createBody?: Record<string, unknown>; defaultId?: string }>();
+const apiStates = new WeakMap<Page, { createBody?: Record<string, unknown>; defaultId?: string; patchBody?: Record<string, unknown>; deletedId?: string }>();
 
 async function mockWarehouses(page: Page) {
   let items = [warehouse('1', 'Asosiy ombor', true), warehouse('2', 'Chilonzor ombori', false)];
-  const state: { createBody?: Record<string, unknown>; defaultId?: string } = {};
+  const state: { createBody?: Record<string, unknown>; defaultId?: string; patchBody?: Record<string, unknown>; deletedId?: string } = {};
   apiStates.set(page, state);
   await page.route('**/api/v1/inventory/warehouses', async (route) => {
     if (route.request().method() === 'POST') {
@@ -28,10 +28,12 @@ async function mockWarehouses(page: Page) {
   });
   await page.route('**/api/v1/inventory/warehouses/*', async (route) => {
     const id = route.request().url().split('/').at(-1);
-    state.defaultId = id;
-    items = items.map((item) => ({ ...item, isDefault: item.id === id }));
-    const updated = items.find((item) => item.id === id);
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: updated }) });
+    if (route.request().method() === 'GET') { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: items.find((item) => item.id === id) }) }); return; }
+    if (route.request().method() === 'DELETE') { state.deletedId = id; items = items.filter((item) => item.id !== id); await route.fulfill({ status: 200, body: '{}' }); return; }
+    const body = route.request().postDataJSON() as Record<string, unknown>;
+    if (Object.keys(body).length === 1 && body.isDefault === true) state.defaultId = id; else state.patchBody = body;
+    items = items.map((item) => item.id === id ? { ...item, ...body } : body.isDefault ? { ...item, isDefault: false } : item);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: items.find((item) => item.id === id) }) });
   });
   return state;
 }
@@ -74,4 +76,17 @@ test('TC2: default belgilanganda faqat bitta default ombor qoladi', async ({ pag
   const defaultRow = page.getByRole('row').filter({ hasText: 'Chilonzor ombori' });
   await expect(defaultRow.getByText('Asosiy', { exact: true })).toBeVisible();
   expect(state?.defaultId).toBe('2');
+});
+
+test('GET detail, PATCH edit va DELETE ishlaydi', async ({ page }) => {
+  const state = apiStates.get(page);
+  await page.getByRole('button', { name: 'Chilonzor ombori omborini tahrirlash' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Omborni tahrirlash' });
+  await expect(dialog.getByLabel('Ombor nomi')).toHaveValue('Chilonzor ombori');
+  await dialog.getByLabel('Ombor nomi').fill('Yangilangan ombor');
+  await dialog.getByRole('button', { name: 'Saqlash' }).click();
+  await expect.poll(() => state?.patchBody).toMatchObject({ name: 'Yangilangan ombor' });
+  await page.getByRole('button', { name: 'Yangilangan ombor omborini o‘chirish' }).click();
+  await page.getByRole('dialog', { name: 'Ombor o‘chirilsinmi?' }).getByRole('button', { name: 'O‘chirish' }).click();
+  await expect.poll(() => state?.deletedId).toBe('2');
 });

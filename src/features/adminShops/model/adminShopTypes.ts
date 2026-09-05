@@ -34,3 +34,11 @@ export interface AdminShopPage {
   page: number;
   limit: number;
 }
+
+export interface AdminShopDetail {
+  id: string;
+  ownerUserId: string;
+  name: string;
+  status: AdminShopStatus;
+  stats: { products: number; orders: number; warehouses: number };
+}

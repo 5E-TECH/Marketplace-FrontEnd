@@ -40,3 +40,7 @@ export interface UpdateAuthProfilePayload {
 export interface AuthSession extends LoginResponse {
   user: AuthUser;
 }
+export interface PhonePayload { phone: string }
+export interface VerifyPhonePayload extends PhonePayload { code: string }
+export interface ResetPasswordPayload extends VerifyPhonePayload { newPassword: string }
+export interface AuthDeviceSession { id: string; userAgent: string; ipAddress: string; createdAt: string; lastUsedAt: string | null; current: boolean }

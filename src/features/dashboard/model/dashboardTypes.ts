@@ -18,3 +18,10 @@ export interface SellerDashboard {
   topProducts: DashboardTopProduct[];
   salesByDay: DashboardSalesPoint[];
 }
+export interface AdminDashboard {
+  shops: { total: number; pending: number; active: number; suspended: number; rejected: number };
+  users: { total: number; sellers: number; buyers: number; admins: number; operators: number };
+  orders: { total: number; today: number };
+  gmv: number;
+  revenue: number;
+}

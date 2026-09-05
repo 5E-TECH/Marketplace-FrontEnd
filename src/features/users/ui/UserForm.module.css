@@ -1,7 +1,7 @@
 .card {
   width: min(100%, 920px);
-  background: rgb(15 23 42 / 34%);
-  border-color: rgb(255 255 255 / 9%);
+  background: var(--color-token-rgb-15-23-42-34);
+  border-color: var(--color-token-rgb-255-255-255-9);
   box-shadow: none;
 }
 
@@ -27,15 +27,15 @@
 
 .actions :global(.ant-btn-primary) {
   color: var(--color-accent);
-  background: rgb(245 158 11 / 10%);
-  border-color: rgb(245 158 11 / 28%);
+  background: var(--color-token-rgb-245-158-11-10);
+  border-color: var(--color-token-rgb-245-158-11-28);
   box-shadow: none;
 }
 
 .actions :global(.ant-btn-primary:hover) {
-  color: #fff !important;
-  background: rgb(245 158 11 / 22%) !important;
-  border-color: rgb(245 158 11 / 42%) !important;
+  color: var(--color-white) !important;
+  background: var(--color-token-rgb-245-158-11-22) !important;
+  border-color: var(--color-token-rgb-245-158-11-42) !important;
 }
 
 @media (max-width: 767px) {

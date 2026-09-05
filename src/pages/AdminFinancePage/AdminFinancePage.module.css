@@ -1,0 +1,8 @@
+.toolbar { display: grid; grid-template-columns: minmax(190px, 1fr) repeat(2, minmax(160px, 220px)) auto; gap: var(--space-3); }
+.table, .report { overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.report { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); padding: var(--space-4); gap: var(--space-3); }
+.metric { display: grid; gap: var(--space-2); padding: var(--space-4); background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.metric span { color: var(--color-text-secondary); text-transform: capitalize; }
+.metric strong { color: var(--color-text); font-size: 1.25rem; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .toolbar { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .toolbar { grid-template-columns: 1fr; } .toolbar :global(.ant-select), .toolbar :global(.ant-btn) { width: 100%; } }

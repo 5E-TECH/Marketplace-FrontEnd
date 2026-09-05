@@ -13,8 +13,8 @@ export interface Warehouse {
 
 export interface WarehousePayload {
   name: string;
-  regionId?: string;
-  districtId?: string;
-  address?: string;
-  isDefault: boolean;
+  regionId?: string | null;
+  districtId?: string | null;
+  address?: string | null;
+  isDefault?: boolean;
 }

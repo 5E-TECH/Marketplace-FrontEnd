@@ -1,7 +1,7 @@
 import { LockKeyhole as LockFilled } from 'lucide-react';
 import { App, Card, Typography } from 'antd';
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { LoginBrand } from './components/LoginBrand/LoginBrand';
@@ -11,6 +11,7 @@ import {
 } from './components/LoginForm/LoginForm';
 import styles from './LoginPage.module.css';
 import { authStorage } from '../../features/auth/lib/authStorage';
+import { normalizeUzPhone } from '../../shared/lib/phone';
 
 export default function LoginPage() {
   const { message } = App.useApp();
@@ -33,7 +34,7 @@ export default function LoginPage() {
   const handleSubmit = (values: LoginFormValues) => {
     loginMutation.mutate(
       {
-        phone: `+998${values.phone}`,
+        phone: normalizeUzPhone(values.phone),
         password: values.password,
       },
       {
@@ -58,6 +59,8 @@ export default function LoginPage() {
               isSubmitting={loginMutation.isPending}
               onSubmit={handleSubmit}
             />
+            <Typography.Paragraph className={styles.switchAuth}><Link to="/forgot-password">Parolni unutdingizmi?</Link></Typography.Paragraph>
+            <Typography.Paragraph className={styles.switchAuth}>Akkauntingiz yo‘qmi? <Link to="/register/account">Ro‘yxatdan o‘tish</Link></Typography.Paragraph>
 
             <Typography.Text className={styles.security}>
               <LockFilled aria-hidden /> Parolingiz brauzer xotirasida saqlanmaydi

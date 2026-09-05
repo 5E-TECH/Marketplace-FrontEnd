@@ -1,6 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { AdminShop, AdminShopListParams, AdminShopPage, AdminShopStatus } from '../model/adminShopTypes';
+import type { AdminShop, AdminShopDetail, AdminShopListParams, AdminShopPage, AdminShopStatus } from '../model/adminShopTypes';
 
 const statuses: AdminShopStatus[] = ['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'REJECTED'];
 
@@ -55,4 +55,28 @@ export async function getAdminShops(params: AdminShopListParams, signal?: AbortS
 
 export async function approveAdminShop(shopId: string): Promise<void> {
   await httpClient.post(`/admin/shops/${encodeURIComponent(shopId)}/approve`);
+}
+
+export async function getAdminShopDetail(shopId: string, signal?: AbortSignal): Promise<AdminShopDetail> {
+  const { data } = await httpClient.get<unknown>(`/admin/shops/${encodeURIComponent(shopId)}`, { signal });
+  const value = unwrapApiData(data);
+  if (!value || typeof value !== 'object') throw new Error('Market tafsiloti noto‘g‘ri formatda');
+  const row = value as Record<string, unknown>;
+  const stats = row.stats && typeof row.stats === 'object' ? row.stats as Record<string, unknown> : {};
+  const status = text(row, 'status').toUpperCase() as AdminShopStatus;
+  if ((typeof row.id !== 'string' && typeof row.id !== 'number') || (typeof row.ownerUserId !== 'string' && typeof row.ownerUserId !== 'number') || typeof row.name !== 'string' || !statuses.includes(status)) throw new Error('Market tafsilotining majburiy maydonlari yo‘q');
+  const count = (key: string) => typeof stats[key] === 'number' && Number.isFinite(stats[key]) ? stats[key] : 0;
+  return { id: String(row.id), ownerUserId: String(row.ownerUserId), name: row.name, status, stats: { products: count('products'), orders: count('orders'), warehouses: count('warehouses') } };
+}
+
+export async function rejectAdminShop({ shopId, reason }: { shopId: string; reason: string }): Promise<void> {
+  await httpClient.post(`/admin/shops/${encodeURIComponent(shopId)}/reject`, { reason });
+}
+
+export async function suspendAdminShop(shopId: string): Promise<void> {
+  await httpClient.post(`/admin/shops/${encodeURIComponent(shopId)}/suspend`);
+}
+
+export async function activateAdminShop(shopId: string): Promise<void> {
+  await httpClient.post(`/admin/shops/${encodeURIComponent(shopId)}/activate`);
 }

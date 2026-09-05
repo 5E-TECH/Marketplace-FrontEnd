@@ -1,0 +1,10 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { forgotPassword, getAuthSessions, registerAccount, resendCode, resetPassword, revokeAuthSession, verifyPhone } from './authApi';
+export const authSessionKey = ['auth', 'sessions'] as const;
+export const useAuthSessionsQuery = () => useQuery({ queryKey: authSessionKey, queryFn: ({ signal }) => getAuthSessions(signal) });
+export const useRevokeAuthSessionMutation = () => { const client = useQueryClient(); return useMutation({ mutationFn: revokeAuthSession, onSuccess: () => client.invalidateQueries({ queryKey: authSessionKey }) }); };
+export const useForgotPasswordMutation = () => useMutation({ mutationFn: forgotPassword });
+export const useResetPasswordMutation = () => useMutation({ mutationFn: resetPassword });
+export const useVerifyPhoneMutation = () => useMutation({ mutationFn: verifyPhone });
+export const useResendCodeMutation = () => useMutation({ mutationFn: resendCode });
+export const useRegisterAccountMutation = () => useMutation({ mutationFn: registerAccount });

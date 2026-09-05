@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Pencil, Star, Trash2 } from 'lucide-react';
 import { Button, Card, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { Warehouse } from '../model/warehouseTypes';
@@ -9,9 +9,11 @@ interface WarehouseTableProps {
   warehouses: Warehouse[];
   changingDefaultId?: string;
   onMakeDefault: (warehouse: Warehouse) => void;
+  onEdit: (warehouse: Warehouse) => void;
+  onDelete: (warehouse: Warehouse) => void;
 }
 
-export function WarehouseTable({ warehouses, changingDefaultId, onMakeDefault }: WarehouseTableProps) {
+export function WarehouseTable({ warehouses, changingDefaultId, onMakeDefault, onEdit, onDelete }: WarehouseTableProps) {
   const { language, t } = useTranslation();
   const changingDefault = changingDefaultId !== undefined;
   const columns: ColumnsType<Warehouse> = [
@@ -26,6 +28,7 @@ export function WarehouseTable({ warehouses, changingDefaultId, onMakeDefault }:
         ? <Tag color="gold" icon={<Star size={13} />}>{t('warehouse.default')}</Tag>
         : <Button type="link" disabled={changingDefault} loading={changingDefaultId === warehouse.id} onClick={() => onMakeDefault(warehouse)}>{t('warehouse.makeDefault')}</Button>,
     },
+    { title: t('users.actions'), width: 100, render: (_, warehouse) => <span><Button type="text" icon={<Pencil size={16} />} aria-label={`${warehouse.name} omborini tahrirlash`} onClick={() => onEdit(warehouse)} /><Button type="text" danger icon={<Trash2 size={16} />} aria-label={`${warehouse.name} omborini o‘chirish`} onClick={() => onDelete(warehouse)} /></span> },
   ];
 
   return <Card><DataTable rowKey="id" columns={columns} dataSource={warehouses} tableLayout="auto" search={{ placeholder: t('warehouse.search'), filter: (warehouse, query) => `${warehouse.name} ${warehouse.address ?? ''}`.toLocaleLowerCase(language).includes(query) }} /></Card>;

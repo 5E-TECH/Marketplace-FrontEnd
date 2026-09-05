@@ -15,7 +15,7 @@ import { BackButton } from '../../shared/ui/BackButton/BackButton';
 
 const emptyProduct: ProductFormValues = {
   name: '', categoryId: '', description: '', price: null, oldPrice: null,
-  attributes: [], hasVariants: false, variants: [], images: [], imageUrl: null,
+  attributes: [], hasVariants: false, variants: [], images: [], imageUrl: null, status: 'DRAFT',
 };
 
 export default function ProductEditorPage() {
@@ -38,6 +38,7 @@ export default function ProductEditorPage() {
         description: product.description,
         price: product.price,
         oldPrice: product.oldPrice,
+        status: ['DRAFT', 'ACTIVE', 'ARCHIVED', 'OUT_OF_STOCK'].includes(product.status) ? product.status as ProductFormValues['status'] : 'DRAFT',
         attributes: Object.entries(product.attributes).map(([key, value]) => ({ key, value })),
         hasVariants: product.hasVariants,
         variants: product.variants,
@@ -53,7 +54,7 @@ export default function ProductEditorPage() {
       if (productId) {
         await updateMutation.mutateAsync(payload);
       } else if (!targetProductId) {
-        const created = await createMutation.mutateAsync({ ...payload, imageUrl: undefined, images: [] });
+        const created = await createMutation.mutateAsync({ ...payload, imageUrl: null, images: [] });
         targetProductId = created.id;
         createdDraftId.current = created.id;
       }
@@ -62,7 +63,7 @@ export default function ProductEditorPage() {
       await Promise.all(uploads.map(async (upload) => {
         updateUpload(upload.uid, { status: 'uploading', percent: 1 });
         try {
-          const url = await uploadFile(upload.file, targetProductId, upload.isCover, (percent) => {
+          const url = await uploadFile({ file: upload.file, productId: targetProductId, isCover: upload.isCover }, (percent) => {
             updateUpload(upload.uid, { status: 'uploading', percent });
           });
           updateUpload(upload.uid, { status: 'done', percent: 100, url });

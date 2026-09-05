@@ -7,7 +7,7 @@
 .orderId, .amount { display: grid; gap: 3px; }
 .orderId small, .muted, .drawerCaption { color: var(--color-text-muted); font-size: 12px; }
 .amount small { color: var(--color-text-muted); font-size: 11px; }
-.tableCard :global(.ant-table-thead > tr > th) { color: var(--color-text-muted); background: #101827; border-bottom-color: var(--color-border); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.tableCard :global(.ant-table-thead > tr > th) { color: var(--color-text-muted); background: var(--color-panel-deep); border-bottom-color: var(--color-border); font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .tableCard :global(.ant-table-tbody > tr > td) { height: 64px; border-bottom-color: var(--color-border); }
 .tableCard :global(.ant-table-tbody > tr:hover > td) { background: var(--color-surface-hover) !important; }
 .tableCard :global(.ant-pagination) { padding: 0 16px 16px; }
@@ -18,4 +18,13 @@
 .statusEditor > div { display: grid; gap: 3px; }
 .statusEditor span { color: var(--color-text-muted); font-size: 12px; }
 .statusEditor :global(.ant-select) { width: 100%; }
+.quickActions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+.shipmentEditor { display: grid; margin-top: var(--space-3); padding: 16px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); gap: 12px; }
+.shipmentEditor > div { display: grid; gap: 3px; }
+.shipmentEditor span { color: var(--color-text-muted); font-size: 12px; }
+.orderTabs { margin-top: var(--space-4); }
+.apiData { display: grid; max-height: 260px; overflow: auto; gap: 8px; }
+.apiData > div { display: grid; grid-template-columns: minmax(90px, .4fr) minmax(0, 1fr); gap: 12px; padding: 9px 10px; background: var(--color-surface-subtle); border-radius: var(--radius-sm); }
+.apiData span { color: var(--color-text-muted); font-size: 12px; overflow-wrap: anywhere; }
+.apiData strong { font-size: 12px; font-weight: 500; overflow-wrap: anywhere; }
 @media (max-width: 575px) { .statusFilter, .dateField, .dateFilter { width: 100%; } }

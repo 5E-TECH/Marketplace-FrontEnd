@@ -50,11 +50,11 @@
   inset: 10px;
   opacity: 0.22;
   background-image:
-    linear-gradient(45deg, transparent 48%, #334155 49%, #334155 51%, transparent 52%),
-    linear-gradient(-45deg, transparent 48%, #334155 49%, #334155 51%, transparent 52%);
+    linear-gradient(45deg, transparent 48%, var(--color-token-334155) 49%, var(--color-token-334155) 51%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, var(--color-token-334155) 49%, var(--color-token-334155) 51%, transparent 52%);
   background-size: 18px 18px;
   content: '';
-  mask-image: linear-gradient(90deg, #000, transparent);
+  mask-image: linear-gradient(90deg, var(--color-black), transparent);
 }
 
 .sidebarLogo {
@@ -63,11 +63,11 @@
   width: 42px;
   height: 42px;
   flex: 0 0 42px;
-  color: #111827;
+  color: var(--color-token-111827);
   font-family: Georgia, serif;
   font-size: 16px;
   font-weight: 800;
-  background: linear-gradient(135deg, #fb923c, #5eead4);
+  background: linear-gradient(135deg, var(--color-accent-bright), var(--color-token-5eead4));
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   place-items: center;
@@ -81,14 +81,14 @@
 }
 
 .sidebarBrandText :global(.ant-typography:first-child) {
-  color: #f8fafc;
+  color: var(--color-text);
   font-family: Georgia, serif;
   font-size: 18px;
 }
 
 .sidebarBrandText :global(.ant-typography:last-child) {
   margin-top: 2px;
-  color: #71809f;
+  color: var(--color-text-faint);
   font-size: 10px;
   letter-spacing: 0.14em;
 }
@@ -103,7 +103,7 @@
 
 :global(.app-navigation.ant-menu) {
   padding: 0 var(--space-3);
-  color: #91a0be;
+  color: var(--color-token-91a0be);
   background: transparent;
   border-inline-end: 0 !important;
 }
@@ -112,7 +112,7 @@
   height: 48px;
   margin: var(--space-1) 0;
   padding-inline: var(--space-4) !important;
-  color: #91a0be !important;
+  color: var(--color-token-91a0be) !important;
   border-radius: var(--radius-sm);
   font-size: 15px;
   font-weight: 600;
@@ -130,31 +130,35 @@
   width: 20px;
   height: 20px;
   stroke-width: 1.8;
-  color: #7f8ca8;
+  color: var(--color-token-7f8ca8);
 }
 
 :global(.app-navigation .ant-menu-item:hover) {
-  color: #fff !important;
+  color: var(--color-white) !important;
   background: var(--color-surface-hover) !important;
 }
 
 :global(.app-navigation .ant-menu-item:hover svg) {
-  color: #fb923c;
+  color: var(--color-accent-bright);
 }
 
 :global(.app-navigation .ant-menu-item-selected) {
   color: var(--color-accent) !important;
-  background: rgb(245 158 11 / 12%) !important;
+  background: var(--color-accent-soft) !important;
 }
 
 :global(.app-navigation .ant-menu-item-selected svg) {
-  color: #fb923c;
+  color: var(--color-accent-bright);
 }
+
+:global(.admin-navigation-shell) { overflow-y: auto; scrollbar-width: thin; }
+:global(.admin-navigation .ant-menu-item) { height: 52px; margin-block: 4px; font-size: 14px; line-height: 52px; letter-spacing: .01em; }
+:global(.admin-navigation .ant-menu-item svg) { width: 22px; height: 22px; stroke-width: 2; }
 
 :global(.app-navigation-utility.ant-menu) {
   margin-top: auto;
   padding-top: var(--space-3);
-  border-top: 1px solid rgb(255 255 255 / 7%) !important;
+  border-top: 1px solid var(--color-token-rgb-255-255-255-7) !important;
 }
 
 :global(.ant-layout-sider-collapsed .app-navigation.ant-menu) {
@@ -166,7 +170,7 @@
 }
 
 :global(.app-navigation-utility .ant-menu-item-danger) {
-  color: #fda4af !important;
+  color: var(--color-token-fda4af) !important;
 }
 
 .header {
@@ -175,9 +179,9 @@
   top: 0;
   height: 72px;
   padding-inline: var(--space-8);
-  background: rgb(8 12 22 / 88%);
+  background: var(--color-token-rgb-8-12-22-88);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 8px 28px rgb(0 0 0 / 12%);
+  box-shadow: 0 8px 28px var(--color-token-rgb-0-0-0-12);
   backdrop-filter: blur(20px);
 }
 
@@ -203,8 +207,8 @@
 .headerActions {
   min-width: 0;
   padding: 3px;
-  background: rgb(17 24 39 / 38%);
-  border: 1px solid rgb(255 255 255 / 6%);
+  background: var(--color-token-rgb-17-24-39-38);
+  border: 1px solid var(--color-token-rgb-255-255-255-6);
   border-radius: 12px;
   flex: 0 0 auto;
   gap: 3px;
@@ -263,8 +267,8 @@
 .notificationButton:hover,
 .logoutButton:hover {
   color: var(--color-accent) !important;
-  background: rgb(245 158 11 / 8%) !important;
-  border-color: rgb(245 158 11 / 18%) !important;
+  background: var(--color-token-rgb-245-158-11-8) !important;
+  border-color: var(--color-token-rgb-245-158-11-18) !important;
 }
 
 .notificationButton {
@@ -305,16 +309,16 @@
 }
 
 .accountSummary:hover {
-  background: rgb(255 255 255 / 4%);
+  background: var(--color-white-soft);
   border-color: var(--color-border);
 }
 
 .accountAvatar {
-  color: #fff;
+  color: var(--color-white);
   font-size: 12px;
   font-weight: 600;
-  background: linear-gradient(145deg, #fbbf24, #f59e0b);
-  box-shadow: 0 6px 16px rgb(245 158 11 / 18%);
+  background: linear-gradient(145deg, var(--color-accent-hover), var(--color-accent));
+  box-shadow: 0 6px 16px var(--color-token-rgb-245-158-11-18);
 }
 
 .accountText {
@@ -358,12 +362,12 @@
 
 .breadcrumb :global(.ant-breadcrumb-link),
 .breadcrumb :global(.ant-breadcrumb-separator) {
-  color: #71809f;
+  color: var(--color-text-faint);
   font-size: 12px;
 }
 
 .breadcrumb :global(a:hover) {
-  color: #fb923c;
+  color: var(--color-accent-bright);
 }
 
 @media (max-width: 991px) {

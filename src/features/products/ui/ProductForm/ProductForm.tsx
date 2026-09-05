@@ -1,8 +1,8 @@
 import { Plus, Save, Trash2 } from 'lucide-react';
-import { App, Button, Form, Switch } from 'antd';
+import { App, Button, Form, Select, Switch } from 'antd';
 import type { FormInstance, UploadFile } from 'antd';
 import { useMemo, useState } from 'react';
-import type { ProductUpsertPayload } from '../../model/productTypes';
+import type { ProductStatus, ProductUpsertPayload } from '../../model/productTypes';
 import type { ProductVariant } from '../../model/productTypes';
 import { ImageUpload } from '../../../../shared/ui/ImageUpload/ImageUpload';
 import { VariantManager } from '../VariantManager/VariantManager';
@@ -19,6 +19,7 @@ export interface ProductFormValues {
   description: string;
   price: number | null;
   oldPrice: number | null;
+  status: Extract<ProductStatus, 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK'>;
   attributes: Array<{ key: string; value: string }>;
   hasVariants: boolean;
   variants: ProductVariant[];
@@ -92,14 +93,15 @@ export function ProductForm({
     );
 
     const payload: ProductUpsertPayload = {
-      ...(values.categoryId ? { categoryId: values.categoryId } : {}),
+      categoryId: values.categoryId || null,
       name: values.name.trim(),
       description: values.description.trim(),
       price: values.price,
-      ...(values.oldPrice !== null ? { oldPrice: values.oldPrice } : {}),
-      ...(coverImage ? { imageUrl: coverImage } : {}),
+      oldPrice: values.oldPrice,
+      imageUrl: coverImage ?? null,
       images: imageEntries.map(({ url }) => url),
       attributes,
+      status: values.status,
     };
     onSubmit({
       payload,
@@ -137,6 +139,12 @@ export function ProductForm({
           <div className={styles.grid}>
             <Form.Item className={styles.fullWidth} label="Mahsulot nomi" name="name" rules={[{ required: true, whitespace: true, message: 'Mahsulot nomini kiriting' }, { max: 120 }]}>
               <TextControl maxLength={120} placeholder="Masalan, iPhone 16 Pro" />
+            </Form.Item>
+            <Form.Item label="Kategoriya ID" name="categoryId" rules={[{ pattern: /^\d*$/, message: 'Kategoriya ID raqam bo‘lishi kerak' }]}>
+              <TextControl inputMode="numeric" placeholder="Masalan, 7" />
+            </Form.Item>
+            <Form.Item label="Holati" name="status" rules={[{ required: true, message: 'Mahsulot holatini tanlang' }]}>
+              <Select options={[{ value: 'DRAFT', label: 'Qoralama' }, { value: 'ACTIVE', label: 'Faol' }, { value: 'ARCHIVED', label: 'Arxivlangan' }, { value: 'OUT_OF_STOCK', label: 'Sotuvda yo‘q' }]} />
             </Form.Item>
             <Form.Item label="Narxi" name="price" rules={[{ required: true, message: 'Narxni kiriting' }]}>
               <NumberControl min={1} precision={0} addonAfter="so‘m" placeholder="14 999 000" />

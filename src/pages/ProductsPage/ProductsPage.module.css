@@ -54,7 +54,7 @@
 }
 
 .tableCard :global(.ant-table-tbody > tr:hover > td) {
-  background: rgb(56 189 248 / 5%) !important;
+  background: var(--color-token-rgb-56-189-248-5) !important;
 }
 
 .tableCard :global(.ant-table-cell.ant-table-column-sort) {
@@ -74,7 +74,7 @@
   width: 36px;
   height: 36px;
   color: var(--color-accent);
-  background: rgb(245 158 11 / 12%);
+  background: var(--color-accent-soft);
   border-radius: 50%;
   place-items: center;
 }
@@ -147,12 +147,12 @@
 }
 
 .editAction {
-  color: #22d3ee !important;
-  background: rgb(34 211 238 / 12%) !important;
+  color: var(--color-token-22d3ee) !important;
+  background: var(--color-token-rgb-34-211-238-12) !important;
 }
 
 .editAction:hover {
-  background: rgb(34 211 238 / 22%) !important;
+  background: var(--color-token-rgb-34-211-238-22) !important;
 }
 
 .deleteAction {
@@ -161,7 +161,7 @@
 
 .deleteAction:hover {
   color: var(--color-error) !important;
-  background: rgb(239 68 68 / 10%) !important;
+  background: var(--color-token-rgb-239-68-68-10) !important;
 }
 
 @media (max-width: 991px) {

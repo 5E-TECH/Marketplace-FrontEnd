@@ -11,6 +11,7 @@ import { AppSidebar } from './AppSidebar';
 import styles from './MainLayout.module.css';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import { prefetchRoute } from '../../app/router/routePreload';
+import { AdminSectionNavigation } from './AdminSectionNavigation';
 
 export default function MainLayout() {
   const { message } = App.useApp();
@@ -44,7 +45,7 @@ export default function MainLayout() {
           width={288}
           open={!showSidebar && mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
-          styles={{ body: { padding: 0, background: '#0E1424' } }}
+          styles={{ body: { padding: 0, background: 'var(--color-drawer-bg)' } }}
           closable={false}
         >
           <AppNavigation
@@ -77,6 +78,7 @@ export default function MainLayout() {
           />
           <Layout.Content className={styles.content}>
             <AppBreadcrumb />
+            {user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? <AdminSectionNavigation /> : null}
             <Suspense fallback={<PageLoader compact />}>
               <Outlet />
             </Suspense>

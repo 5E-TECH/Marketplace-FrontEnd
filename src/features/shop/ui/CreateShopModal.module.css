@@ -28,8 +28,8 @@
   width: 46px;
   height: 46px;
   color: var(--color-accent);
-  background: rgb(245 158 11 / 12%);
-  border: 1px solid rgb(245 158 11 / 24%);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-token-rgb-245-158-11-24);
   border-radius: var(--radius-md);
   place-items: center;
 }
@@ -77,13 +77,13 @@
 
 .form :global(.ant-input:hover),
 .form :global(.ant-input-affix-wrapper:hover) {
-  border-color: #526581;
+  border-color: var(--color-token-526581);
 }
 
 .form :global(.ant-input:focus),
 .form :global(.ant-input-affix-wrapper-focused) {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgb(245 158 11 / 12%);
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
 }
 
 .actions {

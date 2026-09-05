@@ -8,7 +8,7 @@
 
 .field :global(.ant-form-item-label > label) {
   height: auto;
-  color: #353d5c;
+  color: var(--color-token-353d5c);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.09em;
@@ -20,11 +20,11 @@
   min-height: 3rem;
   padding-block: 0;
   padding-inline: 0.9rem;
-  color: #30364d;
-  background: rgb(248 249 253 / 90%);
-  border: 1px solid #e1e4ee;
+  color: var(--color-token-30364d);
+  background: var(--color-token-rgb-248-249-253-90);
+  border: 1px solid var(--color-token-e1e4ee);
   border-radius: 0.8rem;
-  box-shadow: 0 2px 6px rgb(32 38 59 / 3%);
+  box-shadow: 0 2px 6px var(--color-token-rgb-32-38-59-3);
   font-size: 0.9rem;
   transition:
     border-color 160ms ease,
@@ -34,21 +34,21 @@
 
 .input:hover,
 .field :global(.ant-input-affix-wrapper:hover) {
-  background: #fff;
-  border-color: #b9bfea;
+  background: var(--color-white);
+  border-color: var(--color-token-b9bfea);
 }
 
 .input:focus,
 .field :global(.ant-input-affix-wrapper-focused) {
-  background: #fff;
-  border-color: #6750e7;
-  box-shadow: 0 0 0 3px rgb(103 80 231 / 12%);
+  background: var(--color-white);
+  border-color: var(--color-token-6750e7);
+  box-shadow: 0 0 0 3px var(--color-token-rgb-103-80-231-12);
 }
 
 .field :global(.ant-input-affix-wrapper input) {
   height: 100%;
   padding-block: 0;
-  color: #30364d;
+  color: var(--color-token-30364d);
   background: transparent;
   font-size: 0.9rem;
 }
@@ -59,7 +59,7 @@
   height: 2rem;
   flex: 0 0 2rem;
   margin-inline-end: -0.5rem;
-  color: #667085;
+  color: var(--color-token-667085);
   font-size: 1.1rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -70,24 +70,24 @@
 }
 
 .field :global(.ant-input-password-icon:hover) {
-  color: #4f46e5;
-  background: #eef2ff;
+  color: var(--color-token-4f46e5);
+  background: var(--color-token-eef2ff);
 }
 
 .field :global(.ant-input-password-icon:focus-visible) {
-  color: #4f46e5;
-  outline: 2px solid #818cf8;
+  color: var(--color-token-4f46e5);
+  outline: 2px solid var(--color-token-818cf8);
   outline-offset: 1px;
 }
 
 .field :global(.ant-input::placeholder) {
-  color: #9298aa;
+  color: var(--color-token-9298aa);
 }
 
 .phonePrefix {
   padding-right: 0.65rem;
-  color: #444a61;
-  border-right: 1px solid #dfe2ec;
+  color: var(--color-token-444a61);
+  border-right: 1px solid var(--color-token-dfe2ec);
   line-height: 1.25rem;
 }
 
@@ -98,10 +98,10 @@
   font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.025em;
-  background: linear-gradient(100deg, #159fe7 0%, #3e72e4 48%, #7042dc 100%);
+  background: linear-gradient(100deg, var(--color-token-159fe7) 0%, var(--color-token-3e72e4) 48%, var(--color-token-7042dc) 100%);
   border: 0;
   border-radius: 0.9rem;
-  box-shadow: 0 0.7rem 1.5rem rgb(63 105 218 / 20%);
+  box-shadow: 0 0.7rem 1.5rem var(--color-token-rgb-63-105-218-20);
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
@@ -109,14 +109,14 @@
 }
 
 .submitButton:not(:disabled):hover {
-  box-shadow: 0 0.9rem 1.8rem rgb(63 105 218 / 28%);
+  box-shadow: 0 0.9rem 1.8rem var(--color-token-rgb-63-105-218-28);
   filter: saturate(1.08);
   transform: translateY(-1px);
 }
 
 .submitButton:not(:disabled):active {
-  background: linear-gradient(100deg, #108ed2, #316cd1 47%, #6537c5);
-  box-shadow: 0 0.4rem 1rem rgb(63 105 218 / 20%);
+  background: linear-gradient(100deg, var(--color-token-108ed2), var(--color-token-316cd1) 47%, var(--color-token-6537c5));
+  box-shadow: 0 0.4rem 1rem var(--color-token-rgb-63-105-218-20);
   transform: translateY(0);
 }
 

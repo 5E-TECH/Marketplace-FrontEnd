@@ -32,7 +32,8 @@ function parseItem(value: unknown): StockItem {
 }
 
 export async function getStock(params: StockListParams, signal?: AbortSignal): Promise<StockPage> {
-  const { data } = await httpClient.get<unknown>('/inventory/stock', { signal, params: { page: params.page, limit: params.limit, ...(params.search ? { search: params.search } : {}), ...(params.lowOnly ? { lowOnly: true } : {}) } });
+  const endpoint = params.lowOnly ? '/inventory/stock/low' : '/inventory/stock';
+  const { data } = await httpClient.get<unknown>(endpoint, { signal, params: { page: params.page, limit: params.limit, ...(params.search ? { search: params.search } : {}), ...(params.warehouseId ? { warehouseId: params.warehouseId } : {}), ...(params.productId ? { productId: params.productId } : {}), ...(params.variantId ? { variantId: params.variantId } : {}) } });
   const value = unwrap(data);
   if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error('Stock ro‘yxati noto‘g‘ri formatda');
   const record = value as Record<string, unknown>;

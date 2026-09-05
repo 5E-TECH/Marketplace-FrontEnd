@@ -15,8 +15,8 @@ function resolveApiUrl(value: string | undefined): string {
 export const httpClient = axios.create({
   baseURL: resolveApiUrl(import.meta.env.VITE_API_URL),
   timeout: 10_000,
-  // Hozirgi auth Bearer token orqali ishlaydi; cross-site cookie yubormaymiz.
-  withCredentials: false,
+  // Refresh token HttpOnly cookie orqali qaytishi mumkin.
+  withCredentials: true,
   headers: {
     Accept: 'application/json',
   },

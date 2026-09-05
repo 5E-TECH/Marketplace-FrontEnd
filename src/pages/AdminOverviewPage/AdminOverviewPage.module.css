@@ -1,0 +1,10 @@
+.metric { height: 100%; }
+.metricTop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.metricTop > span { display: grid; width: 40px; height: 40px; color: var(--color-accent); background: var(--color-accent-soft); border-radius: 12px; place-items: center; }
+.metricTop svg { width: 19px; }
+.metricTop :global(.ant-tag) { display: inline-flex; align-items: center; gap: 3px; }
+.content { margin-top: var(--space-4); }
+.chart { display: flex; height: 260px; padding-top: 20px; align-items: flex-end; justify-content: space-around; gap: 12px; }
+.chart > div { display: grid; height: 100%; flex: 1; align-items: end; gap: 8px; text-align: center; }
+.chart span { display: block; min-height: 8px; background: linear-gradient(180deg, var(--color-accent), var(--color-token-rgb-245-158-11-20)); border-radius: 8px 8px 2px 2px; }
+.chart small { color: var(--color-text-muted); }

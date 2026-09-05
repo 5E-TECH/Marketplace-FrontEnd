@@ -13,4 +13,5 @@ export const palette = {
   border: '#27314A',
   backgroundLayout: '#080D18',
   backgroundContainer: '#151C2F',
+  rowHover: '#192238',
 } as const;

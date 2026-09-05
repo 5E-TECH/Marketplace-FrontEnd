@@ -1,8 +1,9 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { AdminOrder, AdminOrderListParams, AdminOrdersPage, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
+import type { AdminOrder, AdminOrderListParams, AdminOrderStatus, AdminOrdersPage, ConfirmCheckoutPayload, CreateCheckoutPayload, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
+const adminStatuses: AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED', 'CANCELLED', 'REFUNDED'];
 
 function numberField(record: Record<string, unknown>, key: string): number {
   const value = record[key];
@@ -72,9 +73,9 @@ const optionalText = (record: Record<string, unknown>, keys: string[]) => { for 
 function parseAdminOrder(value: unknown): AdminOrder {
   if (typeof value !== 'object' || value === null) throw new Error('Admin buyurtmasi noto‘g‘ri formatda');
   const order = value as Record<string, unknown>; const id = optionalText(order, ['id']); const status = optionalText(order, ['status']);
-  if (!id || !status || !statuses.includes(status as SellerOrderStatus)) throw new Error('Admin buyurtmasining majburiy maydonlari mavjud emas');
+  if (!id || !status || !adminStatuses.includes(status as AdminOrderStatus)) throw new Error('Admin buyurtmasining majburiy maydonlari mavjud emas');
   const payment = optionalText(order, ['paymentMethod']);
-  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'COD' || payment === 'PAYME' || payment === 'CLICK' ? payment : null, status: status as SellerOrderStatus, shopId: optionalText(order, ['shopId']), createdAt: optionalText(order, ['createdAt']) ?? '' };
+  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), createdAt: optionalText(order, ['createdAt']) ?? '' };
 }
 export async function getAdminOrders(params: AdminOrderListParams, signal?: AbortSignal): Promise<AdminOrdersPage> {
   const { data } = await httpClient.get<unknown>('/admin/orders', { signal, params }); const value = unwrapApiData(data);
@@ -85,3 +86,15 @@ export async function getAdminOrders(params: AdminOrderListParams, signal?: Abor
   return { items, total: numeric('total', items.length), page: numeric('page', params.page), limit: numeric('limit', params.limit), totalPages: numeric('totalPages', Math.max(1, Math.ceil(numeric('total', items.length) / params.limit))) };
 }
 export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
+
+export async function createCheckout({ idempotencyKey, ...payload }: CreateCheckoutPayload): Promise<unknown> {
+  const { data } = await httpClient.post<unknown>('/checkout', payload, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+  return unwrapApiData(data);
+}
+
+export async function confirmCheckout({ orderId }: ConfirmCheckoutPayload): Promise<unknown> {
+  const { data } = await httpClient.post<unknown>(`/checkout/${encodeURIComponent(orderId)}/confirm`);
+  return unwrapApiData(data);
+}

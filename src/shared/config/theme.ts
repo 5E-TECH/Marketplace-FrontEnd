@@ -52,7 +52,7 @@ export const appTheme: ThemeConfig = {
     Table: {
       headerBg: palette.backgroundLayout,
       borderColor: palette.border,
-      rowHoverBg: '#192238',
+      rowHoverBg: palette.rowHover,
       cellPaddingBlock: 12,
       cellPaddingInline: 16,
     },

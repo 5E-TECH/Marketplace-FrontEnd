@@ -1,5 +1,5 @@
 import { ArrowDownToLine, SlidersHorizontal } from 'lucide-react';
-import { App, Button, Card, Form, Tag, Typography } from 'antd';
+import { App, Button, Card, Form, Input, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { useAdjustStockMutation, useInboundStockMutation, useStockQuery } from '../../features/stock/api/stockQueries';
@@ -27,9 +27,11 @@ export default function StockPage() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [lowOnly, setLowOnly] = useState(false);
+  const [warehouseId, setWarehouseId] = useState('');
+  const [productId, setProductId] = useState('');
   const [action, setAction] = useState<StockAction>(null);
   const search = useDebouncedValue(query.trim());
-  const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}) });
+  const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}), ...(warehouseId ? { warehouseId } : {}), ...(productId ? { productId } : {}) });
   const inboundMutation = useInboundStockMutation();
   const adjustMutation = useAdjustStockMutation();
 
@@ -47,7 +49,7 @@ export default function StockPage() {
 
   const submit = (values: MutationForm) => {
     if (!action || values.amount === null) return;
-    const common = { variantId: action.item.variantId, warehouseId: action.item.warehouseId, reason: values.reason.trim() };
+    const common = { variantId: action.item.variantId, warehouseId: action.item.warehouseId, reason: values.reason.trim(), idempotencyKey: crypto.randomUUID() };
     const type = action.type;
     const options = {
       onSuccess: () => {
@@ -70,7 +72,7 @@ export default function StockPage() {
 
   return <main className={styles.page}>
     <PageHeader title={t('stock.title')} description={t('stock.description')} />
-    <ListToolbar value={query} placeholder={t('stock.search')} onChange={(value) => { setQuery(value); setPage(1); }} />
+    <ListToolbar value={query} placeholder={t('stock.search')} onChange={(value) => { setQuery(value); setPage(1); }} actions={<><Input aria-label="Ombor ID" placeholder="Ombor ID" inputMode="numeric" value={warehouseId} onChange={(event) => { setWarehouseId(event.target.value.replace(/\D/g, '')); setPage(1); }} /><Input aria-label="Mahsulot ID" placeholder="Mahsulot ID" inputMode="numeric" value={productId} onChange={(event) => { setProductId(event.target.value.replace(/\D/g, '')); setPage(1); }} /></>} />
     <Card>
       <FilterTabs value={lowOnly ? 'LOW' : 'ALL'} ariaLabel={t('stock.title')} options={[{ value: 'ALL', label: t('stock.all') }, { value: 'LOW', label: t('stock.low') }]} onChange={(value) => { setLowOnly(value === 'LOW'); setPage(1); }} />
       <DataTable rowKey={(item) => `${item.variantId}-${item.warehouseId}`} columns={columns} dataSource={stockQuery.data.items} rowClassName={(item) => item.available <= item.lowStockThreshold ? styles.lowStock : ''} tableLayout="auto" pagination={{ ...createTablePagination(20), current: page, total: stockQuery.data.total }} emptyState={<ContentState state="empty" title={t('stock.empty.title')} description={t('stock.empty.description')} />} onChange={(pagination) => setPage(pagination.current ?? 1)} />
