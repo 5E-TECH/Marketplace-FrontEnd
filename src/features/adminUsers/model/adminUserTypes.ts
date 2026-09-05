@@ -16,14 +16,6 @@ export interface CreateAdminUserPayload {
   role: AdminUserRole;
 }
 
-export interface UpdateAdminUserPayload {
-  id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  role: AdminUserRole;
-}
-
 export interface AdminUser {
   id: string;
   name: string;

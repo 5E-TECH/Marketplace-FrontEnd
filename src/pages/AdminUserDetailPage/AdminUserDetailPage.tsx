@@ -12,15 +12,16 @@ import {
   UserRound,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   useAdminUserQuery,
   useSetAdminUserBlockedMutation,
 } from '../../features/adminUsers/api/adminUserQueries';
 import type { AdminUser } from '../../features/adminUsers/model/adminUserTypes';
-import { AdminUserDeleteDialog } from '../../features/adminUsers/ui/AdminUserDeleteDialog/AdminUserDeleteDialog';
-import { AdminUserEditModal } from '../../features/adminUsers/ui/AdminUserEditModal/AdminUserEditModal';
-import { ADMIN_USER_BLOCK_ACTION_CONFIG } from '../../features/adminUsers/ui/adminUserActionConfig';
+import {
+  ADMIN_USER_BLOCK_ACTION_CONFIG,
+  ADMIN_USER_WRITE_ACTION_UNAVAILABLE,
+} from '../../features/adminUsers/ui/adminUserActionConfig';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { formatDateTime } from '../../shared/lib/date';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
@@ -105,11 +106,8 @@ function getDetailSections(user: AdminUser): DetailPageSection[] {
 
 export default function AdminUserDetailPage() {
   const { message } = App.useApp();
-  const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
-  const [editOpen, setEditOpen] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const userQuery = useAdminUserQuery(userId ?? null);
   const blockMutation = useSetAdminUserBlockedMutation();
   const user = userQuery.data;
@@ -168,7 +166,10 @@ export default function AdminUserDetailPage() {
         description={`Foydalanuvchi #${user.id}`}
         actions={
           <div className={styles.actions}>
-            <Button icon={<Pencil size={17} />} onClick={() => setEditOpen(true)}>
+            <Button
+              icon={<Pencil size={17} />}
+              onClick={() => void message.warning(ADMIN_USER_WRITE_ACTION_UNAVAILABLE)}
+            >
               Tahrirlash
             </Button>
             <Button
@@ -179,7 +180,11 @@ export default function AdminUserDetailPage() {
             >
               {blockAction.label}
             </Button>
-            <Button danger icon={<Trash2 size={17} />} onClick={() => setDeleteDialogOpen(true)}>
+            <Button
+              danger
+              icon={<Trash2 size={17} />}
+              onClick={() => void message.warning(ADMIN_USER_WRITE_ACTION_UNAVAILABLE)}
+            >
               O‘chirish
             </Button>
           </div>
@@ -198,13 +203,6 @@ export default function AdminUserDetailPage() {
         }}
         sections={getDetailSections(user)}
       />
-
-      <AdminUserEditModal
-        open={editOpen}
-        user={user}
-        onCancel={() => setEditOpen(false)}
-      />
-
       <ConfirmDialog
         open={blockDialogOpen}
         title={user.blocked
@@ -216,13 +214,6 @@ export default function AdminUserDetailPage() {
         loading={blockMutation.isPending}
         onCancel={() => setBlockDialogOpen(false)}
         onConfirm={toggleBlocked}
-      />
-
-      <AdminUserDeleteDialog
-        open={deleteDialogOpen}
-        user={user}
-        onCancel={() => setDeleteDialogOpen(false)}
-        onDeleted={() => void navigate('/admin/users', { replace: true })}
       />
     </>
   );

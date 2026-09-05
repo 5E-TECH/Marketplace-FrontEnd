@@ -1,7 +1,7 @@
 import { unwrapApiData } from '../../../shared/api/apiResponse';
 import { httpClient } from '../../../shared/api/httpClient';
 import { asRecord, readItems, readPagination, readText } from '../../../shared/api/responseFields';
-import type { AdminUser, AdminUserListParams, AdminUserRole, AdminUsersPage, CreateAdminUserPayload, UpdateAdminUserPayload } from '../model/adminUserTypes';
+import type { AdminUser, AdminUserListParams, AdminUserRole, AdminUsersPage, CreateAdminUserPayload } from '../model/adminUserTypes';
 
 const roles: AdminUserRole[] = ['SELLER', 'OPERATOR', 'BUYER', 'ADMIN', 'SUPERADMIN'];
 
@@ -83,12 +83,4 @@ export async function createAdminUser(payload: CreateAdminUserPayload): Promise<
     const errorBody: unknown = await response.json().catch(() => null);
     throw new Error(readErrorMessage(errorBody));
   }
-}
-
-export async function updateAdminUser({ id, ...payload }: UpdateAdminUserPayload): Promise<void> {
-  await httpClient.patch(`/admin/users/${encodeURIComponent(id)}`, payload);
-}
-
-export async function deleteAdminUser(id: string): Promise<void> {
-  await httpClient.delete(`/admin/users/${encodeURIComponent(id)}`);
 }

@@ -9,8 +9,10 @@ import {
 } from '../../features/adminUsers/api/adminUserQueries';
 import { ADMIN_USER_ROLE_OPTIONS } from '../../features/adminUsers/model/adminUserOptions';
 import type { AdminUser, AdminUserRole } from '../../features/adminUsers/model/adminUserTypes';
-import { AdminUserDeleteDialog } from '../../features/adminUsers/ui/AdminUserDeleteDialog/AdminUserDeleteDialog';
-import { ADMIN_USER_BLOCK_ACTION_CONFIG } from '../../features/adminUsers/ui/adminUserActionConfig';
+import {
+  ADMIN_USER_BLOCK_ACTION_CONFIG,
+  ADMIN_USER_WRITE_ACTION_UNAVAILABLE,
+} from '../../features/adminUsers/ui/adminUserActionConfig';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { formatDateTime } from '../../shared/lib/date';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
@@ -37,7 +39,6 @@ export default function AdminUsersPage() {
   const [block, setBlock] = useState<BlockFilter>('ALL');
   const [page, setPage] = useState(1);
   const [pendingBlockAction, setPendingBlockAction] = useState<AdminUser | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<AdminUser | null>(null);
   const blockMutation = useSetAdminUserBlockedMutation();
   const query = useAdminUsersQuery({
     page,
@@ -105,15 +106,15 @@ export default function AdminUsersPage() {
               <IconActionButton
                 danger
                 icon={<Trash2 size={17} />}
-                label="O‘chirish"
-                onClick={() => setPendingDelete(row)}
+                label="O‘chirish — backend endpoint mavjud emas"
+                onClick={() => void message.warning(ADMIN_USER_WRITE_ACTION_UNAVAILABLE)}
               />
             </div>
           );
         },
       },
     ],
-    [navigate],
+    [message, navigate],
   );
 
   if (query.isPending) return <ContentState state="loading" />;
@@ -134,7 +135,7 @@ export default function AdminUsersPage() {
     <main>
       <PageHeader
         title="Foydalanuvchilar"
-        description="Platforma foydalanuvchilarini ko‘rish, bloklash va o‘chirishni boshqarish"
+        description="Platforma foydalanuvchilarini ko‘rish va bloklashni boshqarish"
         extra={
           <Button
             type="primary"
@@ -243,12 +244,6 @@ export default function AdminUsersPage() {
             },
           );
         }}
-      />
-
-      <AdminUserDeleteDialog
-        open={Boolean(pendingDelete)}
-        user={pendingDelete}
-        onCancel={() => setPendingDelete(null)}
       />
     </main>
   );

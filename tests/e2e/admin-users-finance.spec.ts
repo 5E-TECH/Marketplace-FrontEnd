@@ -6,11 +6,10 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/v1/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { id: 'admin-e2e', role: 'SUPERADMIN', name: 'Super Admin', phone: '+998901234567', isActive: true, isDeleted: false } }) }));
 });
 
-test('admin user list, detail, edit, block va delete oqimlari ishlaydi', async ({ page }) => {
+test('admin user list, detail va block oqimlari backend kontraktiga mos ishlaydi', async ({ page }) => {
   let user = { id: '17', name: 'Ali Valiyev', phone: '+998901112233', email: 'ali@example.com', avatarUrl: null, role: 'BUYER', isActive: true, isBlocked: false, isDeleted: false, shopId: null, createdAt: '2026-09-04T08:00:00.000Z', updatedAt: '2026-09-05T09:30:00.000Z' };
   let blocked = false;
-  let deleted = false;
-  let updateBody: Record<string, unknown> | undefined;
+  let unsupportedRequestSent = false;
   await page.route('**/api/v1/admin/users**', async route => {
     const request = route.request();
     if (request.url().endsWith('/17/block')) {
@@ -19,25 +18,18 @@ test('admin user list, detail, edit, block va delete oqimlari ishlaydi', async (
       await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
       return;
     }
-    if (request.url().endsWith('/17') && request.method() === 'PATCH') {
-      updateBody = request.postDataJSON() as Record<string, unknown>;
-      user = { ...user, ...updateBody, updatedAt: '2026-09-05T10:00:00.000Z' };
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: user }) });
-      return;
-    }
-    if (request.url().endsWith('/17') && request.method() === 'DELETE') {
-      deleted = true;
-      await route.fulfill({ status: 204 });
+    if (request.method() === 'PATCH' || request.method() === 'DELETE') {
+      unsupportedRequestSent = true;
+      await route.fulfill({ status: 405, contentType: 'application/json', body: '{}' });
       return;
     }
     if (request.url().endsWith('/17')) { await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: user }) }); return; }
-    const items = deleted ? [] : [user];
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items, total: items.length, page: 1, limit: 20, totalPages: items.length } }) });
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [user], total: 1, page: 1, limit: 20, totalPages: 1 } }) });
   });
   await page.goto('/admin/users');
 
   await expect(page.getByRole('button', { name: 'Bloklash' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'O‘chirish' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'O‘chirish — backend endpoint mavjud emas' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tafsilotlar' })).toBeVisible();
   await page.getByRole('button', { name: 'Bloklash' }).click();
   await page.getByRole('button', { name: 'Bloklash', exact: true }).last().click();
@@ -52,25 +44,8 @@ test('admin user list, detail, edit, block va delete oqimlari ishlaydi', async (
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
-  const editDialog = page.getByRole('dialog', { name: 'Foydalanuvchini tahrirlash' });
-  await expect(editDialog).toBeVisible();
-  await editDialog.getByLabel('To‘liq ism').fill('Ali Valiyev Updated');
-  await editDialog.getByLabel('Email').fill('updated@example.com');
-  await editDialog.getByRole('button', { name: 'O‘zgarishlarni saqlash' }).click();
-  await expect.poll(() => updateBody).toEqual({
-    name: 'Ali Valiyev Updated',
-    phone: '+998901112233',
-    email: 'updated@example.com',
-    role: 'BUYER',
-  });
-  await expect(page.getByRole('heading', { name: 'Ali Valiyev Updated' })).toBeVisible();
-
-  await page.getByRole('button', { name: 'O‘chirish' }).click();
-  const deleteDialog = page.getByRole('dialog', { name: 'Foydalanuvchi o‘chirilsinmi?' });
-  await expect(deleteDialog).toBeVisible();
-  await deleteDialog.getByRole('button', { name: 'O‘chirish', exact: true }).click();
-  await expect.poll(() => deleted).toBe(true);
-  await expect(page).toHaveURL(/\/admin\/users$/);
+  await expect(page.getByText('Backend kontraktida foydalanuvchini tahrirlash va o‘chirish endpointlari mavjud emas')).toBeVisible();
+  expect(unsupportedRequestSent).toBe(false);
 });
 
 test('admin alohida sahifada yangi foydalanuvchi yaratadi', async ({ page }) => {
