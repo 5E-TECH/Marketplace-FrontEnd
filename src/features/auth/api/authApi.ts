@@ -7,6 +7,7 @@ import type {
   LoginResponse,
   RegisterCredentials,
   UpdateAuthProfilePayload,
+  UpdateProfilePayload,
   UserRole,
   PhonePayload,
   VerifyPhonePayload,
@@ -130,8 +131,12 @@ export async function updateAuthProfile(
   payload: UpdateAuthProfilePayload,
 ): Promise<AuthUser> {
   const { data } = await httpClient.patch<unknown>('/auth/profile', payload);
-  return parseAuthUser(unwrapApiData(data));
+  const value = unwrapApiData(data);
+  const candidate = value && typeof value === 'object' && 'user' in value ? value.user : value;
+  return parseAuthUser(candidate);
 }
+
+export const updateProfile = (payload: UpdateProfilePayload) => updateAuthProfile(payload);
 
 export async function logout(): Promise<void> {
   await httpClient.post('/auth/logout');

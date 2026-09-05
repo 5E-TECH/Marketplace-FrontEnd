@@ -3,6 +3,7 @@ import { cancelSellerOrder, confirmCheckout, confirmSellerOrder, createCheckout,
 import type { AdminOrderListParams, ConfirmCheckoutPayload, CreateCheckoutPayload, SellerOrderListParams } from '../model/orderTypes';
 
 export const orderKeys = { all: ['seller-orders'] as const, list: (params: SellerOrderListParams) => [...orderKeys.all, params] as const };
+export const shipmentKeys = { all: ['seller-shipments'] as const, list: (params: SellerOrderListParams) => [...shipmentKeys.all, params] as const };
 
 export function useSellerOrdersQuery(params: SellerOrderListParams) {
   return useQuery({
@@ -12,11 +13,24 @@ export function useSellerOrdersQuery(params: SellerOrderListParams) {
   });
 }
 
+export function useSellerShipmentsQuery(params: SellerOrderListParams) {
+  return useQuery({
+    queryKey: shipmentKeys.list(params),
+    queryFn: ({ signal }) => getSellerShipments(params, signal),
+    placeholderData: (previous) => previous,
+  });
+}
+
 export function useUpdateSellerOrderStatusMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateSellerOrderStatus,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: orderKeys.all }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: orderKeys.all }),
+        queryClient.invalidateQueries({ queryKey: shipmentKeys.all }),
+      ]);
+    },
   });
 }
 
@@ -26,7 +40,6 @@ export const useSellerOrderHistoryQuery = (id: string | null) => useQuery({ quer
 const useInvalidatingOrderMutation = <T,>(mutationFn: (value: T) => Promise<void>) => { const client = useQueryClient(); return useMutation({ mutationFn, onSuccess: () => client.invalidateQueries({ queryKey: orderKeys.all }) }); };
 export const useConfirmSellerOrderMutation = () => useInvalidatingOrderMutation(confirmSellerOrder);
 export const useCancelSellerOrderMutation = () => useInvalidatingOrderMutation(cancelSellerOrder);
-export const shipmentKeys = { all: ['seller-shipments'] as const, detail: (id: string) => ['seller-shipments', id] as const, tracking: (id: string) => ['seller-shipments', id, 'tracking'] as const };
 export const useCreateSellerShipmentMutation = () => {
   const client = useQueryClient();
   return useMutation({ mutationFn: createSellerShipment, onSuccess: async () => {
@@ -36,9 +49,8 @@ export const useCreateSellerShipmentMutation = () => {
     ]);
   } });
 };
-export const useSellerShipmentsQuery = () => useQuery({ queryKey: shipmentKeys.all, queryFn: ({ signal }) => getSellerShipments(signal) });
-export const useSellerShipmentQuery = (id: string | null) => useQuery({ queryKey: shipmentKeys.detail(id ?? ''), queryFn: ({ signal }) => getSellerShipment(id!, signal), enabled: Boolean(id) });
-export const useSellerShipmentTrackingQuery = (id: string | null) => useQuery({ queryKey: shipmentKeys.tracking(id ?? ''), queryFn: ({ signal }) => getSellerShipmentTracking(id!, signal), enabled: Boolean(id) });
+export const useSellerShipmentQuery = (id: string | null) => useQuery({ queryKey: [...shipmentKeys.all, 'detail', id], queryFn: ({ signal }) => getSellerShipment(id!, signal), enabled: Boolean(id) });
+export const useSellerShipmentTrackingQuery = (id: string | null) => useQuery({ queryKey: [...shipmentKeys.all, 'tracking', id], queryFn: ({ signal }) => getSellerShipmentTracking(id!, signal), enabled: Boolean(id) });
 export const useCreateCheckoutMutation = () => useMutation({ mutationFn: (payload: CreateCheckoutPayload) => createCheckout(payload) });
 export const useConfirmCheckoutMutation = () => useMutation({ mutationFn: (payload: ConfirmCheckoutPayload) => confirmCheckout(payload) });
 

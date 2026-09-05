@@ -34,10 +34,9 @@ function parseOrder(value: unknown): SellerOrder {
   };
 }
 
-export async function getSellerOrders(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
-  const { data } = await httpClient.get<unknown>('/seller/orders', { signal, params });
+function parseOrdersPage(data: unknown, label: string): SellerOrdersPage {
   const value = unwrapApiData(data);
-  if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error('Buyurtmalar ro‘yxati noto‘g‘ri formatda');
+  if (typeof value !== 'object' || value === null || !('items' in value) || !Array.isArray(value.items)) throw new Error(`${label} noto‘g‘ri formatda`);
   const page = value as Record<string, unknown>;
   return {
     items: value.items.map(parseOrder),
@@ -46,6 +45,20 @@ export async function getSellerOrders(params: SellerOrderListParams, signal?: Ab
     limit: numberField(page, 'limit'),
     totalPages: numberField(page, 'totalPages'),
   };
+}
+
+export async function getSellerOrders(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
+  const { data } = await httpClient.get<unknown>('/seller/orders', { signal, params });
+  return parseOrdersPage(data, 'Buyurtmalar ro‘yxati');
+}
+
+/**
+ * Yetkazib berishga topshirilgan buyurtmalar. Backend `GET /seller/shipments`
+ * buyurtma ro'yxati bilan bir xil qobiqni qaytaradi (faqat jo'natmalar filtri).
+ */
+export async function getSellerShipments(params: SellerOrderListParams, signal?: AbortSignal): Promise<SellerOrdersPage> {
+  const { data } = await httpClient.get<unknown>('/seller/shipments', { signal, params });
+  return parseOrdersPage(data, 'Jo‘natmalar ro‘yxati');
 }
 
 export async function updateSellerOrderStatus({ id, status }: UpdateSellerOrderStatusPayload): Promise<void> {
@@ -64,7 +77,6 @@ export async function getSellerOrderHistory(id: string, signal?: AbortSignal): P
 export async function confirmSellerOrder(id: string): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/confirm`); }
 export async function cancelSellerOrder(id: string): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/cancel`); }
 export async function createSellerShipment({ id, customerPhone }: CreateShipmentPayload): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/shipment`, { customerPhone }); }
-export async function getSellerShipments(signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>('/seller/shipments', { signal }); return unwrapApiData(data); }
 export async function getSellerShipment(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/seller/shipments/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
 export async function getSellerShipmentTracking(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/seller/shipments/${encodeURIComponent(id)}/tracking`, { signal }); return unwrapApiData(data); }
 

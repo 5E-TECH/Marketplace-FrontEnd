@@ -21,12 +21,14 @@ export function AppNavigation({ onNavigate }: AppNavigationProps) {
   const user = useAppSelector(selectAuthUser);
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
   const selectedRoute = findRouteMeta(location.pathname);
+  // Rolga ochiq bo'lmagan bo'lim menyuda ko'rinmaydi — operator uni bosib
+  // backend'dan 403 olishi kerak emas.
   const toMenuItems = (section: 'main' | 'utility') =>
     appRouteConfig
       .filter(
         (route) => route.section === section && route.showInSidebar !== false
           && (!isAdmin || Boolean(route.roles?.includes(user.role)))
-          && (!route.roles || (user ? route.roles.includes(user.role) : false))
+          && (user ? route.roles.includes(user.role) : false)
           && (route.path !== '/users' || user?.role === 'SELLER'),
       )
       .map(({ path, label, icon }) => ({

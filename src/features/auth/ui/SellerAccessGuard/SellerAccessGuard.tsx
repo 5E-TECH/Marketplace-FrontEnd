@@ -1,5 +1,10 @@
 import { App } from 'antd';
 import { Outlet } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  canAccessRoute,
+  getDefaultRoute,
+} from '../../../../app/router/appRouteConfig';
 import { useAppSelector } from '../../../../app/store/hooks';
 import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
 import { selectAuthUser } from '../../model/authSlice';
@@ -8,6 +13,8 @@ import { useLogoutMutation } from '../../api/useLogoutMutation';
 
 export function SellerAccessGuard({ children }: { children?: React.ReactNode }) {
   const { message } = App.useApp();
+  const location = useLocation();
+  const navigate = useNavigate();
   const user = useAppSelector(selectAuthUser);
   const logoutMutation = useLogoutMutation();
 
@@ -38,6 +45,20 @@ export function SellerAccessGuard({ children }: { children?: React.ReactNode }) 
         description={`Joriy akkaunt roli: ${user.role}. Bu akkaunt kabinetga kirish huquqiga ega emas.`}
         actionLabel="Seller akkaunti bilan kirish"
         onAction={switchToSeller}
+      />
+    );
+  }
+
+  if (!canAccessRoute(location.pathname, user.role)) {
+    const fallback = getDefaultRoute(user.role);
+
+    return (
+      <ContentState
+        state="forbidden"
+        title="Bu bo‘lim sizga ochiq emas"
+        description={`«${user.role}» roli bu bo‘limda ishlay olmaydi. Sizga ochiq bo‘limga o‘tishingiz mumkin.`}
+        actionLabel="Ochiq bo‘limga o‘tish"
+        onAction={() => void navigate(fallback, { replace: true })}
       />
     );
   }

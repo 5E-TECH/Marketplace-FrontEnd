@@ -20,8 +20,21 @@ export async function getAdminPayouts(params: PayoutListParams, signal?: AbortSi
   const items = rawItems.map(parsePayout);
   return { items, ...readPagination(record, { page: params.page, limit: params.limit, itemCount: items.length }) };
 }
-export async function runPayoutAction({ id, action }: { id: string; action: PayoutAction }): Promise<void> { await httpClient.post(`/admin/finance/payouts/${encodeURIComponent(id)}/${action}`); }
+export async function runPayoutAction({ id, action }: { id: string; action: PayoutAction }): Promise<void> {
+  const payoutId = encodeURIComponent(id);
+  if (action === 'approve') {
+    await httpClient.post(`/admin/finance/payouts/${payoutId}/approve`);
+  } else if (action === 'hold') {
+    await httpClient.post(`/admin/finance/payouts/${payoutId}/hold`);
+  } else {
+    await httpClient.post(`/admin/finance/payouts/${payoutId}/release`);
+  }
+}
 export async function getFinanceReport(kind: 'reports' | 'reconciliation', params: ReportParams, signal?: AbortSignal): Promise<unknown> {
-  const suffix = kind === 'reconciliation' ? '/reconciliation' : '';
-  const { data } = await httpClient.get<unknown>(`/admin/finance/reports${suffix}`, { params, signal }); return unwrapApiData(data);
+  if (kind === 'reconciliation') {
+    const { data } = await httpClient.get<unknown>('/admin/finance/reports/reconciliation', { params, signal });
+    return unwrapApiData(data);
+  }
+  const { data } = await httpClient.get<unknown>('/admin/finance/reports', { params, signal });
+  return unwrapApiData(data);
 }

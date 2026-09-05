@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { getDefaultRoute } from '../../../../app/router/appRouteConfig';
 import { useAppSelector } from '../../../../app/store/hooks';
-import { selectIsAuthenticated } from '../../model/authSlice';
+import { selectAuthUser, selectIsAuthenticated } from '../../model/authSlice';
 
 interface RedirectState {
   from?: {
@@ -10,7 +11,7 @@ interface RedirectState {
   };
 }
 
-function getRedirectPath(state: unknown): string {
+function getRedirectPath(state: unknown, fallback: string): string {
   const { from } = (state ?? {}) as RedirectState;
 
   if (
@@ -19,7 +20,7 @@ function getRedirectPath(state: unknown): string {
     !from.pathname.startsWith('/') ||
     from.pathname.startsWith('//')
   ) {
-    return '/';
+    return fallback;
   }
 
   const search = typeof from.search === 'string' ? from.search : '';
@@ -30,10 +31,14 @@ function getRedirectPath(state: unknown): string {
 
 export function PublicOnlyRoute() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const user = useAppSelector(selectAuthUser);
   const location = useLocation();
+  // Operatorda bosh sahifa (sotuvchi dashboardi) yopiq — uni o'ziga
+  // ochiq birinchi bo'limga yuboramiz.
+  const fallback = user ? getDefaultRoute(user.role) : '/';
 
   return isAuthenticated ? (
-    <Navigate to={getRedirectPath(location.state)} replace />
+    <Navigate to={getRedirectPath(location.state, fallback)} replace />
   ) : (
     <Outlet />
   );

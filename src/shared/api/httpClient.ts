@@ -15,7 +15,9 @@ function resolveApiUrl(value: string | undefined): string {
 export const httpClient = axios.create({
   baseURL: resolveApiUrl(import.meta.env.VITE_API_URL),
   timeout: 10_000,
-  // Refresh token HttpOnly cookie orqali qaytishi mumkin.
+  // Access token Bearer sarlavhasida ketadi. Refresh token esa backend
+  // tomonidan HttpOnly cookie'da beriladi (path: /api/v1/auth) — brauzer uni
+  // faqat shu bayroq bilan saqlaydi va qaytaradi. JS cookie'ni o'qiy olmaydi.
   withCredentials: true,
   headers: {
     Accept: 'application/json',
