@@ -42,14 +42,15 @@ export interface ProductVariant {
 export type ProductVariantPayload = Pick<ProductVariant, 'sku' | 'name' | 'attributes' | 'price' | 'oldPrice' | 'barcode' | 'imageUrl' | 'isActive'>;
 
 export interface ProductUpsertPayload {
-  categoryId?: string;
+  categoryId?: string | null;
   name: string;
-  description: string;
+  description?: string;
   price: number;
-  oldPrice?: number;
-  imageUrl?: string;
-  images: string[];
-  attributes: Record<string, string>;
+  oldPrice?: number | null;
+  imageUrl?: string | null;
+  images?: string[];
+  attributes?: Record<string, string>;
+  status?: Extract<ProductStatus, 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK'>;
 }
 
 export interface ProductListParams {

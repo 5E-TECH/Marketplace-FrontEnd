@@ -10,7 +10,8 @@ export const palette = {
   textPrimary: '#F8FAFC',
   textSecondary: '#94A3B8',
   textDisabled: '#64748B',
-  border: '#27314A',
-  backgroundLayout: '#080D18',
-  backgroundContainer: '#151C2F',
+  border: '#243149',
+  backgroundLayout: '#080C16',
+  backgroundContainer: '#121A2A',
+  rowHover: '#182235',
 } as const;

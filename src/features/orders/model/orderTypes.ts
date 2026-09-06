@@ -34,3 +34,45 @@ export interface UpdateSellerOrderStatusPayload {
   id: string;
   status: SellerOrderStatus;
 }
+
+export interface CreateShipmentPayload { id: string; customerPhone: string }
+export interface SellerOrderHistory { id: string; status: SellerOrderStatus; createdAt: string }
+export interface SellerOrderItem { id: string; name: string; quantity: number; price: number }
+
+export type CheckoutPaymentMethod = 'COD' | 'PAYME' | 'CLICK';
+export interface CheckoutAddress {
+  regionId: string;
+  districtId: string;
+  address: string;
+  whereDeliver: 'ADDRESS';
+}
+export interface CreateCheckoutPayload {
+  paymentMethod: CheckoutPaymentMethod;
+  address: CheckoutAddress;
+  idempotencyKey: string;
+}
+export interface ConfirmCheckoutPayload { orderId: string }
+
+export type PaymentMethod = 'COD' | 'PAYME' | 'CLICK';
+export type AdminOrderStatus = 'DRAFT' | 'PENDING_PAYMENT' | 'PAID' | 'CONFIRMED' | 'PARTIALLY_FULFILLED' | 'FULFILLED' | 'CANCELLED' | 'REFUNDED';
+export type AdminPaymentMethod = 'online' | 'cod';
+export interface AdminOrderListParams {
+  status?: AdminOrderStatus;
+  paymentMethod?: AdminPaymentMethod;
+  shopId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page: number;
+  limit: number;
+}
+export interface AdminOrder {
+  id: string;
+  orderNumber: string;
+  buyerName: string | null;
+  totalAmount: number;
+  paymentMethod: AdminPaymentMethod | null;
+  status: AdminOrderStatus;
+  shopId: string | null;
+  createdAt: string;
+}
+export interface AdminOrdersPage { items: AdminOrder[]; total: number; page: number; limit: number; totalPages: number }

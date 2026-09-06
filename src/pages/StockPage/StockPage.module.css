@@ -1,6 +1,6 @@
 .page { display: grid; gap: 18px; }
-.lowStock td { background: rgb(245 158 11 / 9%) !important; }
-.lowValue { color: #f59e0b; font-weight: 700; }
+.lowStock td { background: var(--color-token-rgb-245-158-11-9) !important; }
+.lowValue { color: var(--color-accent); font-weight: 700; }
 .product { display: grid; gap: 3px; }
 .product small { color: var(--color-text-muted); }
 .actions { display: flex; gap: 6px; }

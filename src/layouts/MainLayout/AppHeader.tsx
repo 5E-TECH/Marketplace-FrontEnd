@@ -1,13 +1,18 @@
 import {
-  Bell as BellOutlined,
-  Globe2 as GlobalOutlined,
+  BellRing as NotificationOutlined,
+  ChevronDown,
+  Languages as LanguageOutlined,
   LogOut as LogoutOutlined,
   PanelLeftClose as MenuFoldOutlined,
   PanelLeftOpen as MenuUnfoldOutlined,
   Search as SearchOutlined,
 } from 'lucide-react';
-import { Avatar, Badge, Button, Divider, Flex, Input, Layout, Typography } from 'antd';
+import { Avatar, Badge, Button, Divider, Dropdown, Flex, Input, Layout, Typography } from 'antd';
+import { useState } from 'react';
 import type { AuthUser } from '../../features/auth/model/authTypes';
+import { useAppDispatch } from '../../app/store/hooks';
+import { languageChanged, type Language } from '../../features/preferences/model/preferencesSlice';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 import styles from './MainLayout.module.css';
 
 interface AppHeaderProps {
@@ -17,6 +22,7 @@ interface AppHeaderProps {
   onMenuToggle: () => void;
   onLogout: () => void;
   onNavigate: (path: string) => void;
+  onGlobalSearch: (query: string) => void;
 }
 
 export function AppHeader({
@@ -26,7 +32,16 @@ export function AppHeader({
   onMenuToggle,
   onLogout,
   onNavigate,
+  onGlobalSearch,
 }: AppHeaderProps) {
+  const dispatch = useAppDispatch();
+  const { language, t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const languages: Array<{ key: Language; label: string }> = [
+    { key: 'uz', label: "O‘zbekcha" },
+    { key: 'ru', label: 'Русский' },
+    { key: 'en', label: 'English' },
+  ];
   return (
     <Layout.Header className={styles.header}>
       <Flex align="center" justify="space-between" className={styles.headerContent}>
@@ -34,44 +49,60 @@ export function AppHeader({
           <Button
             type="text"
             icon={mobile || collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            aria-label={mobile || collapsed ? 'Menyuni ochish' : 'Menyuni yopish'}
+            aria-label={mobile || collapsed ? t('header.openMenu') : t('header.closeMenu')}
             onClick={onMenuToggle}
           />
-          <Input
+          <Input.Search
             className={styles.globalSearch}
             prefix={<SearchOutlined />}
-            placeholder="Mahsulot, buyurtma yoki mijoz..."
-            aria-label="Global qidiruv"
+            placeholder={t('header.search')}
+            aria-label={t('header.globalSearch')}
+            value={searchQuery}
+            enterButton
+            onChange={(event) => setSearchQuery(event.target.value)}
+            onSearch={(value) => {
+              const normalizedQuery = value.trim();
+              if (normalizedQuery) onGlobalSearch(normalizedQuery);
+            }}
           />
         </Flex>
 
         <Flex className={styles.headerActions} align="center">
-          <Button
-            type="text"
-            className={styles.headerIconButton}
-            icon={<GlobalOutlined />}
-            aria-label="Tilni tanlash"
-          />
-          <Badge dot offset={[-7, 7]}>
+          <Dropdown
+            trigger={['click']}
+            menu={{
+              selectable: true,
+              selectedKeys: [language],
+              items: languages,
+              onClick: ({ key }) => dispatch(languageChanged(key as Language)),
+            }}
+          >
+            <Button type="text" className={styles.languageButton} aria-label={t('header.selectLanguage')}>
+              <LanguageOutlined />
+              <span>{language.toUpperCase()}</span>
+              <ChevronDown className={styles.languageChevron} />
+            </Button>
+          </Dropdown>
+          <Badge dot className={styles.notificationBadge} offset={[-7, 7]}>
             <Button
               type="text"
-              className={styles.headerIconButton}
-              icon={<BellOutlined />}
-              aria-label="Bildirishnomalar"
+              className={styles.notificationButton}
+              icon={<NotificationOutlined />}
+              aria-label={t('header.notifications')}
             />
           </Badge>
           <Divider type="vertical" className={styles.headerDivider} />
           <button
             className={styles.accountSummary}
             type="button"
-            aria-label="Akkaunt profiliga o‘tish"
+            aria-label={t('header.profile')}
             onClick={() => onNavigate('/profile')}
           >
             <Avatar className={styles.accountAvatar} size={34} src={user?.avatarUrl}>
               {user?.name?.slice(0, 2).toUpperCase() ?? 'AK'}
             </Avatar>
             <span className={styles.accountText}>
-              <Typography.Text>{user?.name ?? 'Akkaunt'}</Typography.Text>
+              <Typography.Text>{user?.name ?? t('header.account')}</Typography.Text>
               <Typography.Text>{user?.role ?? 'SELLER'}</Typography.Text>
             </span>
           </button>
@@ -79,7 +110,7 @@ export function AppHeader({
             type="text"
             className={styles.logoutButton}
             icon={<LogoutOutlined />}
-            aria-label="Tizimdan chiqish"
+            aria-label={t('header.logout')}
             onClick={onLogout}
           />
         </Flex>

@@ -15,46 +15,13 @@
 
 .stats {
   display: grid;
-  margin-bottom: var(--space-6);
+  margin-bottom: 18px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: 10px;
 }
 
 .tableCard {
-  overflow: hidden;
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-.tableCard :global(.ant-card-body) {
-  padding: 0;
-}
-
-.tableHeader {
-  display: flex;
-  min-height: 68px;
-  padding: var(--space-3) var(--space-5);
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--color-border);
-  gap: var(--space-3);
-}
-
-.tableHeader > div:first-child {
-  display: grid;
-  gap: 3px;
-}
-
-.tableHeader strong {
-  color: var(--color-text);
-  font-size: 15px;
-}
-
-.tableHeader span {
-  color: var(--color-text-muted);
-  font-size: 12px;
+  box-shadow: none;
 }
 
 .statusFilter {
@@ -69,9 +36,10 @@
 }
 
 .tableCard :global(.ant-table-thead > tr > th) {
-  height: 48px;
+  height: 44px;
+  padding-block: 8px;
   color: var(--color-text-muted);
-  background: #101827;
+  background: var(--color-surface-subtle);
   border-bottom-color: var(--color-border);
   font-size: 11px;
   font-weight: 700;
@@ -79,12 +47,14 @@
 }
 
 .tableCard :global(.ant-table-tbody > tr > td) {
-  height: 58px;
+  height: 64px;
+  padding-block: 9px;
+  background: var(--color-surface);
   border-bottom-color: var(--color-border);
 }
 
 .tableCard :global(.ant-table-tbody > tr:hover > td) {
-  background: var(--color-surface-hover) !important;
+  background: var(--color-token-rgb-56-189-248-5) !important;
 }
 
 .tableCard :global(.ant-table-cell.ant-table-column-sort) {
@@ -96,7 +66,7 @@
 }
 
 .tableCard :global(.ant-pagination) {
-  padding: 0 var(--space-4) var(--space-4);
+  padding: 0 12px 12px;
 }
 
 .imagePlaceholder {
@@ -104,8 +74,8 @@
   width: 36px;
   height: 36px;
   color: var(--color-accent);
-  background: rgb(245 158 11 / 12%);
-  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  border-radius: 50%;
   place-items: center;
 }
 
@@ -115,14 +85,22 @@
   height: 44px;
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: 50%;
   object-fit: cover;
 }
 
 .productInfo {
   display: grid;
-  min-width: 160px;
+  min-width: 0;
+  max-width: 240px;
   gap: 3px;
+}
+
+.productInfo > :first-child,
+.productInfo small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .productInfo small,
@@ -132,12 +110,18 @@
 }
 
 .sku {
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
   padding: 3px 7px;
   color: var(--color-text-secondary);
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 12px;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .imagePlaceholder svg {
@@ -145,24 +129,74 @@
   height: 17px;
 }
 
+.rowActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.rowActions :global(.ant-btn) {
+  width: 34px;
+  height: 34px;
+}
+
+.rowActions :global(svg) {
+  width: 15px;
+  height: 15px;
+}
+
+.editAction {
+  color: var(--color-token-22d3ee) !important;
+  background: var(--color-token-rgb-34-211-238-12) !important;
+}
+
+.editAction:hover {
+  background: var(--color-token-rgb-34-211-238-22) !important;
+}
+
+.deleteAction {
+  color: var(--color-text-muted) !important;
+}
+
+.deleteAction:hover {
+  color: var(--color-error) !important;
+  background: var(--color-token-rgb-239-68-68-10) !important;
+}
+
 @media (max-width: 991px) {
   .stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .stats {
+    display: flex;
+    margin-inline: calc(var(--space-3) * -1);
+    padding-inline: var(--space-3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .stats > * {
+    min-width: min(82vw, 300px);
+    scroll-snap-align: start;
+  }
+
+  .stats::-webkit-scrollbar { display: none; }
+
+  .tableCard {
+    margin-inline: calc(var(--space-3) * -1);
+    border-inline: 0;
+    border-radius: 0;
   }
 }
 
 @media (max-width: 575px) {
-  .stats {
-    grid-template-columns: 1fr;
-  }
-
   .statusFilter {
     width: 100%;
-  }
-
-  .tableHeader {
-    align-items: flex-start;
-    flex-direction: column;
   }
 
 }

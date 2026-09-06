@@ -16,6 +16,9 @@ interface WarehouseFormModalProps {
   form: FormInstance<WarehouseFormValues>;
   onCancel: () => void;
   onSubmit: (values: WarehouseFormValues) => void;
+  title?: string;
+  submitText?: string;
+  initialValues?: Partial<WarehouseFormValues>;
 }
 
 export function WarehouseFormModal({
@@ -25,14 +28,17 @@ export function WarehouseFormModal({
   form,
   onCancel,
   onSubmit,
+  title = 'Yangi ombor',
+  submitText = 'Qo‘shish',
+  initialValues,
 }: WarehouseFormModalProps) {
   return (
     <FormModal
-      title="Yangi ombor"
+      title={title}
       open={open}
       form={form}
-      initialValues={{ isDefault: makeDefaultInitially }}
-      submitText="Qo‘shish"
+      initialValues={{ isDefault: makeDefaultInitially, ...initialValues }}
+      submitText={submitText}
       loading={loading}
       onCancel={onCancel}
       onSubmit={onSubmit}

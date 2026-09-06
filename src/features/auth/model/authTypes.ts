@@ -26,16 +26,24 @@ export interface AuthUser {
   avatarUrl: string | null;
   isActive: boolean;
   isDeleted: boolean;
+  isBlocked: boolean;
+}
+
+export interface UpdateAuthProfilePayload {
+  name?: string;
+  phone?: string;
+  email?: string;
+  avatarUrl?: string;
+  password?: string;
 }
 
 export interface AuthSession extends LoginResponse {
   user: AuthUser;
 }
+export interface PhonePayload { phone: string }
+export interface VerifyPhonePayload extends PhonePayload { code: string }
+export interface ResetPasswordPayload extends VerifyPhonePayload { newPassword: string }
+export interface AuthDeviceSession { id: string; userAgent: string; ipAddress: string; createdAt: string; lastUsedAt: string | null; current: boolean }
 
 /** `PATCH /auth/profile` — barcha maydon ixtiyoriy (UpdateProfileDto). */
-export interface UpdateProfilePayload {
-  name?: string;
-  phone?: string;
-  avatarUrl?: string;
-  password?: string;
-}
+export type UpdateProfilePayload = UpdateAuthProfilePayload;

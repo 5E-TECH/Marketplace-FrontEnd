@@ -1,8 +1,10 @@
 .page { width: min(100%, 960px); margin: 0 auto; }
 .profile { overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
-.identity { display: flex; min-height: 126px; padding: 24px 28px; background: linear-gradient(135deg, rgb(245 158 11 / 7%), transparent 42%), var(--color-surface-subtle); border-bottom: 1px solid var(--color-border); align-items: center; gap: 18px; }
-.identity :global(.ant-avatar) { color: #fff; background: #172136; border: 3px solid rgb(245 158 11 / 28%); font-size: 22px; }
+.identity { display: flex; min-height: 126px; padding: 24px 28px; background: linear-gradient(135deg, var(--color-token-rgb-245-158-11-7), transparent 42%), var(--color-surface-subtle); border-bottom: 1px solid var(--color-border); align-items: center; gap: 18px; }
+.identity :global(.ant-avatar) { color: var(--color-white); background: var(--color-token-172136); border: 3px solid var(--color-token-rgb-245-158-11-28); font-size: 22px; }
 .identity h2 { margin: 0 0 8px !important; color: var(--color-text) !important; font-size: 24px !important; }
+.identityContent { min-width: 0; }
+.editButton { margin-left: auto; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .sectionTitle { display: flex; padding: 22px 28px 16px; align-items: center; gap: 10px; }
 .sectionTitle > svg { width: 19px; color: var(--color-accent); }
@@ -15,4 +17,9 @@
 .infoGrid dt svg { width: 14px; height: 14px; }
 .infoGrid dd { overflow: hidden; margin: 0; color: var(--color-text); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .modalDescription { margin: 0 0 18px; color: var(--color-text-muted); font-size: 13px; }
-@media (max-width: 575px) { .identity { padding: 20px 16px; align-items: flex-start; flex-direction: column; } .sectionTitle { padding: 20px 16px 14px; } .infoGrid { padding: 0 16px 20px; grid-template-columns: 1fr; } }
+.passwordHeading { display: flex; margin: 6px 0 18px; padding-top: 18px; border-top: 1px solid var(--color-border); align-items: center; gap: 10px; }
+.passwordHeading > svg { width: 20px; color: var(--color-accent); }
+.passwordHeading > div { display: grid; gap: 2px; }
+.passwordHeading strong { color: var(--color-text); }
+.passwordHeading span { color: var(--color-text-muted); font-size: 12px; }
+@media (max-width: 575px) { .identity { padding: 20px 16px; align-items: flex-start; flex-direction: column; } .editButton { width: 100%; margin-left: 0; } .sectionTitle { padding: 20px 16px 14px; } .infoGrid { padding: 0 16px 20px; grid-template-columns: 1fr; } }

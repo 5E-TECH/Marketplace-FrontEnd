@@ -11,10 +11,11 @@ import { productKeys } from '../../features/products/api/productQueries';
 import { uploadFile } from '../../shared/api/fileApi';
 import { createProductVariant, deleteProductVariant, updateProductVariant } from '../../features/products/api/productVariantApi';
 import styles from './ProductEditorPage.module.css';
+import { BackButton } from '../../shared/ui/BackButton/BackButton';
 
 const emptyProduct: ProductFormValues = {
   name: '', categoryId: '', description: '', price: null, oldPrice: null,
-  attributes: [], hasVariants: false, variants: [], images: [], imageUrl: null,
+  attributes: [], hasVariants: false, variants: [], images: [], imageUrl: null, status: 'DRAFT',
 };
 
 export default function ProductEditorPage() {
@@ -37,6 +38,7 @@ export default function ProductEditorPage() {
         description: product.description,
         price: product.price,
         oldPrice: product.oldPrice,
+        status: ['DRAFT', 'ACTIVE', 'ARCHIVED', 'OUT_OF_STOCK'].includes(product.status) ? product.status as ProductFormValues['status'] : 'DRAFT',
         attributes: Object.entries(product.attributes).map(([key, value]) => ({ key, value })),
         hasVariants: product.hasVariants,
         variants: product.variants,
@@ -52,16 +54,16 @@ export default function ProductEditorPage() {
       if (productId) {
         await updateMutation.mutateAsync(payload);
       } else if (!targetProductId) {
-        const created = await createMutation.mutateAsync({ ...payload, imageUrl: undefined, images: [] });
+        const created = await createMutation.mutateAsync({ ...payload, imageUrl: null, images: [] });
         targetProductId = created.id;
         createdDraftId.current = created.id;
       }
       if (!targetProductId) throw new Error('Mahsulot IDsi olinmadi');
 
-      for (const upload of uploads) {
+      await Promise.all(uploads.map(async (upload) => {
         updateUpload(upload.uid, { status: 'uploading', percent: 1 });
         try {
-          const url = await uploadFile(upload.file, targetProductId, upload.isCover, (percent) => {
+          const url = await uploadFile({ file: upload.file, productId: targetProductId, isCover: upload.isCover }, (percent) => {
             updateUpload(upload.uid, { status: 'uploading', percent });
           });
           updateUpload(upload.uid, { status: 'done', percent: 100, url });
@@ -69,16 +71,17 @@ export default function ProductEditorPage() {
           updateUpload(upload.uid, { status: 'error', percent: 0 });
           throw error;
         }
-      }
+      }));
 
       const initialVariants = product?.variants ?? [];
       const retainedIds = new Set(variants.flatMap((variant) => variant.id ? [variant.id] : []));
-      for (const variant of initialVariants) {
-        if (variant.id && !retainedIds.has(variant.id)) {
-          await deleteProductVariant(targetProductId, variant.id);
-        }
-      }
-      for (const variant of variants) {
+      const deletedVariantIds = initialVariants.flatMap((variant) =>
+        variant.id && !retainedIds.has(variant.id) ? [variant.id] : [],
+      );
+      await Promise.all(deletedVariantIds.map((variantId) =>
+        deleteProductVariant(targetProductId, variantId),
+      ));
+      await Promise.all(variants.map(async (variant) => {
         const variantPayload = {
           sku: variant.sku,
           name: variant.name || '',
@@ -91,7 +94,7 @@ export default function ProductEditorPage() {
         };
         if (variant.id) await updateProductVariant(targetProductId, variant.id, variantPayload);
         else await createProductVariant(targetProductId, variantPayload);
-      }
+      }));
 
       await queryClient.invalidateQueries({ queryKey: productKeys.mine() });
       void message.success(isEditing ? 'Mahsulot yangilandi' : 'Mahsulot yaratildi');
@@ -111,6 +114,7 @@ export default function ProductEditorPage() {
   return (
     <main className={styles.page}>
       <PageHeader
+        before={<BackButton fallback="/products" disabled={saving} />}
         title={isEditing ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}
         description={isEditing ? 'Mahsulot ma’lumotlari va variantlarini yangilang.' : 'Katalog uchun yangi mahsulot ma’lumotlarini kiriting.'}
       />

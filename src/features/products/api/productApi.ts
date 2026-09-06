@@ -1,5 +1,5 @@
 import { httpClient } from '../../../shared/api/httpClient';
-import { unwrapData } from '../../../shared/api/unwrapData';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type { Product, ProductListParams, ProductPage, ProductStatus, ProductUpsertPayload, ProductVariant } from '../model/productTypes';
 
 const productStatuses: ProductStatus[] = ['ACTIVE', 'LOW', 'INACTIVE', 'DRAFT', 'ARCHIVED', 'OUT_OF_STOCK'];
@@ -52,11 +52,11 @@ function parseVariants(value: unknown): ProductVariant[] {
 }
 
 function parseProduct(value: unknown): Product {
-  const candidate = unwrapData(value);
+  const candidate = unwrapApiData(value);
   if (typeof candidate !== 'object' || candidate === null) {
     throw new Error('Mahsulot serverdan noto‘g‘ri formatda keldi');
   }
-  if (!('id' in candidate) || typeof candidate.id !== 'string' || !('name' in candidate) || typeof candidate.name !== 'string') {
+  if (!('id' in candidate) || (typeof candidate.id !== 'string' && typeof candidate.id !== 'number') || !('name' in candidate) || typeof candidate.name !== 'string') {
     throw new Error('Mahsulotning majburiy maydonlari mavjud emas');
   }
 
@@ -76,7 +76,7 @@ function parseProduct(value: unknown): Product {
   const imageUrl = optionalString('imageUrl' in candidate ? candidate.imageUrl : '') || null;
 
   return {
-    id: candidate.id,
+    id: String(candidate.id),
     shopId: optionalString('shopId' in candidate ? candidate.shopId : ''),
     ownerUserId: optionalString('ownerUserId' in candidate ? candidate.ownerUserId : ''),
     categoryId,
@@ -96,7 +96,7 @@ function parseProduct(value: unknown): Product {
     hasVariants: 'hasVariants' in candidate && candidate.hasVariants === true,
     stock,
     status,
-    isDeleted: 'isDeleted' in candidate && candidate.isDeleted === true,
+    isDeleted: ('isDeleted' in candidate && candidate.isDeleted === true) || ('isBlocked' in candidate && candidate.isBlocked === true),
     createdAt: optionalString('createdAt' in candidate ? candidate.createdAt : ''),
     updatedAt: optionalString('updatedAt' in candidate ? candidate.updatedAt : ''),
     variants: parseVariants('variants' in candidate ? candidate.variants : []),
@@ -104,7 +104,7 @@ function parseProduct(value: unknown): Product {
 }
 
 function parseProductPage(value: unknown, fallback: ProductListParams): ProductPage {
-  const unwrapped = unwrapData(value);
+  const unwrapped = unwrapApiData(value);
   const list = Array.isArray(unwrapped)
     ? unwrapped
     : typeof unwrapped === 'object' && unwrapped !== null && 'items' in unwrapped && Array.isArray(unwrapped.items)

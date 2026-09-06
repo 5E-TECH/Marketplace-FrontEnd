@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getSellerDashboard } from './dashboardApi';
+import { getAdminDashboard, getSellerDashboard } from './dashboardApi';
 
 export const dashboardKey = ['seller', 'dashboard'] as const;
 
@@ -9,3 +9,4 @@ export function useSellerDashboardQuery() {
     queryFn: ({ signal }) => getSellerDashboard(signal),
   });
 }
+export const useAdminDashboardQuery = () => useQuery({ queryKey: ['admin', 'dashboard'], queryFn: ({ signal }) => getAdminDashboard(signal), staleTime: 60_000 });

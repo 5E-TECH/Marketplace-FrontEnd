@@ -1,5 +1,6 @@
 import { Inbox as InboxOutlined, RotateCw as ReloadOutlined } from 'lucide-react';
 import { Button, Result, Skeleton } from 'antd';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface ContentStateProps {
   state: 'loading' | 'empty' | 'error' | 'forbidden';
@@ -16,6 +17,7 @@ export function ContentState({
   actionLabel,
   onAction,
 }: ContentStateProps) {
+  const { t } = useTranslation();
   if (state === 'loading') {
     return <Skeleton active paragraph={{ rows: 6 }} />;
   }
@@ -24,20 +26,20 @@ export function ContentState({
     empty: {
       status: 'info' as const,
       icon: <InboxOutlined />,
-      title: 'Hozircha ma’lumot yo‘q',
-      description: 'Birinchi yozuvni qo‘shib ishni boshlang.',
+      title: t('state.empty.title'),
+      description: t('state.empty.description'),
     },
     error: {
       status: 'error' as const,
       icon: undefined,
-      title: 'Ma’lumotni yuklab bo‘lmadi',
-      description: 'Internet aloqasini tekshirib, qayta urinib ko‘ring.',
+      title: t('state.error.title'),
+      description: t('state.error.description'),
     },
     forbidden: {
       status: '403' as const,
       icon: undefined,
-      title: 'Bu bo‘lim hozircha yopiq',
-      description: 'Do‘kon tasdiqlangandan keyin bu bo‘lim ochiladi.',
+      title: t('state.forbidden.title'),
+      description: t('state.forbidden.description'),
     },
   }[state];
 
@@ -54,7 +56,7 @@ export function ContentState({
             icon={state === 'error' ? <ReloadOutlined /> : undefined}
             onClick={onAction}
           >
-            {actionLabel ?? (state === 'error' ? 'Qayta urinish' : 'Qo‘shish')}
+            {actionLabel ?? (state === 'error' ? t('common.retry') : t('common.add'))}
           </Button>
         ) : null
       }

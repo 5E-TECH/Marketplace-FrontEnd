@@ -32,12 +32,13 @@ function skipsRefresh(url?: string): boolean {
     endsWithPath(url, '/auth/logout')
   );
 }
+function isRefreshRequest(url?: string): boolean { return Boolean(url?.endsWith('/auth/refresh')); }
 
 function attachAccessToken(
   config: InternalAxiosRequestConfig,
   accessToken: string | null,
 ): InternalAxiosRequestConfig {
-  if (accessToken && !isLoginRequest(config.url)) {
+  if (accessToken && !isLoginRequest(config.url) && !isRefreshRequest(config.url)) {
     config.headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
@@ -64,7 +65,6 @@ export function setupHttpInterceptors({
 
     return pendingRefresh;
   };
-
   const requestInterceptor = httpClient.interceptors.request.use((config) =>
     attachAccessToken(config, getAccessToken()),
   );

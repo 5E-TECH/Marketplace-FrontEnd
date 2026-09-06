@@ -1,0 +1,18 @@
+.page { width: 100%; min-width: 0; }
+.filterPanel { display: grid; grid-template-columns: minmax(220px, 1.35fr) repeat(2, minmax(150px, .75fr)) repeat(2, minmax(175px, .9fr)) auto; gap: var(--space-3); align-items: end; background: color-mix(in srgb, var(--color-surface) 82%, transparent); }
+.field { display: grid; min-width: 0; gap: 7px; }
+.field label { color: var(--color-text-secondary); font: var(--font-label); letter-spacing: .03em; }
+.field :global(.ant-input-affix-wrapper), .field :global(.ant-select-selector) { min-height: 42px !important; }
+.field :global(.ant-select) { width: 100%; }
+.field :global(svg) { width: 16px; color: var(--color-text-muted); }
+.filterAction :global(.ant-btn) { min-height: 42px; }
+.tablePanel { min-width: 0; overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.tablePanel :global(.ant-table), .tablePanel :global(.ant-table-container) { background: transparent; }
+.amount { font-weight: 700; }
+.rowActions { display: inline-flex; align-items: center; gap: 2px; }
+.details { margin-top: 14px; }
+.detailBlock { margin-top: var(--space-4); }
+.details :global(.ant-descriptions-view) { overflow: hidden; border-color: var(--color-border) !important; border-radius: var(--radius-md); }
+@media (max-width: 1399px) { .filterPanel { grid-template-columns: minmax(240px, 1.4fr) repeat(2, minmax(160px, 1fr)); } .filterAction { display: flex; justify-content: flex-end; } }
+@media (max-width: 899px) { .filterPanel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .marketField { grid-column: 1 / -1; } }
+@media (max-width: 575px) { .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); } .marketField { grid-column: auto; } .filterAction, .filterAction :global(.ant-btn) { width: 100%; } }

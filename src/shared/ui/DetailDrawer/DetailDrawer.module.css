@@ -1,0 +1,11 @@
+.drawer :global(.ant-drawer-mask) { background: var(--color-overlay) !important; backdrop-filter: blur(3px); }
+.drawer :global(.ant-drawer-content), .drawer :global(.ant-drawer-header), .drawer :global(.ant-drawer-body) { background: var(--color-drawer-bg) !important; }
+.drawer :global(.ant-drawer-content) { border-left: 1px solid var(--color-border); box-shadow: var(--shadow-md); }
+.drawer :global(.ant-drawer-header) { min-height: 76px; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-border); }
+.drawer :global(.ant-drawer-body) { padding: var(--space-5); }
+.drawer :global(.ant-drawer-close) { color: var(--color-text-secondary); }
+.drawer :global(.ant-drawer-close:hover) { color: var(--color-text); background: var(--color-surface-hover); }
+.heading { display: grid; min-width: 0; gap: 2px; }
+.heading strong { color: var(--color-text); font-size: 1rem; line-height: 1.4; }
+.heading span { color: var(--color-text-secondary); font-size: .75rem; font-weight: 400; }
+@media (max-width: 560px) { .drawer :global(.ant-drawer-body) { padding: var(--space-4); } }

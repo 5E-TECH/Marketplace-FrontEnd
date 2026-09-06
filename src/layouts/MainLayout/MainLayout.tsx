@@ -4,7 +4,6 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/store/hooks';
 import { useLogoutMutation } from '../../features/auth/api/useLogoutMutation';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
-import { SellerAccessGuard } from '../../features/auth/ui/SellerAccessGuard/SellerAccessGuard';
 import { AppBreadcrumb } from './AppBreadcrumb';
 import { AppHeader } from './AppHeader';
 import { AppNavigation } from './AppNavigation';
@@ -12,6 +11,7 @@ import { AppSidebar } from './AppSidebar';
 import styles from './MainLayout.module.css';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import { prefetchRoute } from '../../app/router/routePreload';
+import { AdminSectionNavigation } from './AdminSectionNavigation';
 
 export default function MainLayout() {
   const { message } = App.useApp();
@@ -45,7 +45,7 @@ export default function MainLayout() {
           width={288}
           open={!showSidebar && mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
-          styles={{ body: { padding: 0, background: '#0E1424' } }}
+          styles={{ body: { padding: 0, background: 'var(--color-drawer-bg)' } }}
           closable={false}
         >
           <AppNavigation
@@ -66,6 +66,11 @@ export default function MainLayout() {
                 : setMobileMenuOpen(true)
             }
             onLogout={handleLogout}
+            onGlobalSearch={(query) => {
+              const destination = `/products?search=${encodeURIComponent(query)}`;
+              prefetchRoute(destination);
+              void navigate(destination);
+            }}
             onNavigate={(path) => {
               prefetchRoute(path);
               void navigate(path);
@@ -73,11 +78,10 @@ export default function MainLayout() {
           />
           <Layout.Content className={styles.content}>
             <AppBreadcrumb />
-            <SellerAccessGuard>
-              <Suspense fallback={<PageLoader compact />}>
-                <Outlet />
-              </Suspense>
-            </SellerAccessGuard>
+            {user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? <AdminSectionNavigation /> : null}
+            <Suspense fallback={<PageLoader compact />}>
+              <Outlet />
+            </Suspense>
           </Layout.Content>
         </Layout>
       </Layout>

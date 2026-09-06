@@ -8,18 +8,24 @@ import {
   Boxes,
   Settings as SettingOutlined,
   Store as ShopOutlined,
+  UserRoundCog,
+  ShieldCheck,
+  ShoppingCart,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import type { TranslationKey } from '../../shared/i18n/translations';
 import type { UserRole } from '../../features/auth/model/authTypes';
 
 /** Faqat sotuvchi ko'radigan bo'limlar (backend'da ham @Roles(SELLER)). */
 const SELLER_ONLY: readonly UserRole[] = ['SELLER'];
 /** Operator ham ishlaydigan bo'limlar (backend'da @Roles(SELLER, OPERATOR)). */
 const SELLER_AND_OPERATOR: readonly UserRole[] = ['SELLER', 'OPERATOR'];
+const ADMIN_ONLY: readonly UserRole[] = ['ADMIN', 'SUPERADMIN'];
+const BUYER_ONLY: readonly UserRole[] = ['BUYER'];
 
 export interface AppRouteMeta {
   path: string;
-  label: string;
+  label: TranslationKey;
   icon: ReactNode;
   section: 'main' | 'utility';
   showInSidebar?: boolean;
@@ -28,22 +34,28 @@ export interface AppRouteMeta {
 }
 
 export const appRouteConfig: AppRouteMeta[] = [
-  { path: '/', label: 'Bosh sahifa', icon: <BarChartOutlined />, section: 'main', roles: SELLER_ONLY },
-  { path: '/shop', label: 'Do‘kon profili', icon: <ShopOutlined />, section: 'main', roles: SELLER_ONLY },
-  { path: '/profile', label: 'Mening profilim', icon: <ShopOutlined />, section: 'main', showInSidebar: false, roles: SELLER_ONLY },
-  { path: '/products', label: 'Mahsulotlar', icon: <AppstoreOutlined />, section: 'main', roles: SELLER_ONLY },
-  { path: '/warehouses', label: 'Omborlar', icon: <HomeOutlined />, section: 'main', roles: SELLER_ONLY },
-  { path: '/stock', label: 'Qoldiq', icon: <Boxes />, section: 'main', roles: SELLER_ONLY },
-  { path: '/orders', label: 'Buyurtmalar', icon: <ProfileOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
-  { path: '/delivery', label: 'Yetkazib berish', icon: <TruckOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
-  { path: '/settings', label: 'Sozlamalar', icon: <SettingOutlined />, section: 'utility', showInSidebar: false, roles: SELLER_AND_OPERATOR },
-  { path: '/support', label: 'Yordam', icon: <CustomerServiceOutlined />, section: 'utility', roles: SELLER_AND_OPERATOR },
+  { path: '/', label: 'nav.home', icon: <BarChartOutlined />, section: 'main', roles: SELLER_ONLY },
+  { path: '/admin/shops', label: 'nav.adminShops', icon: <ShieldCheck />, section: 'main', roles: ADMIN_ONLY },
+  { path: '/admin/orders', label: 'nav.adminOrders', icon: <ProfileOutlined />, section: 'main', roles: ADMIN_ONLY },
+  { path: '/checkout', label: 'nav.checkout', icon: <ShoppingCart />, section: 'main', roles: BUYER_ONLY },
+  { path: '/users', label: 'nav.users', icon: <UserRoundCog />, section: 'main', roles: SELLER_ONLY },
+  { path: '/shop', label: 'nav.shop', icon: <ShopOutlined />, section: 'main', roles: SELLER_ONLY },
+  { path: '/products', label: 'nav.products', icon: <AppstoreOutlined />, section: 'main', roles: SELLER_ONLY },
+  { path: '/warehouses', label: 'nav.warehouses', icon: <HomeOutlined />, section: 'main', roles: SELLER_ONLY },
+  { path: '/stock', label: 'nav.stock', icon: <Boxes />, section: 'main', roles: SELLER_ONLY },
+  { path: '/orders', label: 'nav.orders', icon: <ProfileOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
+  { path: '/delivery', label: 'nav.delivery', icon: <TruckOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
+  { path: '/profile', label: 'nav.profile', icon: <ShopOutlined />, section: 'main', showInSidebar: false, roles: SELLER_AND_OPERATOR },
+  { path: '/settings', label: 'nav.settings', icon: <SettingOutlined />, section: 'utility', showInSidebar: false, roles: SELLER_AND_OPERATOR },
+  { path: '/support', label: 'nav.support', icon: <CustomerServiceOutlined />, section: 'utility', roles: SELLER_AND_OPERATOR },
 ];
 
+const routesBySpecificity = [...appRouteConfig].sort(
+  (first, second) => second.path.length - first.path.length,
+);
+
 export function findRouteMeta(pathname: string): AppRouteMeta | undefined {
-  return [...appRouteConfig]
-    .sort((first, second) => second.path.length - first.path.length)
-    .find(({ path }) =>
+  return routesBySpecificity.find(({ path }) =>
       path === '/'
         ? pathname === '/'
         : pathname === path || pathname.startsWith(`${path}/`),

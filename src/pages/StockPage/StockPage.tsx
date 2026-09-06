@@ -1,7 +1,7 @@
 import { ArrowDownToLine, SlidersHorizontal } from 'lucide-react';
-import { App, Button, Card, Form, Tag, Typography } from 'antd';
+import { App, Button, Card, Form, Input, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useDeferredValue, useState } from 'react';
+import { useState } from 'react';
 import { useAdjustStockMutation, useInboundStockMutation, useStockQuery } from '../../features/stock/api/stockQueries';
 import type { StockItem } from '../../features/stock/model/stockTypes';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
@@ -14,37 +14,42 @@ import { NumberControl, TextAreaControl } from '../../shared/ui/FormControls/For
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import styles from './StockPage.module.css';
+import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 
 type StockAction = { type: 'inbound' | 'adjust'; item: StockItem } | null;
 type MutationForm = { amount: number | null; reason: string };
 
 export default function StockPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [form] = Form.useForm<MutationForm>();
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [lowOnly, setLowOnly] = useState(false);
+  const [warehouseId, setWarehouseId] = useState('');
+  const [productId, setProductId] = useState('');
   const [action, setAction] = useState<StockAction>(null);
-  const search = useDeferredValue(query.trim());
-  const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}) });
+  const search = useDebouncedValue(query.trim());
+  const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}), ...(warehouseId ? { warehouseId } : {}), ...(productId ? { productId } : {}) });
   const inboundMutation = useInboundStockMutation();
   const adjustMutation = useAdjustStockMutation();
 
   const columns: ColumnsType<StockItem> = [
-    { title: 'Mahsulot', render: (_, item) => <span className={styles.product}><Typography.Text strong>{item.productName}</Typography.Text><small>{item.variantName || 'Default variant'}</small></span> },
-    { title: 'SKU', dataIndex: 'sku' },
-    { title: 'Ombor', dataIndex: 'warehouseName' },
-    { title: 'Jami', dataIndex: 'onHand', align: 'center' },
-    { title: 'Band', dataIndex: 'reserved', align: 'center' },
-    { title: 'Mavjud', dataIndex: 'available', align: 'center', render: (available: number, item) => <span className={available <= item.lowStockThreshold ? styles.lowValue : undefined}>{available}</span> },
-    { title: 'Minimum', dataIndex: 'lowStockThreshold', align: 'center' },
-    { title: 'Holat', render: (_, item) => item.available <= item.lowStockThreshold ? <Tag color="warning">Kam qolgan</Tag> : <Tag color="success">Yetarli</Tag> },
-    { title: 'Amallar', width: 190, render: (_, item) => <span className={styles.actions}><Button size="small" icon={<ArrowDownToLine size={15} />} onClick={() => setAction({ type: 'inbound', item })}>Kirim</Button><Button size="small" icon={<SlidersHorizontal size={15} />} onClick={() => setAction({ type: 'adjust', item })}>Tuzatish</Button></span> },
+    { title: t('stock.product'), render: (_, item) => <span className={styles.product}><Typography.Text strong>{item.productName}</Typography.Text><small>{item.variantName || t('stock.defaultVariant')}</small></span> },
+    { title: t('stock.sku'), dataIndex: 'sku', responsive: ['sm'] },
+    { title: t('stock.warehouse'), dataIndex: 'warehouseName', responsive: ['md'] },
+    { title: t('stock.total'), dataIndex: 'onHand', align: 'center', responsive: ['lg'] },
+    { title: t('stock.reserved'), dataIndex: 'reserved', align: 'center', responsive: ['xl'] },
+    { title: t('stock.available'), dataIndex: 'available', align: 'center', render: (available: number, item) => <span className={available <= item.lowStockThreshold ? styles.lowValue : undefined}>{available}</span> },
+    { title: t('stock.minimum'), dataIndex: 'lowStockThreshold', align: 'center', responsive: ['xl'] },
+    { title: t('stock.status'), responsive: ['lg'], render: (_, item) => item.available <= item.lowStockThreshold ? <Tag color="warning">{t('stock.lowStatus')}</Tag> : <Tag color="success">{t('stock.enough')}</Tag> },
+    { title: t('stock.actions'), width: 190, render: (_, item) => <span className={styles.actions}><Button size="small" icon={<ArrowDownToLine size={15} />} onClick={() => setAction({ type: 'inbound', item })}>{t('stock.inbound')}</Button><Button size="small" icon={<SlidersHorizontal size={15} />} onClick={() => setAction({ type: 'adjust', item })}>{t('stock.adjust')}</Button></span> },
   ];
 
   const submit = (values: MutationForm) => {
     if (!action || values.amount === null) return;
-    const common = { variantId: action.item.variantId, warehouseId: action.item.warehouseId, reason: values.reason.trim() };
+    const common = { variantId: action.item.variantId, warehouseId: action.item.warehouseId, reason: values.reason.trim(), idempotencyKey: crypto.randomUUID() };
     const type = action.type;
     const options = {
       onSuccess: () => {
@@ -66,11 +71,11 @@ export default function StockPage() {
   if (stockQuery.isError) return <ContentState state="error" title="Qoldiqni yuklab bo‘lmadi" description={getAuthErrorMessage(stockQuery.error)} onAction={() => void stockQuery.refetch()} />;
 
   return <main className={styles.page}>
-    <PageHeader title="Qoldiq" description="Variantlar kesimida ombor qoldiqlarini boshqaring" />
-    <ListToolbar value={query} placeholder="Mahsulot yoki SKU qidirish..." onChange={(value) => { setQuery(value); setPage(1); }} />
+    <PageHeader title={t('stock.title')} description={t('stock.description')} />
+    <ListToolbar value={query} placeholder={t('stock.search')} onChange={(value) => { setQuery(value); setPage(1); }} actions={<><Input aria-label="Ombor ID" placeholder="Ombor ID" inputMode="numeric" value={warehouseId} onChange={(event) => { setWarehouseId(event.target.value.replace(/\D/g, '')); setPage(1); }} /><Input aria-label="Mahsulot ID" placeholder="Mahsulot ID" inputMode="numeric" value={productId} onChange={(event) => { setProductId(event.target.value.replace(/\D/g, '')); setPage(1); }} /></>} />
     <Card>
-      <FilterTabs value={lowOnly ? 'LOW' : 'ALL'} ariaLabel="Qoldiq filtri" options={[{ value: 'ALL', label: 'Barcha qoldiq' }, { value: 'LOW', label: 'Kam qolgan' }]} onChange={(value) => { setLowOnly(value === 'LOW'); setPage(1); }} />
-      <DataTable rowKey={(item) => `${item.variantId}-${item.warehouseId}`} columns={columns} dataSource={stockQuery.data.items} rowClassName={(item) => item.available <= item.lowStockThreshold ? styles.lowStock : ''} scroll={{ x: 1050 }} pagination={{ ...createTablePagination(20), current: page, total: stockQuery.data.total }} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+      <FilterTabs value={lowOnly ? 'LOW' : 'ALL'} ariaLabel={t('stock.title')} options={[{ value: 'ALL', label: t('stock.all') }, { value: 'LOW', label: t('stock.low') }]} onChange={(value) => { setLowOnly(value === 'LOW'); setPage(1); }} />
+      <DataTable rowKey={(item) => `${item.variantId}-${item.warehouseId}`} columns={columns} dataSource={stockQuery.data.items} rowClassName={(item) => item.available <= item.lowStockThreshold ? styles.lowStock : ''} tableLayout="auto" pagination={{ ...createTablePagination(20), current: page, total: stockQuery.data.total }} emptyState={<ContentState state="empty" title={t('stock.empty.title')} description={t('stock.empty.description')} />} onChange={(pagination) => setPage(pagination.current ?? 1)} />
     </Card>
     <FormModal title={action?.type === 'inbound' ? 'Tovar kirimi' : 'Qoldiqni tuzatish'} open={Boolean(action)} form={form} submitText={action?.type === 'inbound' ? 'Kirim qilish' : 'Tuzatish'} loading={inboundMutation.isPending || adjustMutation.isPending} onCancel={() => setAction(null)} onSubmit={submit}>
       {action ? <p className={styles.context}><strong>{action.item.productName}</strong> · {action.item.variantName || 'Default'} · {action.item.warehouseName}</p> : null}

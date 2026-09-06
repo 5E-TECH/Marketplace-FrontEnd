@@ -1,11 +1,14 @@
-import { AtSign, IdCard, Pencil, Phone, ShieldCheck, User } from 'lucide-react';
+import { Camera, LockKeyhole, Mail, Pencil, Phone, UserRound } from 'lucide-react';
 import { App, Avatar, Button, Form, Tag, Typography } from 'antd';
 import { useState } from 'react';
-import { useAppSelector } from '../../app/store/hooks';
-import { selectAuthUser } from '../../features/auth/model/authSlice';
-import { useUpdateProfileMutation } from '../../features/auth/api/useUpdateProfileMutation';
-import type { UserRole } from '../../features/auth/model/authTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
+import { loggedOut, selectAuthUser } from '../../features/auth/model/authSlice';
+import type { UpdateAuthProfilePayload, UserRole } from '../../features/auth/model/authTypes';
+import { useUpdateAuthProfileMutation } from '../../features/auth/api/useUpdateAuthProfileMutation';
+import { getApiFieldErrors, getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { authStorage } from '../../features/auth/lib/authStorage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
@@ -13,15 +16,17 @@ import { TextControl } from '../../shared/ui/FormControls/FormControls';
 import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput';
 import styles from './ProfilePage.module.css';
 
-interface AccountFormValues {
+interface ProfileFormValues {
   name: string;
   phone: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
-interface PasswordFormValues {
-  password: string;
-  confirmPassword: string;
-}
+const EDITABLE_FIELDS = new Set<keyof ProfileFormValues>([
+  'name', 'phone', 'email', 'password', 'confirmPassword',
+]);
 
 const roleLabels: Record<UserRole, string> = {
   SELLER: 'Sotuvchi',
@@ -31,202 +36,119 @@ const roleLabels: Record<UserRole, string> = {
   SUPERADMIN: 'Bosh administrator',
 };
 
-/**
- * Akkaunt sahifasi — foydalanuvchining o'z ma'lumoti (`/auth/me`).
- * Do'kon ma'lumotlari alohida sahifada (`/shop`).
- */
+const normalizedOptional = (value?: string | null) => value?.trim() || '';
+
 export default function ProfilePage() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const user = useAppSelector(selectAuthUser);
-  const [accountForm] = Form.useForm<AccountFormValues>();
-  const [passwordForm] = Form.useForm<PasswordFormValues>();
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [passwordOpen, setPasswordOpen] = useState(false);
-  const updateMutation = useUpdateProfileMutation();
+  const [open, setOpen] = useState(false);
+  const [form] = Form.useForm<ProfileFormValues>();
+  const updateMutation = useUpdateAuthProfileMutation();
 
   if (!user) {
-    return (
-      <ContentState
-        state="error"
-        title="Profil ma’lumoti olinmadi"
-        description="Sahifani yangilang yoki qayta tizimga kiring."
-      />
-    );
+    return <ContentState state="error" title="Profil ma’lumoti topilmadi" description="Sahifani yangilang yoki qayta tizimga kiring." />;
   }
 
-  const saveAccount = (values: AccountFormValues) => {
-    updateMutation.mutate(
-      {
-        name: values.name.trim(),
-        phone: values.phone.replace(/\s/g, ''),
-      },
-      {
-        onSuccess: () => {
-          setAccountOpen(false);
-          void message.success('Profil yangilandi');
-        },
-        onError: (error) => void message.error(getAuthErrorMessage(error)),
-      },
-    );
+  const initialValues: ProfileFormValues = {
+    name: user.name,
+    phone: user.phone,
+    email: user.email ?? '',
+    password: '',
+    confirmPassword: '',
   };
 
-  const savePassword = (values: PasswordFormValues) => {
-    updateMutation.mutate(
-      { password: values.password },
-      {
-        onSuccess: () => {
-          setPasswordOpen(false);
-          passwordForm.resetFields();
-          void message.success('Parol yangilandi');
-        },
-        onError: (error) => void message.error(getAuthErrorMessage(error)),
-      },
-    );
+  const buildPayload = (values: ProfileFormValues): UpdateAuthProfilePayload => {
+    const payload: UpdateAuthProfilePayload = {};
+    const name = values.name.trim();
+    const phone = values.phone.replace(/\s/g, '');
+    const email = normalizedOptional(values.email);
+    if (name !== user.name) payload.name = name;
+    if (phone !== user.phone) payload.phone = phone;
+    if (email && email !== normalizedOptional(user.email)) payload.email = email;
+    if (values.password?.trim()) payload.password = values.password;
+    return payload;
+  };
+
+  const endSessionAfterPasswordChange = () => {
+    form.setFieldsValue({ password: '', confirmPassword: '' });
+    authStorage.setNotice('Parol yangilandi, qayta tizimga kiring');
+    queryClient.clear();
+    dispatch(loggedOut());
+    void navigate('/login', { replace: true });
+  };
+
+  const save = async (values: ProfileFormValues) => {
+    if (updateMutation.isPending) return;
+    const payload = buildPayload(values);
+    if (Object.keys(payload).length === 0) {
+      void message.info('O‘zgartirilgan ma’lumot yo‘q');
+      return;
+    }
+    try {
+      await updateMutation.mutateAsync(payload);
+      form.setFieldsValue({ password: '', confirmPassword: '' });
+      if (payload.password) {
+        endSessionAfterPasswordChange();
+        return;
+      }
+      setOpen(false);
+      void message.success('Profil muvaffaqiyatli yangilandi');
+    } catch (error) {
+      const fieldErrors = getApiFieldErrors(error).filter(({ name }) => EDITABLE_FIELDS.has(name as keyof ProfileFormValues));
+      if (fieldErrors.length) {
+        form.setFields(fieldErrors.map(({ name, errors }) => ({ name: [name as keyof ProfileFormValues], errors })));
+      } else {
+        void message.error(getAuthErrorMessage(error));
+      }
+    }
   };
 
   return (
     <main className={styles.page}>
-      <PageHeader
-        title="Mening profilim"
-        description="Akkaunt ma’lumotlaringiz va kirish paroli"
-        extra={
-          <Button
-            type="primary"
-            icon={<Pencil />}
-            onClick={() => {
-              accountForm.setFieldsValue({ name: user.name, phone: user.phone });
-              setAccountOpen(true);
-            }}
-          >
-            Tahrirlash
-          </Button>
-        }
-      />
-
+      <PageHeader title="Mening profilim" description="Shaxsiy ma’lumotlar va akkaunt xavfsizligini boshqaring" />
       <section className={styles.profile}>
         <header className={styles.identity}>
-          <Avatar size={72} src={user.avatarUrl}>
-            {user.name.slice(0, 2).toUpperCase()}
-          </Avatar>
-          <div>
+          <Avatar size={72} src={user.avatarUrl}>{user.name.slice(0, 2).toUpperCase()}</Avatar>
+          <div className={styles.identityContent}>
             <Typography.Title level={2}>{user.name}</Typography.Title>
             <div className={styles.tags}>
-              <Tag color="gold">{roleLabels[user.role]}</Tag>
-              <Tag color={user.isActive ? 'success' : 'warning'}>
-                {user.isActive ? 'Faol' : 'Faolsizlantirilgan'}
+              <Tag color="gold" title={roleLabels[user.role]}>{user.role}</Tag>
+              <Tag color={user.isActive && !user.isBlocked ? 'success' : 'warning'}>
+                {user.isBlocked ? 'Bloklangan' : user.isActive ? 'Faol' : 'Faolsizlantirilgan'}
               </Tag>
             </div>
           </div>
+          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => { form.setFieldsValue(initialValues); setOpen(true); }}>
+            Tahrirlash
+          </Button>
         </header>
-
-        <div className={styles.sectionTitle}>
-          <User />
-          <div>
-            <strong>Shaxsiy ma’lumotlar</strong>
-            <span>Faqat sizga ko‘rinadigan akkaunt ma’lumotlari</span>
-          </div>
-        </div>
-
+        <div className={styles.sectionTitle}><UserRound /><div><strong>Akkaunt ma’lumotlari</strong><span>Profil response’idan olingan ma’lumotlar</span></div></div>
         <dl className={styles.infoGrid}>
-          <div>
-            <dt>
-              <User /> Ism
-            </dt>
-            <dd>{user.name}</dd>
-          </div>
-          <div>
-            <dt>
-              <Phone /> Telefon
-            </dt>
-            <dd>{user.phone}</dd>
-          </div>
-          <div>
-            <dt>
-              <AtSign /> Email
-            </dt>
-            <dd>{user.email ?? '—'}</dd>
-          </div>
-          <div>
-            <dt>
-              <IdCard /> Rol
-            </dt>
-            <dd>{roleLabels[user.role]}</dd>
-          </div>
+          <div><dt><UserRound /> Ism</dt><dd>{user.name}</dd></div>
+          <div><dt><Phone /> Telefon</dt><dd>{user.phone}</dd></div>
+          <div><dt><Mail /> Email</dt><dd>{user.email || '—'}</dd></div>
+          <div><dt><Camera /> Avatar</dt><dd>{user.avatarUrl || 'Kiritilmagan'}</dd></div>
         </dl>
-
-        <div className={styles.sectionTitle}>
-          <ShieldCheck />
-          <div>
-            <strong>Xavfsizlik</strong>
-            <span>Kirish parolini istalgan vaqtda almashtiring</span>
-          </div>
-        </div>
-
-        <Button onClick={() => setPasswordOpen(true)}>Parolni o‘zgartirish</Button>
       </section>
-
-      <FormModal<AccountFormValues>
-        open={accountOpen}
-        title="Akkauntni tahrirlash"
-        form={accountForm}
-        submitText="Saqlash"
-        loading={updateMutation.isPending}
-        onCancel={() => setAccountOpen(false)}
-        onSubmit={saveAccount}
-      >
-        <Form.Item
-          label="Ism"
-          name="name"
-          rules={[{ required: true, whitespace: true }, { max: 255 }]}
-        >
-          <TextControl />
+      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
+        <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { min: 1 }, { max: 255, message: 'Ism 255 belgidan oshmasligi kerak' }]}>
+          <TextControl autoComplete="name" maxLength={255} />
         </Form.Item>
-        <Form.Item
-          label="Telefon"
-          name="phone"
-          rules={[
-            { required: true },
-            {
-              pattern: /^\+998(?:\s?\d){9}$/,
-              message: '+998901234567 formatida kiriting',
-            },
-          ]}
-        >
-          <TextControl />
+        <Form.Item label="Telefon" name="phone" rules={[{ required: true, message: 'Telefon raqamini kiriting' }, { pattern: /^\+998\d{9}$/, message: '+998901234567 formatida kiriting' }]}>
+          <TextControl autoComplete="tel" placeholder="+998901234567" />
         </Form.Item>
-      </FormModal>
-
-      <FormModal<PasswordFormValues>
-        open={passwordOpen}
-        title="Parolni o‘zgartirish"
-        form={passwordForm}
-        submitText="Saqlash"
-        loading={updateMutation.isPending}
-        onCancel={() => setPasswordOpen(false)}
-        onSubmit={savePassword}
-      >
-        <Form.Item
-          label="Yangi parol"
-          name="password"
-          rules={[{ required: true }, { min: 4, message: 'Kamida 4 belgi' }]}
-        >
-          <PasswordInput />
+        <Form.Item label="Email" name="email" rules={[{ type: 'email', message: 'Email manzilini to‘g‘ri kiriting' }, { max: 255, message: 'Email 255 belgidan oshmasligi kerak' }]}>
+          <TextControl autoComplete="email" placeholder="ali@example.com" maxLength={255} />
         </Form.Item>
-        <Form.Item
-          label="Parolni tasdiqlang"
-          name="confirmPassword"
-          dependencies={['password']}
-          rules={[
-            { required: true },
-            ({ getFieldValue }) => ({
-              validator: (_, value: string) =>
-                !value || getFieldValue('password') === value
-                  ? Promise.resolve()
-                  : Promise.reject(new Error('Parollar mos kelmadi')),
-            }),
-          ]}
-        >
-          <PasswordInput />
+        <div className={styles.passwordHeading}><LockKeyhole /><div><strong>Yangi parol</strong><span>Ixtiyoriy — o‘zgartirmasangiz bo‘sh qoldiring</span></div></div>
+        <Form.Item label="Yangi parol" name="password" dependencies={['confirmPassword']} rules={[{ min: 4, message: 'Parol kamida 4 ta belgi bo‘lishi kerak' }]}>
+          <PasswordInput autoComplete="new-password" />
+        </Form.Item>
+        <Form.Item label="Yangi parolni tasdiqlash" name="confirmPassword" dependencies={['password']} rules={[({ getFieldValue }) => ({ validator: (_, value: string | undefined) => { const password = getFieldValue('password') as string | undefined; if (!password && !value) return Promise.resolve(); return value === password ? Promise.resolve() : Promise.reject(new Error('Parollar bir xil emas')); } })]}>
+          <PasswordInput autoComplete="new-password" />
         </Form.Item>
       </FormModal>
     </main>

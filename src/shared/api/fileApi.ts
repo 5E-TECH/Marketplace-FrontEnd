@@ -1,8 +1,24 @@
 import { httpClient } from './httpClient';
-import { unwrapData } from './unwrapData';
+import { unwrapApiData } from './apiResponse';
+
+export interface ProductImageUploadPayload {
+  file: File;
+  productId: string;
+  isCover?: boolean;
+}
+
+export interface ProductImageUploadResult {
+  url: string;
+  objectName: string;
+  bucket: string;
+  mimeType: string;
+  size: number;
+  productId: string;
+  isCover: boolean;
+}
 
 function parseUploadedFileUrl(value: unknown): string {
-  const result = unwrapData(value);
+  const result = unwrapApiData(value);
   if (typeof result === 'string' && result.trim()) return result;
   if (typeof result === 'object' && result !== null) {
     const record = result as Record<string, unknown>;
@@ -17,14 +33,14 @@ function parseUploadedFileUrl(value: unknown): string {
 }
 
 export async function uploadFile(
-  file: File,
-  productId: string,
-  isCover: boolean,
+  { file, productId, isCover = false }: ProductImageUploadPayload,
   onProgress?: (percent: number) => void,
 ): Promise<string> {
+  if (!productId.trim()) throw new Error('Rasm yuklash uchun productId majburiy');
+  if (!(file instanceof File) || file.size === 0) throw new Error('Yuklash uchun fayl tanlang');
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('productId', productId);
+  formData.append('productId', productId.trim());
   formData.append('isCover', String(isCover));
   const { data } = await httpClient.post<unknown>('/files/upload', formData, {
     timeout: 60_000,

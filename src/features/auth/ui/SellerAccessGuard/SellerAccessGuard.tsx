@@ -1,4 +1,5 @@
 import { App } from 'antd';
+import { Outlet } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   canAccessRoute,
@@ -10,7 +11,7 @@ import { selectAuthUser } from '../../model/authSlice';
 import { canAccessSellerCabinet } from '../../lib/sellerAccess';
 import { useLogoutMutation } from '../../api/useLogoutMutation';
 
-export function SellerAccessGuard({ children }: { children: React.ReactNode }) {
+export function SellerAccessGuard({ children }: { children?: React.ReactNode }) {
   const { message } = App.useApp();
   const location = useLocation();
   const navigate = useNavigate();
@@ -62,5 +63,5 @@ export function SellerAccessGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return children;
+  return children ?? <Outlet />;
 }

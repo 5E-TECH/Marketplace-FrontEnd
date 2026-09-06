@@ -10,6 +10,19 @@ export const routeImports = {
   delivery: () => import('../../pages/DeliveryPage/DeliveryPage'),
   settings: () => import('../../pages/SettingsPage/SettingsPage'),
   support: () => import('../../pages/SupportPage/SupportPage'),
+  users: () => import('../../pages/UsersPage/UsersPage'),
+  userEditor: () => import('../../pages/UserEditorPage/UserEditorPage'),
+  adminShops: () => import('../../pages/AdminShopsPage/AdminShopsPage'),
+  adminOrders: () => import('../../pages/AdminOrdersPage/AdminOrdersPage'),
+  adminUsers: () => import('../../pages/AdminUsersPage/AdminUsersPage'),
+  adminUserCreate: () => import('../../pages/AdminUserCreatePage/AdminUserCreatePage'),
+  adminUserDetail: () => import('../../pages/AdminUserDetailPage/AdminUserDetailPage'),
+  adminFinance: () => import('../../pages/AdminFinancePage/AdminFinancePage'),
+  adminSystemHealth: () => import('../../pages/AdminSystemHealthPage/AdminSystemHealthPage'),
+  checkout: () => import('../../pages/CheckoutPage/CheckoutPage'),
+  adminOverview: () => import('../../pages/AdminOverviewPage/AdminOverviewPage'),
+  adminResource: () => import('../../pages/AdminResourcePage/AdminResourcePage'),
+  authRecovery: () => import('../../pages/AuthRecoveryPage/AuthRecoveryPage'),
 };
 
 export const routePreloaders: Array<[
@@ -27,6 +40,18 @@ export const routePreloaders: Array<[
   ['/profile', routeImports.profile],
   ['/settings', routeImports.settings],
   ['/support', routeImports.support],
+  ['/users/new', routeImports.userEditor],
+  ['/users', routeImports.users],
+  ['/admin/shops', routeImports.adminShops],
+  ['/admin/overview', routeImports.adminOverview],
+  ['/admin/orders', routeImports.adminOrders],
+  ['/admin/users/new', routeImports.adminUserCreate],
+  ['/admin/users/', routeImports.adminUserDetail],
+  ['/admin/users', routeImports.adminUsers],
+  ['/admin/finance', routeImports.adminFinance],
+  ['/admin/system-settings', routeImports.adminSystemHealth],
+  ['/admin/', routeImports.adminResource],
+  ['/checkout', routeImports.checkout],
   ['/', routeImports.home],
 ];
 

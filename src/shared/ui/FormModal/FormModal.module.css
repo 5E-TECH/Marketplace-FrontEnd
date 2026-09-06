@@ -9,7 +9,7 @@
   background: var(--color-surface) !important;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 28px 90px rgb(0 0 0 / 52%);
+  box-shadow: 0 28px 90px var(--color-overlay);
 }
 
 .modal :global(.ant-modal-header) {
@@ -73,7 +73,7 @@
 .modal :global(.ant-input-affix-wrapper:hover),
 .modal :global(.ant-input-number:hover),
 .modal :global(.ant-select-selector:hover) {
-  border-color: #50617e !important;
+  border-color: var(--color-border-hover) !important;
 }
 
 .modal :global(.ant-input:focus),
@@ -81,7 +81,7 @@
 .modal :global(.ant-input-number-focused),
 .modal :global(.ant-select-focused .ant-select-selector) {
   border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 3px rgb(245 158 11 / 12%) !important;
+  box-shadow: 0 0 0 3px var(--color-accent-soft) !important;
 }
 
 .modal :global(.ant-modal-footer) {

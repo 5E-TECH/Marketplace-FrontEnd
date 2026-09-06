@@ -22,6 +22,9 @@ export interface StockPage {
 export interface StockListParams {
   search?: string;
   lowOnly?: boolean;
+  warehouseId?: string;
+  productId?: string;
+  variantId?: string;
   page: number;
   limit: number;
 }

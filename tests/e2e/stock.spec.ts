@@ -12,7 +12,7 @@ async function mockStock(page: Page) {
   await page.route('**/api/v1/inventory/stock**', async (route) => {
     if (route.request().method() !== 'GET') return route.fallback();
     const url = new URL(route.request().url());
-    const visible = url.searchParams.get('lowOnly') === 'true' ? items.filter((item) => item.available <= item.lowStockThreshold) : items;
+    const visible = url.pathname.endsWith('/stock/low') ? items.filter((item) => item.available <= item.lowStockThreshold) : items;
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: visible, total: visible.length, page: 1, limit: 20, totalPages: 1 } }) });
   });
   await page.route('**/api/v1/inventory/stock/inbound', async (route) => {
@@ -58,7 +58,8 @@ test('TC2: inbound +10 dan keyin jadval yangilanadi', async ({ page }) => {
   await dialog.getByLabel('Sabab').fill('Yangi partiya');
   await dialog.getByRole('button', { name: 'Kirim qilish' }).click();
   await expect(page.getByText('Kirim muvaffaqiyatli bajarildi')).toBeVisible();
-  expect(api.getInbound()).toEqual({ variantId: '88', warehouseId: '3', quantity: 10, reason: 'Yangi partiya' });
+  expect(api.getInbound()).toMatchObject({ variantId: '88', warehouseId: '3', quantity: 10, reason: 'Yangi partiya' });
+  expect((api.getInbound() as { idempotencyKey: string }).idempotencyKey).toBeTruthy();
   await expect(productRow.getByRole('cell').nth(3)).toHaveText('18');
   await expect(productRow.getByRole('cell').nth(4)).toHaveText('3');
   await expect(productRow.getByRole('cell').nth(5)).toHaveText('15');
@@ -84,5 +85,15 @@ test('tuzatish modal signed delta bilan adjust yuboradi', async ({ page }) => {
   await dialog.getByLabel('Sabab').fill('Yaroqsiz tovar');
   await dialog.getByRole('button', { name: 'Tuzatish' }).click();
   await expect(page.getByText('Qoldiq tuzatildi')).toBeVisible();
-  expect(api.getAdjust()).toEqual({ variantId: '88', warehouseId: '3', delta: -2, reason: 'Yaroqsiz tovar' });
+  expect(api.getAdjust()).toMatchObject({ variantId: '88', warehouseId: '3', delta: -2, reason: 'Yaroqsiz tovar' });
+  expect((api.getAdjust() as { idempotencyKey: string }).idempotencyKey).toBeTruthy();
+});
+
+test('warehouseId va productId query filterlari yuboriladi', async ({ page }) => {
+  await mockStock(page);
+  await page.goto('/stock');
+  const request = page.waitForRequest((value) => { const url = new URL(value.url()); return url.searchParams.get('warehouseId') === '3' && url.searchParams.get('productId') === '12'; });
+  await page.getByLabel('Ombor ID').fill('3');
+  await page.getByLabel('Mahsulot ID').fill('12');
+  await request;
 });

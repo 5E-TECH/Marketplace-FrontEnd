@@ -1,0 +1,6 @@
+.list { display: grid; margin: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.item { display: grid; grid-template-columns: minmax(110px, .7fr) minmax(0, 1.3fr); align-items: center; min-height: 52px; padding: var(--space-3) var(--space-4); gap: var(--space-4); }
+.item + .item { border-top: 1px solid var(--color-border); }
+.item dt { color: var(--color-text-secondary); font-size: .8125rem; }
+.item dd { min-width: 0; margin: 0; color: var(--color-text); font-weight: 550; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .item { grid-template-columns: 1fr; gap: var(--space-1); } }

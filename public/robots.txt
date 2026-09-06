@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Indekslash siyosati sahifa darajasidagi robots meta orqali boshqariladi.
+# Seller kabineti yopiq; faqat /login va /register indekslanadi.

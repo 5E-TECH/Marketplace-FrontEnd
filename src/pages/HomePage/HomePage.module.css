@@ -1,5 +1,5 @@
 .hero {
-  margin-bottom: var(--space-6);
+  margin-bottom: 18px;
 }
 
 .hero h1 {
@@ -16,7 +16,7 @@
 }
 
 .section {
-  margin-top: var(--space-6);
+  margin-top: 16px;
 }
 
 .panel {
@@ -31,12 +31,16 @@
 }
 
 .panel:hover {
-  border-color: #3a4664;
+  border-color: var(--color-token-3a4664);
 }
 
 .panel :global(.ant-card-head) {
-  min-height: 64px;
+  min-height: 56px;
   border-bottom-color: var(--color-border);
+}
+
+.panel :global(.ant-card-body) {
+  padding: 18px 20px;
 }
 
 .panelSubtitle,
@@ -58,20 +62,20 @@
   display: grid;
   width: 38px;
   height: 38px;
-  color: #fb923c;
+  color: var(--color-accent-bright);
   font-weight: 700;
-  background: rgb(251 146 60 / 14%);
+  background: var(--color-token-rgb-251-146-60-14);
   border-radius: var(--radius-md);
   place-items: center;
 }
 
 .stockIcon {
-  color: #2dd4bf;
-  background: rgb(45 212 191 / 14%);
+  color: var(--color-teal);
+  background: var(--color-token-rgb-45-212-191-14);
 }
 
 .orderId {
-  color: #71809f;
+  color: var(--color-text-faint);
   font-size: 11px;
 }
 
@@ -82,9 +86,9 @@
   gap: var(--space-2);
   height: 40px;
   margin-top: var(--space-3);
-  color: #fb923c;
-  background: rgb(251 146 60 / 10%);
-  border: 1px solid rgb(251 146 60 / 15%);
+  color: var(--color-accent-bright);
+  background: var(--color-token-rgb-251-146-60-10);
+  border: 1px solid var(--color-token-rgb-251-146-60-15);
   border-radius: var(--radius-md);
   text-decoration: none;
 }
@@ -92,8 +96,8 @@
 .quickPanel {
   padding: var(--space-1);
   background:
-    radial-gradient(circle at 100% 0%, rgb(251 146 60 / 8%), transparent 38%),
-    #151c2f;
+    radial-gradient(circle at 100% 0%, var(--color-token-rgb-251-146-60-8), transparent 38%),
+    var(--color-token-151c2f);
 }
 
 .quickPanel h3 {
@@ -114,7 +118,7 @@
   min-height: 80px;
   text-decoration: none;
   padding: var(--space-3);
-  color: #d8deea;
+  color: var(--color-token-d8deea);
   font: inherit;
   font: var(--font-label);
   text-align: left;
@@ -137,7 +141,7 @@
 }
 
 .quickIcon {
-  color: #fb923c;
+  color: var(--color-accent-bright);
   font-size: 18px;
 }
 
@@ -149,7 +153,7 @@
 
 .healthValue,
 .customerOrders {
-  color: #2dd4bf;
+  color: var(--color-teal);
   font-size: 11px;
   font-weight: 700;
 }
@@ -173,10 +177,10 @@
   display: grid;
   width: 30px;
   height: 30px;
-  color: #fb923c;
+  color: var(--color-accent-bright);
   font-size: 11px;
   font-weight: 800;
-  background: rgb(251 146 60 / 14%);
+  background: var(--color-token-rgb-251-146-60-14);
   border-radius: var(--radius-sm);
   place-items: center;
 }
@@ -196,9 +200,9 @@
 }
 
 .customerAvatar {
-  color: #2dd4bf;
+  color: var(--color-teal);
   font-weight: 700;
-  background: rgb(45 212 191 / 14%);
+  background: var(--color-token-rgb-45-212-191-14);
 }
 
 @media (max-width: 575px) {

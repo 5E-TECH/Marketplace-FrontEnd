@@ -1,9 +1,10 @@
 import { httpClient } from '../../../shared/api/httpClient';
-import { unwrapData } from '../../../shared/api/unwrapData';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type {
   DashboardSalesPoint,
   DashboardTopProduct,
   SellerDashboard,
+  AdminDashboard,
 } from '../model/dashboardTypes';
 
 function finiteNumber(record: Record<string, unknown>, key: string): number {
@@ -41,7 +42,7 @@ function parseSalesPoint(value: unknown): DashboardSalesPoint {
 }
 
 function parseDashboard(value: unknown): SellerDashboard {
-  const data = unwrapData(value);
+  const data = unwrapApiData(value);
   if (typeof data !== 'object' || data === null) {
     throw new Error('Statistika serverdan noto‘g‘ri formatda keldi');
   }
@@ -63,4 +64,22 @@ function parseDashboard(value: unknown): SellerDashboard {
 export async function getSellerDashboard(signal?: AbortSignal): Promise<SellerDashboard> {
   const { data } = await httpClient.get<unknown>('/seller/dashboard', { signal });
   return parseDashboard(data);
+}
+
+function numberGroup(value: unknown, keys: string[]): Record<string, number> {
+  if (!value || typeof value !== 'object') throw new Error('Admin statistikasi noto‘g‘ri formatda');
+  return Object.fromEntries(keys.map((key) => [key, finiteNumber(value as Record<string, unknown>, key)]));
+}
+
+export async function getAdminDashboard(signal?: AbortSignal): Promise<AdminDashboard> {
+  const { data } = await httpClient.get<unknown>('/admin/dashboard', { signal });
+  const value = unwrapApiData(data);
+  if (!value || typeof value !== 'object') throw new Error('Admin statistikasi noto‘g‘ri formatda');
+  const record = value as Record<string, unknown>;
+  return {
+    shops: numberGroup(record.shops, ['total', 'pending', 'active', 'suspended', 'rejected']) as AdminDashboard['shops'],
+    users: numberGroup(record.users, ['total', 'sellers', 'buyers', 'admins', 'operators']) as AdminDashboard['users'],
+    orders: numberGroup(record.orders, ['total', 'today']) as AdminDashboard['orders'],
+    gmv: finiteNumber(record, 'gmv'), revenue: finiteNumber(record, 'revenue'),
+  };
 }

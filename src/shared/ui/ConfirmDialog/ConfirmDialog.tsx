@@ -1,5 +1,7 @@
 import { Modal } from 'antd';
 import type { ReactNode } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
+import styles from './ConfirmDialog.module.css';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -17,19 +19,21 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmText = 'Tasdiqlash',
-  cancelText = 'Bekor',
+  confirmText,
+  cancelText,
   danger = false,
   loading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
   return (
     <Modal
+      rootClassName={styles.modal}
       open={open}
       title={title}
-      okText={confirmText}
-      cancelText={cancelText}
+      okText={confirmText ?? t('common.confirm')}
+      cancelText={cancelText ?? t('common.cancel')}
       okButtonProps={{ danger, loading }}
       closable={!loading}
       maskClosable={!loading}

@@ -1,6 +1,7 @@
 import { Plus as PlusOutlined } from 'lucide-react';
 import { Button, Empty } from 'antd';
 import type { ReactNode } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface EmptyStateProps {
   title?: string;
@@ -12,24 +13,28 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  title = 'Hozircha ma’lumot yo‘q',
-  description = 'Birinchi yozuvni qo‘shib ishni boshlang.',
-  actionLabel = 'Qo‘shish',
+  title,
+  description,
+  actionLabel,
   onAction,
   image,
   compact = false,
 }: EmptyStateProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('state.empty.title');
+  const resolvedDescription = description ?? t('state.empty.description');
+  const resolvedActionLabel = actionLabel ?? t('common.add');
   return (
     <Empty
       image={image ?? Empty.PRESENTED_IMAGE_SIMPLE}
       imageStyle={compact ? { height: 44 } : undefined}
       description={
         <span>
-          <strong>{title}</strong>
-          {description ? (
+          <strong>{resolvedTitle}</strong>
+          {resolvedDescription ? (
             <>
               <br />
-              <span>{description}</span>
+              <span>{resolvedDescription}</span>
             </>
           ) : null}
         </span>
@@ -37,7 +42,7 @@ export function EmptyState({
     >
       {onAction ? (
         <Button type="primary" icon={<PlusOutlined />} onClick={onAction}>
-          {actionLabel}
+          {resolvedActionLabel}
         </Button>
       ) : null}
     </Empty>

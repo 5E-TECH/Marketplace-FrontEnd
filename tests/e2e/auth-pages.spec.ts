@@ -57,6 +57,16 @@ test('TC2: to‘g‘ri register so‘rovi muvaffaqiyatdan keyin login sahifasiga
 test('TC3: login token oladi, saqlaydi va dashboardga yo‘naltiradi', async ({
   page,
 }) => {
+  await page.route('**/api/v1/seller/dashboard', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: {
+        ordersTotal: 0, revenue: 0, pendingShipments: 0, delivered: 0,
+        lowStockCount: 0, topProducts: [], salesByDay: [],
+      } }),
+    });
+  });
   await page.route('**/api/v1/auth/login', async (route) => {
     await route.fulfill({
       status: 200,

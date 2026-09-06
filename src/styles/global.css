@@ -11,20 +11,43 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
-  --shadow-sm: 0 4px 16px rgb(0 0 0 / 14%);
-  --shadow-md: 0 16px 40px rgb(0 0 0 / 22%);
-  --color-bg: #080d18;
-  --color-surface: #151c2f;
-  --color-surface-subtle: #111827;
-  --color-surface-hover: #192238;
-  --color-border: #27314a;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 18%), 0 8px 24px rgb(0 0 0 / 10%);
+  --shadow-md: 0 18px 50px rgb(0 0 0 / 20%);
+  --color-bg: #080c16;
+  --color-surface: #121a2a;
+  --color-surface-subtle: #0e1523;
+  --color-surface-hover: #182235;
+  --color-border: #243149;
   --color-text: #f8fafc;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #64748b;
   --color-accent: #f59e0b;
   --color-accent-hover: #fbbf24;
   --color-success: #10b981;
+  --color-success-soft: rgb(16 185 129 / 12%);
+  --color-warning: #f59e0b;
+  --color-warning-soft: rgb(245 158 11 / 12%);
   --color-error: #ef4444;
+  --color-error-soft: rgb(239 68 68 / 12%);
+  --color-white: #fff;
+  --color-black: #000;
+  --color-accent-bright: #fb923c;
+  --color-info: #60a5fa;
+  --color-teal: #2dd4bf;
+  --color-danger-soft: #fb7185;
+  --color-control-bg: #0d1525;
+  --color-control-hover: #101a2d;
+  --color-panel-deep: #101827;
+  --color-border-strong: #2d3a55;
+  --color-border-hover: #50617e;
+  --color-text-soft: #d6deeb;
+  --color-text-faint: #71809f;
+  --color-accent-soft: rgb(245 158 11 / 12%);
+  --color-white-soft: rgb(255 255 255 / 4%);
+  --color-overlay: rgb(0 0 0 / 52%);
+  --color-scrollbar: #3b4b69;
+  --color-support: #7c3aed;
+  --color-drawer-bg: #0e1424;
   --font-display: 600 28px/36px Inter, sans-serif;
   --font-h2: 600 18px/28px Inter, sans-serif;
   --font-body: 400 14px/22px Inter, sans-serif;
@@ -35,6 +58,196 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --color-token-rgb-245-158-11-24: rgb(245 158 11 / 24%);
+  --color-token-526581: #526581;
+  --color-token-rgb-245-158-11-18: rgb(245 158 11 / 18%);
+  --color-token-rgb-245-158-11-45: rgb(245 158 11 / 45%);
+  --color-token-a8b4ca: #a8b4ca;
+  --color-token-e2e8f0: #e2e8f0;
+  --color-token-27344c: #27344c;
+  --color-token-rgb-251-146-60-20: rgb(251 146 60 / 20%);
+  --color-token-rgb-45-212-191-14: rgb(45 212 191 / 14%);
+  --color-token-18243a: #18243a;
+  --color-token-rgb-9-15-28-62: rgb(9 15 28 / 62%);
+  --color-token-rgb-255-255-255-48: rgb(255 255 255 / 48%);
+  --color-token-rgb-9-15-28-72: rgb(9 15 28 / 72%);
+  --color-token-rgb-255-255-255-16: rgb(255 255 255 / 16%);
+  --color-token-rgb-9-15-28-90: rgb(9 15 28 / 90%);
+  --color-token-111a2b: #111a2b;
+  --color-token-rgb-0-0-0-26: rgb(0 0 0 / 26%);
+  --color-token-rgb-15-23-42-34: rgb(15 23 42 / 34%);
+  --color-token-rgb-255-255-255-9: rgb(255 255 255 / 9%);
+  --color-token-rgb-245-158-11-10: rgb(245 158 11 / 10%);
+  --color-token-rgb-245-158-11-28: rgb(245 158 11 / 28%);
+  --color-token-rgb-245-158-11-22: rgb(245 158 11 / 22%);
+  --color-token-rgb-245-158-11-42: rgb(245 158 11 / 42%);
+  --color-token-334155: #334155;
+  --color-token-111827: #111827;
+  --color-token-5eead4: #5eead4;
+  --color-token-91a0be: #91a0be;
+  --color-token-7f8ca8: #7f8ca8;
+  --color-token-rgb-255-255-255-7: rgb(255 255 255 / 7%);
+  --color-token-fda4af: #fda4af;
+  --color-token-rgb-8-12-22-88: rgb(8 12 22 / 88%);
+  --color-token-rgb-0-0-0-12: rgb(0 0 0 / 12%);
+  --color-token-rgb-17-24-39-38: rgb(17 24 39 / 38%);
+  --color-token-rgb-255-255-255-6: rgb(255 255 255 / 6%);
+  --color-token-rgb-245-158-11-8: rgb(245 158 11 / 8%);
+  --color-token-rgb-245-158-11-20: rgb(245 158 11 / 20%);
+  --color-token-rgb-245-158-11-9: rgb(245 158 11 / 9%);
+  --color-token-3a4664: #3a4664;
+  --color-token-rgb-251-146-60-14: rgb(251 146 60 / 14%);
+  --color-token-rgb-251-146-60-10: rgb(251 146 60 / 10%);
+  --color-token-rgb-251-146-60-15: rgb(251 146 60 / 15%);
+  --color-token-rgb-251-146-60-8: rgb(251 146 60 / 8%);
+  --color-token-151c2f: #151c2f;
+  --color-token-d8deea: #d8deea;
+  --color-token-rgb-148-163-184-12: rgb(148 163 184 / 12%);
+  --color-token-rgb-251-113-133-14: rgb(251 113 133 / 14%);
+  --color-token-8e9ab2: #8e9ab2;
+  --color-token-6f7c96: #6f7c96;
+  --color-token-27314a: #27314a;
+  --color-token-f4f6fa: #f4f6fa;
+  --color-token-e2e6ef: #e2e6ef;
+  --color-token-rgb-31-41-55-10: rgb(31 41 55 / 10%);
+  --color-token-rgb-31-41-55-5: rgb(31 41 55 / 5%);
+  --color-token-8d93a6: #8d93a6;
+  --color-token-737b91: #737b91;
+  --color-token-6750e7: #6750e7;
+  --color-token-159fea: #159fea;
+  --color-token-5e54e8: #5e54e8;
+  --color-token-753fdc: #753fdc;
+  --color-token-rgb-71-86-218-28: rgb(71 86 218 / 28%);
+  --color-token-rgb-255-255-255-30: rgb(255 255 255 / 30%);
+  --color-token-20263b: #20263b;
+  --color-token-33364a: #33364a;
+  --color-token-353d5c: #353d5c;
+  --color-token-30364d: #30364d;
+  --color-token-rgb-248-249-253-90: rgb(248 249 253 / 90%);
+  --color-token-e1e4ee: #e1e4ee;
+  --color-token-rgb-32-38-59-3: rgb(32 38 59 / 3%);
+  --color-token-b9bfea: #b9bfea;
+  --color-token-rgb-103-80-231-12: rgb(103 80 231 / 12%);
+  --color-token-667085: #667085;
+  --color-token-4f46e5: #4f46e5;
+  --color-token-eef2ff: #eef2ff;
+  --color-token-818cf8: #818cf8;
+  --color-token-9298aa: #9298aa;
+  --color-token-444a61: #444a61;
+  --color-token-dfe2ec: #dfe2ec;
+  --color-token-159fe7: #159fe7;
+  --color-token-3e72e4: #3e72e4;
+  --color-token-7042dc: #7042dc;
+  --color-token-rgb-63-105-218-20: rgb(63 105 218 / 20%);
+  --color-token-rgb-63-105-218-28: rgb(63 105 218 / 28%);
+  --color-token-108ed2: #108ed2;
+  --color-token-316cd1: #316cd1;
+  --color-token-6537c5: #6537c5;
+  --color-token-rgb-56-189-248-5: rgb(56 189 248 / 5%);
+  --color-token-22d3ee: #22d3ee;
+  --color-token-rgb-34-211-238-12: rgb(34 211 238 / 12%);
+  --color-token-rgb-34-211-238-22: rgb(34 211 238 / 22%);
+  --color-token-rgb-239-68-68-10: rgb(239 68 68 / 10%);
+  --color-token-rgb-245-158-11-7: rgb(245 158 11 / 7%);
+  --color-token-172136: #172136;
+  --color-token-rgb-251-146-60-12: rgb(251 146 60 / 12%);
+  --color-token-161f34: #161f34;
+  --color-token-2a3650: #2a3650;
+  --color-token-rgb-45-212-191-8: rgb(45 212 191 / 8%);
+  --color-token-rgb-251-146-60-24: rgb(251 146 60 / 24%);
+  --color-token-rgb-255-255-255-10: rgb(255 255 255 / 10%);
+  --color-token-rgb-15-23-42-22: rgb(15 23 42 / 22%);
+  --color-token-rgb-255-255-255-3: rgb(255 255 255 / 3%);
+  --color-token-rgb-251-146-60-11: rgb(251 146 60 / 11%);
+  --color-token-c5cfdf: #c5cfdf;
+  --color-token-263149: #263149;
+  --color-token-5f6d85: #5f6d85;
+  --color-token-e7edf7: #e7edf7;
+  --color-token-7f8da5: #7f8da5;
+  --color-token-rgb-251-146-60-9: rgb(251 146 60 / 9%);
+  --color-token-40506d: #40506d;
+  --color-token-111b2e: #111b2e;
+  --color-token-rgb-251-146-60-65: rgb(251 146 60 / 65%);
+  --color-token-rgb-251-146-60-16: rgb(251 146 60 / 16%);
+  --color-token-60708d: #60708d;
+  --color-token-0b1220: #0b1220;
+  --color-token-rgb-4-9-17-52: rgb(4 9 17 / 52%);
+  --color-token-rgb-5-10-19-72: rgb(5 10 19 / 72%);
+  --color-token-rgb-5-10-19-80: rgb(5 10 19 / 80%);
+  --color-token-b7c2d5: #b7c2d5;
+  --color-token-rgb-251-113-133-10: rgb(251 113 133 / 10%);
+  --color-token-3a4968: #3a4968;
+  --color-token-rgb-59-130-246-13: rgb(59 130 246 / 13%);
+  --color-token-rgb-16-185-129-13: rgb(16 185 129 / 13%);
+  --color-token-rgb-245-158-11-13: rgb(245 158 11 / 13%);
+}
+
+/*
+ * Ant Design overlaylari portal orqali body ichiga render qilinadi. CSS module
+ * scope ularga doim yetib bormaydi, shuning uchun barcha popup yuzalari shu
+ * markaziy dark palette bilan bir xil qilinadi.
+ */
+:where(.ant-modal-root) .ant-modal-mask,
+:where(.ant-drawer-root) .ant-drawer-mask {
+  background: var(--color-overlay) !important;
+  backdrop-filter: blur(3px);
+}
+
+:where(.ant-modal-root) .ant-modal-content,
+:where(.ant-modal-root) .ant-modal-container,
+:where(.ant-modal-root) .ant-modal-header,
+:where(.ant-modal-root) .ant-modal-footer,
+:where(.ant-drawer-root) .ant-drawer-content,
+:where(.ant-drawer-root) .ant-drawer-header,
+:where(.ant-drawer-root) .ant-drawer-body,
+:where(.ant-popover) .ant-popover-inner,
+:where(.ant-select-dropdown),
+:where(.ant-dropdown) .ant-dropdown-menu,
+:where(.ant-picker-dropdown) .ant-picker-panel-container {
+  color: var(--color-text) !important;
+  background: var(--color-surface) !important;
+}
+
+:where(.ant-modal-root) .ant-modal-content,
+:where(.ant-modal-root) .ant-modal-container,
+:where(.ant-popover) .ant-popover-inner,
+:where(.ant-select-dropdown),
+:where(.ant-dropdown) .ant-dropdown-menu,
+:where(.ant-picker-dropdown) .ant-picker-panel-container {
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md) !important;
+}
+
+:where(.ant-modal-root) .ant-modal-title,
+:where(.ant-popover) .ant-popover-title {
+  color: var(--color-text) !important;
+}
+
+:where(.ant-modal-root) .ant-modal-body,
+:where(.ant-popover) .ant-popover-inner-content {
+  color: var(--color-text-secondary) !important;
+}
+
+:where(.ant-modal-root) .ant-input,
+:where(.ant-modal-root) .ant-input-affix-wrapper,
+:where(.ant-modal-root) .ant-input-number,
+:where(.ant-modal-root) .ant-input-number-input,
+:where(.ant-modal-root) .ant-select-selector,
+:where(.ant-modal-root) textarea.ant-input {
+  color: var(--color-text) !important;
+  background: var(--color-surface-subtle) !important;
+  border-color: var(--color-border) !important;
+}
+
+:where(.ant-select-dropdown) .ant-select-item-option-active:not(.ant-select-item-option-disabled),
+:where(.ant-dropdown) .ant-dropdown-menu-item:hover,
+:where(.ant-dropdown) .ant-dropdown-menu-submenu-title:hover {
+  background: var(--color-surface-hover) !important;
+}
+
+:where(.ant-select-dropdown) .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  color: var(--color-accent) !important;
+  background: var(--color-accent-soft) !important;
 }
 
 * {
@@ -55,6 +268,13 @@ body {
   font: var(--font-body);
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
 a {
   text-decoration: none;
 }
@@ -66,9 +286,17 @@ a {
   transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease !important;
 }
 
-.ant-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
+.ant-table-wrapper { width: 100%; }
+
+.ant-table-content { scrollbar-width: thin; scrollbar-color: var(--color-scrollbar) transparent; }
+
+.ant-table-content::-webkit-scrollbar { height: 7px; }
+.ant-table-content::-webkit-scrollbar-track { background: transparent; }
+.ant-table-content::-webkit-scrollbar-thumb { background: var(--color-scrollbar); border-radius: 999px; }
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .ant-table-thead > tr > th {
@@ -79,7 +307,23 @@ a {
 }
 
 .ant-table-tbody > tr > td {
+  position: relative;
   font-size: 14px;
+}
+
+.ant-table-tbody > tr > td:not(:last-child)::after {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  bottom: 12px;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-border) 72%, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+.ant-table-tbody > tr:hover > td:not(:last-child)::after {
+  background: color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
 }
 
 .ant-pagination {

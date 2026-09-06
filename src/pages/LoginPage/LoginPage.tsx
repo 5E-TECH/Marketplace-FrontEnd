@@ -1,5 +1,7 @@
 import { LockKeyhole as LockFilled } from 'lucide-react';
 import { App, Card, Typography } from 'antd';
+import { useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { LoginBrand } from './components/LoginBrand/LoginBrand';
@@ -8,15 +10,31 @@ import {
   type LoginFormValues,
 } from './components/LoginForm/LoginForm';
 import styles from './LoginPage.module.css';
+import { authStorage } from '../../features/auth/lib/authStorage';
+import { normalizeUzPhone } from '../../shared/lib/phone';
 
 export default function LoginPage() {
   const { message } = App.useApp();
+  const location = useLocation();
+  const navigate = useNavigate();
   const loginMutation = useLoginMutation();
+
+  useEffect(() => {
+    const state: unknown = location.state as unknown;
+    const locationNotice = typeof state === 'object' && state !== null && 'notice' in state && typeof state.notice === 'string'
+      ? state.notice
+      : null;
+    const notice = locationNotice ?? authStorage.consumeNotice();
+    if (notice) {
+      void message.success(notice);
+      if (locationNotice) void navigate('/login', { replace: true, state: null });
+    }
+  }, [location.state, message, navigate]);
 
   const handleSubmit = (values: LoginFormValues) => {
     loginMutation.mutate(
       {
-        phone: `+998${values.phone}`,
+        phone: normalizeUzPhone(values.phone),
         password: values.password,
       },
       {
@@ -41,6 +59,8 @@ export default function LoginPage() {
               isSubmitting={loginMutation.isPending}
               onSubmit={handleSubmit}
             />
+            <Typography.Paragraph className={styles.switchAuth}><Link to="/forgot-password">Parolni unutdingizmi?</Link></Typography.Paragraph>
+            <Typography.Paragraph className={styles.switchAuth}>Akkauntingiz yo‘qmi? <Link to="/register/account">Ro‘yxatdan o‘tish</Link></Typography.Paragraph>
 
             <Typography.Text className={styles.security}>
               <LockFilled aria-hidden /> Parolingiz brauzer xotirasida saqlanmaydi

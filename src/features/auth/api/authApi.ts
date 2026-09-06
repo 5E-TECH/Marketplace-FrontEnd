@@ -1,15 +1,19 @@
 import { httpClient } from '../../../shared/api/httpClient';
-import { unwrapData } from '../../../shared/api/unwrapData';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type {
   AuthUser,
   AuthSession,
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
+  UpdateAuthProfilePayload,
   UpdateProfilePayload,
   UserRole,
+  PhonePayload,
+  VerifyPhonePayload,
+  ResetPasswordPayload,
+  AuthDeviceSession,
 } from '../model/authTypes';
-import { canAccessSellerCabinet } from '../lib/sellerAccess';
 
 interface LoginApiResponse {
   accessToken?: unknown;
@@ -24,12 +28,12 @@ const USER_ROLES: UserRole[] = [
   'SUPERADMIN',
 ];
 
-function isAuthUser(value: unknown): value is AuthUser {
+function parseAuthUser(value: unknown): AuthUser {
   if (typeof value !== 'object' || value === null) {
-    return false;
+    throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
   }
 
-  return (
+  const valid = (
     'id' in value &&
     typeof value.id === 'string' &&
     'role' in value &&
@@ -41,27 +45,27 @@ function isAuthUser(value: unknown): value is AuthUser {
     typeof value.phone === 'string' &&
     'isActive' in value &&
     typeof value.isActive === 'boolean' &&
-    'isDeleted' in value &&
-    typeof value.isDeleted === 'boolean'
+    (!('isDeleted' in value) || typeof value.isDeleted === 'boolean') &&
+    (!('isBlocked' in value) || typeof value.isBlocked === 'boolean')
   );
-}
 
-/** Ixtiyoriy maydonlarni bir xil ko'rinishga keltiradi (yo'q bo'lsa null). */
-function toAuthUser(candidate: AuthUser): AuthUser {
+  if (!valid) throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
+
   return {
-    ...candidate,
-    email:
-      'email' in candidate && typeof candidate.email === 'string'
-        ? candidate.email
-        : null,
-    avatarUrl:
-      'avatarUrl' in candidate && typeof candidate.avatarUrl === 'string'
-        ? candidate.avatarUrl
-        : null,
+    id: value.id as string,
+    role: value.role as UserRole,
+    name: value.name as string,
+    phone: value.phone as string,
+    email: 'email' in value && typeof value.email === 'string' ? value.email : null,
+    avatarUrl: 'avatarUrl' in value && typeof value.avatarUrl === 'string' ? value.avatarUrl : null,
+    isActive: value.isActive as boolean,
+    isDeleted: 'isDeleted' in value && typeof value.isDeleted === 'boolean' ? value.isDeleted : false,
+    isBlocked: 'isBlocked' in value && typeof value.isBlocked === 'boolean' ? value.isBlocked : false,
   };
 }
 
-function parseLoginResponse(data: LoginApiResponse): LoginResponse {
+function parseLoginResponse(value: unknown): LoginResponse {
+  const data = unwrapApiData(value) as LoginApiResponse;
   if (
     typeof data.accessToken !== 'string' ||
     data.accessToken.length === 0 ||
@@ -77,7 +81,7 @@ function parseLoginResponse(data: LoginApiResponse): LoginResponse {
 }
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
-  const { data } = await httpClient.post<LoginApiResponse>('/auth/login', credentials);
+  const { data } = await httpClient.post<unknown>('/auth/login', credentials);
 
   return parseLoginResponse(data);
 }
@@ -97,16 +101,6 @@ export async function register(
   });
 }
 
-/**
- * Access token muddati tugaganda yangisini oladi. Refresh token HttpOnly
- * cookie'da (backend `POST /auth/login` da qo'yadi), shuning uchun body bo'sh.
- */
-export async function refreshAccessToken(): Promise<LoginResponse> {
-  const { data } = await httpClient.post<LoginApiResponse>('/auth/refresh', {});
-
-  return parseLoginResponse(data);
-}
-
 export async function getCurrentUser(
   accessToken?: string,
   signal?: AbortSignal,
@@ -115,35 +109,13 @@ export async function getCurrentUser(
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     signal,
   });
-  const unwrapped = unwrapData(data);
+  const unwrapped = unwrapApiData(data);
   const candidate =
     typeof unwrapped === 'object' && unwrapped !== null && 'user' in unwrapped
       ? unwrapped.user
       : unwrapped;
 
-  if (!isAuthUser(candidate)) {
-    throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
-  }
-
-  return toAuthUser(candidate);
-}
-
-/** Joriy foydalanuvchining o'z akkaunt ma'lumotini yangilaydi. */
-export async function updateProfile(
-  payload: UpdateProfilePayload,
-): Promise<AuthUser> {
-  const { data } = await httpClient.patch<unknown>('/auth/profile', payload);
-  const unwrapped = unwrapData(data);
-  const candidate =
-    typeof unwrapped === 'object' && unwrapped !== null && 'user' in unwrapped
-      ? unwrapped.user
-      : unwrapped;
-
-  if (!isAuthUser(candidate)) {
-    throw new Error('Profil ma’lumoti noto‘g‘ri formatda qaytdi');
-  }
-
-  return toAuthUser(candidate);
+  return parseAuthUser(candidate);
 }
 
 export async function authenticate(
@@ -152,13 +124,38 @@ export async function authenticate(
   const authSession = await login(credentials);
   const user = await getCurrentUser(authSession.accessToken);
 
-  if (!canAccessSellerCabinet(user)) {
-    throw new Error('Bu akkaunt orqali seller kabinetiga kirish mumkin emas');
-  }
-
   return { ...authSession, user };
 }
+
+export async function updateAuthProfile(
+  payload: UpdateAuthProfilePayload,
+): Promise<AuthUser> {
+  const { data } = await httpClient.patch<unknown>('/auth/profile', payload);
+  const value = unwrapApiData(data);
+  const candidate = value && typeof value === 'object' && 'user' in value ? value.user : value;
+  return parseAuthUser(candidate);
+}
+
+export const updateProfile = (payload: UpdateProfilePayload) => updateAuthProfile(payload);
 
 export async function logout(): Promise<void> {
   await httpClient.post('/auth/logout');
 }
+
+export async function refreshAccessToken(refreshToken?: string): Promise<LoginResponse> {
+  const { data } = await httpClient.post<unknown>('/auth/refresh', refreshToken ? { refreshToken } : {});
+  return parseLoginResponse(data);
+}
+export async function forgotPassword(payload: PhonePayload): Promise<void> { await httpClient.post('/auth/forgot-password', payload); }
+export async function resetPassword(payload: ResetPasswordPayload): Promise<void> { await httpClient.post('/auth/reset-password', payload); }
+export async function verifyPhone(payload: VerifyPhonePayload): Promise<void> { await httpClient.post('/auth/verify-phone', payload); }
+export async function resendCode(payload: PhonePayload): Promise<void> { await httpClient.post('/auth/resend-code', payload); }
+export async function registerAccount(payload: { name: string; phone: string; password: string; email?: string; role?: UserRole }): Promise<LoginResponse> { const { data } = await httpClient.post<unknown>('/auth/register', payload); return parseLoginResponse(data); }
+
+function parseSessions(value: unknown): AuthDeviceSession[] {
+  const data = unwrapApiData(value); const list = Array.isArray(data) ? data : data && typeof data === 'object' && 'items' in data && Array.isArray(data.items) ? data.items : null;
+  if (!list) throw new Error('Sessiyalar noto‘g‘ri formatda keldi');
+  return list.map((item: unknown, index) => { const row = item && typeof item === 'object' ? item as Record<string, unknown> : {}; const text = (key: string, fallback = '') => typeof row[key] === 'string' ? row[key] : fallback; return { id: text('id', String(index)), userAgent: text('userAgent', 'Noma’lum qurilma'), ipAddress: text('ipAddress', text('ip', '—')), createdAt: text('createdAt', new Date().toISOString()), lastUsedAt: text('lastUsedAt') || null, current: row.current === true || row.isCurrent === true }; });
+}
+export async function getAuthSessions(signal?: AbortSignal): Promise<AuthDeviceSession[]> { const { data } = await httpClient.get<unknown>('/auth/sessions', { signal }); return parseSessions(data); }
+export async function revokeAuthSession(id: string): Promise<void> { await httpClient.delete(`/auth/sessions/${encodeURIComponent(id)}`); }
