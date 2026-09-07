@@ -1,9 +1,11 @@
 import { Plus, Save, Trash2 } from 'lucide-react';
-import { App, Button, Form, Select, Switch } from 'antd';
+import { App, Button, Form, Select, Switch, TreeSelect } from 'antd';
 import type { FormInstance, UploadFile } from 'antd';
 import { useMemo, useState } from 'react';
 import type { ProductStatus, ProductUpsertPayload } from '../../model/productTypes';
 import type { ProductVariant } from '../../model/productTypes';
+import { usePublicCategoriesQuery } from '../../../categories/api/categoryQueries';
+import type { Category } from '../../../categories/model/categoryTypes';
 import { ImageUpload } from '../../../../shared/ui/ImageUpload/ImageUpload';
 import { VariantManager } from '../VariantManager/VariantManager';
 import styles from './ProductForm.module.css';
@@ -43,6 +45,25 @@ export interface ProductFormSubmission {
   updateUpload: (uid: string, patch: Partial<UploadFile>) => void;
 }
 
+/**
+ * Kategoriya daraxtini TreeSelect kutgan shaklga o'giradi. Faol bo'lmagan
+ * kategoriya tanlanmaydi, lekin ko'rinib turadi — chunki tahrirlanayotgan eski
+ * mahsulot o'sha kategoriyada bo'lishi mumkin.
+ */
+function toCategoryTreeData(categories: Category[]): Array<{
+  value: string;
+  title: string;
+  disabled: boolean;
+  children: ReturnType<typeof toCategoryTreeData>;
+}> {
+  return categories.map((category) => ({
+    value: category.id,
+    title: category.name,
+    disabled: !category.isActive,
+    children: toCategoryTreeData(category.children),
+  }));
+}
+
 function createInitialFiles(values: ProductFormValues): UploadFile[] {
   return [...new Set([values.imageUrl, ...(values.images ?? [])].filter(Boolean))].map(
     (url, index) => ({
@@ -71,6 +92,11 @@ export function ProductForm({
   const [variants, setVariants] = useState<ProductVariant[]>(initialValues.variants);
   const hasVariants = Form.useWatch('hasVariants', form) ?? initialValues.hasVariants;
   const price = Form.useWatch('price', form) ?? initialValues.price;
+  const categoriesQuery = usePublicCategoriesQuery();
+  const categoryTreeData = useMemo(
+    () => toCategoryTreeData(categoriesQuery.data ?? []),
+    [categoriesQuery.data],
+  );
 
   const submit = (values: ProductFormValues) => {
     if (values.price === null) return;
@@ -140,8 +166,23 @@ export function ProductForm({
             <Form.Item className={styles.fullWidth} label="Mahsulot nomi" name="name" rules={[{ required: true, whitespace: true, message: 'Mahsulot nomini kiriting' }, { max: 120 }]}>
               <TextControl maxLength={120} placeholder="Masalan, iPhone 16 Pro" />
             </Form.Item>
-            <Form.Item label="Kategoriya ID" name="categoryId" rules={[{ pattern: /^\d*$/, message: 'Kategoriya ID raqam bo‘lishi kerak' }]}>
-              <TextControl inputMode="numeric" placeholder="Masalan, 7" />
+            <Form.Item
+              label="Kategoriya"
+              name="categoryId"
+              validateStatus={categoriesQuery.isError ? 'warning' : undefined}
+              help={categoriesQuery.isError ? 'Kategoriyalarni yuklab bo‘lmadi — sahifani yangilang' : undefined}
+            >
+              <TreeSelect
+                treeData={categoryTreeData}
+                loading={categoriesQuery.isPending}
+                disabled={categoriesQuery.isPending || categoriesQuery.isError}
+                placeholder={categoriesQuery.isPending ? 'Yuklanmoqda…' : 'Kategoriyani tanlang'}
+                showSearch
+                treeNodeFilterProp="title"
+                treeDefaultExpandAll
+                allowClear
+                notFoundContent="Kategoriya topilmadi"
+              />
             </Form.Item>
             <Form.Item label="Holati" name="status" rules={[{ required: true, message: 'Mahsulot holatini tanlang' }]}>
               <Select options={[{ value: 'DRAFT', label: 'Qoralama' }, { value: 'ACTIVE', label: 'Faol' }, { value: 'ARCHIVED', label: 'Arxivlangan' }, { value: 'OUT_OF_STOCK', label: 'Sotuvda yo‘q' }]} />

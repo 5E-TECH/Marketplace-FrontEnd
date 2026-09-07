@@ -412,3 +412,42 @@ test('TC3: variantsiz mahsulotda standart default ko‘rsatiladi', async ({ page
   await expect(defaultVariant).toContainText('120 000 so‘m');
   await expect(page.getByRole('button', { name: 'Variant qo‘shish' })).toHaveCount(0);
 });
+
+test('kategoriya ro‘yxatdan nomi bo‘yicha tanlanadi va POST /products ga ID sifatida ketadi', async ({ page }) => {
+  let requestBody: Record<string, unknown> | undefined;
+
+  await page.route('**/api/v1/products', async (route) => {
+    if (route.request().method() !== 'POST') return route.fallback();
+    requestBody = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        statusCode: 201,
+        message: 'OK',
+        data: {
+          id: '77', shopId: '5', ownerUserId: '2', categoryId: '2',
+          name: 'Galaxy S25', slug: 'galaxy-s25', description: 'Snapdragon, 256 GB',
+          price: 9500000, oldPrice: null, imageUrl: null, images: [], attributes: {},
+          hasVariants: false, status: 'DRAFT', isDeleted: false,
+          createdAt: '2026-09-07T07:30:00.000Z', updatedAt: '2026-09-07T07:30:00.000Z',
+        },
+      }),
+    });
+  });
+
+  await page.goto('/products/new');
+  await page.getByLabel('Mahsulot nomi').fill('Galaxy S25');
+  await page.getByLabel('Narxi', { exact: true }).fill('9500000');
+  await page.getByLabel('Tavsif').fill('Snapdragon, 256 GB');
+
+  // Sotuvchi raqam yozmaydi — kategoriya nomini ro'yxatdan tanlaydi.
+  await page.getByLabel('Kategoriya').click();
+  await page.getByRole('treeitem', { name: 'Smartfonlar' }).click();
+  await expect(page.getByTitle('Smartfonlar', { exact: true }).first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Mahsulotni yaratish' }).click();
+
+  await expect(page.getByText('Mahsulot yaratildi')).toBeVisible();
+  expect(requestBody?.categoryId).toBe('2');
+});

@@ -120,6 +120,34 @@ export async function mockProducts(page: Page): Promise<void> {
   });
 }
 
+/** Kategoriya daraxti — mahsulot formasidagi tanlash ro'yxati shunga tayanadi. */
+export const publicCategoryTree = [
+  {
+    id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null,
+    iconUrl: null, sortOrder: 1, isActive: true,
+    children: [
+      {
+        id: '2', name: 'Smartfonlar', slug: 'smartfonlar', parentId: '1',
+        iconUrl: null, sortOrder: 1, isActive: true, children: [],
+      },
+    ],
+  },
+  {
+    id: '3', name: 'Kiyim', slug: 'kiyim', parentId: null,
+    iconUrl: null, sortOrder: 2, isActive: true, children: [],
+  },
+] as const;
+
+export async function mockCategories(page: Page): Promise<void> {
+  await page.route('**/api/v1/categories', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ statusCode: 200, message: 'OK', data: publicCategoryTree }),
+    });
+  });
+}
+
 export async function installAuthenticatedSession(
   page: Page,
   user: Record<string, unknown> = authenticatedUser,
@@ -128,6 +156,7 @@ export async function installAuthenticatedSession(
   await mockCurrentUser(page, user);
   await mockLogout(page);
   await mockProducts(page);
+  await mockCategories(page);
   await mockDashboard(page);
   // Test o'zi `page.route` qo'shsa, Playwright keyingi qo'shilganini
   // birinchi ishlatadi — shuning uchun bu umumiy mock ustidan yozilaveradi.
