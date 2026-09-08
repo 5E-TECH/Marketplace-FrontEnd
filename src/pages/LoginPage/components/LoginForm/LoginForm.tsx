@@ -1,6 +1,7 @@
 import { Button, Form, Input } from 'antd';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import styles from './LoginForm.module.css';
+import { useTranslation } from '../../../../shared/i18n/useTranslation';
 
 export interface LoginFormValues {
   phone: string;
@@ -18,6 +19,7 @@ export function LoginForm({
   isSubmitting,
   onSubmit,
 }: LoginFormProps) {
+  const { t } = useTranslation();
   return (
     <Form<LoginFormValues>
       layout="vertical"
@@ -29,14 +31,14 @@ export function LoginForm({
     >
       <Form.Item
         className={styles.field}
-        label="TELEFON RAQAMI"
+        label={t('auth.phone').toLocaleUpperCase()}
         name="phone"
         normalize={(value?: string) => (value ?? '').replace(/\D/g, '').slice(0, 9)}
         rules={[
-          { required: true, message: 'Telefon raqamini kiriting' },
+          { required: true, message: t('auth.phoneRequired') },
           {
             pattern: PHONE_NUMBER_PATTERN,
-            message: '9 xonali telefon raqamini kiriting',
+            message: t('auth.phoneNineDigits'),
           },
         ]}
       >
@@ -49,17 +51,17 @@ export function LoginForm({
           autoComplete="tel"
           spellCheck={false}
           placeholder="90 123 45 67"
-          aria-label="Telefon raqami"
+          aria-label={t('auth.phone')}
         />
       </Form.Item>
 
       <Form.Item
         className={styles.field}
-        label="PAROL"
+        label={t('auth.password').toLocaleUpperCase()}
         name="password"
         rules={[
-          { required: true, message: 'Parolni kiriting' },
-          { max: 128, message: 'Parol 128 belgidan oshmasligi kerak' },
+          { required: true, message: t('auth.passwordRequired') },
+          { max: 128, message: t('auth.passwordMax') },
         ]}
       >
         <PasswordInput
@@ -68,8 +70,8 @@ export function LoginForm({
           autoComplete="current-password"
           maxLength={128}
           spellCheck={false}
-          placeholder="Parolingizni kiriting"
-          aria-label="Parol"
+          placeholder={t('auth.passwordPlaceholder')}
+          aria-label={t('auth.password')}
         />
       </Form.Item>
 
@@ -79,7 +81,7 @@ export function LoginForm({
         htmlType="submit"
         loading={isSubmitting}
       >
-        PLATFORMAGA KIRISH
+        {t('auth.signIn').toLocaleUpperCase()}
       </Button>
 
     </Form>

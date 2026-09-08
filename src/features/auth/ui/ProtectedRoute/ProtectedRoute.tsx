@@ -4,8 +4,10 @@ import { selectIsAuthenticated } from '../../model/authSlice';
 import { useCurrentUserQuery } from '../../api/useCurrentUserQuery';
 import { PageLoader } from '../../../../shared/ui/PageLoader/PageLoader';
 import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
+import { useTranslation } from '../../../../shared/i18n/useTranslation';
 
 export function ProtectedRoute() {
+  const { t } = useTranslation();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const location = useLocation();
   const currentUserQuery = useCurrentUserQuery();
@@ -22,7 +24,7 @@ export function ProtectedRoute() {
     return (
       <ContentState
         state="error"
-        description="Profil ma’lumotini olib bo‘lmadi. Qayta urinib ko‘ring."
+        description={t('auth.profileLoadError')}
         onAction={() => void currentUserQuery.refetch()}
       />
     );

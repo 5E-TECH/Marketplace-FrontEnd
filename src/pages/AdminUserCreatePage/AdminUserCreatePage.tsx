@@ -9,6 +9,7 @@ import { BackButton } from '../../shared/ui/BackButton/BackButton';
 import { TextControl, SelectControl } from '../../shared/ui/FormControls/FormControls';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 import styles from './AdminUserCreatePage.module.css';
 
 interface AdminUserFormValues {
@@ -26,6 +27,7 @@ const editableFields = new Set<keyof AdminUserFormValues>([
 
 export default function AdminUserCreatePage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form] = Form.useForm<AdminUserFormValues>();
   const createMutation = useCreateAdminUserMutation();
@@ -41,7 +43,7 @@ export default function AdminUserCreatePage() {
       },
       {
         onSuccess: () => {
-          void message.success('Foydalanuvchi muvaffaqiyatli yaratildi');
+          void message.success(t('admin.users.createdSuccess'));
           void navigate('/admin/users', { replace: true });
         },
         onError: (error) => {
@@ -61,16 +63,16 @@ export default function AdminUserCreatePage() {
     <main className={styles.page}>
       <PageHeader
         before={<BackButton fallback="/admin/users" disabled={createMutation.isPending} />}
-        title="Yangi foydalanuvchi"
-        description="Akkaunt ma’lumotlari va platformadagi rolini belgilang"
+        title={t('admin.users.createTitle')}
+        description={t('admin.users.createDescription')}
       />
 
       <section className={styles.card}>
         <header className={styles.cardHeader}>
           <span className={styles.headerIcon}><UserPlus aria-hidden /></span>
           <div>
-            <h2>Foydalanuvchi ma’lumotlari</h2>
-            <p>Barcha majburiy maydonlarni to‘ldiring</p>
+            <h2>{t('admin.users.formTitle')}</h2>
+            <p>{t('admin.users.formDescription')}</p>
           </div>
         </header>
 
@@ -83,23 +85,23 @@ export default function AdminUserCreatePage() {
           onFinish={submit}
         >
           <Form.Item
-            label="To‘liq ism"
+            label={t('admin.users.fullName')}
             name="name"
             rules={[
-              { required: true, whitespace: true, message: 'Foydalanuvchi ismini kiriting' },
-              { min: 2, message: 'Ism kamida 2 ta belgidan iborat bo‘lsin' },
-              { max: 255, message: 'Ism 255 belgidan oshmasligi kerak' },
+              { required: true, whitespace: true, message: t('admin.users.nameRequired') },
+              { min: 2, message: t('admin.users.nameMin') },
+              { max: 255, message: t('admin.users.nameMax') },
             ]}
           >
-            <TextControl placeholder="Masalan: Ali Valiyev" autoComplete="name" maxLength={255} />
+            <TextControl placeholder={t('admin.users.namePlaceholder')} autoComplete="name" maxLength={255} />
           </Form.Item>
 
           <Form.Item
-            label="Telefon raqami"
+            label={t('admin.users.phone')}
             name="phone"
             rules={[
-              { required: true, message: 'Telefon raqamini kiriting' },
-              { pattern: /^\+998\d{9}$/, message: '+998901234567 formatida kiriting' },
+              { required: true, message: t('admin.users.phoneRequired') },
+              { pattern: /^\+998\d{9}$/, message: t('admin.users.phoneInvalid') },
             ]}
           >
             <TextControl placeholder="+998901234567" autoComplete="tel" maxLength={13} />
@@ -109,48 +111,48 @@ export default function AdminUserCreatePage() {
             label="Email"
             name="email"
             rules={[
-              { type: 'email', message: 'Email manzilini to‘g‘ri kiriting' },
-              { max: 255, message: 'Email 255 belgidan oshmasligi kerak' },
+              { type: 'email', message: t('admin.users.emailInvalid') },
+              { max: 255, message: t('admin.users.emailMax') },
             ]}
           >
             <TextControl placeholder="ali@example.com" autoComplete="email" maxLength={255} />
           </Form.Item>
 
           <Form.Item
-            label="Foydalanuvchi roli"
+            label={t('admin.users.role')}
             name="role"
-            rules={[{ required: true, message: 'Rolni tanlang' }]}
+            rules={[{ required: true, message: t('admin.users.roleRequired') }]}
           >
-            <SelectControl options={ADMIN_USER_ROLE_OPTIONS} />
+            <SelectControl options={ADMIN_USER_ROLE_OPTIONS.map(({ value, label }) => ({ value, label: t(label) }))} />
           </Form.Item>
 
           <div className={styles.sectionHeading}>
             <ShieldCheck aria-hidden />
-            <div><strong>Kirish xavfsizligi</strong><span>Foydalanuvchi tizimga shu parol bilan kiradi</span></div>
+            <div><strong>{t('admin.users.security')}</strong><span>{t('admin.users.securityDescription')}</span></div>
           </div>
 
           <Form.Item
-            label="Parol"
+            label={t('users.password')}
             name="password"
             rules={[
-              { required: true, message: 'Parolni kiriting' },
-              { min: 8, message: 'Parol kamida 8 ta belgidan iborat bo‘lsin' },
+              { required: true, message: t('admin.users.passwordRequired') },
+              { min: 8, message: t('admin.users.passwordMin') },
             ]}
           >
             <PasswordInput autoComplete="new-password" />
           </Form.Item>
 
           <Form.Item
-            label="Parolni tasdiqlash"
+            label={t('admin.users.confirmPassword')}
             name="confirmPassword"
             dependencies={['password']}
             rules={[
-              { required: true, message: 'Parolni qayta kiriting' },
+              { required: true, message: t('admin.users.confirmPasswordRequired') },
               ({ getFieldValue }) => ({
                 validator: (_, value: string | undefined) =>
                   !value || value === getFieldValue('password')
                     ? Promise.resolve()
-                    : Promise.reject(new Error('Parollar bir xil emas')),
+                    : Promise.reject(new Error(t('admin.users.passwordMismatch'))),
               }),
             ]}
           >
@@ -158,9 +160,9 @@ export default function AdminUserCreatePage() {
           </Form.Item>
 
           <div className={styles.actions}>
-            <Button disabled={createMutation.isPending} onClick={() => void navigate('/admin/users')}>Bekor qilish</Button>
+            <Button disabled={createMutation.isPending} onClick={() => void navigate('/admin/users')}>{t('common.cancel')}</Button>
             <Button type="primary" htmlType="submit" icon={<Save size={17} />} loading={createMutation.isPending}>
-              Foydalanuvchi yaratish
+              {t('admin.users.create')}
             </Button>
           </div>
         </Form>

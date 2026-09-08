@@ -27,24 +27,28 @@ import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
+import { useTranslation } from '../../shared/i18n/useTranslation';
+import { usePublicCategoriesQuery } from '../../features/categories/api/categoryQueries';
+import { createCategoryOptions } from '../../features/categories/lib/categoryOptions';
 
 type ProductStatusFilter = 'ALL' | Product['status'];
 const EMPTY_PRODUCTS: Product[] = [];
 
-const STATUS_FILTERS = [
-  { value: 'ALL', label: 'Barcha holatlar' },
-  { value: 'DRAFT', label: 'Qoralama' },
-  { value: 'ACTIVE', label: 'Faol' },
-  { value: 'OUT_OF_STOCK', label: 'Sotuvda yo‘q' },
-  { value: 'ARCHIVED', label: 'Arxivlangan' },
-] as const satisfies readonly { value: ProductStatusFilter; label: string }[];
-
 export default function ProductsPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
+  const statusFilters: Array<{ value: ProductStatusFilter; label: string }> = [
+    { value: 'ALL', label: t('product.allStatuses') },
+    { value: 'DRAFT', label: t('status.draft') },
+    { value: 'ACTIVE', label: t('status.active') },
+    { value: 'OUT_OF_STOCK', label: t('status.outOfStock') },
+    { value: 'ARCHIVED', label: t('status.archived') },
+  ];
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const routeSearch = searchParams.get('search')?.trim() ?? '';
   const [status, setStatus] = useState<ProductStatusFilter>('ALL');
+  const [categoryId, setCategoryId] = useState('ALL');
   const [localQuery, setLocalQuery] = useState('');
   const query = routeSearch || localQuery;
   const [page, setPage] = useState(1);
@@ -54,7 +58,13 @@ export default function ProductsPage() {
     limit: 8,
     ...(deferredQuery ? { search: deferredQuery } : {}),
     ...(status !== 'ALL' && ['DRAFT', 'ACTIVE', 'ARCHIVED', 'OUT_OF_STOCK'].includes(status) ? { status: status as 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK' } : {}),
+    ...(categoryId !== 'ALL' ? { categoryId } : {}),
   });
+  const categoriesQuery = usePublicCategoriesQuery();
+  const categoryOptions = useMemo(
+    () => [{ value: 'ALL', label: t('product.allCategories') }, ...createCategoryOptions(categoriesQuery.data ?? [])],
+    [categoriesQuery.data, t],
+  );
   const deleteMutation = useDeleteProductMutation();
   const products = productsQuery.data?.items ?? EMPTY_PRODUCTS;
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
@@ -76,7 +86,7 @@ export default function ProductsPage() {
       onSuccess: () => {
         setDeletingProduct(null);
         if (products.length === 1 && page > 1) setPage((current) => current - 1);
-        void message.success('Mahsulot o‘chirildi');
+        void message.success(t('product.deleted'));
       },
       onError: (error) => void message.error(getAuthErrorMessage(error)),
     });
@@ -86,7 +96,7 @@ export default function ProductsPage() {
     return (
       <main className={styles.page}>
         <Typography.Title level={1} className={styles.srOnly}>
-          Mahsulotlar
+          {t('product.title')}
         </Typography.Title>
         <ContentState state="loading" />
       </main>
@@ -96,11 +106,11 @@ export default function ProductsPage() {
     return (
       <main className={styles.page}>
         <Typography.Title level={1} className={styles.srOnly}>
-          Mahsulotlar
+          {t('product.title')}
         </Typography.Title>
         <ContentState
           state="error"
-          title="Mahsulotlarni yuklab bo‘lmadi"
+          title={t('product.loadError')}
           description={getAuthErrorMessage(productsQuery.error)}
           onAction={() => void productsQuery.refetch()}
         />
@@ -116,20 +126,21 @@ export default function ProductsPage() {
         ? <img className={styles.productImage} src={product.imageUrl} alt="" loading="lazy" />
         : <span className={styles.imagePlaceholder}><PictureOutlined /></span>,
     },
-    { title: 'Mahsulot', dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name), render: (name: string, product) => <span className={styles.productInfo}><Typography.Text strong>{name}</Typography.Text><small>ID: {product.id}</small></span> },
+    { title: t('product.product'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name), render: (name: string, product) => <span className={styles.productInfo}><Typography.Text strong>{name}</Typography.Text><small>ID: {product.id}</small></span> },
     { title: 'Slug', dataIndex: 'slug', width: 170, responsive: ['xl'], render: (slug: string) => <code className={styles.sku}>{slug || '—'}</code> },
-    { title: 'Kategoriya', dataIndex: 'category', width: 150, responsive: ['lg'], ellipsis: true, render: (category: string) => category || <span className={styles.muted}>Kategoriyasiz</span> },
-    { title: 'Narxi', dataIndex: 'price', width: 130, render: (price: number) => <MoneyText value={price} />, sorter: (a, b) => a.price - b.price },
-    { title: 'Qoldiq', dataIndex: 'stock', width: 90, responsive: ['md'], sorter: (a, b) => a.stock - b.stock },
-    { title: 'Holati', dataIndex: 'status', width: 120, responsive: ['sm'], render: (status: Product['status']) => <StatusTag status={status} /> },
+    { title: t('product.category'), dataIndex: 'category', width: 150, responsive: ['lg'], ellipsis: true, render: (category: string) => category || <span className={styles.muted}>{t('product.noCategory')}</span> },
+    { title: t('product.price'), dataIndex: 'price', width: 130, render: (price: number) => <MoneyText value={price} />, sorter: (a, b) => a.price - b.price },
+    { title: t('product.stock'), dataIndex: 'stock', width: 90, responsive: ['md'], sorter: (a, b) => a.stock - b.stock },
+    { title: t('product.rating'), dataIndex: 'rating', width: 90, responsive: ['xl'], render: (rating: number) => rating > 0 ? rating.toFixed(1) : '—' },
+    { title: t('common.status'), width: 120, responsive: ['sm'], render: (_, product) => <StatusTag status={product.isBlocked ? 'BLOCKED' : product.status} /> },
     {
-      title: 'Amallar',
+      title: t('common.actions'),
       width: 116,
       align: 'center',
       render: (_, product) => (
         <span className={styles.rowActions}>
-          <Button className={styles.editAction} type="text" shape="circle" icon={<EditOutlined />} aria-label={`${product.name} mahsulotini tahrirlash`} onClick={() => void navigate(`/products/${product.id}/edit`)} />
-          <Button className={styles.deleteAction} type="text" shape="circle" danger icon={<DeleteOutlined />} aria-label={`${product.name} mahsulotini o‘chirish`} onClick={() => setDeletingProduct(product)} />
+          <Button className={styles.editAction} type="text" shape="circle" icon={<EditOutlined />} aria-label={t('product.editAria', { name: product.name })} onClick={() => void navigate(`/products/${product.id}/edit`)} />
+          <Button className={styles.deleteAction} type="text" shape="circle" danger icon={<DeleteOutlined />} aria-label={t('product.deleteAria', { name: product.name })} onClick={() => setDeletingProduct(product)} />
         </span>
       ),
     },
@@ -138,17 +149,17 @@ export default function ProductsPage() {
   return (
     <main className={styles.page}>
       <PageHeader
-        title="Mahsulotlar"
-        description="Katalog, narxlar va mahsulot qoldiqlarini boshqaring"
+        title={t('product.title')}
+        description={t('product.description')}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => void navigate('/products/new')}>
-            Mahsulot qo‘shish
+            {t('product.add')}
           </Button>
         }
       />
       <ListToolbar
         value={query}
-        placeholder="Mahsulot nomi yoki slug bo‘yicha qidirish..."
+        placeholder={t('product.search')}
         onChange={(value) => {
           if (routeSearch) setSearchParams({}, { replace: true });
           setLocalQuery(value);
@@ -159,43 +170,56 @@ export default function ProductsPage() {
           <Select<ProductStatusFilter>
             className={styles.statusFilter}
             value={status}
-            options={STATUS_FILTERS.map((option) => ({ value: option.value, label: option.label }))}
+            options={statusFilters}
             suffixIcon={<SlidersHorizontal size={16} />}
-            title="Holat bo‘yicha filtrlash"
+            title={t('product.filterStatus')}
+            aria-label={t('product.filterStatus')}
             onChange={(value) => { setStatus(value); setPage(1); }}
           />
-          <ToolbarButton icon={<Download />} onClick={() => void message.info('Eksport tayyorlanmoqda')}>Eksport</ToolbarButton>
-          <ToolbarButton icon={<Upload />} onClick={() => void message.info('Import oynasi tayyorlanmoqda')}>Import</ToolbarButton>
+          <Select
+            className={styles.statusFilter}
+            value={categoryId}
+            options={categoryOptions}
+            loading={categoriesQuery.isPending}
+            showSearch
+            virtual={false}
+            optionFilterProp="label"
+            title={t('product.filterCategory')}
+            aria-label={t('product.filterCategory')}
+            onChange={(value) => { setCategoryId(value); setPage(1); }}
+          />
+          <ToolbarButton icon={<Download />} onClick={() => void message.info(t('product.exportPreparing'))}>{t('product.export')}</ToolbarButton>
+          <ToolbarButton icon={<Upload />} onClick={() => void message.info(t('product.importPreparing'))}>{t('product.import')}</ToolbarButton>
           </>
         }
       />
 
-      <section className={styles.stats} aria-label="Mahsulot statistikasi">
-        <SummaryCard title="Jami mahsulotlar" value={productsQuery.data?.total ?? 0} caption="Katalogdagi barcha mahsulotlar" icon={<PictureOutlined />} />
-        <SummaryCard title="Faol mahsulotlar" value={activeCount} caption="Sotuv uchun faol holatda" icon={<PictureOutlined />} tone="success" />
-        <SummaryCard title="Sotuvda yo‘q" value={lowStockCount} caption="Qoldiqni yangilash talab qilinadi" icon={<PictureOutlined />} tone="warning" />
+      <section className={styles.stats} aria-label={t('product.statistics')}>
+        <SummaryCard title={t('product.total')} value={productsQuery.data?.total ?? 0} caption={t('product.totalCaption')} icon={<PictureOutlined />} />
+        <SummaryCard title={t('product.active')} value={activeCount} caption={t('product.activeCaption')} icon={<PictureOutlined />} tone="success" />
+        <SummaryCard title={t('status.outOfStock')} value={lowStockCount} caption={t('product.outOfStockCaption')} icon={<PictureOutlined />} tone="warning" />
       </section>
 
       <TablePanel
         className={styles.tableCard}
-        title="Mahsulotlar ro‘yxati"
-        caption={`${productsQuery.data?.total ?? 0} ta natija${deferredQuery ? ` · “${deferredQuery}” bo‘yicha` : ''}`}
-        action={status !== 'ALL' || query ? <Button type="text" onClick={() => { setStatus('ALL'); setLocalQuery(''); setSearchParams({}, { replace: true }); setPage(1); }}>Filterlarni tozalash</Button> : null}
+        title={t('product.list')}
+        caption={deferredQuery ? t('product.resultSearch', { count: productsQuery.data?.total ?? 0, query: deferredQuery }) : t('product.resultCount', { count: productsQuery.data?.total ?? 0 })}
+        action={status !== 'ALL' || categoryId !== 'ALL' || query ? <Button type="text" onClick={() => { setStatus('ALL'); setCategoryId('ALL'); setLocalQuery(''); setSearchParams({}, { replace: true }); setPage(1); }}>{t('product.clearFilters')}</Button> : null}
       >
         <DataTable
           rowKey="id"
           columns={columns}
           dataSource={products}
           tableLayout="auto"
-          pagination={{ ...createTablePagination(8), current: page, total: productsQuery.data?.total ?? 0 }}
+          pagination={{ ...createTablePagination(8, (total) => t('pagination.total', { total })), current: page, total: productsQuery.data?.total ?? 0 }}
           onChange={(pagination) => setPage(pagination.current ?? 1)}
         />
       </TablePanel>
       <ConfirmDialog
         open={Boolean(deletingProduct)}
-        title="Mahsulot o‘chirilsinmi?"
-        description={`${deletingProduct?.name ?? 'Mahsulot'} ro‘yxatdan olib tashlanadi.`}
-        confirmText="O‘chirish"
+        title={t('product.deleteTitle')}
+        description={t('product.deleteDescription', { name: deletingProduct?.name ?? t('product.unknown') })}
+        confirmText={t('common.delete')}
         danger
         loading={deleteMutation.isPending}
         onCancel={() => setDeletingProduct(null)}

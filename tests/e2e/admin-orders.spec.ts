@@ -66,3 +66,21 @@ test('admin order list filtrlari va detail requesti to‘g‘ri yuboriladi', asy
   await expect(page.getByRole('button', { name: 'Buyurtma yaratish' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Buyurtmani o‘chirish' })).toHaveCount(0);
 });
+
+test('admin orders pagination backendga page va limit yuboradi', async ({ page }) => {
+  const orders = Array.from({ length: 21 }, (_, index) => ({ id: String(index + 1), orderNumber: `A-${index + 1}`, buyerName: `Xaridor ${index + 1}`, shopId: '7', totalAmount: 250000, paymentMethod: 'cod', status: 'CONFIRMED', createdAt: '2026-09-03T10:00:00.000Z' }));
+  await page.route('**/api/v1/admin/orders**', async route => {
+    const url = new URL(route.request().url());
+    const pageNumber = Number(url.searchParams.get('page') ?? 1);
+    const limit = Number(url.searchParams.get('limit') ?? 20);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: orders.slice((pageNumber - 1) * limit, pageNumber * limit), total: orders.length, page: pageNumber, limit, totalPages: 2 } }) });
+  });
+  await page.goto('/admin/orders');
+  const secondPageRequest = page.waitForRequest(request => {
+    const url = new URL(request.url());
+    return url.searchParams.get('page') === '2' && url.searchParams.get('limit') === '20';
+  });
+  await page.getByTitle('2').click();
+  await secondPageRequest;
+  await expect(page.getByText('Xaridor 21')).toBeVisible();
+});

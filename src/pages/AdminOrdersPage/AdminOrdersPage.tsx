@@ -16,6 +16,7 @@ import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
 import styles from './AdminOrdersPage.module.css';
 import { formatDateTime } from '../../shared/lib/date';
+import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { DetailDrawer } from '../../shared/ui/DetailDrawer/DetailDrawer';
 import { DetailList } from '../../shared/ui/DetailList/DetailList';
 
@@ -36,7 +37,8 @@ const statuses: AdminOrderStatus[] = [
 export default function AdminOrdersPage() {
   const { language, t } = useTranslation();
   const [status, setStatus] = useState<StatusFilter>('ALL'); const [payment, setPayment] = useState<PaymentFilter>('ALL'); const [shopId, setShopId] = useState(''); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState(''); const [page, setPage] = useState(1); const [selected, setSelected] = useState<AdminOrder | null>(null);
-  const query = useAdminOrdersQuery({ page, limit: 20, ...(status !== 'ALL' ? { status } : {}), ...(payment !== 'ALL' ? { paymentMethod: payment } : {}), ...(shopId.trim() ? { shopId: shopId.trim() } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) });
+  const deferredShopId = useDebouncedValue(shopId.trim());
+  const query = useAdminOrdersQuery({ page, limit: 20, ...(status !== 'ALL' ? { status } : {}), ...(payment !== 'ALL' ? { paymentMethod: payment } : {}), ...(deferredShopId ? { shopId: deferredShopId } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) });
   const detail = useAdminOrderQuery(selected?.id ?? null); const reset = () => { setStatus('ALL'); setPayment('ALL'); setShopId(''); setDateFrom(''); setDateTo(''); setPage(1); };
   const columns: ColumnsType<AdminOrder> = [
     { title: t('adminOrders.order'), render: (_, order) => `#${order.orderNumber}` },
@@ -60,7 +62,7 @@ export default function AdminOrdersPage() {
       <div className={styles.field}><label htmlFor="admin-order-to">{t('adminOrders.dateTo')}</label><Input id="admin-order-to" prefix={<CalendarDays aria-hidden />} type="date" value={dateTo} min={dateFrom || undefined} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></div>
       <div className={styles.filterAction}><Button icon={<RotateCcw size={16}/>} disabled={!hasFilters} onClick={reset}>{t('adminOrders.clear')}</Button></div>
     </FilterPanel>
-    <div className={styles.tablePanel}><DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{...createTablePagination(20),current:page,total:query.data.total}} onChange={(pagination) => setPage(pagination.current ?? 1)} /></div>
+    <div className={styles.tablePanel}><DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{...createTablePagination(20, (total) => t('pagination.total', { total })),current:page,total:query.data.total}} onChange={(pagination) => setPage(pagination.current ?? 1)} /></div>
     <DetailDrawer title={`${t('adminOrders.order')} #${selected?.orderNumber ?? ''}`} subtitle="Buyurtma tafsilotlari" open={Boolean(selected)} onClose={() => setSelected(null)}>
       {selected ? <><DetailList items={[{ label: t('adminOrders.buyer'), value: selected.buyerName || '—' }, { label: t('adminOrders.shopId'), value: selected.shopId ? `#${selected.shopId}` : '—' }, { label: t('adminOrders.amount'), value: `${formatMoney(selected.totalAmount)} UZS` }, { label: t('adminOrders.payment'), value: selected.paymentMethod?.toUpperCase() || '—' }, { label: t('users.status'), value: <StatusTag status={selected.status} /> }]} />{detail.isPending ? <ContentState state="loading" /> : detail.isError ? <ContentState state="error" description={getAuthErrorMessage(detail.error)} onAction={() => void detail.refetch()} /> : <AppDetailNotice value={detail.data} />}</> : null}
     </DetailDrawer>

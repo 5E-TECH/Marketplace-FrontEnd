@@ -7,6 +7,7 @@ import styles from './VariantManager.module.css';
 import { formatMoney } from '../../../../shared/ui/MoneyText/formatMoney';
 import { DataTable } from '../../../../shared/ui/DataTable/DataTable';
 import { EmptyState } from '../../../../shared/ui/EmptyState/EmptyState';
+import { useTranslation } from '../../../../shared/i18n/useTranslation';
 
 interface VariantManagerProps {
   enabled: boolean;
@@ -15,9 +16,12 @@ interface VariantManagerProps {
   onChange?: (variants: ProductVariant[]) => void;
 }
 
-type VariantFormValues = ProductVariant;
+type VariantFormValues = Omit<ProductVariant, 'attributes'> & {
+  attributeEntries: Array<{ key: string; value: string }>;
+};
 
 export function VariantManager({ enabled, basePrice, value = [], onChange }: VariantManagerProps) {
+  const { t } = useTranslation();
   const [form] = Form.useForm<VariantFormValues>();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -30,24 +34,32 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
 
   const addVariant = () => {
     setEditingIndex(null);
-    form.setFieldsValue({ name: '', sku: '', price: basePrice, oldPrice: null, barcode: '', attributes: {}, imageUrl: null, isActive: true });
+    form.setFieldsValue({ name: '', sku: '', price: basePrice, oldPrice: null, barcode: '', attributeEntries: [], imageUrl: null, isActive: true });
     setOpen(true);
   };
 
   const editVariant = (variant: ProductVariant, index: number) => {
     setEditingIndex(index);
-    form.setFieldsValue(variant);
+    form.setFieldsValue({
+      ...variant,
+      attributeEntries: Object.entries(variant.attributes).map(([key, value]) => ({ key, value })),
+    });
     setOpen(true);
   };
 
-  const save = (variant: ProductVariant) => {
+  const save = (values: VariantFormValues) => {
     const normalized: ProductVariant = {
-      ...variant,
-      name: variant.name.trim(),
-      sku: variant.sku.trim(),
-      attributes: variant.attributes ?? {},
-      imageUrl: variant.imageUrl ?? null,
+      ...values,
+      name: values.name.trim(),
+      sku: values.sku.trim(),
+      attributes: Object.fromEntries(
+        (values.attributeEntries ?? [])
+          .map(({ key, value }) => [key.trim(), value.trim()] as const)
+          .filter(([key, value]) => key && value),
+      ),
+      imageUrl: values.imageUrl?.trim() || null,
     };
+    delete (normalized as ProductVariant & { attributeEntries?: unknown }).attributeEntries;
     onChange?.(
       editingIndex === null
         ? [...value, normalized]
@@ -58,13 +70,13 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
 
   if (!enabled) {
     return (
-      <section className={styles.defaultVariant} aria-label="Standart variant">
+      <section className={styles.defaultVariant} aria-label={t('variant.default')}>
         <div>
           <Tag color="default">DEFAULT</Tag>
-          <strong>Standart variant</strong>
-          <span>Variantlarsiz mahsulot uchun avtomatik ishlatiladi.</span>
+          <strong>{t('variant.default')}</strong>
+          <span>{t('variant.defaultDescription')}</span>
         </div>
-        <b>{basePrice ? `${formatMoney(basePrice)} so‘m` : 'Narx kiritilmagan'}</b>
+        <b>{basePrice ? `${formatMoney(basePrice)} ${t('product.currency')}` : t('variant.noPrice')}</b>
       </section>
     );
   }
@@ -73,29 +85,29 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
     <section className={styles.manager} aria-labelledby="variants-title">
       <div className={styles.header}>
         <div>
-          <h3 id="variants-title">Mahsulot variantlari</h3>
-          <p>O‘lcham, rang yoki boshqa ko‘rinishlarni alohida boshqaring.</p>
+          <h3 id="variants-title">{t('variant.title')}</h3>
+          <p>{t('variant.description')}</p>
         </div>
-        <Button type="primary" icon={<Plus size={16} />} onClick={addVariant}>Variant qo‘shish</Button>
+        <Button type="primary" icon={<Plus size={16} />} onClick={addVariant}>{t('variant.add')}</Button>
       </div>
 
       <DataTable<ProductVariant>
         rowKey={(variant) => `${variant.sku}-${variant.name}`}
         dataSource={value}
         pagination={false}
-        emptyState={<EmptyState compact title="Hali variant qo‘shilmagan" description="" />}
+        emptyState={<EmptyState compact title={t('variant.empty')} description="" />}
         columns={[
-          { title: 'Variant', dataIndex: 'name' },
+          { title: t('variant.variant'), dataIndex: 'name' },
           { title: 'SKU', dataIndex: 'sku', responsive: ['sm'], render: (sku: string) => <code>{sku}</code> },
-          { title: 'Narx', dataIndex: 'price', align: 'right', render: (price: number | null) => price === null ? 'Asosiy narx' : `${formatMoney(price)} so‘m` },
-          { title: 'Holati', dataIndex: 'isActive', align: 'center', responsive: ['md'], render: (active: boolean) => <Tag color={active ? 'success' : 'default'}>{active ? 'Faol' : 'Nofaol'}</Tag> },
+          { title: t('product.price'), dataIndex: 'price', align: 'right', render: (price: number | null) => price === null ? t('variant.basePrice') : `${formatMoney(price)} ${t('product.currency')}` },
+          { title: t('common.status'), dataIndex: 'isActive', align: 'center', responsive: ['md'], render: (active: boolean) => <Tag color={active ? 'success' : 'default'}>{active ? t('status.active') : t('status.inactive')}</Tag> },
           {
             title: '', width: 92, align: 'right',
             render: (_value, variant, index) => (
               <div className={styles.actions}>
-                <Button type="text" aria-label={`${variant.name} variantini tahrirlash`} icon={<Pencil size={16} />} onClick={() => editVariant(variant, index)} />
-                <Popconfirm title="Variant o‘chirilsinmi?" okText="O‘chirish" cancelText="Bekor qilish" onConfirm={() => onChange?.(value.filter((_item, itemIndex) => itemIndex !== index))}>
-                  <Button type="text" danger aria-label={`${variant.name} variantini o‘chirish`} icon={<Trash2 size={16} />} />
+                <Button type="text" aria-label={t('variant.editAria', { name: variant.name })} icon={<Pencil size={16} />} onClick={() => editVariant(variant, index)} />
+                <Popconfirm title={t('variant.deleteTitle')} okText={t('common.delete')} cancelText={t('common.cancel')} onConfirm={() => onChange?.(value.filter((_item, itemIndex) => itemIndex !== index))}>
+                  <Button type="text" danger aria-label={t('variant.deleteAria', { name: variant.name })} icon={<Trash2 size={16} />} />
                 </Popconfirm>
               </div>
             ),
@@ -103,27 +115,52 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
         ]}
       />
 
-      <Modal title={editingIndex === null ? 'Yangi variant' : 'Variantni tahrirlash'} open={open} okText="Saqlash" cancelText="Bekor qilish" onCancel={close} onOk={() => form.submit()} destroyOnHidden>
+      <Modal title={editingIndex === null ? t('variant.new') : t('variant.edit')} open={open} okText={t('common.save')} cancelText={t('common.cancel')} onCancel={close} onOk={() => form.submit()} destroyOnHidden>
         <Form<VariantFormValues> name="productVariant" form={form} layout="vertical" onFinish={save} className={styles.modalForm}>
-          <Form.Item label="Variant nomi" name="name" rules={[{ required: true, whitespace: true, message: 'Variant nomini kiriting' }, { max: 100 }]}>
-            <TextControl placeholder="Masalan, Qora / XL" maxLength={100} />
+          <Form.Item label={t('variant.name')} name="name" rules={[{ required: true, whitespace: true, message: t('variant.nameRequired') }, { max: 100 }]}>
+            <TextControl placeholder={t('variant.namePlaceholder')} maxLength={100} />
           </Form.Item>
-          <Form.Item label="SKU" name="sku" rules={[{ required: true, whitespace: true, message: 'SKU kiriting' }, { max: 80 }, { validator: (_, sku: string) => value.some((item, index) => item.sku.toLowerCase() === sku?.trim().toLowerCase() && index !== editingIndex) ? Promise.reject(new Error('Bu SKU allaqachon mavjud')) : Promise.resolve() }]}>
+          <Form.Item label="SKU" name="sku" rules={[{ required: true, whitespace: true, message: t('variant.skuRequired') }, { max: 80 }, { validator: (_, sku: string) => value.some((item, index) => item.sku.toLowerCase() === sku?.trim().toLowerCase() && index !== editingIndex) ? Promise.reject(new Error(t('variant.skuExists'))) : Promise.resolve() }]}>
             <TextControl placeholder="MAS-001-QORA-XL" maxLength={80} />
           </Form.Item>
           <div className={styles.modalGrid}>
-            <Form.Item label="Narxi" name="price" rules={[{ required: true, message: 'Narxni kiriting' }]}>
-              <NumberControl min={1} precision={0} addonAfter="so‘m" />
+            <Form.Item label={t('product.price')} name="price" rules={[{ required: true, message: t('product.priceRequired') }]}>
+              <NumberControl min={1} precision={0} addonAfter={t('product.currency')} />
             </Form.Item>
-            <Form.Item label="Eski narxi" name="oldPrice">
-              <NumberControl min={0} precision={0} addonAfter="so‘m" />
+            <Form.Item label={t('product.oldPrice')} name="oldPrice">
+              <NumberControl min={0} precision={0} addonAfter={t('product.currency')} />
             </Form.Item>
           </div>
-          <Form.Item label="Shtrix-kod" name="barcode" rules={[{ max: 80 }]}>
+          <Form.Item label={t('variant.barcode')} name="barcode" rules={[{ max: 80 }]}>
             <TextControl placeholder="4780012345678" maxLength={80} />
           </Form.Item>
-          <Form.Item label="Faol variant" name="isActive" valuePropName="checked">
-            <Switch checkedChildren="Ha" unCheckedChildren="Yo‘q" />
+          <Form.Item label={t('variant.imageUrl')} name="imageUrl" rules={[{ type: 'url' }]}>
+            <TextControl placeholder="https://cdn.example.com/product.jpg" maxLength={500} />
+          </Form.Item>
+          <div className={styles.attributesHeading}>
+            <strong>{t('variant.attributes')}</strong>
+            <span>{t('variant.attributesDescription')}</span>
+          </div>
+          <Form.List name="attributeEntries">
+            {(fields, { add, remove }) => (
+              <div className={styles.attributeList}>
+                {fields.map((field) => (
+                  <div className={styles.attributeRow} key={field.key}>
+                    <Form.Item {...field} name={[field.name, 'key']} rules={[{ required: true, whitespace: true, message: t('product.attributeNameRequired') }]}>
+                      <TextControl placeholder={t('product.attributeNamePlaceholder')} maxLength={80} />
+                    </Form.Item>
+                    <Form.Item {...field} name={[field.name, 'value']} rules={[{ required: true, whitespace: true, message: t('product.attributeValueRequired') }]}>
+                      <TextControl placeholder={t('product.attributeValuePlaceholder')} maxLength={160} />
+                    </Form.Item>
+                    <Button type="text" danger aria-label={t('product.deleteAttribute')} icon={<Trash2 size={16} />} onClick={() => remove(field.name)} />
+                  </div>
+                ))}
+                <Button type="dashed" block icon={<Plus size={16} />} onClick={() => add({ key: '', value: '' })}>{t('product.addAttribute')}</Button>
+              </div>
+            )}
+          </Form.List>
+          <Form.Item label={t('variant.active')} name="isActive" valuePropName="checked">
+            <Switch checkedChildren={t('common.yes')} unCheckedChildren={t('common.no')} />
           </Form.Item>
         </Form>
       </Modal>

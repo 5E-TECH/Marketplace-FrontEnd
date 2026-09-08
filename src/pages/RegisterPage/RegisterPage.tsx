@@ -10,9 +10,12 @@ import {
   RegisterForm,
   type RegisterFormValues,
 } from './components/RegisterForm';
+import { useTranslation } from '../../shared/i18n/useTranslation';
+import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 
 export default function RegisterPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const registerMutation = useRegisterMutation();
 
@@ -29,7 +32,7 @@ export default function RegisterPage() {
       },
       {
         onSuccess: () => {
-          void message.success('Ro‘yxatdan muvaffaqiyatli o‘tdingiz');
+          void message.success(t('auth.registrationSuccess'));
           void navigate('/login', { replace: true });
         },
         onError: (error) => {
@@ -41,6 +44,7 @@ export default function RegisterPage() {
 
   return (
     <main className={styles.page}>
+      <div className={styles.language}><LanguageSwitcher /></div>
       <section className={styles.auth} aria-labelledby="register-title">
         <Card className={styles.card} variant="borderless">
           <div className={styles.cardContent}>
@@ -50,10 +54,10 @@ export default function RegisterPage() {
               onSubmit={handleSubmit}
             />
             <Typography.Paragraph className={styles.switchAuth}>
-              Akkauntingiz bormi? <Link to="/login">Kirish</Link>
+              {t('auth.hasAccount')} <Link to="/login">{t('auth.login')}</Link>
             </Typography.Paragraph>
             <Typography.Text className={styles.security}>
-              <LockFilled aria-hidden /> Parolingiz brauzer xotirasida saqlanmaydi
+              <LockFilled aria-hidden /> {t('auth.securityNotice')}
             </Typography.Text>
           </div>
         </Card>
