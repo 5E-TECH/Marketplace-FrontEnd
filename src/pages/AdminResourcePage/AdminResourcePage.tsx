@@ -12,6 +12,7 @@ import {
 } from '../../features/adminDashboard/api/adminResourceService';
 import { adminRouteTitle } from '../../features/adminDashboard/model/adminNavigation';
 import { formatDateTime } from '../../shared/lib/date';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
@@ -25,15 +26,15 @@ import styles from './AdminResourcePage.module.css';
 
 type FormValue = Pick<AdminResourceRecord, 'name' | 'type' | 'status'>;
 
-const statusOptions: Array<{ value: AdminResourceRecord['status']; label: string }> = [
-  { value: 'ACTIVE', label: 'Faol' },
-  { value: 'PENDING', label: 'Kutilmoqda' },
-  { value: 'BLOCKED', label: 'Bloklangan' },
-];
-
 export default function AdminResourcePage() {
   const { pathname } = useLocation();
-  const title = adminRouteTitle(pathname);
+  const { locale, t } = useTranslation();
+  const title = t(adminRouteTitle(pathname));
+  const statusOptions: Array<{ value: AdminResourceRecord['status']; label: string }> = [
+    { value: 'ACTIVE', label: t('status.active') },
+    { value: 'PENDING', label: t('status.pending') },
+    { value: 'BLOCKED', label: t('status.blocked') },
+  ];
   const { message } = App.useApp();
   const [rows, setRows] = useState<AdminResourceRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,18 +80,18 @@ export default function AdminResourcePage() {
   );
 
   const columns: ColumnsType<AdminResourceRecord> = [
-    { title: 'Nomi', dataIndex: 'name', sorter: (first, second) => first.name.localeCompare(second.name) },
-    { title: 'Turi', dataIndex: 'type', responsive: ['md'] },
-    { title: 'Holati', dataIndex: 'status', render: (value: AdminResourceRecord['status']) => <StatusTag status={value} /> },
-    { title: 'Yangilangan', dataIndex: 'updatedAt', responsive: ['lg'], render: (value: string) => formatDateTime(value) },
+    { title: t('admin.common.name'), dataIndex: 'name', sorter: (first, second) => first.name.localeCompare(second.name) },
+    { title: t('admin.resource.type'), dataIndex: 'type', responsive: ['md'] },
+    { title: t('common.status'), dataIndex: 'status', render: (value: AdminResourceRecord['status']) => <StatusTag status={value} /> },
+    { title: t('common.updatedAt'), dataIndex: 'updatedAt', responsive: ['lg'], render: (value: string) => formatDateTime(value, locale) },
     {
-      title: 'Amallar',
+      title: t('common.actions'),
       width: 112,
       align: 'center',
       render: (_, row) => (
         <div className={styles.actions}>
           <IconActionButton
-            label="Tahrirlash"
+            label={t('common.edit')}
             icon={<Pencil size={16} />}
             onClick={() => {
               setEditing(row);
@@ -98,7 +99,7 @@ export default function AdminResourcePage() {
             }}
           />
           <IconActionButton
-            label="O‘chirish"
+            label={t('common.delete')}
             icon={<Trash2 size={16} />}
             danger
             onClick={() => setDeleting([row.id])}
@@ -119,9 +120,9 @@ export default function AdminResourcePage() {
         ? current.map((row) => row.id === saved.id ? saved : row)
         : [saved, ...current]);
       setEditing(undefined);
-      void message.success('Muvaffaqiyatli saqlandi');
+      void message.success(t('admin.resource.saved'));
     } catch {
-      void message.error('Ma’lumotni saqlab bo‘lmadi');
+      void message.error(t('admin.resource.saveError'));
     } finally {
       setSaving(false);
     }
@@ -135,9 +136,9 @@ export default function AdminResourcePage() {
       setRows((current) => current.filter((row) => !deleting.includes(row.id)));
       setSelected([]);
       setDeleting([]);
-      void message.success('O‘chirildi');
+      void message.success(t('admin.resource.deleted'));
     } catch {
-      void message.error('Yozuvlarni o‘chirib bo‘lmadi');
+      void message.error(t('admin.resource.deleteError'));
     } finally {
       setDeletePending(false);
     }
@@ -150,7 +151,7 @@ export default function AdminResourcePage() {
     <main>
       <PageHeader
         title={title}
-        description={`${title} bo‘limini boshqarish, moderatsiya va ommaviy amallar`}
+        description={t('admin.resource.description', { name: title })}
         extra={(
           <Button
             type="primary"
@@ -160,20 +161,20 @@ export default function AdminResourcePage() {
               setEditing(null);
             }}
           >
-            {title} qo‘shish
+            {t('admin.resource.add', { name: title })}
           </Button>
         )}
       />
       <div className={styles.toolbar}>
-        <Input prefix={<Search />} allowClear value={query} placeholder="Qidirish..." onChange={(event) => setQuery(event.target.value)} />
+        <Input prefix={<Search />} allowClear value={query} placeholder={t('admin.resource.search')} onChange={(event) => setQuery(event.target.value)} />
         <Select
           value={status}
           onChange={setStatus}
-          options={[{ value: 'ALL', label: 'Barcha holatlar' }, ...statusOptions]}
+          options={[{ value: 'ALL', label: t('admin.resource.allStatuses') }, ...statusOptions]}
         />
         {selected.length ? (
           <Button danger icon={<Trash2 size={16} />} onClick={() => setDeleting(selected.map(String))}>
-            {selected.length} tani o‘chirish
+            {t('admin.resource.bulkDelete', { count: selected.length })}
           </Button>
         ) : null}
       </div>
@@ -185,38 +186,38 @@ export default function AdminResourcePage() {
           rowSelection={{ selectedRowKeys: selected, onChange: setSelected }}
           pagination={{ ...createTablePagination(10), total: filtered.length }}
           scroll={{ x: 680 }}
-          emptyState={<EmptyState compact title="Yozuvlar topilmadi" description="Qidiruv yoki holat filtrini o‘zgartirib ko‘ring." />}
+          emptyState={<EmptyState compact title={t('admin.resource.empty')} description={t('admin.resource.emptyDescription')} />}
         />
       </div>
 
       <FormModal<FormValue>
         open={editing !== undefined}
-        title={editing ? `${title}ni tahrirlash` : `Yangi ${title}`}
+        title={editing ? t('admin.resource.edit', { name: title }) : t('admin.resource.add', { name: title })}
         form={form}
         initialValues={{ status: 'PENDING' }}
-        submitText="Saqlash"
-        cancelText="Bekor"
+        submitText={t('common.save')}
+        cancelText={t('common.cancel')}
         loading={saving}
         onCancel={() => setEditing(undefined)}
         onSubmit={save}
       >
-        <Form.Item name="name" label="Nomi" rules={[{ required: true, whitespace: true, message: 'Nomini kiriting' }]}>
+        <Form.Item name="name" label={t('admin.common.name')} rules={[{ required: true, whitespace: true, message: t('admin.resource.nameRequired') }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="type" label="Turi" rules={[{ required: true, whitespace: true, message: 'Turini kiriting' }]}>
+        <Form.Item name="type" label={t('admin.resource.type')} rules={[{ required: true, whitespace: true, message: t('admin.resource.typeRequired') }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="status" label="Holati" rules={[{ required: true, message: 'Holatini tanlang' }]}>
+        <Form.Item name="status" label={t('common.status')} rules={[{ required: true, message: t('admin.resource.statusRequired') }]}>
           <Select options={statusOptions} />
         </Form.Item>
       </FormModal>
 
       <ConfirmDialog
         open={deleting.length > 0}
-        title="Yozuvlar o‘chirilsinmi?"
-        description={`${deleting.length} ta yozuv o‘chiriladi.`}
+        title={t('admin.resource.deleteTitle')}
+        description={t('admin.resource.deleteCount', { count: deleting.length })}
         danger
-        confirmText="O‘chirish"
+        confirmText={t('common.delete')}
         loading={deletePending}
         onCancel={() => setDeleting([])}
         onConfirm={removeSelected}

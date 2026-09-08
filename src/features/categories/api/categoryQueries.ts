@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createCategory, deleteCategory, getAdminCategories, updateCategory } from './categoryApi';
+import { createCategory, deleteCategory, getAdminCategories, getPublicCategories, updateCategory } from './categoryApi';
 export const categoryKey = ['admin', 'categories'] as const;
 export const useAdminCategoriesQuery = () => useQuery({ queryKey: categoryKey, queryFn: ({ signal }) => getAdminCategories(signal) });
+export const publicCategoryKey = ['categories', 'public'] as const;
+export const usePublicCategoriesQuery = () => useQuery({ queryKey: publicCategoryKey, queryFn: ({ signal }) => getPublicCategories(signal), staleTime: 5 * 60_000 });
 const useCategoryMutation = <T,>(mutationFn: (value: T) => Promise<unknown>) => { const client = useQueryClient(); return useMutation({ mutationFn, onSuccess: () => client.invalidateQueries({ queryKey: categoryKey }) }); };
 export const useCreateCategoryMutation = () => useCategoryMutation(createCategory);
 export const useUpdateCategoryMutation = () => useCategoryMutation(updateCategory);

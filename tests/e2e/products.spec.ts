@@ -8,6 +8,7 @@ const makeProduct = (index: number) => ({
   slug: index === 4 ? 'noyob-kamera' : `mahsulot-${String(index).padStart(2, '0')}`,
   sku: `SKU-${String(index).padStart(2, '0')}`,
   category: 'Elektronika',
+  categoryId: '1',
   price: index * 100_000,
   stock: index,
   status: index <= 5 ? 'LOW' : 'ACTIVE',
@@ -21,11 +22,13 @@ async function mockProductsApi(page: Page) {
     const url = new URL(route.request().url());
     const search = (url.searchParams.get('search') ?? '').toLocaleLowerCase('uz');
     const status = url.searchParams.get('status');
+    const categoryId = url.searchParams.get('categoryId');
     const page = Number(url.searchParams.get('page') ?? 1);
     const limit = Number(url.searchParams.get('limit') ?? 8);
     const filtered = products.filter((product) =>
       (!search || `${product.name} ${product.slug}`.toLocaleLowerCase('uz').includes(search)) &&
-      (!status || product.status === status),
+      (!status || product.status === status) &&
+      (!categoryId || product.categoryId === categoryId),
     );
     await route.fulfill({
       status: 200,
@@ -85,7 +88,7 @@ test('TC2: products search filtr ishlaydi', async ({ page }) => {
 
 test('status filter serverga status query yuboradi va natijani filtrlaydi', async ({ page }) => {
   const filterRequest = page.waitForRequest((request) => new URL(request.url()).searchParams.get('status') === 'ACTIVE');
-  const statusFilter = page.getByRole('combobox');
+  const statusFilter = page.getByLabel('Holat bo‘yicha filtrlash');
   await statusFilter.click();
   await statusFilter.press('ArrowDown');
   await statusFilter.press('ArrowDown');
@@ -99,6 +102,22 @@ test('status filter serverga status query yuboradi va natijani filtrlaydi', asyn
 
 test('jadval backenddan kelgan cover rasmni ko‘rsatadi', async ({ page }) => {
   await expect(page.locator('img[src="https://cdn.example.com/product-1.jpg"]')).toBeVisible();
+});
+
+test('create alohida to‘liq sahifada ochiladi va kategoriya filteri APIga ulanadi', async ({ page }) => {
+  const categoryRequest = page.waitForRequest((request) =>
+    new URL(request.url()).searchParams.get('categoryId') === '1',
+  );
+  await page.getByLabel('Kategoriya bo‘yicha filtrlash').click();
+  await page.getByRole('option', { name: 'Elektronika' }).click();
+  await categoryRequest;
+
+  await page.getByRole('button', { name: 'Mahsulot qo‘shish' }).click();
+  await expect(page).toHaveURL(/\/products\/new$/);
+  await expect(page.getByRole('heading', { name: 'Yangi mahsulot' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Asosiy ma’lumotlar' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mahsulot rasmlari' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
 test('TC3: delete tasdiqlangach mahsulot ro‘yxatdan yo‘qoladi', async ({ page }) => {
@@ -265,6 +284,8 @@ test('product create yangi API contractiga mos payload yuboradi', async ({ page 
   await page.getByLabel('Narxi', { exact: true }).fill('14999000');
   await page.getByLabel('Eski narxi', { exact: true }).fill('15999000');
   await page.getByLabel('Tavsif').fill('Titanium, 256 GB');
+  await page.getByLabel('Kategoriya').click();
+  await page.getByRole('option', { name: 'Elektronika' }).click();
   await page.locator('input[type="file"]').setInputFiles({
     name: 'iphone.png',
     mimeType: 'image/png',
@@ -280,7 +301,7 @@ test('product create yangi API contractiga mos payload yuboradi', async ({ page 
 
   await expect(page.getByText('Mahsulot yaratildi')).toBeVisible();
   expect(requestBody).toEqual({
-    categoryId: null,
+    categoryId: '1',
     name: 'iPhone 16 Pro',
     description: 'Titanium, 256 GB',
     price: 14999000,
@@ -353,13 +374,17 @@ test('TC1: variant qo‘shish va saqlash backendda persist qilinadi', async ({ p
   await dialog.getByLabel('SKU').fill('FUT-QORA-XL');
   await dialog.getByLabel('Eski narxi').fill('150000');
   await dialog.getByLabel('Shtrix-kod').fill('4780012345678');
+  await dialog.getByLabel('Variant rasmi URL manzili').fill('https://cdn.example.com/futbolka-qora.jpg');
+  await dialog.getByRole('button', { name: 'Xususiyat qo‘shish' }).click();
+  await dialog.getByPlaceholder('Masalan, Rang').fill('color');
+  await dialog.getByPlaceholder('Masalan, Qora', { exact: true }).fill('Qora');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
   await page.getByRole('button', { name: 'Mahsulotni yaratish' }).click();
 
   await expect(page.getByText('Mahsulot yaratildi')).toBeVisible();
   expect(variantBody).toEqual({
-    sku: 'FUT-QORA-XL', name: 'Qora / XL', attributes: {}, price: 120000,
-    oldPrice: 150000, barcode: '4780012345678', imageUrl: null, isActive: true,
+    sku: 'FUT-QORA-XL', name: 'Qora / XL', attributes: { color: 'Qora' }, price: 120000,
+    oldPrice: 150000, barcode: '4780012345678', imageUrl: 'https://cdn.example.com/futbolka-qora.jpg', isActive: true,
   });
 });
 

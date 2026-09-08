@@ -51,7 +51,7 @@ function parseVariants(value: unknown): ProductVariant[] {
   });
 }
 
-function parseProduct(value: unknown): Product {
+export function parseProduct(value: unknown): Product {
   const candidate = unwrapApiData(value);
   if (typeof candidate !== 'object' || candidate === null) {
     throw new Error('Mahsulot serverdan noto‘g‘ri formatda keldi');
@@ -96,6 +96,8 @@ function parseProduct(value: unknown): Product {
     hasVariants: 'hasVariants' in candidate && candidate.hasVariants === true,
     stock,
     status,
+    isBlocked: 'isBlocked' in candidate && candidate.isBlocked === true,
+    rating: toNumber('rating' in candidate ? candidate.rating : 0, 'reyting'),
     isDeleted: ('isDeleted' in candidate && candidate.isDeleted === true) || ('isBlocked' in candidate && candidate.isBlocked === true),
     createdAt: optionalString('createdAt' in candidate ? candidate.createdAt : ''),
     updatedAt: optionalString('updatedAt' in candidate ? candidate.updatedAt : ''),
@@ -103,7 +105,7 @@ function parseProduct(value: unknown): Product {
   };
 }
 
-function parseProductPage(value: unknown, fallback: ProductListParams): ProductPage {
+export function parseProductPage(value: unknown, fallback: Pick<ProductListParams, 'page' | 'limit'>): ProductPage {
   const unwrapped = unwrapApiData(value);
   const list = Array.isArray(unwrapped)
     ? unwrapped

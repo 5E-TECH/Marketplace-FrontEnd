@@ -120,6 +120,29 @@ export async function mockProducts(page: Page): Promise<void> {
   });
 }
 
+export async function mockPublicCategories(page: Page): Promise<void> {
+  await page.route('**/api/v1/categories', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: [
+          {
+            id: '1',
+            name: 'Elektronika',
+            slug: 'elektronika',
+            parentId: null,
+            iconUrl: null,
+            sortOrder: 1,
+            isActive: true,
+            children: [],
+          },
+        ],
+      }),
+    });
+  });
+}
+
 export async function installAuthenticatedSession(
   page: Page,
   user: Record<string, unknown> = authenticatedUser,
@@ -128,6 +151,7 @@ export async function installAuthenticatedSession(
   await mockCurrentUser(page, user);
   await mockLogout(page);
   await mockProducts(page);
+  await mockPublicCategories(page);
   await mockDashboard(page);
   // Test o'zi `page.route` qo'shsa, Playwright keyingi qo'shilganini
   // birinchi ishlatadi — shuning uchun bu umumiy mock ustidan yozilaveradi.

@@ -1,18 +1,15 @@
 import {
   BellRing as NotificationOutlined,
-  ChevronDown,
-  Languages as LanguageOutlined,
   LogOut as LogoutOutlined,
   PanelLeftClose as MenuFoldOutlined,
   PanelLeftOpen as MenuUnfoldOutlined,
   Search as SearchOutlined,
 } from 'lucide-react';
-import { Avatar, Badge, Button, Divider, Dropdown, Flex, Input, Layout, Typography } from 'antd';
+import { Avatar, Badge, Button, Divider, Flex, Input, Layout, Typography } from 'antd';
 import { useState } from 'react';
 import type { AuthUser } from '../../features/auth/model/authTypes';
-import { useAppDispatch } from '../../app/store/hooks';
-import { languageChanged, type Language } from '../../features/preferences/model/preferencesSlice';
 import { useTranslation } from '../../shared/i18n/useTranslation';
+import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 import styles from './MainLayout.module.css';
 
 interface AppHeaderProps {
@@ -34,14 +31,8 @@ export function AppHeader({
   onNavigate,
   onGlobalSearch,
 }: AppHeaderProps) {
-  const dispatch = useAppDispatch();
-  const { language, t } = useTranslation();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const languages: Array<{ key: Language; label: string }> = [
-    { key: 'uz', label: "O‘zbekcha" },
-    { key: 'ru', label: 'Русский' },
-    { key: 'en', label: 'English' },
-  ];
   return (
     <Layout.Header className={styles.header}>
       <Flex align="center" justify="space-between" className={styles.headerContent}>
@@ -68,21 +59,7 @@ export function AppHeader({
         </Flex>
 
         <Flex className={styles.headerActions} align="center">
-          <Dropdown
-            trigger={['click']}
-            menu={{
-              selectable: true,
-              selectedKeys: [language],
-              items: languages,
-              onClick: ({ key }) => dispatch(languageChanged(key as Language)),
-            }}
-          >
-            <Button type="text" className={styles.languageButton} aria-label={t('header.selectLanguage')}>
-              <LanguageOutlined />
-              <span>{language.toUpperCase()}</span>
-              <ChevronDown className={styles.languageChevron} />
-            </Button>
-          </Dropdown>
+          <span className={styles.languageButton}><LanguageSwitcher /></span>
           <Badge dot className={styles.notificationBadge} offset={[-7, 7]}>
             <Button
               type="text"

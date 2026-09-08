@@ -1,11 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { ManagedUser, UpdateUserPayload, UserListParams, UserPage, UserUpsertPayload } from '../model/userTypes';
-
-const numberField = (record: Record<string, unknown>, key: string, fallback: number) => {
-  const value = record[key];
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-};
+import type { ManagedUser, UpdateUserPayload, UserUpsertPayload } from '../model/userTypes';
 
 function parseOperator(value: unknown): ManagedUser {
   if (typeof value !== 'object' || value === null) throw new Error('Operator ma’lumoti noto‘g‘ri formatda');
@@ -37,14 +32,13 @@ function parseOperator(value: unknown): ManagedUser {
   };
 }
 
-export async function getUsers(params: UserListParams, signal?: AbortSignal): Promise<UserPage> {
-  const { data } = await httpClient.get<unknown>('/sellers/operators', { signal, params: { page: params.page, limit: params.limit, ...(params.search ? { search: params.search } : {}), ...(params.isActive !== undefined ? { isActive: params.isActive } : {}) } });
+export async function getUsers(signal?: AbortSignal): Promise<ManagedUser[]> {
+  const { data } = await httpClient.get<unknown>('/sellers/operators', { signal });
   const value = unwrapApiData(data);
   const record = typeof value === 'object' && value !== null ? value as Record<string, unknown> : {};
   const list = Array.isArray(value) ? value : Array.isArray(record.items) ? record.items : Array.isArray(record.operators) ? record.operators : null;
   if (!list) throw new Error('Operatorlar ro‘yxati noto‘g‘ri formatda');
-  const items = list.map(parseOperator); const total = numberField(record, 'total', items.length); const page = numberField(record, 'page', params.page); const limit = numberField(record, 'limit', params.limit);
-  return { items, total, page, limit, totalPages: numberField(record, 'totalPages', Math.max(1, Math.ceil(total / limit))) };
+  return list.map(parseOperator);
 }
 
 export async function createUser(payload: UserUpsertPayload): Promise<ManagedUser> {

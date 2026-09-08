@@ -3,6 +3,7 @@ import { App, Modal, Progress, Upload } from 'antd';
 import type { UploadFile, UploadProps } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import styles from './ImageUpload.module.css';
+import { useTranslation } from '../../i18n/useTranslation';
 
 const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const DEFAULT_ACCEPT = [...ACCEPTED_TYPES].join(',');
@@ -31,6 +32,7 @@ export function ImageUpload({
   uploadFile,
 }: ImageUploadProps) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [internalFiles, setInternalFiles] = useState<UploadFile[]>([]);
   const [internalCoverUid, setInternalCoverUid] = useState<string | null>(null);
   const [previewFile, setPreviewFile] = useState<UploadFile | null>(null);
@@ -72,7 +74,7 @@ export function ImageUpload({
     };
     reader.onerror = () => {
       updateFile(file.uid, { status: 'error', percent: 0 });
-      void message.error(`${file.name} rasmini o‘qib bo‘lmadi`);
+      void message.error(t('upload.readError', { name: file.name }));
     };
     reader.readAsDataURL(file.originFileObj);
 
@@ -83,22 +85,22 @@ export function ImageUpload({
         .then((url) => updateFile(file.uid, { status: 'done', percent: 100, url }))
         .catch(() => {
           updateFile(file.uid, { status: 'error', percent: 0 });
-          void message.error(`${file.name} rasmini serverga yuklab bo‘lmadi`);
+          void message.error(t('upload.serverError', { name: file.name }));
         });
     }
   };
 
   const beforeUpload: UploadProps['beforeUpload'] = (file) => {
     if (!ACCEPTED_TYPES.has(file.type)) {
-      void message.error('Faqat JPG, PNG yoki WEBP rasm yuklash mumkin');
+      void message.error(t('upload.typeError'));
       return Upload.LIST_IGNORE;
     }
     if (file.size > maxSizeMb * 1024 * 1024) {
-      void message.error(`Rasm hajmi ${maxSizeMb} MB dan oshmasligi kerak`);
+      void message.error(t('upload.sizeError', { size: maxSizeMb }));
       return Upload.LIST_IGNORE;
     }
     if (filesRef.current.length >= maxCount) {
-      void message.warning(`Maksimum ${maxCount} ta rasm yuklash mumkin`);
+      void message.warning(t('upload.countError', { count: maxCount }));
       return Upload.LIST_IGNORE;
     }
     return false;
@@ -126,7 +128,7 @@ export function ImageUpload({
   return (
     <section
       className={`${styles.root} ${compact ? styles.compact : ''}`}
-      aria-label="Mahsulot rasmlari yuklash"
+      aria-label={t('upload.aria')}
     >
       <Upload.Dragger
         multiple
@@ -171,19 +173,19 @@ export function ImageUpload({
                 <span className={styles.previewIcon}><Eye /></span>
               </button>
               {file.status === 'uploading' ? (
-                <div className={styles.progress} aria-label={`${file.name} yuklanmoqda`}>
+                <div className={styles.progress} aria-label={t('upload.loading', { name: file.name })}>
                   <Progress percent={Math.round(file.percent ?? 0)} size="small" />
                 </div>
               ) : null}
               <div className={styles.cardTop}>
-                <span className={styles.dragHandle} title="Tartibni o‘zgartirish"><GripVertical /></span>
-                {isCover ? <span className={styles.coverBadge}><Star /> Asosiy</span> : null}
+                <span className={styles.dragHandle} title={t('upload.reorder')}><GripVertical /></span>
+                {isCover ? <span className={styles.coverBadge}><Star /> {t('upload.cover')}</span> : null}
               </div>
               <div className={styles.cardActions}>
                 <button type="button" disabled={disabled || isCover} onClick={() => setCover(file.uid)}>
-                  <Star /> {isCover ? 'Asosiy rasm' : 'Asosiy qilish'}
+                  <Star /> {isCover ? t('upload.coverImage') : t('upload.makeCover')}
                 </button>
-                <button type="button" aria-label={`${file.name} rasmini o‘chirish`} disabled={disabled} onClick={() => removeFile(file.uid)}>
+                <button type="button" aria-label={t('upload.deleteAria', { name: file.name })} disabled={disabled} onClick={() => removeFile(file.uid)}>
                   <Trash2 />
                 </button>
               </div>
@@ -192,13 +194,13 @@ export function ImageUpload({
         }}
       >
         <div className={styles.dropIcon}><UploadCloud /></div>
-        <p className={styles.dropTitle}>Rasmlarni shu yerga tashlang</p>
-        <p className={styles.dropHint}>yoki kompyuterdan tanlash uchun bosing</p>
-        <span className={styles.rules}>JPG, PNG, WEBP · {maxSizeMb} MB gacha · maksimum {maxCount} ta</span>
+        <p className={styles.dropTitle}>{t('upload.drop')}</p>
+        <p className={styles.dropHint}>{t('upload.choose')}</p>
+        <span className={styles.rules}>{t('upload.rules', { size: maxSizeMb, count: maxCount })}</span>
       </Upload.Dragger>
 
       {files.length > 1 ? (
-        <p className={styles.sortHint}><GripVertical /> Rasmlarni tortib tartibini o‘zgartiring. Birinchi rasm avtomatik asosiy bo‘ladi.</p>
+        <p className={styles.sortHint}><GripVertical /> {t('upload.sortHint')}</p>
       ) : null}
 
       <Modal
@@ -211,7 +213,7 @@ export function ImageUpload({
         {previewFile?.thumbUrl || previewFile?.url ? (
           <img
             src={previewFile.thumbUrl ?? previewFile.url}
-            alt={`${previewFile.name} ko‘rinishi`}
+            alt={t('upload.previewAlt', { name: previewFile.name })}
             className={styles.previewImage}
           />
         ) : null}

@@ -5,6 +5,13 @@
   place-items: center;
 }
 
+.language {
+  position: fixed;
+  z-index: 2;
+  top: 1rem;
+  right: 1rem;
+}
+
 .auth {
   display: grid;
   width: 100%;

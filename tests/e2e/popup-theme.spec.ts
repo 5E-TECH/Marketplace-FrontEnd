@@ -28,7 +28,8 @@ test('generic admin form modal va select popup dark surface bilan bir xil', asyn
     contentType: 'application/json',
     body: JSON.stringify({ data: { id: '1', role: 'SUPERADMIN', name: 'Super Admin', phone: '+998900000000', email: null, avatarUrl: null, isActive: true, isBlocked: false, isDeleted: false } }),
   }));
-  await page.goto('/admin/products');
+  // Brands uses AdminResourcePage and its shared FormModal/Select controls.
+  await page.goto('/admin/brands');
   const paginationSpacing = await page.locator('.ant-table-pagination').evaluate(element => {
     const styles = getComputedStyle(element);
     const rootStyles = getComputedStyle(document.documentElement);
@@ -43,7 +44,7 @@ test('generic admin form modal va select popup dark surface bilan bir xil', asyn
   expect(paginationSpacing.marginBottom).toBe(paginationSpacing.expectedBottom);
 
   await page.getByRole('button', { name: 'Tahrirlash' }).first().click();
-  await expect(page.getByRole('dialog', { name: 'Mahsulot moderatsiyasini tahrirlash' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Brendlarni tahrirlash' })).toBeVisible();
 
   const expected = await surfaceColor(page);
   await expect.poll(() => page.locator('.ant-modal-container:visible').evaluate(element => getComputedStyle(element).backgroundColor)).toBe(expected);

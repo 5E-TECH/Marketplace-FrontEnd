@@ -1,12 +1,14 @@
 import { ShoppingBag as ShoppingFilled } from 'lucide-react';
 import { Flex, Typography } from 'antd';
 import styles from './LoginBrand.module.css';
+import { useTranslation } from '../../../../shared/i18n/useTranslation';
 
 interface LoginBrandProps {
   titleId?: string;
 }
 
 export function LoginBrand({ titleId = 'login-title' }: LoginBrandProps) {
+  const { t } = useTranslation();
   return (
     <Flex className={styles.brand} vertical align="center">
       <span className={styles.iconWrapper} aria-hidden>
@@ -16,7 +18,7 @@ export function LoginBrand({ titleId = 'login-title' }: LoginBrandProps) {
         MarketHub
       </Typography.Title>
       <Typography.Text className={styles.tagline}>
-        O‘zbekistonning eng yaxshi marketplace
+        {t('auth.brandTagline')}
       </Typography.Text>
     </Flex>
   );

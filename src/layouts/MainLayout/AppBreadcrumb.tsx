@@ -20,10 +20,10 @@ export function AppBreadcrumb() {
 
   const items = adminGroup && adminItem
     ? adminGroup.items.length === 1
-      ? [{ title: adminGroup.label }]
+      ? [{ title: t(adminGroup.label) }]
       : [
-          { title: <Link to={adminGroup.items[0].path}>{adminGroup.label}</Link> },
-          { title: adminItem.label },
+          { title: <Link to={adminGroup.items[0].path}>{t(adminGroup.label)}</Link> },
+          { title: t(adminItem.label) },
         ]
     : !currentRoute || currentRoute.path === '/'
       ? [{ title: t('nav.home') }]
