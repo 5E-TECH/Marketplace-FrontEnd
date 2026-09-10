@@ -7,9 +7,14 @@
  * backend endpointni o'chirsa yoki nomini o'zgartirsa testlar baribir yashil
  * qolardi va xato faqat productionda ko'rinardi.
  *
- * Sxemani yangilash (backend repo'sida):
- *   npm run build:all && npm run contract:export
- *   cp docs/openapi.json ../Marketplace-FrontEnd/contract/openapi.json
+ * Bu tekshiruv faqat endpoint YO'Lini biladi. Javob ichidagi maydon nomi
+ * o'zgarsa u sezmaydi — buning uchun `npm run api:check` va
+ * `src/shared/api/contractAssertions.ts` bor (C5.6).
+ *
+ * Sxemani yangilash:
+ *   npm run api:sync && npm run api:generate
+ * (backend tomonda sxema `npm run build:all && npm run contract:export` bilan
+ * yangilanadi; u yerda ham CI darvozasi bor.)
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

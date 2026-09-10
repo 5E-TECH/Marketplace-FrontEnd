@@ -10,6 +10,9 @@
     "lint": "eslint .",
     "typecheck": "tsc -b --force",
     "contract:check": "node scripts/check-contract.mjs",
+    "api:sync": "node scripts/sync-contract.mjs",
+    "api:generate": "node scripts/generate-api.mjs",
+    "api:check": "node scripts/generate-api.mjs --check",
     "test": "playwright test",
     "test:e2e": "playwright test"
   },
@@ -35,6 +38,7 @@
     "eslint-plugin-react-hooks": "^7.0.0",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "openapi-typescript": "^7.13.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.2.0"
