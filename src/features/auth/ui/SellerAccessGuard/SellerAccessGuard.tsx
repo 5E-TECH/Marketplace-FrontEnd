@@ -10,9 +10,11 @@ import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
 import { selectAuthUser } from '../../model/authSlice';
 import { canAccessSellerCabinet } from '../../lib/sellerAccess';
 import { useLogoutMutation } from '../../api/useLogoutMutation';
+import { useTranslation } from '../../../../shared/i18n/useTranslation';
 
 export function SellerAccessGuard({ children }: { children?: React.ReactNode }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAppSelector(selectAuthUser);
@@ -22,7 +24,7 @@ export function SellerAccessGuard({ children }: { children?: React.ReactNode }) 
     logoutMutation.mutate(undefined, {
       onError: () =>
         void message.warning(
-          'Server sessiyasi yopilmadi, lokal sessiya tozalandi',
+          t('auth.localSessionCleared'),
         ),
     });
   };
@@ -31,8 +33,8 @@ export function SellerAccessGuard({ children }: { children?: React.ReactNode }) 
     return (
       <ContentState
         state="error"
-        title="Profil ma’lumoti olinmadi"
-        description="Sahifani yangilang yoki qayta tizimga kiring."
+        title={t('auth.profileMissing')}
+        description={t('auth.refreshOrLogin')}
       />
     );
   }
@@ -41,9 +43,9 @@ export function SellerAccessGuard({ children }: { children?: React.ReactNode }) 
     return (
       <ContentState
         state="forbidden"
-        title="Seller akkaunti talab qilinadi"
-        description={`Joriy akkaunt roli: ${user.role}. Bu akkaunt kabinetga kirish huquqiga ega emas.`}
-        actionLabel="Seller akkaunti bilan kirish"
+        title={t('auth.sellerRequired')}
+        description={t('auth.roleDenied', { role: user.role })}
+        actionLabel={t('auth.loginAsSeller')}
         onAction={switchToSeller}
       />
     );
@@ -55,9 +57,9 @@ export function SellerAccessGuard({ children }: { children?: React.ReactNode }) 
     return (
       <ContentState
         state="forbidden"
-        title="Bu bo‘lim sizga ochiq emas"
-        description={`«${user.role}» roli bu bo‘limda ishlay olmaydi. Sizga ochiq bo‘limga o‘tishingiz mumkin.`}
-        actionLabel="Ochiq bo‘limga o‘tish"
+        title={t('auth.sectionDenied')}
+        description={t('auth.sectionDeniedDescription', { role: user.role })}
+        actionLabel={t('auth.goToAllowed')}
         onAction={() => void navigate(fallback, { replace: true })}
       />
     );

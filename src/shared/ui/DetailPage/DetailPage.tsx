@@ -26,12 +26,14 @@ interface DetailPageProps {
   actions?: ReactNode;
   hero: {
     avatarUrl?: string | null;
+    avatarShape?: 'circle' | 'square';
     avatarFallback: string;
     title: string;
     subtitle?: string;
     badges?: ReactNode;
   };
   sections: readonly DetailPageSection[];
+  children?: ReactNode;
 }
 
 export function DetailPage({
@@ -41,6 +43,7 @@ export function DetailPage({
   actions,
   hero,
   sections,
+  children,
 }: DetailPageProps) {
   return (
     <main className={styles.page}>
@@ -52,7 +55,7 @@ export function DetailPage({
       />
       <div className={styles.content}>
         <section className={styles.hero}>
-          <Avatar className={styles.avatar} size={76} src={hero.avatarUrl}>
+          <Avatar className={styles.avatar} shape={hero.avatarShape} size={76} src={hero.avatarUrl}>
             {hero.avatarFallback}
           </Avatar>
           <div className={styles.identity}>
@@ -81,6 +84,7 @@ export function DetailPage({
             </dl>
           </section>
         ))}
+        {children}
       </div>
     </main>
   );

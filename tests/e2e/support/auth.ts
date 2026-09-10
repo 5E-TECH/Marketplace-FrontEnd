@@ -120,7 +120,11 @@ export async function mockProducts(page: Page): Promise<void> {
   });
 }
 
-/** Kategoriya daraxti — mahsulot formasidagi tanlash ro'yxati shunga tayanadi. */
+/**
+ * Kategoriya daraxti — mahsulot formasidagi tanlash ro'yxati shunga tayanadi.
+ * Ichma-ich tugun ataylab bor: `createCategoryOptions` chuqurlikni "— " bilan
+ * ko'rsatadi, tekis ro'yxatda bu xatti-harakat umuman sinalmay qolardi.
+ */
 export const publicCategoryTree = [
   {
     id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null,
@@ -138,7 +142,7 @@ export const publicCategoryTree = [
   },
 ] as const;
 
-export async function mockCategories(page: Page): Promise<void> {
+export async function mockPublicCategories(page: Page): Promise<void> {
   await page.route('**/api/v1/categories', async (route) => {
     await route.fulfill({
       status: 200,
@@ -156,7 +160,7 @@ export async function installAuthenticatedSession(
   await mockCurrentUser(page, user);
   await mockLogout(page);
   await mockProducts(page);
-  await mockCategories(page);
+  await mockPublicCategories(page);
   await mockDashboard(page);
   // Test o'zi `page.route` qo'shsa, Playwright keyingi qo'shilganini
   // birinchi ishlatadi — shuning uchun bu umumiy mock ustidan yozilaveradi.

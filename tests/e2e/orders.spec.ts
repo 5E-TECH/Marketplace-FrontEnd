@@ -76,6 +76,27 @@ test('TC2: status, sana va search filterlari serverga yuboriladi', async ({ page
   await expect(page.getByRole('row').filter({ hasText: '#14' })).toBeVisible();
 });
 
+test('TC2.1: seller order pagination page query orqali backendga yuboriladi', async ({ page }) => {
+  const manyOrders = Array.from({ length: 21 }, (_, index) => ({
+    ...orders[0],
+    id: String(index + 100),
+    salesOrderId: String(index + 1000),
+    buyerName: `Xaridor ${index + 1}`,
+  }));
+  await page.route('**/api/v1/seller/orders**', async route => {
+    const url = new URL(route.request().url());
+    const pageNumber = Number(url.searchParams.get('page') ?? 1);
+    const limit = Number(url.searchParams.get('limit') ?? 20);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: manyOrders.slice((pageNumber - 1) * limit, pageNumber * limit), total: manyOrders.length, page: pageNumber, limit, totalPages: 2 } }) });
+  });
+  await page.reload();
+  const secondPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '2');
+  await page.getByTitle('2').click();
+  await secondPageRequest;
+  await expect(page.getByText('Xaridor 21')).toBeVisible();
+  await expect(page.getByText('Xaridor 1', { exact: true })).toHaveCount(0);
+});
+
 test('TC4: status PATCH orqali CONFIRMED ga yangilanadi', async ({ page }) => {
   const api = await mockOrders(page);
   await page.reload();

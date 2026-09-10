@@ -39,7 +39,7 @@ test('TC2: to‘g‘ri register so‘rovi muvaffaqiyatdan keyin login sahifasiga
   await page.getByLabel('Do‘kon tavsifi').fill('Maishiy texnika do‘koni');
   await page.getByLabel('Manzil').fill('Toshkent shahri');
   await page.getByLabel('Parol', { exact: true }).fill('Secure123');
-  await page.getByLabel('Parolni tasdiqlash').fill('Secure123');
+  await page.getByLabel('Parolni tasdiqlang', { exact: true }).fill('Secure123');
   await page.getByRole('button', { name: 'RO‘YXATDAN O‘TISH' }).click();
 
   await expect(page).toHaveURL(/\/login$/);

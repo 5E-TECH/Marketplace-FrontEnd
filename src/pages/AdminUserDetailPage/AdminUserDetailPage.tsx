@@ -20,10 +20,11 @@ import {
 import type { AdminUser } from '../../features/adminUsers/model/adminUserTypes';
 import {
   ADMIN_USER_BLOCK_ACTION_CONFIG,
-  ADMIN_USER_WRITE_ACTION_UNAVAILABLE,
 } from '../../features/adminUsers/ui/adminUserActionConfig';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { formatDateTime } from '../../shared/lib/date';
+import { useTranslation } from '../../shared/i18n/useTranslation';
+import type { TranslationKey } from '../../shared/i18n/translations';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
@@ -32,72 +33,72 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import styles from './AdminUserDetailPage.module.css';
 
-const displayDate = (value: string) => value ? formatDateTime(value) : '—';
+type Translate = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
-function getDetailSections(user: AdminUser): DetailPageSection[] {
+function getDetailSections(user: AdminUser, locale: string, t: Translate): DetailPageSection[] {
   return [
     {
       key: 'personal',
       icon: <UserRound aria-hidden />,
-      title: 'Shaxsiy ma’lumotlar',
-      description: 'Foydalanuvchining asosiy aloqa ma’lumotlari',
+      title: t('admin.users.personal'),
+      description: t('admin.users.personalDescription'),
       fields: [
-        { key: 'name', icon: <UserRound />, label: 'To‘liq ism', value: user.name || '—' },
-        { key: 'phone', icon: <Phone />, label: 'Telefon', value: user.phone || '—' },
-        { key: 'email', icon: <Mail />, label: 'Email', value: user.email || '—' },
-        { key: 'role', icon: <IdCard />, label: 'Rol', value: user.role },
+        { key: 'name', icon: <UserRound />, label: t('admin.users.fullName'), value: user.name || '—' },
+        { key: 'phone', icon: <Phone />, label: t('admin.users.phone'), value: user.phone || '—' },
+        { key: 'email', icon: <Mail />, label: t('admin.users.email'), value: user.email || '—' },
+        { key: 'role', icon: <IdCard />, label: t('admin.users.role'), value: user.role },
       ],
     },
     {
       key: 'account',
       icon: <ShieldCheck aria-hidden />,
-      title: 'Hisob holati',
-      description: 'Ruxsatlar va backenddagi joriy holat',
+      title: t('admin.users.accountStatus'),
+      description: t('admin.users.accountStatusDescription'),
       fields: [
-        { key: 'id', icon: <IdCard />, label: 'Foydalanuvchi ID', value: `#${user.id}` },
+        { key: 'id', icon: <IdCard />, label: t('admin.users.userId'), value: `#${user.id}` },
         {
           key: 'shop',
           icon: <Store />,
-          label: 'Do‘kon ID',
-          value: user.shopId ? `#${user.shopId}` : 'Biriktirilmagan',
+          label: t('admin.users.shopId'),
+          value: user.shopId ? `#${user.shopId}` : t('admin.users.notAssigned'),
         },
         {
           key: 'active',
           icon: <ShieldCheck />,
-          label: 'Faollik',
+          label: t('admin.users.activity'),
           value: <StatusTag status={user.isActive ? 'ACTIVE' : 'INACTIVE'} />,
         },
         {
           key: 'blocked',
           icon: <Ban />,
-          label: 'Blok holati',
+          label: t('admin.users.blockStatus'),
           value: <StatusTag status={user.blocked ? 'BLOCKED' : 'ACTIVE'} />,
         },
         {
           key: 'deleted',
           icon: <Trash2 />,
-          label: 'O‘chirilgan',
-          value: user.isDeleted ? 'Ha' : 'Yo‘q',
+          label: t('admin.users.deletedField'),
+          value: user.isDeleted ? t('common.yes') : t('common.no'),
         },
       ],
     },
     {
       key: 'dates',
       icon: <CalendarClock aria-hidden />,
-      title: 'Vaqt ma’lumotlari',
-      description: 'Hisob yaratilgan va oxirgi yangilangan vaqt',
+      title: t('admin.users.timeInfo'),
+      description: t('admin.users.timeInfoDescription'),
       fields: [
         {
           key: 'createdAt',
           icon: <CalendarClock />,
-          label: 'Ro‘yxatdan o‘tgan',
-          value: displayDate(user.createdAt),
+          label: t('admin.users.registeredAt'),
+          value: user.createdAt ? formatDateTime(user.createdAt, locale) : '—',
         },
         {
           key: 'updatedAt',
           icon: <CalendarClock />,
-          label: 'Yangilangan',
-          value: displayDate(user.updatedAt),
+          label: t('common.updatedAt'),
+          value: user.updatedAt ? formatDateTime(user.updatedAt, locale) : '—',
         },
       ],
     },
@@ -106,6 +107,7 @@ function getDetailSections(user: AdminUser): DetailPageSection[] {
 
 export default function AdminUserDetailPage() {
   const { message } = App.useApp();
+  const { locale, t } = useTranslation();
   const { userId } = useParams<{ userId: string }>();
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const userQuery = useAdminUserQuery(userId ?? null);
@@ -120,7 +122,7 @@ export default function AdminUserDetailPage() {
         onSuccess: () => {
           setBlockDialogOpen(false);
           void message.success(
-            user.blocked ? 'Foydalanuvchi blokdan chiqarildi' : 'Foydalanuvchi bloklandi',
+            user.blocked ? t('admin.users.unblocked') : t('admin.users.blocked'),
           );
         },
         onError: (error) => void message.error(getAuthErrorMessage(error)),
@@ -133,19 +135,19 @@ export default function AdminUserDetailPage() {
       <main className={styles.statePage}>
         <PageHeader
           before={<BackButton fallback="/admin/users" />}
-          title="Foydalanuvchi tafsilotlari"
-          description={userId ? `Foydalanuvchi #${userId}` : 'Foydalanuvchi ma’lumoti'}
+          title={t('admin.users.detailTitle')}
+          description={userId ? t('admin.users.userNumber', { id: userId }) : t('admin.users.userInfo')}
         />
         {!userId ? (
           <ContentState
             state="error"
-            title="Foydalanuvchi aniqlanmadi"
-            description="Foydalanuvchilar ro‘yxatiga qaytib, qayta urinib ko‘ring."
+            title={t('admin.users.notIdentified')}
+            description={t('admin.users.notIdentifiedDescription')}
           />
         ) : userQuery.isError ? (
           <ContentState
             state="error"
-            title="Foydalanuvchi ma’lumotini yuklab bo‘lmadi"
+            title={t('admin.users.detailLoadError')}
             description={getAuthErrorMessage(userQuery.error)}
             onAction={() => void userQuery.refetch()}
           />
@@ -162,15 +164,15 @@ export default function AdminUserDetailPage() {
     <>
       <DetailPage
         backFallback="/admin/users"
-        title="Foydalanuvchi tafsilotlari"
-        description={`Foydalanuvchi #${user.id}`}
+        title={t('admin.users.detailTitle')}
+        description={t('admin.users.userNumber', { id: user.id })}
         actions={
           <div className={styles.actions}>
             <Button
               icon={<Pencil size={17} />}
-              onClick={() => void message.warning(ADMIN_USER_WRITE_ACTION_UNAVAILABLE)}
+              onClick={() => void message.warning(t('admin.users.writeUnavailable'))}
             >
-              Tahrirlash
+              {t('common.edit')}
             </Button>
             <Button
               danger={blockAction.danger}
@@ -178,22 +180,22 @@ export default function AdminUserDetailPage() {
               loading={blockMutation.isPending}
               onClick={() => setBlockDialogOpen(true)}
             >
-              {blockAction.label}
+              {t(blockAction.label)}
             </Button>
             <Button
               danger
               icon={<Trash2 size={17} />}
-              onClick={() => void message.warning(ADMIN_USER_WRITE_ACTION_UNAVAILABLE)}
+              onClick={() => void message.warning(t('admin.users.writeUnavailable'))}
             >
-              O‘chirish
+              {t('common.delete')}
             </Button>
           </div>
         }
         hero={{
           avatarUrl: user.avatarUrl,
           avatarFallback: (user.name || user.phone || 'U').slice(0, 2).toUpperCase(),
-          title: user.name || 'Nomsiz foydalanuvchi',
-          subtitle: user.email || user.phone || 'Aloqa ma’lumoti kiritilmagan',
+          title: user.name || t('admin.users.unnamed'),
+          subtitle: user.email || user.phone || t('admin.users.noContact'),
           badges: (
             <>
               <StatusTag status={user.blocked ? 'BLOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'} />
@@ -201,15 +203,15 @@ export default function AdminUserDetailPage() {
             </>
           ),
         }}
-        sections={getDetailSections(user)}
+        sections={getDetailSections(user, locale, t)}
       />
       <ConfirmDialog
         open={blockDialogOpen}
         title={user.blocked
-          ? 'Foydalanuvchi blokdan chiqarilsinmi?'
-          : 'Foydalanuvchi bloklansinmi?'}
+          ? t('admin.users.unblockTitle')
+          : t('admin.users.blockTitle')}
         description={user.name || user.phone}
-        confirmText={blockAction.label}
+        confirmText={t(blockAction.label)}
         danger={blockAction.danger}
         loading={blockMutation.isPending}
         onCancel={() => setBlockDialogOpen(false)}

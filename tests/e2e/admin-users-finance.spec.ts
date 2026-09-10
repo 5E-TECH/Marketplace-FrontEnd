@@ -88,6 +88,30 @@ test('admin alohida sahifada yangi foydalanuvchi yaratadi', async ({ page }) => 
   });
 });
 
+test('admin user search va pagination querylari backendga yuboriladi', async ({ page }) => {
+  let requestedUrl = '';
+  const users = Array.from({ length: 21 }, (_, index) => ({ id: String(index + 1), name: index === 20 ? 'Noyob Admin User' : `User ${index + 1}`, phone: `+9989012345${String(index).padStart(2, '0')}`, email: null, avatarUrl: null, role: 'BUYER', isActive: true, isBlocked: false, isDeleted: false, shopId: null, createdAt: '2026-09-04T08:00:00.000Z', updatedAt: '2026-09-04T08:00:00.000Z' }));
+  await page.route('**/api/v1/admin/users**', async route => {
+    const url = new URL(route.request().url());
+    requestedUrl = url.toString();
+    const search = (url.searchParams.get('search') ?? '').toLocaleLowerCase('uz');
+    const pageNumber = Number(url.searchParams.get('page') ?? 1);
+    const limit = Number(url.searchParams.get('limit') ?? 20);
+    const filtered = users.filter(user => !search || `${user.name} ${user.phone}`.toLocaleLowerCase('uz').includes(search));
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: filtered.slice((pageNumber - 1) * limit, pageNumber * limit), total: filtered.length, page: pageNumber, limit, totalPages: Math.max(1, Math.ceil(filtered.length / limit)) } }) });
+  });
+  await page.goto('/admin/users');
+  await page.getByPlaceholder('Ism yoki telefon...').fill('Noyob Admin');
+  await expect.poll(() => requestedUrl).toContain('search=Noyob+Admin');
+  await expect(page.getByText('Noyob Admin User')).toBeVisible();
+
+  await page.getByPlaceholder('Ism yoki telefon...').clear();
+  const secondPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '2');
+  await page.getByTitle('2').click();
+  await secondPageRequest;
+  await expect(page.getByText('Noyob Admin User')).toBeVisible();
+});
+
 test('admin payout action va report endpointlari ishlaydi', async ({ page }) => {
   const payout = { id: '8', shopId: '7', shopName: 'Ali Market', amount: 500000, status: 'PENDING', createdAt: '2026-09-04T08:00:00.000Z' };
   let approved = false; let reports = 0; let reconciliation = 0;
@@ -104,7 +128,7 @@ test('admin payout action va report endpointlari ishlaydi', async ({ page }) => 
   await page.getByRole('tab', { name: 'Hisobot' }).click();
   await expect.poll(() => reports).toBeGreaterThan(0);
   await expect(page.getByText('500 000')).toBeVisible();
-  await page.getByRole('tab', { name: 'Reconciliation' }).click();
+  await page.getByRole('tab', { name: 'Solishtirish' }).click();
   await expect.poll(() => reconciliation).toBeGreaterThan(0);
   await expect(page.getByText('450 000')).toBeVisible();
 });

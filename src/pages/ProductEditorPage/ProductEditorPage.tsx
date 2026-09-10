@@ -12,6 +12,7 @@ import { uploadFile } from '../../shared/api/fileApi';
 import { createProductVariant, deleteProductVariant, updateProductVariant } from '../../features/products/api/productVariantApi';
 import styles from './ProductEditorPage.module.css';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 
 const emptyProduct: ProductFormValues = {
   name: '', categoryId: '', description: '', price: null, oldPrice: null,
@@ -20,6 +21,7 @@ const emptyProduct: ProductFormValues = {
 
 export default function ProductEditorPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { productId } = useParams();
   const queryClient = useQueryClient();
@@ -58,7 +60,7 @@ export default function ProductEditorPage() {
         targetProductId = created.id;
         createdDraftId.current = created.id;
       }
-      if (!targetProductId) throw new Error('Mahsulot IDsi olinmadi');
+      if (!targetProductId) throw new Error(t('product.idMissing'));
 
       await Promise.all(uploads.map(async (upload) => {
         updateUpload(upload.uid, { status: 'uploading', percent: 1 });
@@ -97,7 +99,7 @@ export default function ProductEditorPage() {
       }));
 
       await queryClient.invalidateQueries({ queryKey: productKeys.mine() });
-      void message.success(isEditing ? 'Mahsulot yangilandi' : 'Mahsulot yaratildi');
+      void message.success(isEditing ? t('product.updated') : t('product.created'));
       void navigate('/products', { replace: true });
     } catch (error) {
       void message.error(getAuthErrorMessage(error));
@@ -108,21 +110,21 @@ export default function ProductEditorPage() {
 
   if (isEditing && productQuery.isPending) return <ContentState state="loading" />;
   if (isEditing && productQuery.isError) {
-    return <ContentState state="error" title="Mahsulotni yuklab bo‘lmadi" description={getAuthErrorMessage(productQuery.error)} onAction={() => void productQuery.refetch()} />;
+    return <ContentState state="error" title={t('product.loadError')} description={getAuthErrorMessage(productQuery.error)} onAction={() => void productQuery.refetch()} />;
   }
 
   return (
     <main className={styles.page}>
       <PageHeader
         before={<BackButton fallback="/products" disabled={saving} />}
-        title={isEditing ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}
-        description={isEditing ? 'Mahsulot ma’lumotlari va variantlarini yangilang.' : 'Katalog uchun yangi mahsulot ma’lumotlarini kiriting.'}
+        title={isEditing ? t('product.editTitle') : t('product.newTitle')}
+        description={isEditing ? t('product.editDescription') : t('product.newDescription')}
       />
       <ProductForm
         form={form}
         initialValues={initialValues}
         submitting={saving || createMutation.isPending || updateMutation.isPending}
-        submitLabel={isEditing ? 'O‘zgarishlarni saqlash' : 'Mahsulotni yaratish'}
+        submitLabel={isEditing ? t('product.saveChanges') : t('product.create')}
         onCancel={() => void navigate('/products')}
         onSubmit={(submission) => void handleSubmit(submission)}
       />

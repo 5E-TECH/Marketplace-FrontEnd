@@ -20,6 +20,8 @@ export interface Product {
   hasVariants: boolean;
   stock: number;
   status: ProductStatus;
+  isBlocked: boolean;
+  rating: number;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;

@@ -12,9 +12,12 @@ import {
 import styles from './LoginPage.module.css';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { normalizeUzPhone } from '../../shared/lib/phone';
+import { useTranslation } from '../../shared/i18n/useTranslation';
+import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 
 export default function LoginPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
@@ -39,7 +42,7 @@ export default function LoginPage() {
       },
       {
         onSuccess: () => {
-          void message.success('Tizimga muvaffaqiyatli kirdingiz');
+          void message.success(t('auth.loginSuccess'));
         },
         onError: (error) => {
           void message.error(getAuthErrorMessage(error));
@@ -50,6 +53,7 @@ export default function LoginPage() {
 
   return (
     <main className={styles.page}>
+      <div className={styles.language}><LanguageSwitcher /></div>
       <section className={styles.auth} aria-labelledby="login-title">
         <Card className={styles.card} variant="borderless">
           <div className={styles.cardContent}>
@@ -59,11 +63,11 @@ export default function LoginPage() {
               isSubmitting={loginMutation.isPending}
               onSubmit={handleSubmit}
             />
-            <Typography.Paragraph className={styles.switchAuth}><Link to="/forgot-password">Parolni unutdingizmi?</Link></Typography.Paragraph>
-            <Typography.Paragraph className={styles.switchAuth}>Akkauntingiz yo‘qmi? <Link to="/register/account">Ro‘yxatdan o‘tish</Link></Typography.Paragraph>
+            <Typography.Paragraph className={styles.switchAuth}><Link to="/forgot-password">{t('auth.forgotPassword')}</Link></Typography.Paragraph>
+            <Typography.Paragraph className={styles.switchAuth}>{t('auth.noAccount')} <Link to="/register/account">{t('auth.register')}</Link></Typography.Paragraph>
 
             <Typography.Text className={styles.security}>
-              <LockFilled aria-hidden /> Parolingiz brauzer xotirasida saqlanmaydi
+              <LockFilled aria-hidden /> {t('auth.securityNotice')}
             </Typography.Text>
           </div>
         </Card>

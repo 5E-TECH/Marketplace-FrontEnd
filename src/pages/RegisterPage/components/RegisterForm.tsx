@@ -1,6 +1,7 @@
 import { Button, Form, Input } from 'antd';
 import { PasswordInput } from '../../../shared/ui/PasswordInput/PasswordInput';
 import styles from '../../LoginPage/components/LoginForm/LoginForm.module.css';
+import { useTranslation } from '../../../shared/i18n/useTranslation';
 
 export interface RegisterFormValues {
   name: string;
@@ -22,6 +23,7 @@ const PHONE_NUMBER_PATTERN = /^\d{9}$/;
 const STRONG_PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,128}$/;
 
 export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
+  const { t } = useTranslation();
   return (
     <Form<RegisterFormValues>
       layout="vertical"
@@ -33,12 +35,12 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
     >
       <Form.Item
         className={styles.field}
-        label="ISM VA FAMILIYA"
+        label={t('auth.fullName').toLocaleUpperCase()}
         name="name"
         rules={[
-          { required: true, whitespace: true, message: 'Ism va familiyangizni kiriting' },
-          { min: 2, message: 'Ism kamida 2 belgidan iborat bo‘lsin' },
-          { max: 80, message: 'Ism 80 belgidan oshmasligi kerak' },
+          { required: true, whitespace: true, message: t('auth.fullNameRequired') },
+          { min: 2, message: t('auth.nameMin') },
+          { max: 80, message: t('auth.nameMax') },
         ]}
       >
         <Input
@@ -46,37 +48,37 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
           variant="borderless"
           autoComplete="name"
           maxLength={80}
-          placeholder="Ism Familiya"
-          aria-label="Ism va familiya"
+          placeholder={t('auth.fullNamePlaceholder')}
+          aria-label={t('auth.fullName')}
         />
       </Form.Item>
 
-      <Form.Item className={styles.field} label="EMAIL" name="email" rules={[{ type: 'email', message: 'Email manzilini to‘g‘ri kiriting' }]}>
+      <Form.Item className={styles.field} label="EMAIL" name="email" rules={[{ type: 'email', message: t('auth.emailInvalid') }]}>
         <Input className={styles.input} variant="borderless" autoComplete="email" maxLength={120} placeholder="seller@example.com" aria-label="Email" />
       </Form.Item>
 
-      <Form.Item className={styles.field} label="DO‘KON NOMI" name="shopName" rules={[{ required: true, whitespace: true, message: 'Do‘kon nomini kiriting' }, { max: 80 }]}>
-        <Input className={styles.input} variant="borderless" maxLength={80} placeholder="Ali Market" aria-label="Do‘kon nomi" />
+      <Form.Item className={styles.field} label={t('auth.shopName').toLocaleUpperCase()} name="shopName" rules={[{ required: true, whitespace: true, message: t('auth.shopNameRequired') }, { max: 80 }]}>
+        <Input className={styles.input} variant="borderless" maxLength={80} placeholder="Ali Market" aria-label={t('auth.shopName')} />
       </Form.Item>
 
-      <Form.Item className={styles.field} label="DO‘KON TAVSIFI" name="shopDescription" rules={[{ max: 500 }]}>
-        <Input className={styles.input} variant="borderless" maxLength={500} placeholder="Maishiy texnika do‘koni" aria-label="Do‘kon tavsifi" />
+      <Form.Item className={styles.field} label={t('auth.shopDescription').toLocaleUpperCase()} name="shopDescription" rules={[{ max: 500 }]}>
+        <Input className={styles.input} variant="borderless" maxLength={500} placeholder={t('auth.shopDescriptionPlaceholder')} aria-label={t('auth.shopDescription')} />
       </Form.Item>
 
-      <Form.Item className={styles.field} label="MANZIL" name="address" rules={[{ max: 180 }]}>
-        <Input className={styles.input} variant="borderless" maxLength={180} placeholder="Toshkent shahri" aria-label="Manzil" />
+      <Form.Item className={styles.field} label={t('auth.address').toLocaleUpperCase()} name="address" rules={[{ max: 180 }]}>
+        <Input className={styles.input} variant="borderless" maxLength={180} placeholder={t('auth.addressPlaceholder')} aria-label={t('auth.address')} />
       </Form.Item>
 
       <Form.Item
         className={styles.field}
-        label="TELEFON RAQAMI"
+        label={t('auth.phone').toLocaleUpperCase()}
         name="phone"
         normalize={(value?: string) =>
           (value ?? '').replace(/\D/g, '').slice(0, 9)
         }
         rules={[
-          { required: true, message: 'Telefon raqamini kiriting' },
-          { pattern: PHONE_NUMBER_PATTERN, message: '9 xonali telefon raqamini kiriting' },
+          { required: true, message: t('auth.phoneRequired') },
+          { pattern: PHONE_NUMBER_PATTERN, message: t('auth.phoneNineDigits') },
         ]}
       >
         <Input
@@ -87,19 +89,19 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
           maxLength={9}
           autoComplete="tel"
           placeholder="90 123 45 67"
-          aria-label="Telefon raqami"
+          aria-label={t('auth.phone')}
         />
       </Form.Item>
 
       <Form.Item
         className={styles.field}
-        label="PAROL"
+        label={t('auth.password').toLocaleUpperCase()}
         name="password"
         rules={[
-          { required: true, message: 'Parolni kiriting' },
+          { required: true, message: t('auth.passwordRequired') },
           {
             pattern: STRONG_PASSWORD_PATTERN,
-            message: 'Kamida 8 belgi, harf va raqam ishlating',
+            message: t('auth.strongPassword'),
           },
         ]}
       >
@@ -108,24 +110,24 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
           variant="borderless"
           autoComplete="new-password"
           maxLength={128}
-          placeholder="Kamida 8 belgi"
-          aria-label="Parol"
+          placeholder={t('auth.passwordMinPlaceholder')}
+          aria-label={t('auth.password')}
         />
       </Form.Item>
 
       <Form.Item
         className={styles.field}
-        label="PAROLNI TASDIQLANG"
+        label={t('auth.confirmPassword').toLocaleUpperCase()}
         name="confirmPassword"
         dependencies={['password']}
         rules={[
-          { required: true, message: 'Parolni qayta kiriting' },
+          { required: true, message: t('auth.confirmPasswordRequired') },
           ({ getFieldValue }) => ({
             validator(_, value: string | undefined) {
               if (!value || getFieldValue('password') === value) {
                 return Promise.resolve();
               }
-              return Promise.reject(new Error('Parollar bir xil emas'));
+              return Promise.reject(new Error(t('auth.passwordMismatch')));
             },
           }),
         ]}
@@ -135,8 +137,8 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
           variant="borderless"
           autoComplete="new-password"
           maxLength={128}
-          placeholder="Parolni takrorlang"
-          aria-label="Parolni tasdiqlash"
+          placeholder={t('auth.repeatPassword')}
+          aria-label={t('auth.confirmPassword')}
         />
       </Form.Item>
 
@@ -146,7 +148,7 @@ export function RegisterForm({ isSubmitting, onSubmit }: RegisterFormProps) {
         htmlType="submit"
         loading={isSubmitting}
       >
-        RO‘YXATDAN O‘TISH
+        {t('auth.register').toLocaleUpperCase()}
       </Button>
     </Form>
   );
