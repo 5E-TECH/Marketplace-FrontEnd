@@ -1,7 +1,7 @@
 import { ArrowDownToLine, SlidersHorizontal } from 'lucide-react';
 import { App, Button, Card, Form, Input, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAdjustStockMutation, useInboundStockMutation, useStockQuery } from '../../features/stock/api/stockQueries';
 import type { StockItem } from '../../features/stock/model/stockTypes';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
@@ -29,6 +29,7 @@ export default function StockPage() {
   const [lowOnly, setLowOnly] = useState(false);
   const [warehouseId, setWarehouseId] = useState('');
   const [productId, setProductId] = useState('');
+  const attempt = useRef<{ signature: string; key: string } | null>(null);
   const [action, setAction] = useState<StockAction>(null);
   const search = useDebouncedValue(query.trim());
   const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}), ...(warehouseId ? { warehouseId } : {}), ...(productId ? { productId } : {}) });
@@ -48,11 +49,14 @@ export default function StockPage() {
   ];
 
   const submit = (values: MutationForm) => {
-    if (!action || values.amount === null) return;
-    const common = { variantId: action.item.variantId, warehouseId: action.item.warehouseId, reason: values.reason.trim(), idempotencyKey: crypto.randomUUID() };
+    if (!action || values.amount === null || inboundMutation.isPending || adjustMutation.isPending) return;
+    const signature = JSON.stringify([action.type, action.item.variantId, action.item.warehouseId, values.amount, values.reason.trim()]);
+    if (attempt.current?.signature !== signature) attempt.current = { signature, key: crypto.randomUUID() };
+    const common = { variantId: action.item.variantId, warehouseId: action.item.warehouseId, reason: values.reason.trim(), idempotencyKey: attempt.current.key };
     const type = action.type;
     const options = {
       onSuccess: () => {
+        attempt.current = null;
         setAction(null);
         void message.success(type === 'inbound' ? 'Kirim muvaffaqiyatli bajarildi' : 'Qoldiq tuzatildi');
       },

@@ -39,17 +39,19 @@ export interface CreateShipmentPayload { id: string; customerPhone: string }
 export interface SellerOrderHistory { id: string; status: SellerOrderStatus; createdAt: string }
 export interface SellerOrderItem { id: string; name: string; quantity: number; price: number }
 
-export type CheckoutPaymentMethod = 'COD' | 'PAYME' | 'CLICK';
+export type CheckoutPaymentMethod = 'cod' | 'online';
 export interface CheckoutAddress {
+  recipientName: string;
+  phone: string;
   regionId: string;
   districtId: string;
   address: string;
-  whereDeliver: 'ADDRESS';
 }
 export interface CreateCheckoutPayload {
   paymentMethod: CheckoutPaymentMethod;
   address: CheckoutAddress;
   idempotencyKey: string;
+  sessionId: string;
 }
 export interface ConfirmCheckoutPayload { orderId: string }
 

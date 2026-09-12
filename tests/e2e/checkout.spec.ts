@@ -9,6 +9,7 @@ test('BUYER buyurtma yaratadi va COD buyurtmani tasdiqlaydi', async ({ page }) =
   let authorization = '';
   await page.route('**/api/v1/checkout', async (route) => {
     checkoutBody = route.request().postDataJSON();
+    expect(route.request().headers()['x-session-id']).toBeTruthy();
     idempotencyKey = route.request().headers()['idempotency-key'] ?? '';
     authorization = route.request().headers().authorization ?? '';
     await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ data: { orderId: '77' } }) });
@@ -26,7 +27,7 @@ test('BUYER buyurtma yaratadi va COD buyurtmani tasdiqlaydi', async ({ page }) =
   await page.getByRole('button', { name: 'Buyurtma yaratish' }).click();
 
   await expect(page.getByText('Buyurtma ID: #77')).toBeVisible();
-  expect(checkoutBody).toEqual({ paymentMethod: 'COD', address: { regionId: '1', districtId: '2', address: 'Toshkent shahri', whereDeliver: 'ADDRESS' } });
+  expect(checkoutBody).toEqual({ paymentMethod: 'cod', address: { recipientName: 'Xaridor', phone: '+998901234567', regionId: '1', districtId: '2', address: 'Toshkent shahri' } });
   expect(idempotencyKey.length).toBeGreaterThan(10);
   expect(authorization).toBe(`Bearer ${TEST_ACCESS_TOKEN}`);
 

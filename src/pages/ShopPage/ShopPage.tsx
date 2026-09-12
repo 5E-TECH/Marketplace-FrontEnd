@@ -19,7 +19,6 @@ import {
 import { ShopProfileForm } from '../../features/shop/ui/ShopProfileForm';
 import { ShopProfileHero } from '../../features/shop/ui/ShopProfileHero';
 import { CreateShopModal, type SellerRegistrationFormValues } from '../../features/shop/ui/CreateShopModal';
-import { useShopMediaDraft } from '../../features/shop/model/useShopMediaDraft';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import styles from './ShopPage.module.css';
@@ -29,7 +28,6 @@ export default function ShopPage() {
   const [form] = Form.useForm<ShopProfileFormValues>();
   const [editing, setEditing] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const mediaDraft = useShopMediaDraft();
   const shopQuery = useSellerShopQuery();
   const updateShopMutation = useUpdateSellerShopMutation();
   const createShopMutation = useCreateSellerShopMutation();
@@ -61,7 +59,6 @@ export default function ShopPage() {
 
   const cancelEditing = () => {
     if (profile) form.setFieldsValue(profile);
-    mediaDraft.reset();
     setEditing(false);
   };
 
@@ -78,8 +75,7 @@ export default function ShopPage() {
     createShopMutation.mutate(payload, {
       onSuccess: () => {
         setCreateOpen(false);
-        mediaDraft.reset();
-        void message.success('Seller va do‘kon muvaffaqiyatli yaratildi');
+            void message.success('Seller va do‘kon muvaffaqiyatli yaratildi');
       },
       onError: (error) => void message.error(getAuthErrorMessage(error)),
     });
@@ -115,8 +111,7 @@ export default function ShopPage() {
           saving={createShopMutation.isPending}
           onCancel={() => {
             setCreateOpen(false);
-            mediaDraft.reset();
-          }}
+                  }}
           onSubmit={createProfile}
         />
       </div>
@@ -127,6 +122,8 @@ export default function ShopPage() {
 
   const saveProfile = (values: ShopProfileFormValues) => {
     const payload: UpdateSellerShopPayload = {
+      ...((values.logoUrl?.trim() ?? '') !== (profile.logoUrl ?? '') ? { logoUrl: values.logoUrl?.trim() ?? '' } : {}),
+      ...((values.bannerUrl?.trim() ?? '') !== (profile.bannerUrl ?? '') ? { bannerUrl: values.bannerUrl?.trim() ?? '' } : {}),
       name: values.name.trim(),
       description: values.description.trim(),
       phone: values.phone.replace(/\s/g, ''),
@@ -138,8 +135,7 @@ export default function ShopPage() {
     updateShopMutation.mutate(payload, {
       onSuccess: () => {
         setEditing(false);
-        mediaDraft.reset();
-        void message.success('Do‘kon ma’lumotlari saqlandi');
+            void message.success('Do‘kon ma’lumotlari saqlandi');
       },
       onError: (error) => void message.error(getAuthErrorMessage(error)),
     });
@@ -153,10 +149,8 @@ export default function ShopPage() {
       />
       <div className={styles.profileLayout}>
         <ShopProfileHero
-          profile={{ ...profile, ...mediaDraft.preview }}
-          editing={editing}
+          profile={profile}
           status={shopQuery.data.status}
-          onImageSelect={mediaDraft.select}
         />
         <ShopProfileForm
           form={form}

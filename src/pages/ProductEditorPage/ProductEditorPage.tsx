@@ -7,6 +7,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { useCreateProductMutation, useProductQuery, useUpdateProductMutation } from '../../features/products/api/productQueries';
+import { updateProduct } from '../../features/products/api/productApi';
 import { productKeys } from '../../features/products/api/productQueries';
 import { uploadFile } from '../../shared/api/fileApi';
 import { createProductVariant, deleteProductVariant, updateProductVariant } from '../../features/products/api/productVariantApi';
@@ -28,6 +29,7 @@ export default function ProductEditorPage() {
   const [form] = Form.useForm<ProductFormValues>();
   const [saving, setSaving] = useState(false);
   const createdDraftId = useRef<string | null>(null);
+  const deletedVariants = useRef(new Set<string>());
   const isEditing = Boolean(productId);
   const productQuery = useProductQuery(productId);
   const createMutation = useCreateProductMutation();
@@ -49,7 +51,8 @@ export default function ProductEditorPage() {
       }
     : emptyProduct;
 
-  const handleSubmit = async ({ payload, variants, uploads, updateUpload }: ProductFormSubmission) => {
+  const handleSubmit = async ({ payload, variants, uploads, updateUpload, updateVariantId }: ProductFormSubmission) => {
+    if (saving) return;
     setSaving(true);
     try {
       let targetProductId = productId ?? createdDraftId.current;
@@ -59,10 +62,12 @@ export default function ProductEditorPage() {
         const created = await createMutation.mutateAsync({ ...payload, imageUrl: null, images: [] });
         targetProductId = created.id;
         createdDraftId.current = created.id;
+      } else {
+        await updateProduct(targetProductId, payload);
       }
       if (!targetProductId) throw new Error(t('product.idMissing'));
 
-      await Promise.all(uploads.map(async (upload) => {
+      const uploadResults = await Promise.allSettled(uploads.map(async (upload) => {
         updateUpload(upload.uid, { status: 'uploading', percent: 1 });
         try {
           const url = await uploadFile({ file: upload.file, productId: targetProductId, isCover: upload.isCover }, (percent) => {
@@ -75,15 +80,19 @@ export default function ProductEditorPage() {
         }
       }));
 
-      const initialVariants = product?.variants ?? [];
+      const failedUpload = uploadResults.find((result) => result.status === 'rejected');
+      if (failedUpload?.status === 'rejected') throw failedUpload.reason;
+
+      const initialVariants = product?.hasVariants ? product.variants : [];
       const retainedIds = new Set(variants.flatMap((variant) => variant.id ? [variant.id] : []));
       const deletedVariantIds = initialVariants.flatMap((variant) =>
-        variant.id && !retainedIds.has(variant.id) ? [variant.id] : [],
+        variant.id && !retainedIds.has(variant.id) && !deletedVariants.current.has(variant.id) ? [variant.id] : [],
       );
-      await Promise.all(deletedVariantIds.map((variantId) =>
-        deleteProductVariant(targetProductId, variantId),
-      ));
-      await Promise.all(variants.map(async (variant) => {
+      for (const variantId of deletedVariantIds) {
+        await deleteProductVariant(targetProductId, variantId);
+        deletedVariants.current.add(variantId);
+      }
+      for (const variant of variants) {
         const variantPayload = {
           sku: variant.sku,
           name: variant.name || '',
@@ -95,8 +104,13 @@ export default function ProductEditorPage() {
           isActive: variant.isActive,
         };
         if (variant.id) await updateProductVariant(targetProductId, variant.id, variantPayload);
-        else await createProductVariant(targetProductId, variantPayload);
-      }));
+        else {
+          const id = await createProductVariant(targetProductId, variantPayload);
+          updateVariantId(variant.sku, id);
+        }
+      }
+
+      queryClient.removeQueries({ queryKey: productKeys.detail(targetProductId), exact: true });
 
       await queryClient.invalidateQueries({ queryKey: productKeys.mine() });
       void message.success(isEditing ? t('product.updated') : t('product.created'));

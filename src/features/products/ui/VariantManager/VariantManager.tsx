@@ -11,6 +11,7 @@ import { useTranslation } from '../../../../shared/i18n/useTranslation';
 
 interface VariantManagerProps {
   enabled: boolean;
+  disabled?: boolean;
   basePrice: number | null;
   value?: ProductVariant[];
   onChange?: (variants: ProductVariant[]) => void;
@@ -20,7 +21,7 @@ type VariantFormValues = Omit<ProductVariant, 'attributes'> & {
   attributeEntries: Array<{ key: string; value: string }>;
 };
 
-export function VariantManager({ enabled, basePrice, value = [], onChange }: VariantManagerProps) {
+export function VariantManager({ disabled = false, enabled, basePrice, value = [], onChange }: VariantManagerProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm<VariantFormValues>();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -49,6 +50,7 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
 
   const save = (values: VariantFormValues) => {
     const normalized: ProductVariant = {
+      ...(editingIndex === null ? {} : value[editingIndex]),
       ...values,
       name: values.name.trim(),
       sku: values.sku.trim(),
@@ -88,7 +90,7 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
           <h3 id="variants-title">{t('variant.title')}</h3>
           <p>{t('variant.description')}</p>
         </div>
-        <Button type="primary" icon={<Plus size={16} />} onClick={addVariant}>{t('variant.add')}</Button>
+        <Button type="primary" icon={<Plus size={16} />} disabled={disabled} onClick={addVariant}>{t('variant.add')}</Button>
       </div>
 
       <DataTable<ProductVariant>
@@ -105,9 +107,9 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
             title: '', width: 92, align: 'right',
             render: (_value, variant, index) => (
               <div className={styles.actions}>
-                <Button type="text" aria-label={t('variant.editAria', { name: variant.name })} icon={<Pencil size={16} />} onClick={() => editVariant(variant, index)} />
-                <Popconfirm title={t('variant.deleteTitle')} okText={t('common.delete')} cancelText={t('common.cancel')} onConfirm={() => onChange?.(value.filter((_item, itemIndex) => itemIndex !== index))}>
-                  <Button type="text" danger aria-label={t('variant.deleteAria', { name: variant.name })} icon={<Trash2 size={16} />} />
+                <Button type="text" aria-label={t('variant.editAria', { name: variant.name })} icon={<Pencil size={16} />} disabled={disabled} onClick={() => editVariant(variant, index)} />
+                <Popconfirm disabled={disabled} title={t('variant.deleteTitle')} okText={t('common.delete')} cancelText={t('common.cancel')} onConfirm={() => onChange?.(value.filter((_item, itemIndex) => itemIndex !== index))}>
+                  <Button disabled={disabled} type="text" danger aria-label={t('variant.deleteAria', { name: variant.name })} icon={<Trash2 size={16} />} />
                 </Popconfirm>
               </div>
             ),
@@ -152,7 +154,7 @@ export function VariantManager({ enabled, basePrice, value = [], onChange }: Var
                     <Form.Item {...field} name={[field.name, 'value']} rules={[{ required: true, whitespace: true, message: t('product.attributeValueRequired') }]}>
                       <TextControl placeholder={t('product.attributeValuePlaceholder')} maxLength={160} />
                     </Form.Item>
-                    <Button type="text" danger aria-label={t('product.deleteAttribute')} icon={<Trash2 size={16} />} onClick={() => remove(field.name)} />
+                    <Button disabled={disabled} type="text" danger aria-label={t('product.deleteAttribute')} icon={<Trash2 size={16} />} onClick={() => remove(field.name)} />
                   </div>
                 ))}
                 <Button type="dashed" block icon={<Plus size={16} />} onClick={() => add({ key: '', value: '' })}>{t('product.addAttribute')}</Button>

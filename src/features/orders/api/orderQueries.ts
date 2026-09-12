@@ -37,7 +37,7 @@ export function useUpdateSellerOrderStatusMutation() {
 export const useSellerOrderQuery = (id: string | null) => useQuery({ queryKey: [...orderKeys.all, 'detail', id], queryFn: ({ signal }) => getSellerOrder(id!, signal), enabled: Boolean(id) });
 export const useSellerOrderItemsQuery = (id: string | null) => useQuery({ queryKey: [...orderKeys.all, 'items', id], queryFn: ({ signal }) => getSellerOrderItems(id!, signal), enabled: Boolean(id) });
 export const useSellerOrderHistoryQuery = (id: string | null) => useQuery({ queryKey: [...orderKeys.all, 'history', id], queryFn: ({ signal }) => getSellerOrderHistory(id!, signal), enabled: Boolean(id) });
-const useInvalidatingOrderMutation = <T,>(mutationFn: (value: T) => Promise<void>) => { const client = useQueryClient(); return useMutation({ mutationFn, onSuccess: () => client.invalidateQueries({ queryKey: orderKeys.all }) }); };
+const useInvalidatingOrderMutation = <T,>(mutationFn: (value: T) => Promise<void>) => { const client = useQueryClient(); return useMutation({ mutationFn, onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: orderKeys.all }), client.invalidateQueries({ queryKey: shipmentKeys.all })]) }); };
 export const useConfirmSellerOrderMutation = () => useInvalidatingOrderMutation(confirmSellerOrder);
 export const useCancelSellerOrderMutation = () => useInvalidatingOrderMutation(cancelSellerOrder);
 export const useCreateSellerShipmentMutation = () => {

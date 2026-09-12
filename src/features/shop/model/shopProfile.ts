@@ -10,10 +10,7 @@ export interface ShopProfile {
   bannerUrl: string | null;
 }
 
-export type ShopProfileFormValues = Omit<
-  ShopProfile,
-  'logoUrl' | 'bannerUrl'
->;
+export type ShopProfileFormValues = ShopProfile;
 
 export const initialShopProfile: ShopProfile = {
   name: 'MarketHub Store',

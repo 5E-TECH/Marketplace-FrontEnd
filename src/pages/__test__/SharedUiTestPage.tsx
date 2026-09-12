@@ -1,6 +1,7 @@
-import { Button, Card, Space } from 'antd';
+import { Button, Card, Space, Form, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
+import { FormModal } from '../../shared/ui/FormModal/FormModal';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
 import { ImageUpload } from '../../shared/ui/ImageUpload/ImageUpload';
@@ -33,6 +34,8 @@ const columns: ColumnsType<TestRecord> = [
 ];
 
 export default function SharedUiTestPage() {
+  const [form] = Form.useForm<{ status: string }>();
+  const [formOpen, setFormOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmCount, setConfirmCount] = useState(0);
 
@@ -68,6 +71,12 @@ export default function SharedUiTestPage() {
           />
         </Card>
 
+        <Card title="FormModal">
+          <Button onClick={() => setFormOpen(true)}>Formani ochish</Button>
+          <FormModal form={form} open={formOpen} title="Test formasi" onCancel={() => setFormOpen(false)} onSubmit={() => setFormOpen(false)}>
+            <Form.Item name="status" label="Holati"><Select options={[{ value: 'ACTIVE', label: 'Faol' }]} /></Form.Item>
+          </FormModal>
+        </Card>
         <Card title="ImageUpload">
           <ImageUpload />
         </Card>

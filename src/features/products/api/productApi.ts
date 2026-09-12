@@ -144,7 +144,15 @@ export async function getProduct(id: string, signal?: AbortSignal): Promise<Prod
   const { data } = await httpClient.get<unknown>(`/products/${encodeURIComponent(id)}`, {
     signal,
   });
-  return parseProduct(data);
+  const product = parseProduct(data);
+  const raw = unwrapApiData(data);
+  if (product.hasVariants && !(raw && typeof raw === 'object' && 'variants' in raw)) {
+    const response = await httpClient.get<unknown>(`/products/${encodeURIComponent(id)}/variants`, { signal });
+    const variants = unwrapApiData(response.data);
+    if (!Array.isArray(variants)) throw new Error('Variantlar ro‘yxati noto‘g‘ri formatda');
+    product.variants = parseVariants(variants);
+  }
+  return product;
 }
 
 export async function createProduct(payload: ProductUpsertPayload): Promise<Product> {

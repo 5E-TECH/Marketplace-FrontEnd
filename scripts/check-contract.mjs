@@ -19,6 +19,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SPEC_FILE = resolve(root, 'contract/openapi.json');
@@ -42,23 +43,58 @@ function listSourceFiles(dir) {
   });
 }
 
-// httpClient.get<...>('/yo/l', ...) yoki httpClient.post(`/yo/l/${id}`, ...)
-const CALL_PATTERN =
-  /httpClient\s*\.\s*(get|post|put|patch|delete)\s*(?:<[^>]*>)?\s*\(\s*([`'"])([^`'"]+)\2/g;
-
+// Parse calls as TypeScript, including generic types and local endpoint constants.
 function collectCalls() {
   const calls = new Map();
-
+  const unresolved = [];
   for (const file of listSourceFiles(SOURCE_DIR)) {
-    const source = readFileSync(file, 'utf8');
-    for (const [, method, , rawPath] of source.matchAll(CALL_PATTERN)) {
-      if (!rawPath.startsWith('/')) continue;
-      const key = `${method.toUpperCase()} ${API_PREFIX}${normalize(rawPath)}`;
-      if (!calls.has(key)) calls.set(key, []);
-      calls.get(key).push(file.slice(root.length + 1));
+    const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
+    const constants = new Map();
+    function visitConstants(node) {
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+        constants.set(node.name.text, node.initializer);
+      }
+      ts.forEachChild(node, visitConstants);
     }
+    visitConstants(source);
+    function paths(node, seen = new Set()) {
+      if (!node) return [];
+      if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return [node.text];
+      if (ts.isConditionalExpression(node)) return [...paths(node.whenTrue, seen), ...paths(node.whenFalse, seen)];
+      if (ts.isTemplateExpression(node)) {
+        return [node.head.text + node.templateSpans.map(span => PARAM + span.literal.text).join('')];
+      }
+      if (ts.isIdentifier(node) && !seen.has(node.text)) {
+        return paths(constants.get(node.text), new Set([...seen, node.text]));
+      }
+      return [];
+    }
+    function visit(node) {
+      if (ts.isCallExpression(node)) {
+        const expression = node.expression;
+        const isHttp = ts.isPropertyAccessExpression(expression) && expression.expression.getText(source) === 'httpClient'
+          && ['get', 'post', 'put', 'patch', 'delete'].includes(expression.name.text);
+        const isFetch = ts.isIdentifier(expression) && expression.text === 'fetch';
+        if (isHttp || isFetch) {
+          let method = isHttp ? expression.name.text.toUpperCase() : 'GET';
+          if (isFetch && node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
+            const property = node.arguments[1].properties.find(item => ts.isPropertyAssignment(item) && item.name.getText(source) === 'method');
+            if (property) method = paths(property.initializer)[0]?.toUpperCase() ?? method;
+          }
+          const endpoints = paths(node.arguments[0]).map(path => isFetch ? path.replace(/^\{\}/, '') : path);
+          if (!endpoints.length || endpoints.some(path => !path.startsWith('/'))) unresolved.push(file.slice(root.length + 1));
+          for (const endpoint of endpoints.filter(path => path.startsWith('/'))) {
+            const key = `${method} ${API_PREFIX}${normalize(endpoint)}`;
+            if (!calls.has(key)) calls.set(key, []);
+            calls.get(key).push(file.slice(root.length + 1));
+          }
+        }
+      }
+      ts.forEachChild(node, visit);
+    }
+    visit(source);
   }
-
+  if (unresolved.length) throw new Error(`Endpointni aniqlab bo‘lmadi: ${unresolved.join(', ')}`);
   return calls;
 }
 
@@ -97,3 +133,34 @@ if (missing.length > 0) {
 }
 
 console.log('Barcha chaqiruvlar backend sxemasiga mos. ✓');
+
+// Endpoint existence alone cannot catch incompatible checkout request bodies.
+const spec = JSON.parse(readFileSync(SPEC_FILE, 'utf8'));
+const program = ts.createProgram([join(SOURCE_DIR, 'features/orders/model/orderTypes.ts')], { strict: true, noEmit: true });
+const checker = program.getTypeChecker();
+const typesSource = program.getSourceFile(join(SOURCE_DIR, 'features/orders/model/orderTypes.ts'));
+const declarations = new Map(typesSource.statements.filter(ts.isInterfaceDeclaration).map(node => [node.name.text, node]));
+function checkDto(name, schemaName) {
+  const schema = spec.components.schemas[schemaName];
+  const type = checker.getTypeAtLocation(declarations.get(name));
+  for (const field of schema.required ?? []) {
+    const property = type.getProperty(field);
+    if (!property || property.flags & ts.SymbolFlags.Optional) throw new Error(`${name}.${field} majburiy`);
+  }
+  for (const [field, rule] of Object.entries(schema.properties)) {
+    const property = type.getProperty(field);
+    if (!property) continue;
+    const fieldType = checker.getTypeOfSymbolAtLocation(property, declarations.get(name));
+    const alternatives = fieldType.isUnion() ? fieldType.types : [fieldType];
+    for (const variant of alternatives) {
+      if (variant.flags & ts.TypeFlags.Undefined) continue;
+      if (rule.enum && (!(variant.flags & ts.TypeFlags.StringLiteral) || !rule.enum.includes(variant.value))) {
+        throw new Error(`${name}.${field}: kontraktdagi enumga mos emas`);
+      }
+      if (rule.type === 'string' && !(variant.flags & ts.TypeFlags.StringLike)) throw new Error(`${name}.${field}: string bo‘lishi kerak`);
+    }
+  }
+}
+checkDto('CreateCheckoutPayload', 'CreateCheckoutDto');
+checkDto('CheckoutAddress', 'CheckoutAddressDto');
+console.log('Checkout DTO maydonlari va to‘lov qiymatlari kontraktga mos. ✓');

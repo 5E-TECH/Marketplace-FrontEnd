@@ -1,39 +1,18 @@
-import { Camera as CameraOutlined, CircleCheckBig as CheckCircleFilled, Store as ShopOutlined } from 'lucide-react';
-import { App, Button, Tag, Typography, Upload } from 'antd';
-import type { UploadProps } from 'antd';
+import { CircleCheckBig as CheckCircleFilled, Store as ShopOutlined } from 'lucide-react';
+import { Tag, Typography } from 'antd';
 import type { ShopProfile } from '../model/shopProfile';
 import type { SellerShopStatus } from '../api/sellerShopApi';
 import styles from './ShopProfileHero.module.css';
 
 interface ShopProfileHeroProps {
   profile: ShopProfile;
-  editing: boolean;
   status: SellerShopStatus;
-  onImageSelect: (kind: 'logo' | 'banner', file: File) => void | Promise<void>;
 }
 
 export function ShopProfileHero({
   profile,
-  editing,
   status,
-  onImageSelect,
 }: ShopProfileHeroProps) {
-  const { message } = App.useApp();
-  const createUploadProps = (
-    kind: 'logo' | 'banner',
-  ): UploadProps => ({
-    accept: 'image/jpeg,image/png,image/webp',
-    showUploadList: false,
-    beforeUpload: async (file) => {
-      try {
-        await onImageSelect(kind, file);
-      } catch (error) {
-        void message.error(error instanceof Error ? error.message : 'Rasmni yuklab bo‘lmadi');
-      }
-      return false;
-    },
-  });
-
   return (
     <section className={styles.hero} aria-label="Do‘kon ko‘rinishi">
       <div
@@ -51,17 +30,7 @@ export function ShopProfileHero({
             <span>Do‘kon banneri</span>
           </div>
         ) : null}
-        {editing ? (
-          <Upload {...createUploadProps('banner')}>
-            <Button
-              className={styles.bannerAction}
-              icon={<CameraOutlined />}
-              aria-label="Banner rasmini almashtirish"
-            >
-              Bannerni almashtirish
-            </Button>
-          </Upload>
-        ) : null}
+
       </div>
 
       <div className={styles.identity}>
@@ -73,16 +42,7 @@ export function ShopProfileHero({
               <ShopOutlined aria-hidden />
             )}
           </div>
-          {editing ? (
-            <Upload {...createUploadProps('logo')}>
-              <Button
-                className={styles.logoAction}
-                shape="circle"
-                icon={<CameraOutlined />}
-                aria-label="Logo rasmini almashtirish"
-              />
-            </Upload>
-          ) : null}
+  
         </div>
 
         <div className={styles.identityCopy}>

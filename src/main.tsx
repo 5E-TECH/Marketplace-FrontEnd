@@ -1,4 +1,5 @@
 import { StrictMode } from 'react';
+import { CanceledError } from 'axios';
 import { createRoot } from 'react-dom/client';
 import { AppProviders } from './app/providers/AppProviders';
 import { AppRouter } from './app/router/AppRouter';
@@ -18,7 +19,11 @@ const ejectHttpInterceptors = setupHttpInterceptors({
   // Access token muddati tuganda (odatda 1 soat) sessiyani uzmaymiz:
   // HttpOnly refresh cookie orqali yangi token olinadi va so'rov qaytariladi.
   refreshAccessToken: async () => {
+    const sessionVersion = store.getState().auth.sessionVersion;
     const { accessToken } = await refreshAccessToken();
+    if (store.getState().auth.sessionVersion !== sessionVersion) {
+      throw new CanceledError('Sessiya o‘zgardi');
+    }
     store.dispatch(accessTokenRefreshed({ accessToken }));
     return accessToken;
   },

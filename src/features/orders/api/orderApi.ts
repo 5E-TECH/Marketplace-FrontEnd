@@ -99,9 +99,9 @@ export async function getAdminOrders(params: AdminOrderListParams, signal?: Abor
 }
 export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
 
-export async function createCheckout({ idempotencyKey, ...payload }: CreateCheckoutPayload): Promise<unknown> {
+export async function createCheckout({ idempotencyKey, sessionId, ...payload }: CreateCheckoutPayload): Promise<unknown> {
   const { data } = await httpClient.post<unknown>('/checkout', payload, {
-    headers: { 'Idempotency-Key': idempotencyKey },
+    headers: { 'Idempotency-Key': idempotencyKey, 'X-Session-Id': sessionId },
   });
   return unwrapApiData(data);
 }
