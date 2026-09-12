@@ -12,14 +12,22 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL: 'http://127.0.0.1:5273',
     channel: 'chrome',
     headless: true,
     trace: 'retain-on-failure',
   },
+  // DIQQAT — port ataylab 5273, Vite'ning standart 5173 si EMAS.
+  // `reuseExistingServer: true` portda nima turgan bo'lsa o'shani ishlatadi:
+  // 5173 da boshqa loyihaning dev serveri turgan bo'lsa, testlar jimgina
+  // BOShQA ILOVAGA qarshi yuradi va hammasi yiqiladi (2026-09-12 da aynan
+  // shunday bo'ldi — post_control_system ning `base: "/admin/"` serveri
+  // ushlanib, admin testlari 404 bergan).
+  // `--strictPort` esa port band bo'lsa Vite'ni jimgina boshqa portga
+  // o'tkazmasdan, ochiq xato bilan to'xtatadi.
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1',
-    url: 'http://127.0.0.1:5173',
+    command: 'npm run dev -- --host 127.0.0.1 --port 5273 --strictPort',
+    url: 'http://127.0.0.1:5273',
     reuseExistingServer: true,
     timeout: 120_000,
   },

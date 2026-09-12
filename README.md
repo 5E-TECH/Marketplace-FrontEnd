@@ -18,7 +18,7 @@ Talab: **Node 22+**.
 
 ```bash
 npm install
-npm run dev            # http://localhost:5173
+npm run dev            # http://localhost:5273
 ```
 
 Dev'da API bir xil origin orqali ishlaydi: Vite `/api` ni

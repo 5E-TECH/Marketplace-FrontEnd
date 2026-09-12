@@ -38,7 +38,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      port: 5173,
+      // Standart 5173 emas: boshqa loyihalar bilan to'qnashmasligi uchun
+      // (playwright.config.ts dagi izohga qarang).
+      port: 5273,
       proxy: {
         '/api': {
           target: devApiTarget,
