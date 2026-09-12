@@ -129,6 +129,8 @@
 :global(.app-navigation .ant-menu-item svg) {
   width: 20px;
   height: 20px;
+  min-width: 20px;
+  flex: 0 0 20px;
   stroke-width: 1.8;
   color: var(--color-token-7f8ca8);
 }
@@ -154,6 +156,12 @@
 :global(.admin-navigation-shell) { overflow-y: auto; scrollbar-width: thin; }
 :global(.admin-navigation .ant-menu-item) { height: 52px; margin-block: 4px; font-size: 14px; line-height: 52px; letter-spacing: .01em; }
 :global(.admin-navigation .ant-menu-item svg) { width: 22px; height: 22px; stroke-width: 2; }
+:global(.admin-navigation .ant-menu-item .ant-menu-item-icon) {
+  width: 22px !important;
+  min-width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 22px;
+}
 
 :global(.app-navigation-utility.ant-menu) {
   margin-top: auto;
@@ -167,6 +175,10 @@
 
 :global(.ant-layout-sider-collapsed .app-navigation .ant-menu-item) {
   padding-inline: calc(50% - 9px) !important;
+}
+
+:global(.ant-layout-sider-collapsed .admin-navigation .ant-menu-item) {
+  padding-inline: calc(50% - 11px) !important;
 }
 
 :global(.app-navigation-utility .ant-menu-item-danger) {
@@ -196,6 +208,23 @@
   background: var(--color-surface-subtle);
   border-color: var(--color-border);
   border-radius: var(--radius-md);
+}
+
+.globalSearch :global(svg) {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+}
+
+.modeBadge {
+  margin: 0;
+  padding: 4px 10px;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
 }
 
 .globalSearch:hover,
@@ -392,6 +421,11 @@
 
   .globalSearch {
     display: none;
+  }
+
+  .modeBadge {
+    padding-inline: 7px;
+    font-size: 10px;
   }
 
   .headerActions {

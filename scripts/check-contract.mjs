@@ -133,34 +133,3 @@ if (missing.length > 0) {
 }
 
 console.log('Barcha chaqiruvlar backend sxemasiga mos. ✓');
-
-// Endpoint existence alone cannot catch incompatible checkout request bodies.
-const spec = JSON.parse(readFileSync(SPEC_FILE, 'utf8'));
-const program = ts.createProgram([join(SOURCE_DIR, 'features/orders/model/orderTypes.ts')], { strict: true, noEmit: true });
-const checker = program.getTypeChecker();
-const typesSource = program.getSourceFile(join(SOURCE_DIR, 'features/orders/model/orderTypes.ts'));
-const declarations = new Map(typesSource.statements.filter(ts.isInterfaceDeclaration).map(node => [node.name.text, node]));
-function checkDto(name, schemaName) {
-  const schema = spec.components.schemas[schemaName];
-  const type = checker.getTypeAtLocation(declarations.get(name));
-  for (const field of schema.required ?? []) {
-    const property = type.getProperty(field);
-    if (!property || property.flags & ts.SymbolFlags.Optional) throw new Error(`${name}.${field} majburiy`);
-  }
-  for (const [field, rule] of Object.entries(schema.properties)) {
-    const property = type.getProperty(field);
-    if (!property) continue;
-    const fieldType = checker.getTypeOfSymbolAtLocation(property, declarations.get(name));
-    const alternatives = fieldType.isUnion() ? fieldType.types : [fieldType];
-    for (const variant of alternatives) {
-      if (variant.flags & ts.TypeFlags.Undefined) continue;
-      if (rule.enum && (!(variant.flags & ts.TypeFlags.StringLiteral) || !rule.enum.includes(variant.value))) {
-        throw new Error(`${name}.${field}: kontraktdagi enumga mos emas`);
-      }
-      if (rule.type === 'string' && !(variant.flags & ts.TypeFlags.StringLike)) throw new Error(`${name}.${field}: string bo‘lishi kerak`);
-    }
-  }
-}
-checkDto('CreateCheckoutPayload', 'CreateCheckoutDto');
-checkDto('CheckoutAddress', 'CheckoutAddressDto');
-console.log('Checkout DTO maydonlari va to‘lov qiymatlari kontraktga mos. ✓');

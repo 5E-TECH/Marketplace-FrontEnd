@@ -10,7 +10,6 @@ import {
   Store as ShopOutlined,
   UserRoundCog,
   ShieldCheck,
-  ShoppingCart,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -21,7 +20,6 @@ const SELLER_ONLY: readonly UserRole[] = ['SELLER'];
 /** Operator ham ishlaydigan bo'limlar (backend'da @Roles(SELLER, OPERATOR)). */
 const SELLER_AND_OPERATOR: readonly UserRole[] = ['SELLER', 'OPERATOR'];
 const ADMIN_ONLY: readonly UserRole[] = ['ADMIN', 'SUPERADMIN'];
-const BUYER_ONLY: readonly UserRole[] = ['BUYER'];
 
 export interface AppRouteMeta {
   path: string;
@@ -37,7 +35,6 @@ export const appRouteConfig: AppRouteMeta[] = [
   { path: '/', label: 'nav.home', icon: <BarChartOutlined />, section: 'main', roles: SELLER_ONLY },
   { path: '/admin/shops', label: 'nav.adminShops', icon: <ShieldCheck />, section: 'main', roles: ADMIN_ONLY },
   { path: '/admin/orders', label: 'nav.adminOrders', icon: <ProfileOutlined />, section: 'main', roles: ADMIN_ONLY },
-  { path: '/checkout', label: 'nav.checkout', icon: <ShoppingCart />, section: 'main', roles: BUYER_ONLY },
   { path: '/users', label: 'nav.users', icon: <UserRoundCog />, section: 'main', roles: SELLER_ONLY },
   { path: '/shop', label: 'nav.shop', icon: <ShopOutlined />, section: 'main', roles: SELLER_ONLY },
   { path: '/products', label: 'nav.products', icon: <AppstoreOutlined />, section: 'main', roles: SELLER_ONLY },

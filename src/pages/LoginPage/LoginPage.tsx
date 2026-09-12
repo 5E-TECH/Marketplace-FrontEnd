@@ -1,7 +1,7 @@
 import { LockKeyhole as LockFilled } from 'lucide-react';
 import { App, Card, Typography } from 'antd';
 import { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { LoginBrand } from './components/LoginBrand/LoginBrand';
@@ -63,9 +63,6 @@ export default function LoginPage() {
               isSubmitting={loginMutation.isPending}
               onSubmit={handleSubmit}
             />
-            <Typography.Paragraph className={styles.switchAuth}><Link to="/forgot-password">{t('auth.forgotPassword')}</Link></Typography.Paragraph>
-            <Typography.Paragraph className={styles.switchAuth}>{t('auth.noAccount')} <Link to="/register/account">{t('auth.register')}</Link></Typography.Paragraph>
-
             <Typography.Text className={styles.security}>
               <LockFilled aria-hidden /> {t('auth.securityNotice')}
             </Typography.Text>

@@ -10,7 +10,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:?VITE_API_URL kerak — masalan https://api.example.com/api/v1}
+        VITE_API_URL: ${VITE_API_URL:?VITE_API_URL kerak — masalan https://api.elchimarket.uz/api/v1}
         # Domen hali yo'q va API HTTP orqali sinalayotgan bo'lsa `true`.
         VITE_ALLOW_INSECURE_API: ${VITE_ALLOW_INSECURE_API:-false}
     image: marketplace-frontend:latest

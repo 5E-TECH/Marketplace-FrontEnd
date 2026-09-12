@@ -53,18 +53,6 @@
   gap: 0.5rem;
 }
 
-.switchAuth {
-  margin: 1rem 0 0 !important;
-  color: var(--color-token-737b91);
-  font-size: 0.82rem;
-  text-align: center;
-}
-
-.switchAuth a {
-  color: var(--color-token-6750e7);
-  font-weight: 700;
-}
-
 @media (max-width: 575px) {
   .cardContent {
     padding: 1.5rem 1.25rem;

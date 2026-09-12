@@ -5,7 +5,7 @@ import {
   PanelLeftOpen as MenuUnfoldOutlined,
   Search as SearchOutlined,
 } from 'lucide-react';
-import { Avatar, Badge, Button, Divider, Flex, Input, Layout, Typography } from 'antd';
+import { Avatar, Badge, Button, Divider, Flex, Input, Layout, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import type { AuthUser } from '../../features/auth/model/authTypes';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -20,6 +20,8 @@ interface AppHeaderProps {
   onLogout: () => void;
   onNavigate: (path: string) => void;
   onGlobalSearch: (query: string) => void;
+  modeLabel?: string;
+  profilePath?: string;
 }
 
 export function AppHeader({
@@ -30,6 +32,8 @@ export function AppHeader({
   onLogout,
   onNavigate,
   onGlobalSearch,
+  modeLabel,
+  profilePath = '/profile',
 }: AppHeaderProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,9 +47,10 @@ export function AppHeader({
             aria-label={mobile || collapsed ? t('header.openMenu') : t('header.closeMenu')}
             onClick={onMenuToggle}
           />
-          {user?.role !== 'BUYER' ? <Input.Search
+          {modeLabel ? <Tag className={styles.modeBadge}>{modeLabel}</Tag> : null}
+          <Input.Search
             className={styles.globalSearch}
-            prefix={<SearchOutlined />}
+            prefix={<SearchOutlined size={15} aria-hidden />}
             placeholder={t('header.search')}
             aria-label={t('header.globalSearch')}
             value={searchQuery}
@@ -55,7 +60,7 @@ export function AppHeader({
               const normalizedQuery = value.trim();
               if (normalizedQuery) onGlobalSearch(normalizedQuery);
             }}
-          /> : null}
+          />
         </Flex>
 
         <Flex className={styles.headerActions} align="center">
@@ -75,7 +80,7 @@ export function AppHeader({
             className={styles.accountSummary}
             type="button"
             aria-label={t('header.profile')}
-            onClick={() => onNavigate('/profile')}
+            onClick={() => onNavigate(profilePath)}
           >
             <Avatar className={styles.accountAvatar} size={34} src={user?.avatarUrl}>
               {user?.name?.slice(0, 2).toUpperCase() ?? 'AK'}

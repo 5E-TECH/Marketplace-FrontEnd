@@ -8,13 +8,14 @@ import { SeoManager } from '../../shared/seo/SeoManager';
 import { SellerAccessGuard } from '../../features/auth/ui/SellerAccessGuard/SellerAccessGuard';
 import { SellerOnlyRoute } from '../../features/auth/ui/SellerOnlyRoute/SellerOnlyRoute';
 import { AdminOnlyRoute } from '../../features/auth/ui/AdminOnlyRoute/AdminOnlyRoute';
+import { SuperAdminOnlyRoute } from '../../features/auth/ui/SuperAdminOnlyRoute/SuperAdminOnlyRoute';
 import { useAppSelector } from '../store/hooks';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
 
 const MainLayout = lazy(() => import('../../layouts/MainLayout/MainLayout'));
+const AdminLayout = lazy(() => import('../../layouts/AdminLayout/AdminLayout'));
 const HomePage = lazy(routeImports.home);
 const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
-const RegisterPage = lazy(() => import('../../pages/RegisterPage/RegisterPage'));
 const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'));
 const ProductsPage = lazy(routeImports.products);
 const ProductEditorPage = lazy(routeImports.productEditor);
@@ -37,11 +38,8 @@ const AdminUserCreatePage = lazy(routeImports.adminUserCreate);
 const AdminUserDetailPage = lazy(routeImports.adminUserDetail);
 const AdminFinancePage = lazy(routeImports.adminFinance);
 const AdminSystemHealthPage = lazy(routeImports.adminSystemHealth);
-const CheckoutPage = lazy(routeImports.checkout);
 const AdminOverviewPage = lazy(routeImports.adminOverview);
 const AdminResourcePage = lazy(routeImports.adminResource);
-const AuthRecoveryPage = lazy(routeImports.authRecovery);
-const AccountRegisterPage = lazy(() => import('../../pages/AccountRegisterPage/AccountRegisterPage'));
 const AdminCategoriesPage = lazy(() => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
@@ -50,7 +48,6 @@ const SharedUiTestPage = import.meta.env.DEV
 function RoleHomeRoute() {
   const role = useAppSelector(selectAuthUser)?.role;
   if (role === 'ADMIN' || role === 'SUPERADMIN') return <Navigate to="/admin/overview" replace />;
-  if (role === 'BUYER') return <Navigate to="/checkout" replace />;
   return <SellerAccessGuard><HomePage /></SellerAccessGuard>;
 }
 
@@ -65,21 +62,11 @@ export function AppRouter() {
           ) : null}
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="register/account" element={<AccountRegisterPage />} />
-            <Route path="forgot-password" element={<AuthRecoveryPage />} />
-            <Route path="reset-password" element={<AuthRecoveryPage />} />
-            <Route path="verify-phone" element={<AuthRecoveryPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
-              <Route index element={<RoleHomeRoute />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="support" element={<SupportPage />} />
-              <Route path="checkout" element={<CheckoutPage />} />
-              <Route element={<AdminOnlyRoute />}>
+            <Route element={<AdminOnlyRoute />}>
+              <Route element={<AdminLayout />}>
                 <Route path="admin/overview" element={<AdminOverviewPage />} />
                 <Route path="admin/shops" element={<AdminShopsPage />} />
                 <Route path="admin/orders" element={<AdminOrdersPage />} />
@@ -88,11 +75,21 @@ export function AppRouter() {
                 <Route path="admin/users" element={<AdminUsersPage />} />
                 <Route path="admin/users/new" element={<AdminUserCreatePage />} />
                 <Route path="admin/users/:userId" element={<AdminUserDetailPage />} />
-                <Route path="admin/finance" element={<AdminFinancePage />} />
+                <Route element={<SuperAdminOnlyRoute />}>
+                  <Route path="admin/finance" element={<AdminFinancePage />} />
+                  <Route path="admin/team" element={<AdminResourcePage />} />
+                </Route>
                 <Route path="admin/system-settings" element={<AdminSystemHealthPage />} />
                 <Route path="admin/categories" element={<AdminCategoriesPage />} />
+                <Route path="admin/profile" element={<ProfilePage />} />
                 <Route path="admin/:module" element={<AdminResourcePage />} />
               </Route>
+            </Route>
+            <Route element={<MainLayout />}>
+              <Route index element={<RoleHomeRoute />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="support" element={<SupportPage />} />
               <Route element={<SellerAccessGuard />}>
                 <Route path="products" element={<ProductsPage />} />
                 <Route path="products/new" element={<ProductEditorPage />} />

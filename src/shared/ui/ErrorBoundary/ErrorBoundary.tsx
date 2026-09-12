@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button, Result, Typography } from 'antd';
+import styles from './ErrorBoundary.module.css';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -45,7 +46,8 @@ export class ErrorBoundary extends Component<
     }
 
     return (
-      <Result
+      <main className={styles.page}>
+        <Result
         status="error"
         title="Nimadir noto‘g‘ri ketdi"
         subTitle="Sahifani ko‘rsatib bo‘lmadi. Qayta urinib ko‘ring — muammo takrorlansa, sahifani yangilang."
@@ -63,7 +65,8 @@ export class ErrorBoundary extends Component<
             <code>{error.message}</code>
           </Typography.Paragraph>
         ) : null}
-      </Result>
+        </Result>
+      </main>
     );
   }
 }

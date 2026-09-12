@@ -14,6 +14,9 @@ test('pending list va detail statistikasi ko‘rinadi, approve ishlaydi', async 
   let approved = false;
   await page.route('**/api/v1/admin/shops/15/approve', (route) => { approved = true; return route.fulfill({ status: 201, body: '{}' }); });
   await page.goto('/admin/shops');
+  const tablePanel = page.locator('section').filter({ has: page.getByRole('table') });
+  await expect(tablePanel).toContainText('Market');
+  await expect(tablePanel).toContainText('Jami 1 ta');
   await expect(page.getByText('Ali Market', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
   await expect(page.getByText('12', { exact: true })).toBeVisible();

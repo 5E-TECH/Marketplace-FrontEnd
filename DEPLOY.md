@@ -51,7 +51,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up -d
 Serverda `/home/deploy/marketplace-frontend/.env.production`:
 
 ```env
-VITE_API_URL=https://api.marketplace.uz/api/v1
+VITE_API_URL=https://api.elchimarket.uz/api/v1
 ```
 
 > Bu qiymat build vaqtida bundle ichiga yoziladi. O'zgartirsangiz konteynerni
@@ -90,7 +90,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up -d --bui
 
 ```bash
 curl -I https://kabinet.marketplace.uz                     # 200 + HSTS + CSP
-curl -s https://api.marketplace.uz/api/v1/health/ready | jq # ok / degraded
+curl -s https://api.elchimarket.uz/api/v1/health/ready | jq # ok / degraded
 docker compose -f docker-compose.prod.yml logs -f frontend
 ```
 
