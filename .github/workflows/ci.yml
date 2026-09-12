@@ -35,11 +35,22 @@ jobs:
 
       # E2E testlar mock javoblar ustida ishlaydi, shuning uchun backend
       # kontraktidagi o'zgarishni ular ushlamaydi — bu qadam ushlaydi.
-      - name: Kontrakt tekshiruvi
+      - name: Kontrakt tekshiruvi (endpoint yo'llari)
         run: npm run contract:check
 
+      # `contract:check` faqat endpoint BOR-YO'Qligini biladi. Bu qadam
+      # generatsiya qilingan tiplar sxema bilan bir xilligini tekshiradi;
+      # `src/shared/api/contractAssertions.ts` esa ularni qo'lda yozilgan
+      # model tiplariga taqqoslaydi. Ya'ni DTO maydoni nomi o'zgarsa
+      # `typecheck` qadami qizil bo'ladi (C5.6 TC2).
+      - name: Kontrakt tekshiruvi (generatsiya qilingan tiplar)
+        run: npm run api:check
+
       - name: Ops script sintaksisi
-        run: node --check scripts/check-contract.mjs
+        run: |
+          node --check scripts/check-contract.mjs
+          node --check scripts/generate-api.mjs
+          node --check scripts/sync-contract.mjs
 
       - name: Build (production)
         run: npm run build
@@ -97,16 +108,20 @@ jobs:
             --exclude 'dist/' \
             --exclude 'playwright-report/' \
             --exclude 'test-results/' \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
-            ./ "$DEPLOY_USER@$DEPLOY_HOST:/srv/marketplace-frontend/"
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+                 -o ServerAliveInterval=30 -o ServerAliveCountMax=20" \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:/home/deploy/marketplace-frontend/"
 
       - name: Konteynerni yangilash
         run: |
+          # Keepalive: build uzoq davom etadi va ulanish jim turadi.
+          # Backend deploy'ida aynan shu sabab uzilishlar bo'lgan.
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=20 \
             "$DEPLOY_USER@$DEPLOY_HOST" <<'REMOTE'
           set -euo pipefail
-          cd /srv/marketplace-frontend
+          cd /home/deploy/marketplace-frontend
           test -f .env.production
 
           # Backend stack'i `marketplace_edge` tarmog'ini yaratadi.

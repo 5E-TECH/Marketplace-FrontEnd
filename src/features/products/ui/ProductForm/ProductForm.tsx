@@ -71,8 +71,10 @@ export function ProductForm({
   const { message } = App.useApp();
   const { t } = useTranslation();
   const categoriesQuery = usePublicCategoriesQuery();
+  // Faol bo'lmagan kategoriya ro'yxatda ko'rinadi, lekin tanlanmaydi —
+  // tahrirlanayotgan eski mahsulot o'sha kategoriyada bo'lishi mumkin.
   const categoryOptions = useMemo(
-    () => createCategoryOptions(categoriesQuery.data ?? []),
+    () => createCategoryOptions(categoriesQuery.data ?? [], 0, true),
     [categoriesQuery.data],
   );
   const initialFiles = useMemo(() => createInitialFiles(initialValues), [initialValues]);

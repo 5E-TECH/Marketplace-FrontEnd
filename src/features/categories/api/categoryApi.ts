@@ -11,6 +11,7 @@ function parseCategory(value: unknown): Category {
 }
 
 export async function getAdminCategories(signal?: AbortSignal): Promise<Category[]> { const { data } = await httpClient.get<unknown>('/admin/categories', { signal }); const value = unwrapApiData(data); if (!Array.isArray(value)) throw new Error('Kategoriyalar ro‘yxati noto‘g‘ri formatda'); return value.map(parseCategory); }
+// `/admin/categories` dan farqi: ADMIN roli talab qilinmaydi — mahsulot formasida sotuvchi ham kategoriya tanlay oladi.
 export async function getPublicCategories(signal?: AbortSignal): Promise<Category[]> { const { data } = await httpClient.get<unknown>('/categories', { signal }); const value = unwrapApiData(data); if (!Array.isArray(value)) throw new Error('Kategoriyalar ro‘yxati noto‘g‘ri formatda'); return value.map(parseCategory); }
 export async function createCategory(payload: CategoryPayload): Promise<Category> { const { data } = await httpClient.post<unknown>('/admin/categories', payload); return parseCategory(unwrapApiData(data)); }
 export async function updateCategory({ id, payload }: { id: string; payload: CategoryPayload }): Promise<Category> { const { data } = await httpClient.patch<unknown>(`/admin/categories/${encodeURIComponent(id)}`, payload); return parseCategory(unwrapApiData(data)); }

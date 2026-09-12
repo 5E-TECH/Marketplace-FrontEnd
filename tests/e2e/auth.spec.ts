@@ -53,6 +53,16 @@ test('TC2: 401 javobi sessiyani tozalab login sahifasiga chiqaradi', async ({
       body: JSON.stringify({ message: 'Unauthorized' }),
     });
   });
+  // 401 kelganda ilova avval tokenni yangilashga urinadi. Refresh ham
+  // yaroqsiz bo'lgan holat shu yerda tekshiriladi — mocksiz so'rov javobsiz
+  // qolib, sahifa "Yuklanmoqda" holatida qotib turardi.
+  await page.route('**/api/v1/auth/refresh', async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Unauthorized' }),
+    });
+  });
 
   await page.goto('/');
 

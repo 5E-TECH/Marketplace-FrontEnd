@@ -120,25 +120,34 @@ export async function mockProducts(page: Page): Promise<void> {
   });
 }
 
+/**
+ * Kategoriya daraxti — mahsulot formasidagi tanlash ro'yxati shunga tayanadi.
+ * Ichma-ich tugun ataylab bor: `createCategoryOptions` chuqurlikni "— " bilan
+ * ko'rsatadi, tekis ro'yxatda bu xatti-harakat umuman sinalmay qolardi.
+ */
+export const publicCategoryTree = [
+  {
+    id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null,
+    iconUrl: null, sortOrder: 1, isActive: true,
+    children: [
+      {
+        id: '2', name: 'Smartfonlar', slug: 'smartfonlar', parentId: '1',
+        iconUrl: null, sortOrder: 1, isActive: true, children: [],
+      },
+    ],
+  },
+  {
+    id: '3', name: 'Kiyim', slug: 'kiyim', parentId: null,
+    iconUrl: null, sortOrder: 2, isActive: true, children: [],
+  },
+] as const;
+
 export async function mockPublicCategories(page: Page): Promise<void> {
   await page.route('**/api/v1/categories', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        data: [
-          {
-            id: '1',
-            name: 'Elektronika',
-            slug: 'elektronika',
-            parentId: null,
-            iconUrl: null,
-            sortOrder: 1,
-            isActive: true,
-            children: [],
-          },
-        ],
-      }),
+      body: JSON.stringify({ statusCode: 200, message: 'OK', data: publicCategoryTree }),
     });
   });
 }
