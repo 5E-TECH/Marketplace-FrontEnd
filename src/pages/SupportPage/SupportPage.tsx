@@ -17,7 +17,7 @@ export default function SupportPage() {
             <Typography.Paragraph type="secondary">
               Ish kunlari 09:00–18:00 oralig‘ida yordam beramiz.
             </Typography.Paragraph>
-            <Button type="primary">Qo‘ng‘iroq qilish</Button>
+            <Button type="primary" disabled title="Aloqa raqami hali sozlanmagan">Qo‘ng‘iroq qilish</Button>
           </Card>
         </Col>
         <Col xs={24} md={12}>
@@ -27,7 +27,7 @@ export default function SupportPage() {
             <Typography.Paragraph type="secondary">
               Muammoni yozib qoldiring, mutaxassis javob beradi.
             </Typography.Paragraph>
-            <Button>Chatni boshlash</Button>
+            <Button disabled title="Yordam chati hali ulanmagan">Chatni boshlash</Button>
           </Card>
         </Col>
       </Row>

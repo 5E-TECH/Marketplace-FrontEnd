@@ -2,7 +2,7 @@ import { App, Button, Input, Select, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ArrowRight, Image as ImageIcon, RotateCcw, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   useAdminProductsQuery,
   useReactivateAdminProductMutation,
@@ -33,7 +33,9 @@ export default function AdminProductsPage() {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('search') ?? '';
+  const setSearch = (value: string) => setSearchParams(value ? { search: value } : {}, { replace: true });
   const [shopId, setShopId] = useState('');
   const [status, setStatus] = useState<StatusFilter>('ALL');
   const [moderation, setModeration] = useState<ModerationFilter>('ALL');

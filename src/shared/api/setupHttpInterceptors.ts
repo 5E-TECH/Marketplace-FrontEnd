@@ -91,12 +91,14 @@ export function setupHttpInterceptors({
       try {
         const accessToken = await refreshOnce();
         config.headers.set('Authorization', `Bearer ${accessToken}`);
-        return await httpClient.request(config);
-      } catch {
-        // Refresh ham ishlamadi — sessiya haqiqatan tugagan.
-        onUnauthorized();
-        return Promise.reject(toError(error));
+      } catch (refreshError) {
+        if (axios.isAxiosError(refreshError) && refreshError.response?.status === 401) {
+          onUnauthorized();
+        }
+        return Promise.reject(toError(refreshError));
       }
+      // Retried request errors belong to that request, not to token refresh.
+      return httpClient.request(config);
     },
   );
 

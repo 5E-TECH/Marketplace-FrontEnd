@@ -81,25 +81,19 @@ test('joriy do‘kon ma’lumotlari API javobidan to‘ldiriladi', async ({ page
   await expect(page.getByLabel('Tavsif')).toHaveValue(sellerShop.description);
 });
 
-test('logo Base64 preview bo‘lib qoladi va PATCH payloadga yuborilmaydi', async ({ page }) => {
+test('logo va banner havolalari saqlanadi va reload dan keyin ko‘rinadi', async ({ page }) => {
   const apiState = await mockSellerShopApi(page);
   await page.goto('/shop');
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
-
-  const logoChooser = page.waitForEvent('filechooser');
-  await page.getByRole('button', { name: 'Logo rasmini almashtirish' }).click();
-  await (await logoChooser).setFiles({
-    name: 'store-logo.png',
-    mimeType: 'image/png',
-    buffer: Buffer.from('market-logo'),
-  });
-
-  const logo = page.getByRole('img', { name: /MarketHub Store logotipi/i });
-  await expect(logo).toHaveAttribute('src', /^data:image\/png;base64,/);
+  await page.getByLabel('Logo havolasi').fill('https://cdn.example.com/logo.png');
+  await page.getByLabel('Banner havolasi').fill('https://cdn.example.com/banner.png');
   await page.getByRole('button', { name: 'Saqlash' }).click();
-
-  expect(apiState.patchBody?.logoUrl).toBeUndefined();
-  await expect(logo).toHaveCount(0);
+  await expect(page.getByText('Do‘kon ma’lumotlari saqlandi')).toBeVisible();
+  expect(apiState.patchBody?.logoUrl).toBe('https://cdn.example.com/logo.png');
+  expect(apiState.patchBody?.bannerUrl).toBe('https://cdn.example.com/banner.png');
+  await page.reload();
+  await expect(page.getByRole('img', { name: /MarketHub Store logotipi/ })).toHaveAttribute('src', 'https://cdn.example.com/logo.png');
+  await expect(page.getByLabel('Banner havolasi')).toHaveValue('https://cdn.example.com/banner.png');
 });
 
 test('do‘kon profili 375px ekranda horizontal overflow bermaydi', async ({

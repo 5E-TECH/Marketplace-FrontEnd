@@ -7,7 +7,7 @@ import {
   Store as ShopOutlined,
   X as CloseOutlined,
 } from 'lucide-react';
-import { Button, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
+import { Button, Col, Form, Input, Row, Space, Typography } from 'antd';
 import type { FormInstance } from 'antd';
 import type { ShopProfileFormValues } from '../model/shopProfile';
 import styles from './ShopProfileForm.module.css';
@@ -22,8 +22,6 @@ interface ShopProfileFormProps {
   onSubmit: (values: ShopProfileFormValues) => void;
 }
 
-const regionOptions = [{ value: '1', label: 'Toshkent shahri' }];
-const districtOptions = [{ value: '10', label: 'Yashnobod tumani' }];
 
 export function ShopProfileForm({
   form,
@@ -109,7 +107,7 @@ export function ShopProfileForm({
               name="regionId"
               rules={[{ required: true, message: 'Viloyatni tanlang' }]}
             >
-              <Select options={regionOptions} placeholder="Viloyatni tanlang" />
+              <Input inputMode="numeric" placeholder="Viloyat ID" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -118,7 +116,7 @@ export function ShopProfileForm({
               name="districtId"
               rules={[{ required: true, message: 'Tumanni tanlang' }]}
             >
-              <Select options={districtOptions} placeholder="Tumanni tanlang" />
+              <Input inputMode="numeric" placeholder="Tuman ID" />
             </Form.Item>
           </Col>
         </Row>
@@ -142,6 +140,12 @@ export function ShopProfileForm({
           <Input.TextArea rows={editing ? 3 : 1} maxLength={500} showCount={editing} />
         </Form.Item>
 
+        <Form.Item name="logoUrl" label="Logo havolasi" rules={[{ type: 'url', message: 'To‘g‘ri rasm havolasini kiriting' }]}>
+          <Input placeholder="https://cdn.example.com/logo.png" />
+        </Form.Item>
+        <Form.Item name="bannerUrl" label="Banner havolasi" rules={[{ type: 'url', message: 'To‘g‘ri rasm havolasini kiriting' }]}>
+          <Input placeholder="https://cdn.example.com/banner.jpg" />
+        </Form.Item>
       </Form>
     </section>
   );

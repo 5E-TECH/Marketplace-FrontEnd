@@ -43,7 +43,7 @@ export function AppHeader({
             aria-label={mobile || collapsed ? t('header.openMenu') : t('header.closeMenu')}
             onClick={onMenuToggle}
           />
-          <Input.Search
+          {user?.role !== 'BUYER' ? <Input.Search
             className={styles.globalSearch}
             prefix={<SearchOutlined />}
             placeholder={t('header.search')}
@@ -55,16 +55,18 @@ export function AppHeader({
               const normalizedQuery = value.trim();
               if (normalizedQuery) onGlobalSearch(normalizedQuery);
             }}
-          />
+          /> : null}
         </Flex>
 
         <Flex className={styles.headerActions} align="center">
           <span className={styles.languageButton}><LanguageSwitcher /></span>
-          <Badge dot className={styles.notificationBadge} offset={[-7, 7]}>
+          <Badge className={styles.notificationBadge} offset={[-7, 7]}>
             <Button
               type="text"
               className={styles.notificationButton}
               icon={<NotificationOutlined />}
+              disabled
+              title="Bildirishnomalar hali mavjud emas"
               aria-label={t('header.notifications')}
             />
           </Badge>

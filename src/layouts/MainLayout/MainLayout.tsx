@@ -67,7 +67,8 @@ export default function MainLayout() {
             }
             onLogout={handleLogout}
             onGlobalSearch={(query) => {
-              const destination = `/products?search=${encodeURIComponent(query)}`;
+              const target = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? '/admin/products' : user?.role === 'OPERATOR' ? '/orders' : '/products';
+              const destination = `${target}?search=${encodeURIComponent(query)}`;
               prefetchRoute(destination);
               void navigate(destination);
             }}

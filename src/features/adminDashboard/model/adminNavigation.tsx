@@ -5,7 +5,7 @@ import type { TranslationKey } from '../../../shared/i18n/translations';
 export interface AdminNavItem { path: string; label: TranslationKey; icon?: ReactNode }
 export interface AdminNavGroup { key: string; label: TranslationKey; icon: ReactNode; items: AdminNavItem[] }
 
-export const adminNavigation: AdminNavGroup[] = [
+const allAdminNavigation: AdminNavGroup[] = [
   { key: 'overview', label: 'adminNav.overview', icon: <ChartNoAxesCombined />, items: [{ path: '/admin/overview', label: 'adminNav.analytics' }] },
   { key: 'sellers', label: 'adminNav.sellers', icon: <Store />, items: [{ path: '/admin/sellers', label: 'adminNav.sellerList' }, { path: '/admin/shops', label: 'adminNav.kyc' }, { path: '/admin/payout-history', label: 'adminNav.commissionHistory' }] },
   { key: 'catalog', label: 'adminNav.catalog', icon: <PackageSearch />, items: [{ path: '/admin/products', label: 'adminNav.productModeration' }, { path: '/admin/categories', label: 'adminNav.categories' }, { path: '/admin/brands', label: 'adminNav.brands' }, { path: '/admin/attributes', label: 'adminNav.attributes' }] },
@@ -17,6 +17,14 @@ export const adminNavigation: AdminNavGroup[] = [
   { key: 'moderation', label: 'adminNav.reviews', icon: <MessageSquareText />, items: [{ path: '/admin/reviews', label: 'adminNav.reviewModeration' }, { path: '/admin/disputes', label: 'adminNav.disputes' }] },
   { key: 'settings', label: 'adminNav.system', icon: <Settings />, items: [{ path: '/admin/system-settings', label: 'adminNav.systemHealth' }, { path: '/admin/audit-logs', label: 'adminNav.auditLogs' }] },
 ];
+
+const availableRoutes = new Set([
+  '/admin/overview', '/admin/shops', '/admin/products', '/admin/categories',
+  '/admin/orders', '/admin/users', '/admin/finance', '/admin/system-settings',
+]);
+export const adminNavigation: AdminNavGroup[] = allAdminNavigation
+  .map((group) => ({ ...group, items: group.items.filter((item) => availableRoutes.has(item.path)) }))
+  .filter((group) => group.items.length > 0);
 
 export const adminLeafRoutes = adminNavigation.flatMap(({ items }) => items);
 export const adminRouteTitle = (pathname: string): TranslationKey =>

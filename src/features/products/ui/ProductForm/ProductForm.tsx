@@ -43,6 +43,7 @@ export interface ProductFormSubmission {
   payload: ProductUpsertPayload;
   variants: ProductVariant[];
   uploads: Array<{ uid: string; file: File; isCover: boolean }>;
+  updateVariantId: (sku: string, id: string) => void;
   updateUpload: (uid: string, patch: Partial<UploadFile>) => void;
 }
 
@@ -82,13 +83,9 @@ export function ProductForm({
   const price = Form.useWatch('price', form) ?? initialValues.price;
 
   const submit = (values: ProductFormValues) => {
-    if (values.price === null) return;
+    if (submitting || values.price === null) return;
     if (images.some((file) => file.status === 'uploading')) {
       void message.warning(t('product.waitImages'));
-      return;
-    }
-    if (images.some((file) => file.status === 'error')) {
-      void message.error(t('product.removeFailedImage'));
       return;
     }
     const imageEntries = images
@@ -120,6 +117,7 @@ export function ProductForm({
           ? [{ uid: image.uid, file: image.originFileObj, isCover: image.uid === coverUid }]
           : [],
       ),
+      updateVariantId: (sku, id) => setVariants((current) => current.map((variant) => variant.sku === sku ? { ...variant, id } : variant)),
       updateUpload: (uid, patch) => {
         setImages((current) => current.map((image) => image.uid === uid ? { ...image, ...patch } : image));
       },
@@ -129,6 +127,7 @@ export function ProductForm({
   return (
     <Form<ProductFormValues>
       name="product"
+      disabled={submitting}
       form={form}
       layout="vertical"
       requiredMark
@@ -224,6 +223,7 @@ export function ProductForm({
               </Form.List>
             </div>
             <VariantManager
+              disabled={submitting}
               enabled={hasVariants}
               basePrice={price}
               value={variants}
@@ -241,6 +241,7 @@ export function ProductForm({
           </div>
           <ImageUpload
             compact
+            disabled={submitting}
             value={images}
             coverUid={coverUid ?? undefined}
             onChange={(nextImages) => {

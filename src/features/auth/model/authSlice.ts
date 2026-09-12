@@ -3,6 +3,7 @@ import { authStorage } from '../lib/authStorage';
 import type { AuthUser, LoginResponse } from './authTypes';
 
 interface AuthState {
+  sessionVersion: number;
   accessToken: string | null;
   user: AuthUser | null;
 }
@@ -10,6 +11,7 @@ interface AuthState {
 const persistedAccessToken = authStorage.getAccessToken();
 
 const initialState: AuthState = {
+  sessionVersion: 0,
   accessToken: persistedAccessToken,
   user: null,
 };
@@ -19,6 +21,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     authenticated(state, action: PayloadAction<LoginResponse>) {
+      state.sessionVersion += 1;
       state.accessToken = action.payload.accessToken;
       state.user = null;
     },
@@ -34,6 +37,7 @@ const authSlice = createSlice({
       state.user = action.payload;
     },
     loggedOut(state) {
+      state.sessionVersion += 1;
       state.accessToken = null;
       state.user = null;
     },

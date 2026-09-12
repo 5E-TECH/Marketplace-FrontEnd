@@ -2,6 +2,7 @@ import { Ban, Check, Eye, RotateCcw, Truck } from 'lucide-react';
 import { App, Button, Input, Popconfirm, Select, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { SellerOrder, SellerOrderStatus } from '../../features/orders/model/orderTypes';
 import { useCancelSellerOrderMutation, useConfirmSellerOrderMutation, useCreateSellerShipmentMutation, useSellerOrderHistoryQuery, useSellerOrderItemsQuery, useSellerOrderQuery, useSellerOrdersQuery, useUpdateSellerOrderStatusMutation } from '../../features/orders/api/orderQueries';
 import { ElchiTimeline } from '../../features/orders/ui/ElchiTimeline/ElchiTimeline';
@@ -37,7 +38,9 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
   const [nextStatus, setNextStatus] = useState<SellerOrderStatus | null>(null);
   const [status, setStatus] = useState<StatusFilter>('ALL');
-  const [search, setSearch] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('search') ?? '';
+  const setSearch = (value: string) => setSearchParams(value ? { search: value } : {}, { replace: true });
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
@@ -71,7 +74,7 @@ export default function OrdersPage() {
     { title: t('order.payment'), width: 190, responsive: ['sm'], render: (_, order) => <span className={styles.amount}><strong>{formatPrice(order.subtotal)}</strong>{order.codAmount > 0 ? <small>COD: {formatPrice(order.codAmount)}</small> : <small>{t('order.prepaid')}</small>}</span> },
     { title: t('order.date'), dataIndex: 'createdAt', width: 150, responsive: ['xl'], render: (value: string) => formatDateTime(value, locale) },
     { title: t('common.status'), dataIndex: 'status', width: 140, render: (value: SellerOrderStatus) => <StatusTag status={value} /> },
-    { title: '', width: 48, render: (_, order) => <Button type="text" icon={<Eye size={17} />} aria-label={t('order.viewAria', { id: order.salesOrderId })} onClick={() => { setSelectedOrder(order); setNextStatus(order.status); }} /> },
+    { title: '', width: 48, render: (_, order) => <Button type="text" icon={<Eye size={17} />} aria-label={t('order.viewAria', { id: order.salesOrderId })} onClick={() => { setSelectedOrder(order); setNextStatus(order.status); setCustomerPhone(''); }} /> },
   ];
 
   if (ordersQuery.isPending) return <ContentState state="loading" />;
@@ -88,7 +91,7 @@ export default function OrdersPage() {
     <TablePanel className={styles.tableCard} title={t('order.list')} caption={t('order.resultCount', { count: ordersQuery.data.total })}>
       <DataTable rowKey="id" columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
     </TablePanel>
-    <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} width="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending) setSelectedOrder(null); }}>
+    <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} width="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>
         <DetailList items={[{ label: t('order.buyer'), value: selectedOrder.buyerName || t('common.unknown') }, { label: t('order.items'), value: t('order.itemCount', { count: selectedOrder.itemsCount }) }, { label: t('order.amount'), value: formatPrice(selectedOrder.subtotal) }, { label: t('order.codAmount'), value: formatPrice(selectedOrder.codAmount) }, { label: t('common.status'), value: <StatusTag status={selectedOrder.status} /> }]} />
         <div className={styles.quickActions}>
@@ -97,7 +100,7 @@ export default function OrdersPage() {
         </div>
         <section className={styles.statusEditor} aria-label={t('order.updateStatus')}>
           <div><strong>{t('order.updateStatus')}</strong><span>{t('order.updateStatusDescription')}</span></div>
-          <Select<SellerOrderStatus> aria-label={t('order.newStatus')} value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} disabled={updateStatusMutation.isPending} onChange={setNextStatus} />
+          <Select<SellerOrderStatus> virtual={false} placement="topLeft" aria-label={t('order.newStatus')} value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} disabled={updateStatusMutation.isPending} onChange={setNextStatus} />
           <Button type="primary" icon={<Check size={16} />} loading={updateStatusMutation.isPending} disabled={!nextStatus || nextStatus === selectedOrder.status} onClick={() => {
             if (!nextStatus) return;
             const submittedStatus = nextStatus;
