@@ -2,6 +2,7 @@ import { App, Button, Form, Input, Modal, Select, Space, Statistic, Tag, Typogra
 import type { ColumnsType } from 'antd/es/table';
 import { Ban, Check, Eye, Play, X } from 'lucide-react';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useActivateAdminShopMutation, useAdminShopDetailQuery, useAdminShopsQuery, useApproveAdminShopMutation, useRejectAdminShopMutation, useSuspendAdminShopMutation } from '../../features/adminShops/api/adminShopQueries';
 import type { AdminShop, AdminShopStatus } from '../../features/adminShops/model/adminShopTypes';
 import { getUserErrorMessage } from '../../features/users/lib/getUserErrorMessage';
@@ -16,6 +17,7 @@ import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { DetailDrawer } from '../../shared/ui/DetailDrawer/DetailDrawer';
 import { DetailList } from '../../shared/ui/DetailList/DetailList';
+import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import styles from './AdminShopsPage.module.css';
 
 type StatusFilter = 'ALL' | AdminShopStatus;
@@ -26,20 +28,32 @@ export default function AdminShopsPage() {
   const { message } = App.useApp();
   const { language, t } = useTranslation();
   const [search, setSearch] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<StatusFilter>('PENDING');
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState<AdminShop | null>(null);
+  const [selectedShop, setSelectedShop] = useState<AdminShop | null>(null);
   const [rejecting, setRejecting] = useState<AdminShop | null>(null);
   const [rejectForm] = Form.useForm<RejectValues>();
   const debounced = useDebouncedValue(search.trim());
   const query = useAdminShopsQuery({ page, limit: 20, ...(debounced ? { search: debounced } : {}), ...(status !== 'ALL' ? { status } : {}) });
+  const selectedShopId = searchParams.get('shopId');
+  const selected = selectedShop ?? query.data?.items.find(({ id }) => id === selectedShopId) ?? null;
   const detail = useAdminShopDetailQuery(selected?.id ?? null);
   const approve = useApproveAdminShopMutation();
   const reject = useRejectAdminShopMutation();
   const suspend = useSuspendAdminShopMutation();
   const activate = useActivateAdminShopMutation();
   const notifyError = (error: Error) => void message.error(getUserErrorMessage(error, language));
-  const closeAfter = (text: string) => { setSelected(null); void message.success(text); };
+
+  const closeDetail = () => {
+    setSelectedShop(null);
+    if (searchParams.has('shopId')) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('shopId');
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
+  const closeAfter = (text: string) => { closeDetail(); void message.success(text); };
 
   const columns: ColumnsType<AdminShop> = [
     { title: t('adminShops.market'), render: (_, shop) => <Typography.Text strong>{shop.name}</Typography.Text> },
@@ -48,7 +62,7 @@ export default function AdminShopsPage() {
     { title: t('adminShops.address'), dataIndex: 'address', responsive: ['lg'], render: (value: string | null) => value || '—' },
     { title: t('users.status'), dataIndex: 'status', width: 120, render: (value: AdminShopStatus) => <Tag color={statusColor[value]}>{value}</Tag> },
     { title: t('users.createdAt'), dataIndex: 'createdAt', responsive: ['lg'], render: (value: string) => value ? formatDate(value, language) : '—' },
-    { title: t('users.actions'), width: 90, align: 'center', render: (_, shop) => <Button type="text" icon={<Eye size={17} />} aria-label={`${shop.name} tafsilotlarini ko‘rish`} onClick={() => setSelected(shop)}>Ko‘rish</Button> },
+    { title: t('users.actions'), width: 90, align: 'center', render: (_, shop) => <Button type="text" icon={<Eye size={17} />} aria-label={`${shop.name} tafsilotlarini ko‘rish`} onClick={() => setSelectedShop(shop)}>Ko‘rish</Button> },
   ];
 
   if (query.isPending) return <ContentState state="loading" />;
@@ -56,8 +70,13 @@ export default function AdminShopsPage() {
   return <main className={styles.page}>
     <PageHeader title={t('adminShops.title')} description="Kutilayotgan do‘konlarni tekshiring, tasdiqlang yoki sabab bilan rad eting" />
     <ListToolbar value={search} placeholder={t('adminShops.search')} onChange={(value) => { setSearch(value); setPage(1); }} actions={<Select<StatusFilter> className={styles.filter} value={status} options={['PENDING','ALL','ACTIVE','SUSPENDED','REJECTED','INACTIVE'].map((value) => ({ value, label: value === 'ALL' ? t('users.allStatuses') : value }))} onChange={(value) => { setStatus(value); setPage(1); }} />} />
-    <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" emptyState={<EmptyState compact title={t('adminShops.empty')} description={t('adminShops.emptyDescription')} />} pagination={{ ...createTablePagination(20), current: page, total: query.data.total }} onChange={(pagination) => setPage(pagination.current ?? 1)} />
-    <DetailDrawer title={selected?.name ?? 'Do‘kon tafsiloti'} subtitle="Do‘kon moderatsiyasi" width="min(560px, 100vw)" open={Boolean(selected)} onClose={() => setSelected(null)} extra={selected ? <Tag color={statusColor[selected.status]}>{selected.status}</Tag> : null}>
+    <TablePanel
+      title={t('adminShops.market')}
+      caption={t('pagination.total', { total: query.data.total })}
+    >
+      <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminShops.empty')} description={t('adminShops.emptyDescription')} />} pagination={{ ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: query.data.total }} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+    </TablePanel>
+    <DetailDrawer title={selected?.name ?? 'Do‘kon tafsiloti'} subtitle="Do‘kon moderatsiyasi" width="min(560px, 100vw)" open={Boolean(selected)} onClose={closeDetail} extra={selected ? <Tag color={statusColor[selected.status]}>{selected.status}</Tag> : null}>
       {detail.isPending ? <ContentState state="loading" /> : detail.isError ? <ContentState state="error" description={getUserErrorMessage(detail.error, language)} onAction={() => void detail.refetch()} /> : detail.data && selected ? <>
         <DetailList items={[{ label: 'Do‘kon', value: detail.data.name }, { label: 'Do‘kon ID', value: `#${detail.data.id}` }, { label: 'Seller ID', value: `#${detail.data.ownerUserId}` }, { label: 'Telefon', value: selected.phone }, { label: 'Manzil', value: selected.address || '—' }]} />
         <div className={styles.stats}><Statistic title="Mahsulotlar" value={detail.data.stats.products} /><Statistic title="Buyurtmalar" value={detail.data.stats.orders} /><Statistic title="Omborlar" value={detail.data.stats.warehouses} /></div>
@@ -68,6 +87,6 @@ export default function AdminShopsPage() {
         </Space>
       </> : null}
     </DetailDrawer>
-    <Modal title="Do‘konni rad etish" open={Boolean(rejecting)} okText="Rad etish" cancelText="Bekor qilish" okButtonProps={{ danger: true, loading: reject.isPending }} onCancel={() => setRejecting(null)} onOk={() => rejectForm.submit()} destroyOnHidden><Form<RejectValues> form={rejectForm} layout="vertical" onFinish={({ reason }) => { if (!rejecting) return; reject.mutate({ shopId: rejecting.id, reason: reason.trim() }, { onSuccess: () => { setRejecting(null); setSelected(null); void message.success('Do‘kon rad etildi'); }, onError: notifyError }); }}><Form.Item name="reason" label="Rad etish sababi" rules={[{ required: true, whitespace: true, message: 'Sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: hujjatlar to‘liq emas" /></Form.Item></Form></Modal>
+    <Modal title="Do‘konni rad etish" open={Boolean(rejecting)} okText="Rad etish" cancelText="Bekor qilish" okButtonProps={{ danger: true, loading: reject.isPending }} onCancel={() => setRejecting(null)} onOk={() => rejectForm.submit()} destroyOnHidden><Form<RejectValues> form={rejectForm} layout="vertical" onFinish={({ reason }) => { if (!rejecting) return; reject.mutate({ shopId: rejecting.id, reason: reason.trim() }, { onSuccess: () => { setRejecting(null); closeDetail(); void message.success('Do‘kon rad etildi'); }, onError: notifyError }); }}><Form.Item name="reason" label="Rad etish sababi" rules={[{ required: true, whitespace: true, message: 'Sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: hujjatlar to‘liq emas" /></Form.Item></Form></Modal>
   </main>;
 }

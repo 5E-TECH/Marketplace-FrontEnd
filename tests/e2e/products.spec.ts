@@ -145,11 +145,11 @@ test('product PATCH /products/12 orqali Bearer token bilan yangilanadi', async (
   let requestBody: Record<string, unknown> | undefined;
 
   await page.route('**/api/v1/products/12', async (route) => {
-    method = route.request().method();
-    if (method === 'GET') {
+    if (route.request().method() === 'GET') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: product }) });
       return;
     }
+    method = route.request().method();
     authorization = route.request().headers().authorization ?? '';
     requestBody = route.request().postDataJSON() as Record<string, unknown>;
     await route.fulfill({
@@ -241,6 +241,27 @@ test('product form number inputlari bo‘sh boshlanadi va 0 yopishib qolmaydi', 
   await expect(price).toHaveValue('250000');
   await expect(oldPrice).toHaveValue('300000');
 
+});
+
+test('TC3: majburiy maydonlar bo‘sh qolsa validatsiya ko‘rsatiladi', async ({ page }) => {
+  let createRequests = 0;
+  await page.route('**/api/v1/products', async (route) => {
+    if (route.request().method() !== 'POST') return route.fallback();
+    createRequests += 1;
+    await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
+  });
+  await page.goto('/products/new');
+
+  await page.getByRole('button', { name: 'Mahsulotni yaratish' }).click();
+
+  await expect(page.getByText('Mahsulot nomini kiriting')).toBeVisible();
+  await expect(page.getByText('Narxni kiriting')).toBeVisible();
+  await expect(page.getByText('Mahsulot tavsifini kiriting')).toBeVisible();
+  await expect(page.getByLabel('Mahsulot nomi')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByLabel('Narxi', { exact: true })).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByLabel('Tavsif')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page).toHaveURL(/\/products\/new$/);
+  expect(createRequests).toBe(0);
 });
 
 test('product create yangi API contractiga mos payload yuboradi', async ({ page }) => {

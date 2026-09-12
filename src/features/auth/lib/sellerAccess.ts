@@ -11,6 +11,18 @@ import type { AuthUser, UserRole } from '../model/authTypes';
  */
 export const SELLER_CABINET_ROLES: readonly UserRole[] = ['SELLER', 'OPERATOR'];
 
+/** Kabinetning istalgan himoyalangan sahifasiga kira oladigan rollar. */
+export const CABINET_ROLES: readonly UserRole[] = [
+  'SELLER',
+  'OPERATOR',
+  'ADMIN',
+  'SUPERADMIN',
+];
+
+export function canAccessCabinet(user: Pick<AuthUser, 'role' | 'isDeleted'>): boolean {
+  return !user.isDeleted && CABINET_ROLES.includes(user.role);
+}
+
 export function canAccessSellerCabinet(
   user: Pick<AuthUser, 'role' | 'isDeleted'>,
 ): boolean {

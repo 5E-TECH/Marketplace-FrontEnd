@@ -70,3 +70,15 @@ test('SELLER barcha bo‘limlarni ko‘radi', async ({ page }) => {
     await expect(sidebar.getByRole('menuitem', { name: visible })).toBeVisible();
   }
 });
+
+test('BUYER kabinet sahifalariga kira olmaydi va checkout mavjud emas', async ({ page }) => {
+  await installAuthenticatedSession(page, { ...operatorUser, role: 'BUYER' });
+
+  await page.goto('/profile');
+  await expect(page.getByText('Seller akkaunti talab qilinadi')).toBeVisible();
+  await expect(page.getByRole('complementary')).toHaveCount(0);
+
+  await page.goto('/checkout');
+  await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Buyurtma yaratish' })).toHaveCount(0);
+});

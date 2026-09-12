@@ -18,7 +18,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 ARG VITE_ALLOW_INSECURE_API=false
 ENV VITE_ALLOW_INSECURE_API=${VITE_ALLOW_INSECURE_API}
 RUN test -n "$VITE_API_URL" || { \
-      echo "XATO: VITE_API_URL build-arg berilmadi (masalan https://api.example.com/api/v1)"; \
+      echo "XATO: VITE_API_URL build-arg berilmadi (masalan https://api.elchimarket.uz/api/v1)"; \
       exit 1; \
     }
 

@@ -1,31 +1,31 @@
-import { Banknote, Boxes, ChartNoAxesCombined, ClipboardList, Megaphone, MessageSquareText, PackageSearch, Settings, Store, Users } from 'lucide-react';
+import { Banknote, ChartNoAxesCombined, ClipboardList, ListTree, Store, UserRoundCog, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../../shared/i18n/translations';
+import type { UserRole } from '../../auth/model/authTypes';
 
-export interface AdminNavItem { path: string; label: TranslationKey; icon?: ReactNode }
+export interface AdminNavItem {
+  path: string;
+  label: TranslationKey;
+  icon?: ReactNode;
+  roles: readonly UserRole[];
+}
 export interface AdminNavGroup { key: string; label: TranslationKey; icon: ReactNode; items: AdminNavItem[] }
 
-const allAdminNavigation: AdminNavGroup[] = [
-  { key: 'overview', label: 'adminNav.overview', icon: <ChartNoAxesCombined />, items: [{ path: '/admin/overview', label: 'adminNav.analytics' }] },
-  { key: 'sellers', label: 'adminNav.sellers', icon: <Store />, items: [{ path: '/admin/sellers', label: 'adminNav.sellerList' }, { path: '/admin/shops', label: 'adminNav.kyc' }, { path: '/admin/payout-history', label: 'adminNav.commissionHistory' }] },
-  { key: 'catalog', label: 'adminNav.catalog', icon: <PackageSearch />, items: [{ path: '/admin/products', label: 'adminNav.productModeration' }, { path: '/admin/categories', label: 'adminNav.categories' }, { path: '/admin/brands', label: 'adminNav.brands' }, { path: '/admin/attributes', label: 'adminNav.attributes' }] },
-  { key: 'orders', label: 'adminNav.orders', icon: <ClipboardList />, items: [{ path: '/admin/orders', label: 'adminNav.globalOrders' }, { path: '/admin/transactions', label: 'adminNav.transactions' }] },
-  { key: 'inventory', label: 'adminNav.inventory', icon: <Boxes />, items: [{ path: '/admin/warehouses', label: 'adminNav.warehouses' }, { path: '/admin/stock', label: 'adminNav.stock' }, { path: '/admin/transfers', label: 'adminNav.transfers' }] },
-  { key: 'users', label: 'adminNav.users', icon: <Users />, items: [{ path: '/admin/users', label: 'adminNav.allUsers' }] },
-  { key: 'marketing', label: 'adminNav.marketing', icon: <Megaphone />, items: [{ path: '/admin/banners', label: 'adminNav.banners' }, { path: '/admin/promocodes', label: 'adminNav.promocodes' }, { path: '/admin/collections', label: 'adminNav.collections' }] },
-  { key: 'finance', label: 'adminNav.finance', icon: <Banknote />, items: [{ path: '/admin/finance', label: 'adminNav.payoutReports' }] },
-  { key: 'moderation', label: 'adminNav.reviews', icon: <MessageSquareText />, items: [{ path: '/admin/reviews', label: 'adminNav.reviewModeration' }, { path: '/admin/disputes', label: 'adminNav.disputes' }] },
-  { key: 'settings', label: 'adminNav.system', icon: <Settings />, items: [{ path: '/admin/system-settings', label: 'adminNav.systemHealth' }, { path: '/admin/audit-logs', label: 'adminNav.auditLogs' }] },
+const ADMIN_ROLES: readonly UserRole[] = ['ADMIN', 'SUPERADMIN'];
+const SUPERADMIN_ONLY: readonly UserRole[] = ['SUPERADMIN'];
+
+export const adminNavigation: AdminNavGroup[] = [
+  { key: 'overview', label: 'adminNav.overview', icon: <ChartNoAxesCombined />, items: [{ path: '/admin/overview', label: 'adminNav.overview', roles: ADMIN_ROLES }] },
+  { key: 'accounts', label: 'adminNav.accounts', icon: <UserRoundCog />, items: [{ path: '/admin/users', label: 'adminNav.accounts', roles: ADMIN_ROLES }] },
+  { key: 'shops', label: 'adminNav.shops', icon: <Store />, items: [{ path: '/admin/shops', label: 'adminNav.shops', roles: ADMIN_ROLES }] },
+  { key: 'orders', label: 'adminNav.orders', icon: <ClipboardList />, items: [{ path: '/admin/orders', label: 'adminNav.orders', roles: ADMIN_ROLES }] },
+  { key: 'categories', label: 'adminNav.categories', icon: <ListTree />, items: [{ path: '/admin/categories', label: 'adminNav.categories', roles: ADMIN_ROLES }] },
+  { key: 'finance', label: 'adminNav.finance', icon: <Banknote />, items: [{ path: '/admin/finance', label: 'adminNav.finance', roles: SUPERADMIN_ONLY }] },
+  { key: 'team', label: 'adminNav.team', icon: <Users />, items: [{ path: '/admin/team', label: 'adminNav.team', roles: SUPERADMIN_ONLY }] },
 ];
 
-const availableRoutes = new Set([
-  '/admin/overview', '/admin/shops', '/admin/products', '/admin/categories',
-  '/admin/orders', '/admin/users', '/admin/finance', '/admin/system-settings',
-]);
-export const adminNavigation: AdminNavGroup[] = allAdminNavigation
-  .map((group) => ({ ...group, items: group.items.filter((item) => availableRoutes.has(item.path)) }))
-  .filter((group) => group.items.length > 0);
-
 export const adminLeafRoutes = adminNavigation.flatMap(({ items }) => items);
+export const getAdminNavigation = (role: UserRole | undefined): AdminNavGroup[] =>
+  adminNavigation.filter(({ items }) => role && items.some((item) => item.roles.includes(role)));
 export const adminRouteTitle = (pathname: string): TranslationKey =>
   adminLeafRoutes.find(({ path }) => pathname === path)?.label ?? 'adminNav.management';

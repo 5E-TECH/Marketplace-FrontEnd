@@ -135,7 +135,7 @@ export default function AdminProductsPage() {
         );
       },
     },
-  ], [navigate, t]);
+  ], [navigate, t, setPendingAction]);
 
   if (query.isPending) return <ContentState state="loading" />;
   if (query.isError) return (

@@ -5,56 +5,45 @@ import {
   authenticatedUser,
 } from './support/auth';
 
-test('TC1: bo‘sh register submit majburiy maydonlarni validatsiya qiladi', async ({
-  page,
-}) => {
-  await page.goto('/register');
-  await page.getByRole('button', { name: 'RO‘YXATDAN O‘TISH' }).click();
+test('login sahifasida faqat telefon va parol orqali kirish mavjud', async ({ page }) => {
+  await page.goto('/login');
 
-  await expect(page.getByText('Ism va familiyangizni kiriting')).toBeVisible();
-  await expect(page.getByText('Telefon raqamini kiriting')).toBeVisible();
-  await expect(page.getByText('Do‘kon nomini kiriting')).toBeVisible();
-  await expect(page.getByText('Parolni kiriting')).toBeVisible();
-  await expect(page.getByText('Parolni qayta kiriting')).toBeVisible();
+  await expect(page.getByLabel('Telefon raqami')).toBeVisible();
+  await expect(page.getByLabel('Parol')).toBeVisible();
+  await expect(page.getByRole('link', { name: /parolni unutdingizmi/i })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /ro‘yxatdan o‘tish/i })).toHaveCount(0);
 });
 
-test('TC2: to‘g‘ri register so‘rovi muvaffaqiyatdan keyin login sahifasiga o‘tadi', async ({
-  page,
-}) => {
-  let requestBody: unknown;
-  await page.route('**/api/v1/sellers/register', async (route) => {
-    requestBody = route.request().postDataJSON();
-    await route.fulfill({
-      status: 201,
-      contentType: 'application/json',
-      body: JSON.stringify({ message: 'Created' }),
-    });
-  });
+test('TC1: BUYER login qilganda kabinetga kirishi taqiqlanadi', async ({ page }) => {
+  await page.route('**/api/v1/auth/login', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ accessToken: TEST_ACCESS_TOKEN }),
+  }));
+  await page.route('**/api/v1/auth/me', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { ...authenticatedUser, role: 'BUYER' } }),
+  }));
 
-  await page.goto('/register');
-  await page.getByLabel('Ism va familiya').fill('Ali Valiyev');
+  await page.goto('/login');
   await page.getByLabel('Telefon raqami').fill('901234567');
-  await page.getByLabel('Email').fill('seller@example.com');
-  await page.getByLabel('Do‘kon nomi').fill('Ali Market');
-  await page.getByLabel('Do‘kon tavsifi').fill('Maishiy texnika do‘koni');
-  await page.getByLabel('Manzil').fill('Toshkent shahri');
-  await page.getByLabel('Parol', { exact: true }).fill('Secure123');
-  await page.getByLabel('Parolni tasdiqlang', { exact: true }).fill('Secure123');
-  await page.getByRole('button', { name: 'RO‘YXATDAN O‘TISH' }).click();
+  await page.getByLabel('Parol').fill('Secure123');
+  await page.getByRole('button', { name: 'PLATFORMAGA KIRISH' }).click();
 
-  await expect(page).toHaveURL(/\/login$/);
-  expect(requestBody).toEqual({
-    name: 'Ali Valiyev',
-    phone: '+998901234567',
-    password: 'Secure123',
-    email: 'seller@example.com',
-    shopName: 'Ali Market',
-    shopDescription: 'Maishiy texnika do‘koni',
-    address: 'Toshkent shahri',
-  });
+  await expect(page.getByText('Seller akkaunti talab qilinadi')).toBeVisible();
+  await expect(page.getByRole('complementary')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toHaveCount(0);
 });
 
-test('TC3: login token oladi, saqlaydi va dashboardga yo‘naltiradi', async ({
+for (const path of ['/register', '/register/account', '/forgot-password', '/reset-password', '/verify-phone']) {
+  test(`${path} kabinetda mavjud emas`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
+  });
+}
+
+test('SELLER login token oladi, saqlaydi va dashboardga yo‘naltiradi', async ({
   page,
 }) => {
   await page.route('**/api/v1/seller/dashboard', async (route) => {
@@ -112,7 +101,7 @@ test('TC3: login token oladi, saqlaydi va dashboardga yo‘naltiradi', async ({
   ).toBe(TEST_ACCESS_TOKEN);
 });
 
-test('TC4: noto‘g‘ri parol server xatosini ko‘rsatadi va token saqlamaydi', async ({
+test('noto‘g‘ri parol server xatosini ko‘rsatadi va token saqlamaydi', async ({
   page,
 }) => {
   await page.route('**/api/v1/auth/login', async (route) => {

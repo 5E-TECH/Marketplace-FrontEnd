@@ -1,6 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { AdminOrder, AdminOrderListParams, AdminOrderStatus, AdminOrdersPage, ConfirmCheckoutPayload, CreateCheckoutPayload, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
+import type { AdminOrder, AdminOrderListParams, AdminOrderStatus, AdminOrdersPage, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 const adminStatuses: AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED', 'CANCELLED', 'REFUNDED'];
@@ -98,15 +98,3 @@ export async function getAdminOrders(params: AdminOrderListParams, signal?: Abor
   return { items, total: numeric('total', items.length), page: numeric('page', params.page), limit: numeric('limit', params.limit), totalPages: numeric('totalPages', Math.max(1, Math.ceil(numeric('total', items.length) / params.limit))) };
 }
 export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
-
-export async function createCheckout({ idempotencyKey, sessionId, ...payload }: CreateCheckoutPayload): Promise<unknown> {
-  const { data } = await httpClient.post<unknown>('/checkout', payload, {
-    headers: { 'Idempotency-Key': idempotencyKey, 'X-Session-Id': sessionId },
-  });
-  return unwrapApiData(data);
-}
-
-export async function confirmCheckout({ orderId }: ConfirmCheckoutPayload): Promise<unknown> {
-  const { data } = await httpClient.post<unknown>(`/checkout/${encodeURIComponent(orderId)}/confirm`);
-  return unwrapApiData(data);
-}

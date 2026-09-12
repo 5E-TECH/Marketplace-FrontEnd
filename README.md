@@ -72,7 +72,8 @@ Frontend backenddagi `@Roles` chegarasini takrorlaydi:
 | -------------------- | -------------------------------------------------- |
 | `SELLER`             | Barcha bo'limlar                                   |
 | `OPERATOR`           | Buyurtmalar, Yetkazib berish, Sozlamalar, Yordam   |
-| `ADMIN`/`SUPERADMIN` | Kabinet yopiq (ularning alohida admin API'si bor)  |
+| `ADMIN` | Alohida admin kabineti: dashboard, accountlar, do‘konlar, buyurtmalar va kategoriyalar |
+| `SUPERADMIN` | Admin kabineti hamda qo‘shimcha moliya va jamoa bo‘limlari |
 
 Rolga yopiq bo'lim menyuda ko'rinmaydi va yo'lga to'g'ridan-to'g'ri kirilsa
 "ruxsat yo'q" holati chiqadi.

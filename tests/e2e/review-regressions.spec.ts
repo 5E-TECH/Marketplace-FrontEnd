@@ -45,25 +45,6 @@ for (const scenario of ['retry-server-error', 'refresh-server-error'] as const) 
   });
 }
 
-test('checkout timeoutdan keyin qayta yuborishda ayni idempotency key ishlatiladi', async ({ page }) => {
-  await installAuthenticatedSession(page, { ...authenticatedUser, role: 'BUYER' });
-  const keys: string[] = [];
-  await page.route('**/api/v1/checkout', route => {
-    keys.push(route.request().headers()['idempotency-key']);
-    return route.fulfill(keys.length === 1 ? { status: 504, json: { message: 'Vaqtincha xato' } } : { json: { data: { orderId: '77' } } });
-  });
-  await page.goto('/checkout');
-  await page.getByLabel('Viloyat ID').fill('1');
-  await page.getByLabel('Tuman ID').fill('2');
-  await page.getByLabel('To‘liq manzil').fill('Toshkent shahri');
-  await page.getByRole('button', { name: 'Buyurtma yaratish' }).click();
-  await expect(page.getByText('Vaqtincha xato')).toBeVisible();
-  await page.getByRole('button', { name: 'Buyurtma yaratish' }).click();
-  await expect(page.getByText('Buyurtma ID: #77')).toBeVisible();
-  expect(keys).toHaveLength(2);
-  expect(keys[0]).toBe(keys[1]);
-});
-
 test('ulanmagan admin bo‘limida soxta CRUD va demo yozuvlar yo‘q', async ({ page }) => {
   await installAuthenticatedSession(page, { ...authenticatedUser, role: 'ADMIN' });
   await page.goto('/admin/brands');

@@ -1,0 +1,15 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: var(--color-background);
+  place-items: center;
+}
+
+.page :global(.ant-result) {
+  width: min(100%, 42rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
