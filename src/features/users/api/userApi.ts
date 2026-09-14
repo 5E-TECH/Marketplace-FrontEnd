@@ -9,13 +9,7 @@ function parseOperator(value: unknown): ManagedUser {
     typeof item.id !== 'string' ||
     item.role !== 'OPERATOR' ||
     typeof item.name !== 'string' ||
-    typeof item.phone !== 'string' ||
-    typeof item.isActive !== 'boolean' ||
-    typeof item.isBlocked !== 'boolean' ||
-    typeof item.shopId !== 'string' ||
-    typeof item.createdAt !== 'string' ||
-    typeof item.updatedAt !== 'string' ||
-    typeof item.isDeleted !== 'boolean'
+    typeof item.phone !== 'string'
   ) throw new Error('Operatorning majburiy maydonlari mavjud emas');
   return {
     id: item.id,
@@ -23,12 +17,12 @@ function parseOperator(value: unknown): ManagedUser {
     phone: item.phone,
     avatarUrl: typeof item.avatarUrl === 'string' ? item.avatarUrl : null,
     role: 'OPERATOR',
-    isActive: item.isActive,
-    isBlocked: item.isBlocked,
-    shopId: item.shopId,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-    isDeleted: item.isDeleted,
+    isActive: typeof item.isActive === 'boolean' ? item.isActive : true,
+    isBlocked: typeof item.isBlocked === 'boolean' ? item.isBlocked : false,
+    shopId: typeof item.shopId === 'string' ? item.shopId : '',
+    createdAt: typeof item.createdAt === 'string' ? item.createdAt : '',
+    updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : '',
+    isDeleted: typeof item.isDeleted === 'boolean' ? item.isDeleted : false,
   };
 }
 

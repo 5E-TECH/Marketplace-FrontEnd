@@ -46,7 +46,7 @@ export function DetailPage({
   children,
 }: DetailPageProps) {
   return (
-    <main className={styles.page}>
+    <main className={styles.page} data-testid="detail-page">
       <PageHeader
         before={<BackButton fallback={backFallback} />}
         title={title}

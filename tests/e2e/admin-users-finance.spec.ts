@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/v1/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { id: 'admin-e2e', role: 'SUPERADMIN', name: 'Super Admin', phone: '+998901234567', isActive: true, isDeleted: false } }) }));
 });
 
-test('admin user list, detail va block oqimlari backend kontraktiga mos ishlaydi', async ({ page }) => {
+test('TC3: block tugmasi confirm modal ochadi va faqat tasdiqdan keyin request yuboradi', async ({ page }) => {
   let user = { id: '17', name: 'Ali Valiyev', phone: '+998901112233', email: 'ali@example.com', avatarUrl: null, role: 'BUYER', isActive: true, isBlocked: false, isDeleted: false, shopId: null, createdAt: '2026-09-04T08:00:00.000Z', updatedAt: '2026-09-05T09:30:00.000Z' };
   let blocked = false;
   let unsupportedRequestSent = false;
@@ -15,6 +15,12 @@ test('admin user list, detail va block oqimlari backend kontraktiga mos ishlaydi
     if (request.url().endsWith('/17/block')) {
       blocked = true;
       user = { ...user, isBlocked: true };
+      await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
+      return;
+    }
+    if (request.url().endsWith('/17/unblock')) {
+      blocked = false;
+      user = { ...user, isBlocked: false };
       await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
       return;
     }
@@ -28,12 +34,28 @@ test('admin user list, detail va block oqimlari backend kontraktiga mos ishlaydi
   });
   await page.goto('/admin/users');
 
+  await expect(page.getByText('Ali Valiyev')).toBeVisible();
+  await expect(page.getByText('+998901112233')).toBeVisible();
+  await expect(page.getByText('Xaridor')).toBeVisible();
+  await expect(page.getByText('Faol', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Bloklash' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'O‘chirish — backend endpoint mavjud emas' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tafsilotlar' })).toBeVisible();
   await page.getByRole('button', { name: 'Bloklash' }).click();
-  await page.getByRole('button', { name: 'Bloklash', exact: true }).last().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Ali Valiyev');
+  expect(blocked).toBe(false);
+  await dialog.getByRole('button', { name: 'Bloklash', exact: true }).click();
+  await expect(dialog).toBeHidden();
   await expect.poll(() => blocked).toBe(true);
+  await expect(page.getByRole('table').getByText('Bloklangan', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Blokdan chiqarish' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Blokdan chiqarish' }).click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Blokdan chiqarish', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect.poll(() => blocked).toBe(false);
+  await expect(page.getByText('Faol', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Tafsilotlar' }).click();
   await expect(page).toHaveURL(/\/admin\/users\/17$/);
@@ -88,7 +110,7 @@ test('admin alohida sahifada yangi foydalanuvchi yaratadi', async ({ page }) => 
   });
 });
 
-test('admin user search va pagination querylari backendga yuboriladi', async ({ page }) => {
+test('TC1: users jadvali, qidiruv va pagination backend bilan ishlaydi', async ({ page }) => {
   let requestedUrl = '';
   const users = Array.from({ length: 21 }, (_, index) => ({ id: String(index + 1), name: index === 20 ? 'Noyob Admin User' : `User ${index + 1}`, phone: `+9989012345${String(index).padStart(2, '0')}`, email: null, avatarUrl: null, role: 'BUYER', isActive: true, isBlocked: false, isDeleted: false, shopId: null, createdAt: '2026-09-04T08:00:00.000Z', updatedAt: '2026-09-04T08:00:00.000Z' }));
   await page.route('**/api/v1/admin/users**', async route => {
@@ -110,6 +132,41 @@ test('admin user search va pagination querylari backendga yuboriladi', async ({ 
   await page.getByTitle('2').click();
   await secondPageRequest;
   await expect(page.getByText('Noyob Admin User')).toBeVisible();
+});
+
+test('TC2: rol va holat filtrlari backend querylariga ulanadi', async ({ page }) => {
+  let requestedUrl = '';
+  const blockedBuyer = { id: '31', name: 'Bloklangan Xaridor', phone: '+998901110031', email: null, avatarUrl: null, role: 'BUYER', isActive: true, isBlocked: true, isDeleted: false, shopId: null, createdAt: '2026-09-06T08:00:00.000Z', updatedAt: '2026-09-06T08:00:00.000Z' };
+  await page.route('**/api/v1/admin/users**', async route => {
+    requestedUrl = route.request().url();
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [blockedBuyer], total: 1, page: 1, limit: 20, totalPages: 1 } }) });
+  });
+
+  await page.goto('/admin/users');
+  await page.getByLabel('Foydalanuvchi roli').click();
+  await page.locator('.ant-select-dropdown:visible .ant-select-item-option').filter({ hasText: 'Xaridor' }).click();
+  await expect.poll(() => new URL(requestedUrl).searchParams.get('role')).toBe('BUYER');
+
+  await page.getByLabel('Blok holati').click();
+  await page.locator('.ant-select-dropdown:visible .ant-select-item-option').filter({ hasText: 'Bloklangan' }).click();
+  await expect.poll(() => new URL(requestedUrl).searchParams.get('blocked')).toBe('true');
+  await expect(page.getByText('Bloklangan Xaridor')).toBeVisible();
+  await expect(page.getByRole('table').getByText('Bloklangan', { exact: true })).toBeVisible();
+});
+
+test('TC4: bloklangan user holati jadvalda ko‘rinadi', async ({ page }) => {
+  const blockedUser = { id: '44', name: 'Aziza Karimova', phone: '+998901110044', email: null, avatarUrl: null, role: 'SELLER', isActive: true, isBlocked: true, isDeleted: false, shopId: '7', createdAt: '2026-09-07T08:00:00.000Z', updatedAt: '2026-09-07T08:00:00.000Z' };
+  await page.route('**/api/v1/admin/users**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { items: [blockedUser], total: 1, page: 1, limit: 20, totalPages: 1 } }),
+  }));
+
+  await page.goto('/admin/users');
+  const row = page.getByRole('row', { name: /Aziza Karimova/ });
+  await expect(row).toContainText('Sotuvchi');
+  await expect(row.getByText('Bloklangan', { exact: true })).toBeVisible();
+  await expect(row.getByRole('button', { name: 'Blokdan chiqarish' })).toBeVisible();
 });
 
 test('admin payout action va report endpointlari ishlaydi', async ({ page }) => {

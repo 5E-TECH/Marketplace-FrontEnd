@@ -1,4 +1,4 @@
-.statePage { width: min(100%, 1040px); margin: 0 auto; }
+.statePage { width: 100%; min-width: 0; }
 .mediaCard { overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
 .mediaCard > header { display: flex; padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--color-border); align-items: center; gap: var(--space-3); }
 .mediaCard > header > svg { width: 20px; color: var(--color-accent); }

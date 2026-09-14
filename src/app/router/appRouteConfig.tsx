@@ -44,7 +44,7 @@ export const appRouteConfig: AppRouteMeta[] = [
   { path: '/delivery', label: 'nav.delivery', icon: <TruckOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
   { path: '/profile', label: 'nav.profile', icon: <ShopOutlined />, section: 'main', showInSidebar: false, roles: SELLER_AND_OPERATOR },
   { path: '/settings', label: 'nav.settings', icon: <SettingOutlined />, section: 'utility', showInSidebar: false, roles: SELLER_AND_OPERATOR },
-  { path: '/support', label: 'nav.support', icon: <CustomerServiceOutlined />, section: 'utility', roles: SELLER_AND_OPERATOR },
+  { path: '/support', label: 'nav.support', icon: <CustomerServiceOutlined />, section: 'utility', roles: SELLER_ONLY },
 ];
 
 const routesBySpecificity = [...appRouteConfig].sort(

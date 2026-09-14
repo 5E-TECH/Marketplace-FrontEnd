@@ -1,6 +1,6 @@
 import { Form, Modal } from 'antd';
 import type { FormInstance } from 'antd';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import styles from './FormModal.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
 
@@ -36,6 +36,13 @@ export function FormModal<Values extends object>({
   onCancel,
 }: FormModalProps<Values>) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (open && initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [form, initialValues, open]);
+
   const close = () => {
     if (!loading) onCancel();
   };
@@ -56,9 +63,6 @@ export function FormModal<Values extends object>({
       onOk={() => void form.submit()}
       onCancel={close}
       afterOpenChange={(isOpen) => {
-        if (isOpen && initialValues) {
-          form.setFieldsValue(initialValues);
-        }
         if (!isOpen && resetOnClose) {
           form.resetFields();
         }

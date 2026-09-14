@@ -59,6 +59,57 @@ export interface AdminOrder {
   paymentMethod: AdminPaymentMethod | null;
   status: AdminOrderStatus;
   shopId: string | null;
+  shopName: string | null;
+  sellersCount: number;
   createdAt: string;
 }
 export interface AdminOrdersPage { items: AdminOrder[]; total: number; page: number; limit: number; totalPages: number }
+
+export interface AdminSubOrder {
+  id: string;
+  shopId: string | null;
+  shopName: string | null;
+  status: string;
+  amount: number | null;
+  createdAt: string | null;
+}
+
+export interface AdminOrderItemDetail {
+  id: string;
+  name: string;
+  sku: string | null;
+  quantity: number | null;
+  unitPrice: number | null;
+  totalPrice: number | null;
+}
+
+export interface AdminOrderShipmentDetail {
+  id: string;
+  provider: string | null;
+  status: string | null;
+  trackingUrl: string | null;
+  createdAt: string | null;
+}
+
+export interface AdminOrderHistoryEntry {
+  id: string;
+  status: string;
+  note: string | null;
+  actorName: string | null;
+  createdAt: string | null;
+}
+
+export interface AdminOrderPaymentDetail {
+  method: string | null;
+  status: string | null;
+  amount: number | null;
+  transactionId: string | null;
+}
+
+export interface AdminOrderDetail {
+  sellerOrders: AdminSubOrder[];
+  items: AdminOrderItemDetail[];
+  shipments: AdminOrderShipmentDetail[];
+  history: AdminOrderHistoryEntry[];
+  payment: AdminOrderPaymentDetail | null;
+}

@@ -1,4 +1,4 @@
-import { App, Button, Input, Select, Typography } from 'antd';
+import { App, Button, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ArrowRight, Image as ImageIcon, RotateCcw, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -24,6 +24,7 @@ import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionBut
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import styles from './AdminProductsPage.module.css';
 
 type StatusFilter = 'ALL' | Extract<ProductStatus, 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK'>;
@@ -210,13 +211,7 @@ export default function AdminProductsPage() {
         </Button>
       </FilterPanel>
 
-      <section className={styles.tablePanel} aria-label={t('adminProducts.list')}>
-        <header className={styles.tableHeader}>
-          <div>
-            <Typography.Title level={2}>{t('adminProducts.list')}</Typography.Title>
-            <Typography.Text>{t('adminProducts.resultCount', { count: query.data.total })}</Typography.Text>
-          </div>
-        </header>
+      <TablePanel title={t('adminProducts.list')} caption={t('adminProducts.resultCount', { count: query.data.total })}>
         <DataTable
           rowKey="id"
           columns={columns}
@@ -226,7 +221,7 @@ export default function AdminProductsPage() {
           pagination={{ ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
           onChange={(pagination) => setPage(pagination.current ?? 1)}
         />
-      </section>
+      </TablePanel>
 
       <ConfirmDialog
         open={Boolean(pendingAction && actionConfig)}

@@ -37,9 +37,9 @@ const AdminUsersPage = lazy(routeImports.adminUsers);
 const AdminUserCreatePage = lazy(routeImports.adminUserCreate);
 const AdminUserDetailPage = lazy(routeImports.adminUserDetail);
 const AdminFinancePage = lazy(routeImports.adminFinance);
+const AdminAuditPage = lazy(routeImports.adminAudit);
 const AdminSystemHealthPage = lazy(routeImports.adminSystemHealth);
 const AdminOverviewPage = lazy(routeImports.adminOverview);
-const AdminResourcePage = lazy(routeImports.adminResource);
 const AdminCategoriesPage = lazy(() => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
@@ -75,22 +75,21 @@ export function AppRouter() {
                 <Route path="admin/users" element={<AdminUsersPage />} />
                 <Route path="admin/users/new" element={<AdminUserCreatePage />} />
                 <Route path="admin/users/:userId" element={<AdminUserDetailPage />} />
+                <Route path="admin/audit-logs" element={<AdminAuditPage />} />
                 <Route element={<SuperAdminOnlyRoute />}>
                   <Route path="admin/finance" element={<AdminFinancePage />} />
-                  <Route path="admin/team" element={<AdminResourcePage />} />
                 </Route>
                 <Route path="admin/system-settings" element={<AdminSystemHealthPage />} />
                 <Route path="admin/categories" element={<AdminCategoriesPage />} />
                 <Route path="admin/profile" element={<ProfilePage />} />
-                <Route path="admin/:module" element={<AdminResourcePage />} />
               </Route>
             </Route>
             <Route element={<MainLayout />}>
               <Route index element={<RoleHomeRoute />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="settings" element={<SettingsPage />} />
-              <Route path="support" element={<SupportPage />} />
               <Route element={<SellerAccessGuard />}>
+                <Route path="support" element={<SupportPage />} />
                 <Route path="products" element={<ProductsPage />} />
                 <Route path="products/new" element={<ProductEditorPage />} />
                 <Route path="products/:productId/edit" element={<ProductEditorPage />} />

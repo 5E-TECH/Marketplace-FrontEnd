@@ -74,13 +74,15 @@ export default function AdminOverviewPage() {
       <section className={styles.metricGrid} aria-label={t('admin.overview.statistics')}>
         {metrics.map((metric) => <SummaryCard key={metric.title} {...metric} />)}
       </section>
-      <TablePanel className={styles.pendingPanel} title={t('admin.overview.pendingShops')} caption={t('admin.overview.pendingShopsDescription')} action={
-        <Button type="link" icon={<ExternalLink size={16} />} onClick={() => void navigate('/admin/shops')}>{t('admin.overview.viewAll')}</Button>
-      }>
-        <DataTable rowKey="id" columns={columns} dataSource={pendingShopsQuery.data.items} pagination={false} scroll={{ x: 'max-content' }} emptyState={
-          <EmptyState compact title={t('admin.overview.noPendingShops')} description={t('admin.overview.noPendingShopsDescription')} />
-        } />
-      </TablePanel>
+      <div className={styles.pendingSection}>
+        <TablePanel title={t('admin.overview.pendingShops')} caption={t('admin.overview.pendingShopsDescription')} action={
+          <Button type="link" icon={<ExternalLink size={16} />} onClick={() => void navigate('/admin/shops')}>{t('admin.overview.viewAll')}</Button>
+        }>
+          <DataTable rowKey="id" columns={columns} dataSource={pendingShopsQuery.data.items} pagination={false} scroll={{ x: 'max-content' }} emptyState={
+            <EmptyState compact title={t('admin.overview.noPendingShops')} description={t('admin.overview.noPendingShopsDescription')} />
+          } />
+        </TablePanel>
+      </div>
     </main>
   );
 }
