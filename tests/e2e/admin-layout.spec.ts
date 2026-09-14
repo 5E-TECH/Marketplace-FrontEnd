@@ -45,16 +45,17 @@ test('TC2: ADMIN login admin sidebarni ko‘radi', async ({ page }) => {
 
   await expect(page.getByTestId('admin-layout')).toBeVisible();
   const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
-  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Kategoriyalar']) {
+  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Mahsulot moderatsiyasi', 'Kategoriyalar', 'Audit loglar', 'Tizim holati']) {
     await expect(sidebar.getByRole('menuitem', { name: item })).toBeVisible();
   }
+  await expect(sidebar.getByRole('menuitem')).toHaveCount(8);
   await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toHaveCount(0);
   await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
 
   await page.goto('/admin/finance');
   await expect(page).toHaveURL(/\/admin\/overview$/);
   await page.goto('/admin/team');
-  await expect(page).toHaveURL(/\/admin\/overview$/);
+  await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
 });
 
 test('TC1: SELLER admin URL ga kira olmaydi va redirect qilinadi', async ({ page }) => {
@@ -67,14 +68,15 @@ test('TC1: SELLER admin URL ga kira olmaydi va redirect qilinadi', async ({ page
   await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
 });
 
-test('TC3: SUPERADMIN qo‘shimcha moliya va jamoa menyularini ko‘radi', async ({ page }) => {
+test('TC3: SUPERADMIN ishlaydigan to‘qqiz bo‘limni, jumladan moliyani ko‘radi', async ({ page }) => {
   await installAuthenticatedSession(page, superAdminUser);
   await mockAdminDashboard(page);
   await page.goto('/admin/overview');
 
   const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
   await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toBeVisible();
-  await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toBeVisible();
+  await expect(sidebar.getByRole('menuitem')).toHaveCount(9);
+  await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
 });
 
 test('TC4: ADMIN rejim belgisi ko‘rinadi', async ({ page }) => {

@@ -1,6 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { AdminOrder, AdminOrderListParams, AdminOrderStatus, AdminOrdersPage, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
+import type { AdminOrder, AdminOrderDetail, AdminOrderHistoryEntry, AdminOrderItemDetail, AdminOrderListParams, AdminOrderPaymentDetail, AdminOrderShipmentDetail, AdminOrderStatus, AdminOrdersPage, AdminSubOrder, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 const adminStatuses: AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED', 'CANCELLED', 'REFUNDED'];
@@ -87,7 +87,7 @@ function parseAdminOrder(value: unknown): AdminOrder {
   const order = value as Record<string, unknown>; const id = optionalText(order, ['id']); const status = optionalText(order, ['status']);
   if (!id || !status || !adminStatuses.includes(status as AdminOrderStatus)) throw new Error('Admin buyurtmasining majburiy maydonlari mavjud emas');
   const payment = optionalText(order, ['paymentMethod']);
-  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), createdAt: optionalText(order, ['createdAt']) ?? '' };
+  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), createdAt: optionalText(order, ['createdAt']) ?? '' };
 }
 export async function getAdminOrders(params: AdminOrderListParams, signal?: AbortSignal): Promise<AdminOrdersPage> {
   const { data } = await httpClient.get<unknown>('/admin/orders', { signal, params }); const value = unwrapApiData(data);
@@ -97,4 +97,60 @@ export async function getAdminOrders(params: AdminOrderListParams, signal?: Abor
   const numeric = (key: string, fallback: number) => typeof record[key] === 'number' ? record[key] : fallback;
   return { items, total: numeric('total', items.length), page: numeric('page', params.page), limit: numeric('limit', params.limit), totalPages: numeric('totalPages', Math.max(1, Math.ceil(numeric('total', items.length) / params.limit))) };
 }
-export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
+const asRecord = (value: unknown): Record<string, unknown> | null => typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
+const recordsAt = (record: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) if (Array.isArray(record[key])) return (record[key] as unknown[]).map(asRecord).filter((item): item is Record<string, unknown> => Boolean(item));
+  return [];
+};
+const nullableNumber = (record: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) if (typeof record[key] === 'number' && Number.isFinite(record[key])) return record[key];
+  return null;
+};
+const identify = (record: Record<string, unknown>, fallback: string) => optionalText(record, ['id', 'orderId', 'sellerOrderId', 'itemId', 'shipmentId', 'eventId']) ?? fallback;
+
+function parseSubOrder(record: Record<string, unknown>, index: number): AdminSubOrder {
+  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']) };
+}
+function parseAdminItem(record: Record<string, unknown>, index: number): AdminOrderItemDetail {
+  const quantity = nullableNumber(record, ['quantity', 'qty']);
+  const unitPrice = nullableNumber(record, ['unitPrice', 'price']);
+  return { id: identify(record, String(index + 1)), name: optionalText(record, ['name', 'productName', 'title']) ?? `#${identify(record, String(index + 1))}`, sku: optionalText(record, ['sku', 'variantSku']), quantity, unitPrice, totalPrice: nullableNumber(record, ['lineTotal', 'totalPrice', 'total', 'subtotal']) ?? (quantity !== null && unitPrice !== null ? quantity * unitPrice : null) };
+}
+function parseShipment(record: Record<string, unknown>, index: number): AdminOrderShipmentDetail {
+  return { id: identify(record, String(index + 1)), provider: optionalText(record, ['provider', 'carrier', 'service']), status: optionalText(record, ['status']), trackingUrl: optionalText(record, ['trackingUrl', 'trackingLink']), createdAt: optionalText(record, ['createdAt']) };
+}
+function parseHistory(record: Record<string, unknown>, index: number): AdminOrderHistoryEntry {
+  return { id: identify(record, String(index + 1)), status: optionalText(record, ['status', 'action', 'event']) ?? '—', note: optionalText(record, ['note', 'comment', 'reason', 'description']), actorName: optionalText(record, ['actorName', 'userName', 'createdBy']), createdAt: optionalText(record, ['createdAt', 'date', 'timestamp']) };
+}
+function parsePayment(record: Record<string, unknown>): AdminOrderPaymentDetail {
+  return { method: optionalText(record, ['method', 'paymentMethod']), status: optionalText(record, ['status']), amount: nullableNumber(record, ['amount', 'totalAmount', 'total']), transactionId: optionalText(record, ['transactionId', 'id']) };
+}
+function parseAdminOrderDetail(value: unknown): AdminOrderDetail {
+  const record = asRecord(value);
+  if (!record) throw new Error('Admin buyurtma tafsiloti noto‘g‘ri formatda');
+  const sellerOrderRecords = recordsAt(record, ['sellerOrders', 'subOrders', 'orders']);
+  const directItems = recordsAt(record, ['items', 'orderItems']);
+  const directShipments = recordsAt(record, ['shipments']);
+  const directHistory = recordsAt(record, ['history', 'statusHistory', 'events']);
+  const nestedItems = sellerOrderRecords.flatMap((item) => recordsAt(item, ['items', 'orderItems']));
+  const nestedShipments = sellerOrderRecords.flatMap((item) => {
+    const shipment = asRecord(item.shipment);
+    const shipments = [...recordsAt(item, ['shipments']), ...(shipment ? [shipment] : [])];
+    // Marketplace backend puts Elchi shipment fields directly on each seller order.
+    if (!shipments.length && optionalText(item, ['elchiShipmentId'])) {
+      shipments.push({ id: item.elchiShipmentId, provider: 'Elchi', status: item.status, trackingUrl: item.trackingUrl });
+    }
+    return shipments;
+  });
+  const nestedHistory = sellerOrderRecords.flatMap((item) => recordsAt(item, ['history', 'statusHistory', 'events']));
+  const shipment = asRecord(record.shipment);
+  const payment = asRecord(record.payment);
+  return {
+    sellerOrders: sellerOrderRecords.map(parseSubOrder),
+    items: [...directItems, ...nestedItems].map(parseAdminItem),
+    shipments: [...directShipments, ...(shipment ? [shipment] : []), ...nestedShipments].map(parseShipment),
+    history: [...directHistory, ...nestedHistory].map(parseHistory),
+    payment: payment ? parsePayment(payment) : optionalText(record, ['paymentMethod']) ? parsePayment({ method: record.paymentMethod, amount: record.totalAmount }) : null,
+  };
+}
+export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<AdminOrderDetail> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return parseAdminOrderDetail(unwrapApiData(data)); }

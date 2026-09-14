@@ -154,7 +154,7 @@
 }
 
 :global(.admin-navigation-shell) { overflow-y: auto; scrollbar-width: thin; }
-:global(.admin-navigation .ant-menu-item) { height: 52px; margin-block: 4px; font-size: 14px; line-height: 52px; letter-spacing: .01em; }
+:global(.admin-navigation .ant-menu-item) { height: 52px; margin-block: 4px; font-size: 15px; line-height: 52px; letter-spacing: .01em; }
 :global(.admin-navigation .ant-menu-item svg) { width: 22px; height: 22px; stroke-width: 2; }
 :global(.admin-navigation .ant-menu-item .ant-menu-item-icon) {
   width: 22px !important;

@@ -20,9 +20,9 @@ export const routeImports = {
   adminUserCreate: () => import('../../pages/AdminUserCreatePage/AdminUserCreatePage'),
   adminUserDetail: () => import('../../pages/AdminUserDetailPage/AdminUserDetailPage'),
   adminFinance: () => import('../../pages/AdminFinancePage/AdminFinancePage'),
+  adminAudit: () => import('../../pages/AdminAuditPage/AdminAuditPage'),
   adminSystemHealth: () => import('../../pages/AdminSystemHealthPage/AdminSystemHealthPage'),
   adminOverview: () => import('../../pages/AdminOverviewPage/AdminOverviewPage'),
-  adminResource: () => import('../../pages/AdminResourcePage/AdminResourcePage'),
 };
 
 export const routePreloaders: Array<[
@@ -51,9 +51,9 @@ export const routePreloaders: Array<[
   ['/admin/users/', routeImports.adminUserDetail],
   ['/admin/users', routeImports.adminUsers],
   ['/admin/finance', routeImports.adminFinance],
+  ['/admin/audit-logs', routeImports.adminAudit],
   ['/admin/profile', routeImports.profile],
   ['/admin/system-settings', routeImports.adminSystemHealth],
-  ['/admin/', routeImports.adminResource],
   ['/', routeImports.home],
 ];
 

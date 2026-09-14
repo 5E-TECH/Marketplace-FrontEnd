@@ -71,7 +71,7 @@ Frontend backenddagi `@Roles` chegarasini takrorlaydi:
 | Rol                  | Ochiq bo'limlar                                    |
 | -------------------- | -------------------------------------------------- |
 | `SELLER`             | Barcha bo'limlar                                   |
-| `OPERATOR`           | Buyurtmalar, Yetkazib berish, Sozlamalar, Yordam   |
+| `OPERATOR`           | Buyurtmalar va Yetkazib berish                     |
 | `ADMIN` | Alohida admin kabineti: dashboard, accountlar, do‘konlar, buyurtmalar va kategoriyalar |
 | `SUPERADMIN` | Admin kabineti hamda qo‘shimcha moliya va jamoa bo‘limlari |
 

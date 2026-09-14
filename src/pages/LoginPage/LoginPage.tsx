@@ -13,7 +13,6 @@ import styles from './LoginPage.module.css';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { normalizeUzPhone } from '../../shared/lib/phone';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 
 export default function LoginPage() {
   const { message } = App.useApp();
@@ -53,7 +52,6 @@ export default function LoginPage() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.language}><LanguageSwitcher /></div>
       <section className={styles.auth} aria-labelledby="login-title">
         <Card className={styles.card} variant="borderless">
           <div className={styles.cardContent}>

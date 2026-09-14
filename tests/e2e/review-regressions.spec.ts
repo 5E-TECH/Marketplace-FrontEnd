@@ -45,10 +45,11 @@ for (const scenario of ['retry-server-error', 'refresh-server-error'] as const) 
   });
 }
 
-test('ulanmagan admin bo‘limida soxta CRUD va demo yozuvlar yo‘q', async ({ page }) => {
+test('ulanmagan admin bo‘limi placeholder o‘rniga 404 ko‘rsatadi', async ({ page }) => {
   await installAuthenticatedSession(page, { ...authenticatedUser, role: 'ADMIN' });
   await page.goto('/admin/brands');
-  await expect(page.getByText('Bu bo‘lim hali mavjud emas')).toBeVisible();
+  await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
+  await expect(page.getByText('Bu bo‘lim hali mavjud emas')).toHaveCount(0);
   await expect(page.getByText('Asosiy yozuv', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Tahrirlash' })).toHaveCount(0);
 });

@@ -1,6 +1,6 @@
 import { App, Button, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowRight, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { ArrowRight, Plus, RotateCcw, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -25,6 +25,7 @@ import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionButton';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import styles from './AdminUsersPage.module.css';
 
 type RoleFilter = 'ALL' | AdminUserRole;
@@ -70,12 +71,22 @@ export default function AdminUsersPage() {
         responsive: ['sm'],
         render: (value: string) => value || '—',
       },
-      { title: t('admin.users.role'), dataIndex: 'role', width: 130 },
+      {
+        title: t('admin.users.role'),
+        dataIndex: 'role',
+        width: 160,
+        render: (value: AdminUserRole) => {
+          const option = ADMIN_USER_ROLE_OPTIONS.find((item) => item.value === value);
+          return option ? t(option.label) : value;
+        },
+      },
       {
         title: t('common.status'),
         dataIndex: 'blocked',
         width: 120,
-        render: (value: boolean) => <StatusTag status={value ? 'BLOCKED' : 'ACTIVE'} />,
+        render: (value: boolean, row) => (
+          <StatusTag status={value ? 'BLOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'} />
+        ),
       },
       {
         title: t('common.createdAt'),
@@ -85,7 +96,7 @@ export default function AdminUsersPage() {
       },
       {
         title: t('common.actions'),
-        width: 210,
+        width: 160,
         align: 'center',
         render: (_, row) => {
           const config = ADMIN_USER_BLOCK_ACTION_CONFIG[row.blocked ? 'blocked' : 'active'];
@@ -104,18 +115,12 @@ export default function AdminUsersPage() {
                 label={t(config.label)}
                 onClick={() => setPendingBlockAction(row)}
               />
-              <IconActionButton
-                danger
-                icon={<Trash2 size={17} />}
-                label={t('admin.users.deleteUnavailable')}
-                onClick={() => void message.warning(t('admin.users.writeUnavailable'))}
-              />
             </div>
           );
         },
       },
     ],
-    [locale, message, navigate, t],
+    [locale, navigate, t],
   );
 
   if (query.isPending) return <ContentState state="loading" />;
@@ -198,7 +203,7 @@ export default function AdminUsersPage() {
         </Button>
       </FilterPanel>
 
-      <div className={styles.table}>
+      <TablePanel title={t('admin.users.user')} caption={t('pagination.total', { total: query.data.total })}>
         <DataTable
           rowKey="id"
           columns={columns}
@@ -218,7 +223,7 @@ export default function AdminUsersPage() {
           }}
           onChange={(value) => setPage(value.current ?? 1)}
         />
-      </div>
+      </TablePanel>
 
       <ConfirmDialog
         open={Boolean(pendingBlockAction)}
