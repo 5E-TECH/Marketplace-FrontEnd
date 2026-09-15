@@ -12,6 +12,8 @@ export const routeImports = {
   support: () => import('../../pages/SupportPage/SupportPage'),
   users: () => import('../../pages/UsersPage/UsersPage'),
   userEditor: () => import('../../pages/UserEditorPage/UserEditorPage'),
+  storefrontShop: () => import('../../pages/StorefrontShopPage/StorefrontShopPage'),
+  storefrontProduct: () => import('../../pages/StorefrontProductPage/StorefrontProductPage'),
   adminShops: () => import('../../pages/AdminShopsPage/AdminShopsPage'),
   adminOrders: () => import('../../pages/AdminOrdersPage/AdminOrdersPage'),
   adminProducts: () => import('../../pages/AdminProductsPage/AdminProductsPage'),
@@ -29,6 +31,8 @@ export const routePreloaders: Array<[
   prefix: string,
   preload: () => Promise<unknown>,
 ]> = [
+  ['/dokon/', routeImports.storefrontShop],
+  ['/mahsulot/', routeImports.storefrontProduct],
   ['/products/new', routeImports.productEditor],
   ['/products/', routeImports.productEditor],
   ['/products', routeImports.products],

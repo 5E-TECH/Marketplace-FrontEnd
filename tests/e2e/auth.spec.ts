@@ -68,7 +68,7 @@ test('TC2: 401 javobi sessiyani tozalab login sahifasiga chiqaradi', async ({
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole('heading', { name: 'MarketHub' }),
+    page.getByRole('heading', { name: 'Elchi Market' }),
   ).toBeVisible();
   expect(
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
@@ -88,7 +88,7 @@ test('TC3: tokensiz himoyalangan route login sahifasiga redirect qiladi', async 
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole('heading', { name: 'MarketHub' }),
+    page.getByRole('heading', { name: 'Elchi Market' }),
   ).toBeVisible();
   expect(currentUserRequested).toBe(false);
 });
