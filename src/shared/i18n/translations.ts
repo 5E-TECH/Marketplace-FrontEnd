@@ -3,6 +3,7 @@ import { adminTranslations } from './adminTranslations';
 import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
 import { adminProductTranslations } from './adminProductTranslations';
+import { storefrontTranslations } from './storefrontTranslations';
 
 export const translations = {
   uz: {
@@ -71,6 +72,7 @@ export const translations = {
     ...accountTranslations.uz,
     ...commerceTranslations.uz,
     ...adminProductTranslations.uz,
+    ...storefrontTranslations.uz,
   },
   ru: {
     'common.search': 'Поиск...', 'common.save': 'Сохранить', 'common.cancel': 'Отмена',
@@ -138,6 +140,7 @@ export const translations = {
     ...accountTranslations.ru,
     ...commerceTranslations.ru,
     ...adminProductTranslations.ru,
+    ...storefrontTranslations.ru,
   },
   en: {
     'common.search': 'Search...', 'common.save': 'Save', 'common.cancel': 'Cancel',
@@ -205,6 +208,7 @@ export const translations = {
     ...accountTranslations.en,
     ...commerceTranslations.en,
     ...adminProductTranslations.en,
+    ...storefrontTranslations.en,
   },
 } as const satisfies Record<Language, Record<string, string>>;
 

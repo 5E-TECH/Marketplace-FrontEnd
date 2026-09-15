@@ -15,7 +15,7 @@ export function LoginBrand({ titleId = 'login-title' }: LoginBrandProps) {
         <ShoppingFilled />
       </span>
       <Typography.Title id={titleId} level={1} className={styles.name}>
-        MarketHub
+        Elchi Market
       </Typography.Title>
       <Typography.Text className={styles.tagline}>
         {t('auth.brandTagline')}

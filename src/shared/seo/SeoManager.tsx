@@ -93,7 +93,8 @@ export function SeoManager() {
 
   useEffect(() => {
     const publicConfig = PUBLIC_ROUTES[pathname];
-    const indexable = Boolean(publicConfig);
+    // Admin subdomenidagi login/register ham kabinetning bir qismi: butun host noindex.
+    const indexable = false;
     const origin = getSiteOrigin();
     const title = publicConfig?.title ?? `${BRAND} Seller — boshqaruv kabineti`;
     const description = publicConfig?.description ?? DEFAULT_DESCRIPTION;

@@ -17,6 +17,8 @@ const AdminLayout = lazy(() => import('../../layouts/AdminLayout/AdminLayout'));
 const HomePage = lazy(routeImports.home);
 const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
 const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'));
+const StorefrontShopPage = lazy(routeImports.storefrontShop);
+const StorefrontProductPage = lazy(routeImports.storefrontProduct);
 const ProductsPage = lazy(routeImports.products);
 const ProductEditorPage = lazy(routeImports.productEditor);
 const ShopPage = lazy(routeImports.shop);
@@ -60,6 +62,8 @@ export function AppRouter() {
           {SharedUiTestPage ? (
             <Route path="__test__/shared-ui" element={<SharedUiTestPage />} />
           ) : null}
+          <Route path="dokon/:shopSlug" element={<StorefrontShopPage />} />
+          <Route path="mahsulot/:productId" element={<StorefrontProductPage />} />
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
           </Route>
