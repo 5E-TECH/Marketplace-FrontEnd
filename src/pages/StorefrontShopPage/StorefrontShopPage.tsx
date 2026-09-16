@@ -3,13 +3,12 @@ import {
   BadgeCheck,
   Image as ImageIcon,
   PackageOpen,
-  Search,
   Share2,
   ShoppingBag,
   Star,
   Store,
 } from 'lucide-react';
-import { App, Button, Input, InputNumber, Pagination, Select, Typography } from 'antd';
+import { App, Button, InputNumber, Select, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useStorefrontShopQuery } from '../../features/storefront/api/storefrontQueries';
@@ -21,6 +20,8 @@ import { useTranslation } from '../../shared/i18n/useTranslation';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
+import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
+import { AppPagination } from '../../shared/ui/AppPagination/AppPagination';
 import styles from './StorefrontShopPage.module.css';
 
 const PAGE_SIZE = 12;
@@ -200,14 +201,12 @@ export default function StorefrontShopPage() {
           </div>
 
           <div className={styles.filters} aria-label="Mahsulot filtrlari">
-            <Input
+            <SearchInput
               className={styles.search}
-              prefix={<Search />}
               value={search}
-              allowClear
               aria-label={t('storefront.search')}
               placeholder={t('storefront.search')}
-              onChange={(event) => setSearch(event.target.value)}
+              onValueChange={setSearch}
             />
             <Select className={styles.select} value={categoryId} options={categoryOptions} loading={categoriesQuery.isPending} aria-label={t('storefront.category')} onChange={(value) => updateParams({ categoryId: value || undefined })} />
             <Select<StorefrontSort>
@@ -262,7 +261,7 @@ export default function StorefrontShopPage() {
           )}
 
           {shopQuery.data.products.total > PAGE_SIZE ? (
-            <Pagination current={page} pageSize={PAGE_SIZE} total={shopQuery.data.products.total} showSizeChanger={false} onChange={(next) => updateParams({ page: next }, false)} />
+            <AppPagination current={page} pageSize={PAGE_SIZE} total={shopQuery.data.products.total} onChange={(next) => updateParams({ page: next }, false)} />
           ) : null}
         </section>
       </main>

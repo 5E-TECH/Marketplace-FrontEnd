@@ -1,6 +1,6 @@
-import { App, Button, Input, Select } from 'antd';
+import { App, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowRight, Plus, RotateCcw, Search } from 'lucide-react';
+import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -26,6 +26,8 @@ import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionBut
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
+import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 import styles from './AdminUsersPage.module.css';
 
 type RoleFilter = 'ALL' | AdminUserRole;
@@ -154,17 +156,15 @@ export default function AdminUsersPage() {
       />
 
       <FilterPanel className={styles.toolbar} aria-label={t('admin.common.filters')}>
-        <Input
-          prefix={<Search aria-hidden />}
-          allowClear
+        <SearchInput
           value={search}
           placeholder={t('admin.users.search')}
-          onChange={(event) => {
-            setSearch(event.target.value);
+          onValueChange={(value) => {
+            setSearch(value);
             setPage(1);
           }}
         />
-        <Select<RoleFilter>
+        <FilterSelect<RoleFilter>
           value={role}
           aria-label={t('admin.users.role')}
           options={[
@@ -176,7 +176,7 @@ export default function AdminUsersPage() {
             setPage(1);
           }}
         />
-        <Select<BlockFilter>
+        <FilterSelect<BlockFilter>
           value={block}
           aria-label={t('admin.users.blockStatus')}
           options={[

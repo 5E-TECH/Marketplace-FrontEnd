@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import {
   authenticatedUser,
+  installAuthenticatedSession,
   mockDashboard,
   mockLogout,
   mockProducts,
@@ -157,4 +158,63 @@ test('refresh ham ishlamasa foydalanuvchi login sahifasiga qaytariladi', async (
   await page.goto('/orders');
 
   await expect(page).toHaveURL(/\/login$/);
+});
+
+test('refresh paytida profil so‘rovi vaqtincha ishlamasa avtomatik tiklanadi', async ({
+  page,
+}) => {
+  await seedAccessToken(page);
+  let profileCalls = 0;
+
+  await page.route('**/api/v1/auth/me', async (route) => {
+    profileCalls += 1;
+
+    if (profileCalls === 1) {
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Vaqtincha ishlamayapti' }),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: authenticatedUser }),
+    });
+  });
+  await mockDashboard(page);
+  await mockProducts(page);
+  await mockSellerShop(page);
+
+  await page.goto('/');
+
+  await expect(
+    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+  ).toBeVisible();
+  expect(profileCalls).toBe(2);
+});
+
+test('deploydan keyin eski lazy chunk topilmasa sahifa bir marta yangilanib tiklanadi', async ({
+  page,
+}) => {
+  await installAuthenticatedSession(page);
+  let chunkRequests = 0;
+
+  await page.route('**/src/pages/ProductsPage/ProductsPage.tsx*', async (route) => {
+    chunkRequests += 1;
+
+    if (chunkRequests === 1) {
+      await route.abort('failed');
+      return;
+    }
+
+    await route.continue();
+  });
+
+  await page.goto('/products');
+
+  await expect(page.getByRole('heading', { name: 'Mahsulotlar' })).toBeVisible();
+  expect(chunkRequests).toBe(2);
+  await expect(page.getByText('Nimadir noto‘g‘ri ketdi')).toHaveCount(0);
 });

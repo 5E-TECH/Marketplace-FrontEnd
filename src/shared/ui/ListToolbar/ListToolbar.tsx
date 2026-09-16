@@ -1,10 +1,10 @@
-import { Input } from 'antd';
-import { Search } from 'lucide-react';
 import type { ReactNode } from 'react';
 import styles from './ListToolbar.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
+import { SearchInput } from '../SearchInput/SearchInput';
 
 interface ListToolbarProps {
+  className?: string;
   value: string;
   placeholder?: string;
   actions?: ReactNode;
@@ -12,6 +12,7 @@ interface ListToolbarProps {
 }
 
 export function ListToolbar({
+  className,
   value,
   placeholder,
   actions,
@@ -19,14 +20,12 @@ export function ListToolbar({
 }: ListToolbarProps) {
   const { t } = useTranslation();
   return (
-    <div className={styles.toolbar}>
-      <Input
+    <div className={`${styles.toolbar} ${className ?? ''}`.trim()}>
+      <SearchInput
         className={styles.search}
-        prefix={<Search aria-hidden />}
         placeholder={placeholder ?? t('common.search')}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
-        allowClear
+        onValueChange={onChange}
       />
       {actions ? <div className={styles.actions}>{actions}</div> : null}
     </div>

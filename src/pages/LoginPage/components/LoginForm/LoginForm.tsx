@@ -26,7 +26,7 @@ export function LoginForm({
       requiredMark
       disabled={isSubmitting}
       onFinish={onSubmit}
-      autoComplete="on"
+      autoComplete="off"
       size="large"
     >
       <Form.Item
@@ -48,7 +48,7 @@ export function LoginForm({
           prefix={<span className={styles.phonePrefix}>+998</span>}
           inputMode="numeric"
           maxLength={9}
-          autoComplete="tel"
+          autoComplete="off"
           spellCheck={false}
           placeholder="90 123 45 67"
           aria-label={t('auth.phone')}
@@ -67,7 +67,7 @@ export function LoginForm({
         <PasswordInput
           className={styles.input}
           variant="borderless"
-          autoComplete="current-password"
+          autoComplete="new-password"
           maxLength={128}
           spellCheck={false}
           placeholder={t('auth.passwordPlaceholder')}

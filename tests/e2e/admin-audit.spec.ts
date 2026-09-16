@@ -94,7 +94,9 @@ test('TC3: sana oralig‘i dateFrom va dateTo bilan filtrlanadi', async ({ page 
   await page.goto('/admin/audit-logs');
 
   await page.getByLabel('Boshlanish sanasi').fill('2026-09-10');
+  await page.getByLabel('Boshlanish sanasi').press('Enter');
   await page.getByLabel('Tugash sanasi').fill('2026-09-12');
+  await page.getByLabel('Tugash sanasi').press('Enter');
   await expect.poll(() => requestedUrls.at(-1)).toContain('dateFrom=2026-09-10');
   await expect.poll(() => requestedUrls.at(-1)).toContain('dateTo=2026-09-12');
   await expect(page.locator('tbody tr[data-row-key]')).toHaveCount(3);

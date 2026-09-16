@@ -1,4 +1,4 @@
-import { App, Button, Form, Input, Modal, Select, Space, Statistic, Tag, Typography } from 'antd';
+import { App, Button, Form, Input, Modal, Space, Statistic, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { Ban, Check, Eye, Play, X } from 'lucide-react';
 import { useState } from 'react';
@@ -14,6 +14,7 @@ import { DataTable } from '../../shared/ui/DataTable/DataTable';
 import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { DetailDrawer } from '../../shared/ui/DetailDrawer/DetailDrawer';
 import { DetailList } from '../../shared/ui/DetailList/DetailList';
@@ -69,7 +70,7 @@ export default function AdminShopsPage() {
   if (query.isError) return <ContentState state="error" title={t('adminShops.loadError')} description={getUserErrorMessage(query.error, language)} onAction={() => void query.refetch()} />;
   return <main className={styles.page}>
     <PageHeader title={t('adminShops.title')} description="Kutilayotgan do‘konlarni tekshiring, tasdiqlang yoki sabab bilan rad eting" />
-    <ListToolbar value={search} placeholder={t('adminShops.search')} onChange={(value) => { setSearch(value); setPage(1); }} actions={<Select<StatusFilter> className={styles.filter} value={status} options={['PENDING','ALL','ACTIVE','SUSPENDED','REJECTED','INACTIVE'].map((value) => ({ value, label: value === 'ALL' ? t('users.allStatuses') : value }))} onChange={(value) => { setStatus(value); setPage(1); }} />} />
+    <ListToolbar value={search} placeholder={t('adminShops.search')} onChange={(value) => { setSearch(value); setPage(1); }} actions={<FilterSelect<StatusFilter> className={styles.filter} value={status} options={['PENDING','ALL','ACTIVE','SUSPENDED','REJECTED','INACTIVE'].map((value) => ({ value, label: value === 'ALL' ? t('users.allStatuses') : value }))} onChange={(value) => { setStatus(value); setPage(1); }} />} />
     <TablePanel
       title={t('adminShops.market')}
       caption={t('pagination.total', { total: query.data.total })}

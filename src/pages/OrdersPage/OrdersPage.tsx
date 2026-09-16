@@ -22,6 +22,8 @@ import { formatDateTime } from '../../shared/lib/date';
 import { DetailDrawer } from '../../shared/ui/DetailDrawer/DetailDrawer';
 import { DetailList } from '../../shared/ui/DetailList/DetailList';
 import { useTranslation } from '../../shared/i18n/useTranslation';
+import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 
 type StatusFilter = 'ALL' | SellerOrderStatus;
 export default function OrdersPage() {
@@ -83,9 +85,8 @@ export default function OrdersPage() {
   return <main className={styles.page}>
     <PageHeader title={t('order.title')} description={t('order.description')} />
     <ListToolbar value={search} placeholder={t('order.search')} onChange={(value) => { setSearch(value); resetPage(); }} actions={<>
-      <Select<StatusFilter> className={styles.statusFilter} value={status} options={statusOptions} title={t('order.status')} onChange={(value) => { setStatus(value); resetPage(); }} />
-      <label className={styles.dateField}><span>{t('order.from')}</span><Input className={styles.dateFilter} type="date" aria-label={t('order.startDate')} value={dateFrom} max={dateTo || undefined} onChange={(event) => { setDateFrom(event.target.value); resetPage(); }} /></label>
-      <label className={styles.dateField}><span>{t('order.to')}</span><Input className={styles.dateFilter} type="date" aria-label={t('order.endDate')} value={dateTo} min={dateFrom || undefined} onChange={(event) => { setDateTo(event.target.value); resetPage(); }} /></label>
+      <FilterSelect<StatusFilter> className={styles.statusFilter} value={status} options={statusOptions} title={t('order.status')} onChange={(value) => { setStatus(value); resetPage(); }} />
+      <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('order.startDate')} endLabel={t('order.endDate')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); resetPage(); }} />
       {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>{t('adminOrders.clear')}</Button> : null}
     </>} />
     <TablePanel className={styles.tableCard} title={t('order.list')} caption={t('order.resultCount', { count: ordersQuery.data.total })}>

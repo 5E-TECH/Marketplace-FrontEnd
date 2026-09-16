@@ -1,8 +1,10 @@
-import { Button, Input, Select } from 'antd';
+import { App, Button } from 'antd';
+import type { Key } from 'react';
 import type { ColumnsType } from 'antd/es/table';
-import { CalendarDays, Eye, RotateCcw, Search } from 'lucide-react';
-import { useState } from 'react';
-import { useAdminOrderQuery, useAdminOrdersQuery } from '../../features/orders/api/orderQueries';
+import { Eye, Printer, RotateCcw } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAdminOrdersByStatusesQuery } from '../../features/orders/api/orderQueries';
 import type { AdminOrder, AdminOrderDetail, AdminOrderStatus, AdminPaymentMethod } from '../../features/orders/model/orderTypes';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -11,18 +13,21 @@ import { DataTable } from '../../shared/ui/DataTable/DataTable';
 import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
+import { FilterField } from '../../shared/ui/FilterPanel/FilterField';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
 import styles from './AdminOrdersPage.module.css';
 import { formatDateTime } from '../../shared/lib/date';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
-import { DetailDrawer } from '../../shared/ui/DetailDrawer/DetailDrawer';
 import { DetailList } from '../../shared/ui/DetailList/DetailList';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import type { TranslationKey } from '../../shared/i18n/translations';
+import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
+import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
+import { getAdminOrder } from '../../features/orders/api/orderApi';
 
-type StatusFilter = 'ALL' | AdminOrderStatus;
 type PaymentFilter = 'ALL' | AdminPaymentMethod;
 
 const statuses: AdminOrderStatus[] = [
@@ -30,7 +35,6 @@ const statuses: AdminOrderStatus[] = [
   'PENDING_PAYMENT',
   'PAID',
   'CONFIRMED',
-  'PARTIALLY_FULFILLED',
   'FULFILLED',
   'CANCELLED',
   'REFUNDED',
@@ -47,38 +51,82 @@ const statusLabelKeys: Record<AdminOrderStatus, TranslationKey> = {
 };
 
 export default function AdminOrdersPage() {
+  const { message } = App.useApp();
   const { locale, t } = useTranslation();
-  const [status, setStatus] = useState<StatusFilter>('ALL'); const [payment, setPayment] = useState<PaymentFilter>('ALL'); const [shopId, setShopId] = useState(''); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState(''); const [page, setPage] = useState(1); const [selected, setSelected] = useState<AdminOrder | null>(null);
-  const deferredShopId = useDebouncedValue(shopId.trim());
-  const query = useAdminOrdersQuery({ page, limit: 20, ...(status !== 'ALL' ? { status } : {}), ...(payment !== 'ALL' ? { paymentMethod: payment } : {}), ...(deferredShopId ? { shopId: deferredShopId } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) });
-  const detail = useAdminOrderQuery(selected?.id ?? null); const reset = () => { setStatus('ALL'); setPayment('ALL'); setShopId(''); setDateFrom(''); setDateTo(''); setPage(1); };
+  const navigate = useNavigate();
+  const [statusesFilter, setStatusesFilter] = useState<AdminOrderStatus[]>([]); const [payment, setPayment] = useState<PaymentFilter>('ALL'); const [search, setSearch] = useState(''); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState(''); const [page, setPage] = useState(1); const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
+  const [printOrders, setPrintOrders] = useState<AdminOrderDetail[]>([]);
+  const [printLoading, setPrintLoading] = useState(false);
+  const deferredSearch = useDebouncedValue(search.trim());
+  const query = useAdminOrdersByStatusesQuery({ page, limit: 20, ...(payment !== 'ALL' ? { paymentMethod: payment } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) }, statusesFilter, deferredSearch);
+  const reset = () => { setStatusesFilter([]); setPayment('ALL'); setSearch(''); setDateFrom(''); setDateTo(''); setPage(1); };
   const columns: ColumnsType<AdminOrder> = [
-    { title: t('adminOrders.order'), render: (_, order) => `#${order.orderNumber}` },
     { title: t('adminOrders.buyer'), dataIndex: 'buyerName', responsive: ['md'], render: (value: string | null) => value || '—' },
     { title: t('adminOrders.shopId'), dataIndex: 'shopId', responsive: ['lg'], render: (value: string | null, order) => order.shopName || (value ? `#${value}` : order.sellersCount ? t('adminOrders.shopCount', { count: order.sellersCount }) : '—') },
     { title: t('adminOrders.amount'), dataIndex: 'totalAmount', responsive: ['sm'], render: (value: number) => <span className={styles.amount}>{formatMoney(value)} UZS</span> },
     { title: t('adminOrders.payment'), dataIndex: 'paymentMethod', width: 100, render: (value: AdminPaymentMethod | null) => value ? value.toUpperCase() : '—' },
-    { title: t('users.status'), dataIndex: 'status', width: 170, render: (value: AdminOrderStatus) => <StatusTag status={value} /> },
+    { title: t('users.status'), dataIndex: 'status', width: 170, render: (value: AdminOrderStatus) => value === 'FULFILLED' ? <StatusTag status="SHIPMENT_CREATED" /> : <StatusTag status={value} /> },
     { title: t('users.createdAt'), dataIndex: 'createdAt', responsive: ['xl'], render: (value: string) => value ? formatDateTime(value, locale) : '—' },
-    { title: t('users.actions'), width: 80, align: 'center', render: (_, order) => <span className={styles.rowActions}><Button type="text" icon={<Eye size={17}/>} aria-label={t('adminOrders.detail')} onClick={() => setSelected(order)} /></span> },
+    { title: t('users.actions'), width: 80, align: 'center', render: (_, order) => <span className={styles.rowActions}><Button type="text" icon={<Eye size={17}/>} aria-label={t('adminOrders.detail')} onClick={() => void navigate(`/admin/orders/${encodeURIComponent(order.id)}`, { state: { order } })} /></span> },
   ];
-  const hasFilters = status !== 'ALL' || payment !== 'ALL' || Boolean(shopId || dateFrom || dateTo);
+  const hasFilters = statusesFilter.length > 0 || payment !== 'ALL' || Boolean(search || dateFrom || dateTo);
+  useEffect(() => {
+    if (!printOrders.length) return;
+    const frame = requestAnimationFrame(() => {
+      window.print();
+      setPrintOrders([]);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [printOrders]);
+  const printSelected = async () => {
+    if (!selectedRowKeys.length || printLoading) return;
+    setPrintLoading(true);
+    try {
+      setPrintOrders(await Promise.all(selectedRowKeys.map((id) => getAdminOrder(String(id)))));
+    } catch (error) {
+      void message.error(getAuthErrorMessage(error));
+    } finally {
+      setPrintLoading(false);
+    }
+  };
   return <main className={styles.page}><PageHeader title={t('adminOrders.title')} description={t('adminOrders.description')} />
     <FilterPanel className={styles.filterPanel} aria-label={t('adminOrders.filters')}>
-      <div className={`${styles.field} ${styles.marketField}`}><label htmlFor="admin-order-market">{t('adminOrders.shopId')}</label><Input id="admin-order-market" prefix={<Search aria-hidden />} value={shopId} inputMode="numeric" placeholder={t('adminOrders.shopIdPlaceholder')} allowClear onChange={(event) => { setShopId(event.target.value.replace(/\D/g, '')); setPage(1); }} /></div>
-      <div className={styles.field}><label htmlFor="admin-order-status">{t('users.status')}</label><Select<StatusFilter> id="admin-order-status" value={status} options={[{value:'ALL',label:t('users.allStatuses')}, ...statuses.map((value) => ({value,label:t(statusLabelKeys[value])}))]} onChange={(value) => { setStatus(value); setPage(1); }} /></div>
-      <div className={styles.field}><label htmlFor="admin-order-payment">{t('adminOrders.payment')}</label><Select<PaymentFilter> id="admin-order-payment" value={payment} options={[{ value: 'ALL', label: t('adminOrders.allPayments') }, { value: 'online', label: 'Online' }, { value: 'cod', label: 'COD' }]} onChange={(value) => { setPayment(value); setPage(1); }} /></div>
-      <div className={styles.field}><label htmlFor="admin-order-from">{t('adminOrders.dateFrom')}</label><Input id="admin-order-from" prefix={<CalendarDays aria-hidden />} type="date" value={dateFrom} max={dateTo || undefined} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></div>
-      <div className={styles.field}><label htmlFor="admin-order-to">{t('adminOrders.dateTo')}</label><Input id="admin-order-to" prefix={<CalendarDays aria-hidden />} type="date" value={dateTo} min={dateFrom || undefined} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></div>
+      <FilterField className={styles.searchField} label={t('adminOrders.search')} htmlFor="admin-order-search"><SearchInput id="admin-order-search" value={search} placeholder={t('adminOrders.searchPlaceholder')} onValueChange={(value) => { setSearch(value); setPage(1); }} /></FilterField>
+      <FilterField label={t('users.status')} htmlFor="admin-order-status"><FilterSelect<AdminOrderStatus[]> id="admin-order-status" mode="multiple" maxTagCount="responsive" showSearch value={statusesFilter} placeholder={t('users.allStatuses')} options={statuses.map((value) => ({value,label:value === 'FULFILLED' ? t('status.shipmentCreated') : t(statusLabelKeys[value])}))} onChange={(value) => { setStatusesFilter(value); setPage(1); }} /></FilterField>
+      <FilterField label={t('adminOrders.payment')} htmlFor="admin-order-payment"><FilterSelect<PaymentFilter> id="admin-order-payment" value={payment} options={[{ value: 'ALL', label: t('adminOrders.allPayments') }, { value: 'online', label: 'Online' }, { value: 'cod', label: 'COD' }]} onChange={(value) => { setPayment(value); setPage(1); }} /></FilterField>
+      <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('adminOrders.dateFrom')} endLabel={t('adminOrders.dateTo')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); setPage(1); }} />
       <div className={styles.filterAction}><Button icon={<RotateCcw size={16}/>} disabled={!hasFilters} onClick={reset}>{t('adminOrders.clear')}</Button></div>
     </FilterPanel>
-    {query.isPending ? <ContentState state="loading" /> : query.isError ? <ContentState state="error" title={t('adminOrders.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} /> : <TablePanel title={t('adminOrders.title')} caption={t('pagination.total', { total: query.data.total })}><DataTable loading={query.isFetching} rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{...createTablePagination(20, (total) => t('pagination.total', { total })),current:page,total:query.data.total}} onChange={(pagination) => setPage(pagination.current ?? 1)} /></TablePanel>}
-    <DetailDrawer title={`${t('adminOrders.order')} #${selected?.orderNumber ?? ''}`} subtitle={t('adminOrders.detailSubtitle')} width="min(760px, 100vw)" open={Boolean(selected)} onClose={() => setSelected(null)}>
-      {selected ? <><DetailList items={[{ label: t('adminOrders.buyer'), value: selected.buyerName || '—' }, { label: t('adminOrders.shopId'), value: selected.shopName || (selected.shopId ? `#${selected.shopId}` : detail.data?.sellerOrders.map(order => order.shopName || (order.shopId ? `#${order.shopId}` : '—')).join(', ') || '—') }, { label: t('adminOrders.amount'), value: `${formatMoney(selected.totalAmount)} UZS` }, { label: t('adminOrders.payment'), value: selected.paymentMethod?.toUpperCase() || '—' }, { label: t('users.status'), value: <StatusTag status={selected.status} /> }, { label: t('users.createdAt'), value: selected.createdAt ? formatDateTime(selected.createdAt, locale) : '—' }]} />{detail.isPending ? <ContentState state="loading" /> : detail.isError ? <ContentState state="error" description={getAuthErrorMessage(detail.error)} onAction={() => void detail.refetch()} /> : <AppDetailNotice value={detail.data} />}</> : null}
-    </DetailDrawer>
+    {query.isError ? <ContentState state="error" title={t('adminOrders.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} /> : query.isPending || !query.data ? <ContentState state="loading" /> : <TablePanel title={t('adminOrders.title')} caption={selectedRowKeys.length ? t('adminOrders.selected', { count: selectedRowKeys.length }) : t('pagination.total', { total: query.data.total })} action={<Button icon={<Printer size={16}/>} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printSelected()}>{t('adminOrders.print')}</Button>}><DataTable loading={query.isFetching} rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys }} columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{...createTablePagination(20, (total) => t('pagination.total', { total })),current:page,total:query.data.total}} onChange={(pagination) => setPage(pagination.current ?? 1)} /></TablePanel>}
+    <PrintableOrderLabels orders={printOrders} />
   </main>;
 }
-function AppDetailNotice({ value }: { value: AdminOrderDetail | undefined }) {
+
+function PrintableOrderLabels({ orders }: { orders: AdminOrderDetail[] }) {
+  return <section className={styles.printArea} aria-hidden={!orders.length}>{orders.map((detail, index) => {
+    const order = detail.summary;
+    const products = detail.items.map((item) => `${item.name} x${item.quantity ?? 1}`).join(', ') || '—';
+    const shops = detail.sellerOrders.map((item) => item.shopName || (item.shopId ? `#${item.shopId}` : null)).filter(Boolean).join(', ') || order?.shopName || '—';
+    return <article className={styles.shippingLabel} key={order?.id ?? index}>
+      <div className={styles.labelAside}>
+        <strong>ELCHI<br />POCHTA</strong>
+        <div className={styles.qrPlaceholder} aria-label="QR kod uchun joy" />
+        <b>{order?.createdAt ? order.createdAt.slice(0, 10).split('-').reverse().join('/') : '—'}</b>
+      </div>
+      <dl className={styles.labelDetails}>
+        <div><dt>F.I.O:</dt><dd>{order?.buyerName || '—'}</dd></div>
+        <div><dt>Telefon:</dt><dd>{order?.buyerPhone || '—'}</dd></div>
+        <div><dt>Manzil:</dt><dd>{detail.deliveryAddress || '—'}</dd></div>
+        <div><dt>Jami:</dt><dd>{order ? `${formatMoney(order.totalAmount)} so‘m` : '—'}</dd></div>
+        <div><dt>Jo‘natuvchi:</dt><dd>{shops}</dd></div>
+        <div><dt>Mahsulot:</dt><dd>{products}</dd></div>
+        <div><dt>Mo‘ljal:</dt><dd>—</dd></div>
+        <div><dt>Izoh:</dt><dd>{order ? `Marketplace buyurtma #${order.orderNumber}` : '—'}</dd></div>
+      </dl>
+    </article>;
+  })}</section>;
+}
+export function AppDetailNotice({ value }: { value: AdminOrderDetail | undefined }) {
   const { locale, t } = useTranslation();
   if (!value) return null;
   const showDate = (date: string | null) => date ? formatDateTime(date, locale) : '—';

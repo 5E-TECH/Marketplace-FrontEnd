@@ -1,6 +1,6 @@
 import { Alert, App, Avatar, Button, Form, Input, InputNumber, Space, Switch, Tag, TreeSelect } from 'antd';
-import { ChevronRight, FolderTree, Image, Layers, Pencil, Plus, Search, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronRight, FolderTree, Image, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useAdminCategoriesQuery, useCreateCategoryMutation, useDeleteCategoryMutation, useUpdateCategoryMutation } from '../../features/categories/api/categoryQueries';
 import type { Category, CategoryPayload } from '../../features/categories/model/categoryTypes';
 import { getApiErrorMessage } from '../../shared/api/apiError';
@@ -9,8 +9,10 @@ import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
+import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
+import { ToolbarButton } from '../../shared/ui/ToolbarButton/ToolbarButton';
 import styles from './AdminCategoriesPage.module.css';
 
 interface CategoryValues { name: string; parentId?: string; iconUrl?: string; sortOrder: number; isActive: boolean }
@@ -86,7 +88,6 @@ export default function AdminCategoriesPage() {
   const [deleteError, setDeleteError] = useState('');
   const [search, setSearch] = useState('');
   const [collapsed, setCollapsed] = useState<string[]>([]);
-  const graphScrollRef = useRef<HTMLDivElement>(null);
   const query = useAdminCategoriesQuery();
   const create = useCreateCategoryMutation();
   const update = useUpdateCategoryMutation();
@@ -98,28 +99,6 @@ export default function AdminCategoriesPage() {
   const excludedParents = useMemo(() => new Set(editing ? flatten([editing]).map(item => item.id) : []), [editing]);
   const saving = create.isPending || update.isPending;
   const iconUrl = Form.useWatch('iconUrl', form);
-
-  useEffect(() => {
-    const scroller = graphScrollRef.current;
-    const graph = scroller?.firstElementChild;
-    if (!scroller || !graph) return;
-
-    let frame = 0;
-    const centerRoot = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        scroller.scrollLeft = Math.max(0, (scroller.scrollWidth - scroller.clientWidth) / 2);
-      });
-    };
-    const observer = new ResizeObserver(centerRoot);
-    observer.observe(graph);
-    centerRoot();
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-    };
-  }, [visibleTree]);
 
   const openForm = (category: Category | null, parentId?: string) => {
     setSaveError('');
@@ -138,12 +117,15 @@ export default function AdminCategoriesPage() {
         <div className={styles.stats}><span><b>{query.data.length}</b>{t('admin.categories.roots')}</span><span><b>{flat.filter(item => item.isActive).length}</b>{t('status.active')}</span><span><b>{flat.filter(item => !item.isActive).length}</b>{t('status.inactive')}</span></div>
       </div>
       <TablePanel title={t('admin.categories.tree')} caption={t('pagination.total', { total: flat.length })}>
-        <div className={styles.toolbar}>
-          <Input prefix={<Search size={17} />} allowClear value={search} onChange={event => setSearch(event.target.value)} placeholder={t('admin.categories.search')} aria-label={t('admin.categories.search')} />
-          <Button icon={<Layers size={16} />} disabled={!branchIds.length || Boolean(normalizedSearch)} onClick={() => setCollapsed(collapsed.length ? [] : branchIds)}>{t(collapsed.length ? 'admin.categories.expand' : 'admin.categories.collapse')}</Button>
-        </div>
+        <ListToolbar
+          className={styles.toolbar}
+          value={search}
+          placeholder={t('admin.categories.search')}
+          onChange={setSearch}
+          actions={branchIds.length ? <ToolbarButton icon={<Layers size={16} />} disabled={Boolean(normalizedSearch)} onClick={() => setCollapsed(collapsed.length ? [] : branchIds)}>{t(collapsed.length ? 'admin.categories.expand' : 'admin.categories.collapse')}</ToolbarButton> : undefined}
+        />
         <div className={styles.treeViewport} aria-busy={query.isFetching}>
-          {visibleTree.length ? <div ref={graphScrollRef} className={styles.graphScroller} data-testid="category-tree-scroll" tabIndex={0}>
+          {visibleTree.length ? <div className={styles.graphScroller} data-testid="category-tree-scroll">
             <div className={styles.graph} role="tree" aria-label={t('admin.categories.tree')}>
               <div className={styles.rootNode} data-testid="category-tree-root">
                 <span><FolderTree size={23} /></span>
