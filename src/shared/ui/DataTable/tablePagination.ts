@@ -8,5 +8,9 @@ export function createTablePagination(
     pageSize,
     showSizeChanger: false,
     showTotal: formatTotal,
+    responsive: true,
+    showLessItems: true,
+    showQuickJumper: true,
+    position: ['bottomCenter'],
   };
 }

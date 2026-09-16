@@ -5,7 +5,7 @@
 
 .filters {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(190px, 1.3fr) repeat(2, minmax(150px, 0.8fr)) auto;
+  grid-template-columns: minmax(160px, 1fr) minmax(190px, 1.1fr) minmax(320px, 1.5fr) auto;
   gap: 12px;
   align-items: center;
 }

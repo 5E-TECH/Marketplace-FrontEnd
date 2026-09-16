@@ -67,6 +67,7 @@ test('TC2: status, sana va search filterlari serverga yuboriladi', async ({ page
   await page.getByRole('button', { name: 'Tozalash' }).click();
   const dateRequest = page.waitForRequest((request) => new URL(request.url()).searchParams.get('dateFrom') === '2026-08-01');
   await page.getByLabel('Boshlanish sanasi').fill('2026-08-01');
+  await page.getByLabel('Boshlanish sanasi').press('Enter');
   await dateRequest;
   await expect(page.getByText('Ali Valiyev')).toHaveCount(0);
 

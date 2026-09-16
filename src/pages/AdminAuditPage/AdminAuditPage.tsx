@@ -15,6 +15,8 @@ import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
+import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
+import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import styles from './AdminAuditPage.module.css';
 
 const PAGE_SIZE = 20;
@@ -81,12 +83,11 @@ export default function AdminAuditPage() {
     <main className={styles.page}>
       <PageHeader title={t('admin.audit.title')} description={t('admin.audit.description')} />
       <FilterPanel className={styles.filters} aria-label={t('admin.common.filters')}>
-        <Input
+        <SearchInput
           value={actorId}
-          allowClear
           placeholder={t('admin.audit.actorId')}
           aria-label={t('admin.audit.actorId')}
-          onChange={(event) => { setActorId(event.target.value); setPage(1); }}
+          onValueChange={(value) => { setActorId(value); setPage(1); }}
         />
         <Input
           value={action}
@@ -95,19 +96,11 @@ export default function AdminAuditPage() {
           aria-label={t('admin.audit.action')}
           onChange={(event) => { setAction(event.target.value); setPage(1); }}
         />
-        <Input
-          type="date"
-          value={dateFrom}
-          max={dateTo || undefined}
-          aria-label={t('admin.audit.dateFrom')}
-          onChange={(event) => { setDateFrom(event.target.value); setPage(1); }}
-        />
-        <Input
-          type="date"
-          value={dateTo}
-          min={dateFrom || undefined}
-          aria-label={t('admin.audit.dateTo')}
-          onChange={(event) => { setDateTo(event.target.value); setPage(1); }}
+        <DateRangeFilter
+          value={[dateFrom, dateTo]}
+          startLabel={t('admin.audit.dateFrom')}
+          endLabel={t('admin.audit.dateTo')}
+          onChange={([from, to]) => { setDateFrom(from); setDateTo(to); setPage(1); }}
         />
         <Button
           icon={<RotateCcw size={16} />}

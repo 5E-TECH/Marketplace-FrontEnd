@@ -87,7 +87,7 @@ function parseAdminOrder(value: unknown): AdminOrder {
   const order = value as Record<string, unknown>; const id = optionalText(order, ['id']); const status = optionalText(order, ['status']);
   if (!id || !status || !adminStatuses.includes(status as AdminOrderStatus)) throw new Error('Admin buyurtmasining majburiy maydonlari mavjud emas');
   const payment = optionalText(order, ['paymentMethod']);
-  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), createdAt: optionalText(order, ['createdAt']) ?? '' };
+  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), buyerPhone: optionalText(order, ['buyerPhone', 'customerPhone', 'phone']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), createdAt: optionalText(order, ['createdAt']) ?? '' };
 }
 export async function getAdminOrders(params: AdminOrderListParams, signal?: AbortSignal): Promise<AdminOrdersPage> {
   const { data } = await httpClient.get<unknown>('/admin/orders', { signal, params }); const value = unwrapApiData(data);
@@ -125,6 +125,15 @@ function parseHistory(record: Record<string, unknown>, index: number): AdminOrde
 function parsePayment(record: Record<string, unknown>): AdminOrderPaymentDetail {
   return { method: optionalText(record, ['method', 'paymentMethod']), status: optionalText(record, ['status']), amount: nullableNumber(record, ['amount', 'totalAmount', 'total']), transactionId: optionalText(record, ['transactionId', 'id']) };
 }
+function parseAddress(value: unknown): string | null {
+  if (typeof value === 'string') return value;
+  const address = asRecord(value);
+  if (!address) return null;
+  return ['region', 'district', 'city', 'street', 'address', 'house']
+    .map((key) => optionalText(address, [key]))
+    .filter((part): part is string => Boolean(part))
+    .join(', ') || null;
+}
 function parseAdminOrderDetail(value: unknown): AdminOrderDetail {
   const record = asRecord(value);
   if (!record) throw new Error('Admin buyurtma tafsiloti noto‘g‘ri formatda');
@@ -145,7 +154,15 @@ function parseAdminOrderDetail(value: unknown): AdminOrderDetail {
   const nestedHistory = sellerOrderRecords.flatMap((item) => recordsAt(item, ['history', 'statusHistory', 'events']));
   const shipment = asRecord(record.shipment);
   const payment = asRecord(record.payment);
+  let summary: AdminOrder | null = null;
+  try {
+    summary = parseAdminOrder(record);
+  } catch {
+    // Ayrim eski backend javoblarida detail faqat ichki bo‘limlarni qaytaradi.
+  }
   return {
+    summary,
+    deliveryAddress: parseAddress(record.deliveryAddress ?? record.address),
     sellerOrders: sellerOrderRecords.map(parseSubOrder),
     items: [...directItems, ...nestedItems].map(parseAdminItem),
     shipments: [...directShipments, ...(shipment ? [shipment] : []), ...nestedShipments].map(parseShipment),

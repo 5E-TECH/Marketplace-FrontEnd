@@ -11,7 +11,9 @@ test('health va readiness holatlari ko‘rsatiladi, webhook brauzerdan chaqirilm
   await page.goto('/admin/system-settings');
   await expect(page.getByText('API Gateway', { exact: true })).toBeVisible();
   await expect(page.getByText('Tayyor servislar')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Mikroservislar' })).toBeVisible();
+  const servicesHeading = page.getByRole('heading', { name: 'Mikroservislar' });
+  await expect(servicesHeading).toBeVisible();
+  await expect.poll(() => servicesHeading.locator('xpath=../../..').evaluate(element => getComputedStyle(element).padding)).toBe('20px');
   await expect(page.getByText('ready')).toBeVisible();
   await expect.poll(() => healthCalls).toBeGreaterThan(0);
   await expect.poll(() => readinessCalls).toBeGreaterThan(0);

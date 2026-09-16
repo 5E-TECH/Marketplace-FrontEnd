@@ -1,5 +1,5 @@
 import { ExternalLink, RotateCcw } from 'lucide-react';
-import { Button, Select, Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useDeferredValue, useState } from 'react';
 import type {
@@ -15,13 +15,14 @@ import { DataTable } from '../../shared/ui/DataTable/DataTable';
 import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 
 /** Jo'natma holatlari — Elchi yaratilgandan keyingi bosqichlar. */
 type ShipmentStatusFilter = 'ALL' | SellerOrderStatus;
 
 const statusOptions: Array<{ value: ShipmentStatusFilter; label: string }> = [
   { value: 'ALL', label: 'Barcha holatlar' },
-  { value: 'SHIPMENT_CREATED', label: 'Elchi yaratildi' },
+  { value: 'SHIPMENT_CREATED', label: 'Pochtaga topshirildi' },
   { value: 'ON_THE_ROAD', label: 'Yo‘lda' },
   { value: 'DELIVERED', label: 'Yetkazildi' },
   { value: 'RETURNED', label: 'Qaytarildi' },
@@ -128,7 +129,7 @@ export default function DeliveryPage() {
         }}
         actions={
           <>
-            <Select<ShipmentStatusFilter>
+            <FilterSelect<ShipmentStatusFilter>
               value={status}
               options={statusOptions}
               title="Jo‘natma holati"

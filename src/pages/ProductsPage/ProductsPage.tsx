@@ -7,7 +7,7 @@ import {
   Trash2 as DeleteOutlined,
   Upload,
 } from 'lucide-react';
-import { App, Button, Select, Typography } from 'antd';
+import { App, Button, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -30,6 +30,7 @@ import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { usePublicCategoriesQuery } from '../../features/categories/api/categoryQueries';
 import { createCategoryOptions } from '../../features/categories/lib/categoryOptions';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 
 type ProductStatusFilter = 'ALL' | Product['status'];
 const EMPTY_PRODUCTS: Product[] = [];
@@ -167,7 +168,7 @@ export default function ProductsPage() {
         }}
         actions={
           <>
-          <Select<ProductStatusFilter>
+          <FilterSelect<ProductStatusFilter>
             className={styles.statusFilter}
             value={status}
             options={statusFilters}
@@ -176,7 +177,7 @@ export default function ProductsPage() {
             aria-label={t('product.filterStatus')}
             onChange={(value) => { setStatus(value); setPage(1); }}
           />
-          <Select
+          <FilterSelect
             className={styles.statusFilter}
             value={categoryId}
             options={categoryOptions}

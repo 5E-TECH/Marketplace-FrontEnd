@@ -77,7 +77,7 @@ test('holat filtri so‘rovga status parametrini qo‘shadi', async ({ page }) =
   await page.getByRole('combobox').click();
   await page
     .locator('.ant-select-item-option')
-    .filter({ hasText: 'Elchi yaratildi' })
+    .filter({ hasText: 'Pochtaga topshirildi' })
     .click();
   await statusRequest;
 

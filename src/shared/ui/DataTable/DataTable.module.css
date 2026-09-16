@@ -8,7 +8,12 @@
 }
 
 .table :global(.ant-table-pagination.ant-pagination) {
+  min-height: 64px;
   margin: var(--space-6) var(--space-4) var(--space-4) !important;
+  padding: var(--space-3) var(--space-4);
+  align-items: center;
+  background: color-mix(in srgb, var(--color-surface-subtle) 78%, transparent);
+  border-top: 1px solid var(--color-border);
 }
 
 .table :global(.ant-table-pagination-left) {
@@ -19,9 +24,67 @@
   justify-content: center;
 }
 
+.table :global(.ant-pagination-item),
+.table :global(.ant-pagination-prev),
+.table :global(.ant-pagination-next) {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  line-height: 32px;
+}
+
+.table :global(.ant-pagination-item-active) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.table :global(.ant-pagination-item-active a) {
+  color: var(--color-black);
+  font-weight: 800;
+}
+
+.table :global(.ant-pagination-options-quick-jumper input) {
+  width: 52px;
+  height: 34px;
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.table :global(.ant-table-selection-column) {
+  width: 52px;
+  padding-inline: var(--space-4) !important;
+  text-align: center;
+}
+
+.table :global(.ant-checkbox-inner) {
+  width: 18px;
+  height: 18px;
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border-hover);
+  border-radius: 5px;
+}
+
+.table :global(.ant-checkbox-checked .ant-checkbox-inner) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.table :global(.ant-table-row-selected > .ant-table-cell) {
+  background: var(--color-accent-soft) !important;
+}
+
 @media (max-width: 575px) {
   .table :global(.ant-table-pagination.ant-pagination) {
-    margin: var(--space-4) var(--space-3) var(--space-3) !important;
+    min-height: 56px;
+    margin-inline: var(--space-3) !important;
+    padding: var(--space-3);
+  }
+
+  .table :global(.ant-pagination-total-text),
+  .table :global(.ant-pagination-options) {
+    display: none;
   }
 
   .search {

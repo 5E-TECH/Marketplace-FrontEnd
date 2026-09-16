@@ -33,6 +33,7 @@ const UsersPage = lazy(routeImports.users);
 const UserEditorPage = lazy(routeImports.userEditor);
 const AdminShopsPage = lazy(routeImports.adminShops);
 const AdminOrdersPage = lazy(routeImports.adminOrders);
+const AdminOrderDetailPage = lazy(routeImports.adminOrderDetail);
 const AdminProductsPage = lazy(routeImports.adminProducts);
 const AdminProductDetailPage = lazy(routeImports.adminProductDetail);
 const AdminUsersPage = lazy(routeImports.adminUsers);
@@ -74,6 +75,7 @@ export function AppRouter() {
                 <Route path="admin/overview" element={<AdminOverviewPage />} />
                 <Route path="admin/shops" element={<AdminShopsPage />} />
                 <Route path="admin/orders" element={<AdminOrdersPage />} />
+                <Route path="admin/orders/:orderId" element={<AdminOrderDetailPage />} />
                 <Route path="admin/products" element={<AdminProductsPage />} />
                 <Route path="admin/products/:productId" element={<AdminProductDetailPage />} />
                 <Route path="admin/users" element={<AdminUsersPage />} />

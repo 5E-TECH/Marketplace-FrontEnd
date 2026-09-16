@@ -1,4 +1,4 @@
-import { Flex, Input, Table } from 'antd';
+import { Flex, Table } from 'antd';
 import type { TablePaginationConfig, TableProps } from 'antd';
 import type { ReactNode } from 'react';
 import { useDeferredValue, useMemo, useState } from 'react';
@@ -6,6 +6,7 @@ import { EmptyState } from '../EmptyState/EmptyState';
 import styles from './DataTable.module.css';
 import { createTablePagination } from './tablePagination';
 import { useTranslation } from '../../i18n/useTranslation';
+import { SearchInput } from '../SearchInput/SearchInput';
 
 interface DataTableSearch<RecordType> {
   placeholder?: string;
@@ -68,13 +69,13 @@ export function DataTable<RecordType extends object>({
           wrap
         >
           {search ? (
-            <Input.Search
+            <SearchInput
               allowClear
               className={styles.search}
               placeholder={search.placeholder ?? t('common.search')}
               value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
+              onValueChange={(value) => {
+                setQuery(value);
                 setCurrentPage(1);
               }}
             />

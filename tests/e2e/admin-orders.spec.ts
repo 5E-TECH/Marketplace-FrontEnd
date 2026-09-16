@@ -2,9 +2,9 @@ import { expect, test } from '@playwright/test';
 import { seedAccessToken } from './support/auth';
 
 const allOrders = [
-  { id: '91', orderNumber: 'A-91', buyerName: 'Ali Valiyev', shopId: '7', shopName: 'Ali Market', totalAmount: 250000, paymentMethod: 'cod', status: 'CONFIRMED', createdAt: '2026-09-03T10:00:00.000Z' },
-  { id: '92', orderNumber: 'A-92', buyerName: 'Aziza Karimova', shopId: '8', shopName: 'Aziza Market', totalAmount: 120000, paymentMethod: 'online', status: 'PAID', createdAt: '2026-09-10T15:00:00.000Z' },
-  { id: '93', orderNumber: 'A-93', buyerName: 'Vali Aliyev', shopId: '9', shopName: 'Vali Market', totalAmount: 300000, paymentMethod: 'cod', status: 'CONFIRMED', createdAt: '2026-08-01T10:00:00.000Z' },
+  { id: '91', orderNumber: 'A-91', buyerName: 'Ali Valiyev', buyerPhone: '+998901111111', shopId: '7', shopName: 'Ali Market', totalAmount: 250000, paymentMethod: 'cod', status: 'CONFIRMED', createdAt: '2026-09-03T10:00:00.000Z' },
+  { id: '92', orderNumber: 'A-92', buyerName: 'Aziza Karimova', buyerPhone: '+998902222222', shopId: '8', shopName: 'Aziza Market', totalAmount: 120000, paymentMethod: 'online', status: 'PAID', createdAt: '2026-09-10T15:00:00.000Z' },
+  { id: '93', orderNumber: 'A-93', buyerName: 'Vali Aliyev', buyerPhone: '+998903333333', shopId: '9', shopName: 'Vali Market', totalAmount: 300000, paymentMethod: 'cod', status: 'CONFIRMED', createdAt: '2026-08-01T10:00:00.000Z' },
 ];
 
 test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', async ({ page }) => {
@@ -17,7 +17,7 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
   });
   await page.goto('/admin/orders');
   for (const order of allOrders) {
-    const row = page.getByRole('row').filter({ hasText: `#${order.orderNumber}` });
+    const row = page.getByRole('row').filter({ hasText: order.buyerName });
     await expect(row).toContainText(order.shopName);
     await expect(row).toContainText(order.buyerName);
     await expect(row).toContainText(order.paymentMethod.toUpperCase());
@@ -25,9 +25,49 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
     await expect(row).toContainText('2026');
     await expect(row.getByRole('button', { name: 'Buyurtma tafsilotlari' })).toBeVisible();
   }
+  await expect(page.getByRole('checkbox')).toHaveCount(allOrders.length + 1);
+  await expect(page.getByRole('button', { name: 'Print' })).toBeVisible();
   await expect(page.getByRole('columnheader')).toHaveCount(8);
-  await expect(page.getByRole('row').filter({ hasText: '#A-91' })).toContainText('250 000 UZS');
-  await expect(page.getByRole('row').filter({ hasText: '#A-91' })).toContainText('Tasdiqlangan');
+  await expect(page.getByRole('row').filter({ hasText: 'Ali Valiyev' })).toContainText('250 000 UZS');
+  await expect(page.getByRole('row').filter({ hasText: 'Ali Valiyev' })).toContainText('Tasdiqlangan');
+});
+
+test('Print faqat tanlangan buyurtmalar labelini chiqaradi va QR joyini bo‘sh qoldiradi', async ({ page }) => {
+  const detailIds: string[] = [];
+  await page.addInitScript(() => {
+    window.print = () => {
+      const labels = document.querySelectorAll('[class*="shippingLabel"]');
+      document.body.dataset.printCount = String(labels.length);
+      document.body.dataset.printText = Array.from(labels).map((label) => label.textContent).join('\n');
+      document.body.dataset.qrCount = String(document.querySelectorAll('[aria-label="QR kod uchun joy"]').length);
+      document.body.dataset.labelBreakAfter = labels[0] ? getComputedStyle(labels[0]).breakAfter : '';
+      document.body.dataset.labelBreakInside = labels[0] ? getComputedStyle(labels[0]).breakInside : '';
+    };
+  });
+  await page.route('**/api/v1/admin/orders**', async route => {
+    const path = new URL(route.request().url()).pathname;
+    const id = path.match(/\/admin\/orders\/(\d+)$/)?.[1];
+    if (id) {
+      detailIds.push(id);
+      const order = allOrders.find((item) => item.id === id)!;
+      await route.fulfill({ json: { data: { ...order, deliveryAddress: 'Andijon shahri', sellerOrders: [{ id: `SO-${id}`, shopId: order.shopId, shopName: order.shopName, items: [{ id: `I-${id}`, productName: `Mahsulot ${id}`, quantity: 1, unitPrice: order.totalAmount }] }] } } });
+      return;
+    }
+    await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
+  });
+  await page.goto('/admin/orders');
+  const printButton = page.getByRole('button', { name: 'Print' });
+  await expect(printButton).toBeDisabled();
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await expect(printButton).toBeEnabled();
+  await printButton.click();
+  await expect.poll(() => page.evaluate(() => document.body.dataset.printCount)).toBe('1');
+  expect(detailIds).toEqual(['91']);
+  expect(await page.evaluate(() => document.body.dataset.printText)).toContain('Ali Valiyev');
+  expect(await page.evaluate(() => document.body.dataset.printText)).not.toContain('Aziza Karimova');
+  expect(await page.evaluate(() => document.body.dataset.qrCount)).toBe('1');
+  expect(await page.evaluate(() => document.body.dataset.labelBreakAfter)).not.toBe('page');
+  expect(await page.evaluate(() => document.body.dataset.labelBreakInside)).toBe('avoid');
 });
 
 test('TC2: har bir filtr natijani o‘zgartiradi, birgalikda ishlaydi va tozalanadi', async ({ page }) => {
@@ -37,7 +77,7 @@ test('TC2: har bir filtr natijani o‘zgartiradi, birgalikda ishlaydi va tozalan
     const items = allOrders.filter(order =>
       (!params.has('status') || order.status === params.get('status')) &&
       (!params.has('paymentMethod') || order.paymentMethod === params.get('paymentMethod')) &&
-      (!params.has('shopId') || order.shopId === params.get('shopId')) &&
+      (!params.has('search') || Object.values(order).some(value => String(value).toLocaleLowerCase().includes(params.get('search')!.toLocaleLowerCase()))) &&
       (!params.has('dateFrom') || order.createdAt.slice(0, 10) >= params.get('dateFrom')!) &&
       (!params.has('dateTo') || order.createdAt.slice(0, 10) <= params.get('dateTo')!),
     );
@@ -57,53 +97,62 @@ test('TC2: har bir filtr natijani o‘zgartiradi, birgalikda ishlaydi va tozalan
   await choose('#admin-order-status', 'Tasdiqlangan');
   await expect(rows).toHaveCount(2);
   await expect(page.getByText('Aziza Karimova')).toHaveCount(0);
+  await choose('#admin-order-status', 'To‘langan');
+  await expect(rows).toHaveCount(3);
+  await expect(page.getByText('Aziza Karimova')).toBeVisible();
   await reset();
   await choose('#admin-order-payment', 'Online');
   await expect(rows).toHaveCount(1);
   await expect(rows).toContainText('Aziza Karimova');
   await reset();
-  await page.getByLabel('Do‘kon').fill('9');
+  await page.getByLabel('Qidirish').fill('Aziza');
   await expect(rows).toHaveCount(1);
-  await expect(rows).toContainText('Vali Aliyev');
+  await expect(rows).toContainText('Aziza Karimova');
+  await reset();
+  await page.getByLabel('Qidirish').fill('902222222');
+  await expect(rows).toHaveCount(1);
+  await expect(rows).toContainText('Aziza Karimova');
   await reset();
   await page.getByLabel('Boshlanish sanasi').fill('2026-09-03');
+  await page.getByLabel('Boshlanish sanasi').press('Enter');
   await expect(rows).toHaveCount(2);
   await page.getByLabel('Tugash sanasi').fill('2026-09-03');
+  await page.getByLabel('Tugash sanasi').press('Enter');
   await expect(rows).toHaveCount(1);
   await expect(rows).toContainText('Ali Valiyev');
   await choose('#admin-order-status', 'Tasdiqlangan');
   await choose('#admin-order-payment', 'COD');
-  await page.getByLabel('Do‘kon').fill('7');
+  await page.getByLabel('Qidirish').fill('A-91');
   await expect(rows).toHaveCount(1);
   await expect(rows).toContainText('Ali Valiyev');
   await reset();
-  await expect(page.getByLabel('Do‘kon')).toHaveValue('');
+  await expect(page.getByLabel('Qidirish')).toHaveValue('');
   await expect(page.getByLabel('Boshlanish sanasi')).toHaveValue('');
   await expect(page.getByLabel('Tugash sanasi')).toHaveValue('');
   await expect(page.getByRole('button', { name: 'Tozalash', exact: true })).toBeDisabled();
 });
 
-test('TC2: filtr xatosidan keyin filtrni tozalab tiklanish mumkin', async ({ page }) => {
+test('TC2: search backendga noma’lum query yubormaydi va tozalanadi', async ({ page }) => {
+  let invalidSearchSent = false;
   await page.route('**/api/v1/admin/orders**', async route => {
-    if (new URL(route.request().url()).searchParams.has('shopId')) {
-      await route.fulfill({ status: 400, json: { message: 'Invalid shopId' } });
-      return;
+    if (new URL(route.request().url()).searchParams.has('search')) {
+      invalidSearchSent = true;
     }
     await route.fulfill({ json: { data: { items: allOrders, total: 3, page: 1, limit: 20, totalPages: 1 } } });
   });
   await page.goto('/admin/orders');
   await expect(page.getByText('Ali Valiyev')).toBeVisible();
-  await page.getByLabel('Do‘kon').fill('999');
-  await expect(page.locator('.ant-result-error')).toBeVisible();
+  await page.getByLabel('Qidirish').fill('999');
+  await expect(page.getByText('Buyurtmalar topilmadi')).toBeVisible();
+  expect(invalidSearchSent).toBe(false);
   await expect(page.getByRole('region', { name: 'Buyurtma filtrlari' })).toBeVisible();
   await page.getByRole('button', { name: 'Tozalash', exact: true }).click();
   await expect(page.getByText('Ali Valiyev')).toBeVisible();
-  await expect(page.locator('.ant-result-error')).toHaveCount(0);
 });
 
 test('TC4: filtrga mos buyurtma bo‘lmasa bo‘sh holat va ishlaydigan filtrlar chiqadi', async ({ page }) => {
   await page.goto('/admin/orders');
-  await page.getByLabel('Do‘kon').fill('999');
+  await page.getByLabel('Qidirish').fill('999');
   await expect(page.getByText('Buyurtmalar topilmadi')).toBeVisible();
   await expect(page.getByRole('region', { name: 'Buyurtma filtrlari' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Buyurtma tafsilotlari' })).toHaveCount(0);
@@ -140,9 +189,18 @@ for (const viewport of [
 
     const filters = page.getByRole('region', { name: 'Buyurtma filtrlari' });
     await expect(filters).toBeVisible();
-    await expect(filters.getByLabel('Do‘kon')).toBeVisible();
+    await expect(filters.getByLabel('Qidirish')).toBeVisible();
     await expect(filters.getByLabel('Boshlanish sanasi')).toBeVisible();
     await expect(filters.getByLabel('Tugash sanasi')).toBeVisible();
+    const searchUi = await filters.getByLabel('Qidirish').locator('xpath=..').evaluate((element) => {
+      const icon = element.querySelector('.ant-input-prefix svg');
+      return {
+        height: element.getBoundingClientRect().height,
+        iconWidth: icon?.getBoundingClientRect().width,
+        iconHeight: icon?.getBoundingClientRect().height,
+      };
+    });
+    expect(searchUi).toEqual({ height: 42, iconWidth: 16, iconHeight: 16 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
@@ -167,15 +225,15 @@ test('TC3: filtrlangan buyurtmaning sub-order, item, shipment va tarixi read-onl
   });
 
   await page.goto('/admin/orders');
-  await page.getByLabel('Do‘kon').fill('7');
+  await page.getByLabel('Qidirish').fill('A-91');
   const filteredRequest = page.waitForRequest((request) => {
     const url = new URL(request.url());
     return url.pathname.endsWith('/admin/orders')
       && url.searchParams.get('page') === '1'
-      && url.searchParams.get('limit') === '20'
+      && url.searchParams.get('limit') === '100'
       && url.searchParams.get('status') === 'CONFIRMED'
       && url.searchParams.get('paymentMethod') === 'cod'
-      && url.searchParams.get('shopId') === '7'
+      && !url.searchParams.has('search')
       && url.searchParams.get('dateFrom') === '2026-09-01'
       && url.searchParams.get('dateTo') === '2026-09-14';
   });
@@ -184,33 +242,36 @@ test('TC3: filtrlangan buyurtmaning sub-order, item, shipment va tarixi read-onl
   await page.locator('#admin-order-payment').click();
   await page.locator('.ant-select-dropdown:visible .ant-select-item-option').filter({ hasText: 'COD' }).click();
   await page.getByLabel('Boshlanish sanasi').fill('2026-09-01');
+  await page.getByLabel('Boshlanish sanasi').press('Enter');
   await page.getByLabel('Tugash sanasi').fill('2026-09-14');
+  await page.getByLabel('Tugash sanasi').press('Enter');
   await filteredRequest;
 
-  const row = page.getByRole('row', { name: /A-91/ });
+  const row = page.getByRole('row', { name: /Ali Valiyev/ });
   await expect(row).toContainText('Ali Market');
   await expect(row).toContainText('Ali Valiyev');
   await expect(row).toContainText('250 000 UZS');
   await expect(row).toContainText('COD');
 
   await page.getByRole('button', { name: 'Buyurtma tafsilotlari' }).click();
+  await expect(page).toHaveURL(/\/admin\/orders\/91$/);
   await expect.poll(() => detailRequested).toBe(true);
-  const drawer = page.getByRole('dialog');
-  await expect(drawer).toContainText('Ali Valiyev');
-  await expect(drawer.getByRole('heading', { name: 'Sub-buyurtmalar' })).toBeVisible();
-  await expect(drawer.getByText('#SO-501')).toBeVisible();
-  await expect(drawer.getByRole('heading', { name: 'Mahsulotlar' })).toBeVisible();
-  await expect(drawer.getByText('Simsiz quloqchin')).toBeVisible();
-  await expect(drawer.getByText('EAR-01')).toBeVisible();
-  await expect(drawer.getByRole('heading', { name: 'Jo‘natmalar' })).toBeVisible();
-  await expect(drawer.getByText('Elchi')).toBeVisible();
-  await expect(drawer.getByRole('link', { name: 'Kuzatuv sahifasini ochish' })).toHaveAttribute('href', 'https://elchi.uz/track/SH-9');
-  await expect(drawer.getByRole('heading', { name: 'To‘lov tafsiloti' })).toBeVisible();
-  await expect(drawer.getByText('PAY-8')).toBeVisible();
-  await expect(drawer.getByRole('heading', { name: 'Holat tarixi' })).toBeVisible();
-  await expect(drawer.getByText('Buyurtma tasdiqlandi')).toBeVisible();
-  await expect(drawer.getByRole('button', { name: 'Buyurtma yaratish' })).toHaveCount(0);
-  await expect(drawer.getByRole('button', { name: 'Buyurtmani o‘chirish' })).toHaveCount(0);
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage).toContainText('Ali Valiyev');
+  await expect(detailPage.getByRole('heading', { name: 'Sub-buyurtmalar' })).toBeVisible();
+  await expect(detailPage.getByText('#SO-501')).toBeVisible();
+  await expect(detailPage.getByRole('heading', { name: 'Mahsulotlar' })).toBeVisible();
+  await expect(detailPage.getByText('Simsiz quloqchin')).toBeVisible();
+  await expect(detailPage.getByText('EAR-01')).toBeVisible();
+  await expect(detailPage.getByRole('heading', { name: 'Jo‘natmalar' })).toBeVisible();
+  await expect(detailPage.getByText('Elchi')).toBeVisible();
+  await expect(detailPage.getByRole('link', { name: 'Kuzatuv sahifasini ochish' })).toHaveAttribute('href', 'https://elchi.uz/track/SH-9');
+  await expect(detailPage.getByRole('heading', { name: 'To‘lov tafsiloti' })).toBeVisible();
+  await expect(detailPage.getByText('PAY-8')).toBeVisible();
+  await expect(detailPage.getByRole('heading', { name: 'Holat tarixi' })).toBeVisible();
+  await expect(detailPage.getByText('Buyurtma tasdiqlandi')).toBeVisible();
+  await expect(detailPage.getByRole('button', { name: 'Buyurtma yaratish' })).toHaveCount(0);
+  await expect(detailPage.getByRole('button', { name: 'Buyurtmani o‘chirish' })).toHaveCount(0);
 });
 
 test('admin orders pagination backendga page va limit yuboradi', async ({ page }) => {
@@ -231,9 +292,9 @@ test('admin orders pagination backendga page va limit yuboradi', async ({ page }
   await expect(page.getByText('Xaridor 21')).toBeVisible();
   const resetPageRequest = page.waitForRequest(request => {
     const url = new URL(request.url());
-    return url.pathname.endsWith('/admin/orders') && url.searchParams.get('page') === '1' && url.searchParams.get('shopId') === '7';
+    return url.pathname.endsWith('/admin/orders') && url.searchParams.get('page') === '1' && url.searchParams.get('limit') === '100' && !url.searchParams.has('search');
   });
-  await page.getByLabel('Do‘kon').fill('7');
+  await page.getByLabel('Qidirish').fill('A-1');
   await resetPageRequest;
   await expect(page.getByText('Xaridor 1', { exact: true })).toBeVisible();
   await expect(page.getByText('Xaridor 21')).toHaveCount(0);
@@ -260,19 +321,20 @@ for (const width of [1440, 375]) {
       await route.fulfill({ json: { data: payload } });
     });
     await page.goto('/admin/orders');
-    if (width === 1440) await expect(page.getByRole('row', { name: /#91/ })).toContainText('2 ta do‘kon');
+    if (width === 1440) await expect(page.getByRole('row', { name: /Ali Valiyev/ })).toContainText('2 ta do‘kon');
     await page.getByRole('button', { name: 'Buyurtma tafsilotlari' }).click();
-    const drawer = page.getByRole('dialog');
-    await expect(drawer.getByText('#501', { exact: true })).toBeVisible();
-    await expect(drawer.getByText('#502', { exact: true })).toBeVisible();
-    await expect(drawer).toContainText('#7, #8');
-    await expect(drawer.getByRole('row', { name: /Simsiz quloqchin/ })).toContainText('140 000');
-    await expect(drawer.getByText('Klaviatura', { exact: true })).toBeVisible();
-    await expect(drawer.getByText('#SH-9', { exact: true })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Kuzatuv sahifasini ochish' })).toHaveAttribute('href', 'https://elchi.uz/track/SH-9');
-    await expect(drawer.getByText('To‘lov ma’lumoti mavjud emas')).toHaveCount(0);
-    await expect(drawer.getByText('Holat tarixi mavjud emas')).toBeVisible();
-    await expect(drawer.locator('input, select, textarea')).toHaveCount(0);
+    await expect(page).toHaveURL(/\/admin\/orders\/91$/);
+    const detailPage = page.getByTestId('detail-page');
+    await expect(detailPage.getByText('#501', { exact: true })).toBeVisible();
+    await expect(detailPage.getByText('#502', { exact: true })).toBeVisible();
+    await expect(detailPage).toContainText('#7, #8');
+    await expect(detailPage.getByRole('row', { name: /Simsiz quloqchin/ })).toContainText('140 000');
+    await expect(detailPage.getByText('Klaviatura', { exact: true })).toBeVisible();
+    await expect(detailPage.getByText('#SH-9', { exact: true })).toBeVisible();
+    await expect(detailPage.getByRole('link', { name: 'Kuzatuv sahifasini ochish' })).toHaveAttribute('href', 'https://elchi.uz/track/SH-9');
+    await expect(detailPage.getByText('To‘lov ma’lumoti mavjud emas')).toHaveCount(0);
+    await expect(detailPage.getByText('Holat tarixi mavjud emas')).toBeVisible();
+    await expect(detailPage.locator('input, select, textarea')).toHaveCount(0);
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
@@ -294,17 +356,28 @@ test('TC3: detail loading, xato, qayta urinish va bo‘sh bo‘limlar', async ({
   });
   await page.goto('/admin/orders');
   await page.getByRole('button', { name: 'Buyurtma tafsilotlari' }).click();
-  const drawer = page.getByRole('dialog');
-  await expect(drawer.locator('.ant-skeleton')).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/orders\/91$/);
+  await expect(page.locator('.ant-skeleton')).toBeVisible();
   await expect.poll(() => Boolean(releaseResponse)).toBe(true);
   releaseResponse!();
-  await expect(drawer.locator('.ant-result-error')).toBeVisible();
+  await expect(page.locator('.ant-result-error')).toBeVisible();
   failed = false;
-  await drawer.locator('.ant-result-extra button').click();
-  await expect(drawer.getByText('Sub-buyurtmalar mavjud emas')).toBeVisible();
-  await expect(drawer.getByText('Mahsulotlar mavjud emas')).toBeVisible();
-  await expect(drawer.getByText('Jo‘natma mavjud emas')).toBeVisible();
-  await expect(drawer.getByText('Holat tarixi mavjud emas')).toBeVisible();
+  await page.locator('.ant-result-extra button').click();
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByText('Sub-buyurtmalar mavjud emas')).toBeVisible();
+  await expect(detailPage.getByText('Mahsulotlar mavjud emas')).toBeVisible();
+  await expect(detailPage.getByText('Jo‘natma mavjud emas')).toBeVisible();
+  await expect(detailPage.getByText('Holat tarixi mavjud emas')).toBeVisible();
+});
+
+test('admin order detail direct URL va refreshda backenddan ochiladi', async ({ page }) => {
+  await page.route('**/api/v1/admin/orders/91', route => route.fulfill({ json: { data: { ...allOrders[0], sellerOrders: [] } } }));
+  await page.goto('/admin/orders/91');
+  await expect(page.getByTestId('detail-page')).toContainText('Ali Valiyev');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.reload();
+  await expect(page).toHaveURL(/\/admin\/orders\/91$/);
+  await expect(page.getByTestId('detail-page')).toContainText('Ali Valiyev');
 });
 
 test('TC4: ro‘yxat loading va empty holatlarini ko‘rsatadi', async ({ page }) => {

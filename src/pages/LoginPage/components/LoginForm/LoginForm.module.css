@@ -53,6 +53,18 @@
   font-size: 0.9rem;
 }
 
+.field :global(.ant-input-affix-wrapper:has(input:-webkit-autofill)) {
+  background: var(--color-white);
+}
+
+.field :global(.ant-input:-webkit-autofill),
+.field :global(.ant-input:-webkit-autofill:hover),
+.field :global(.ant-input:-webkit-autofill:focus) {
+  box-shadow: 0 0 0 1000px var(--color-white) inset;
+  caret-color: var(--color-token-30364d);
+  -webkit-text-fill-color: var(--color-token-30364d);
+}
+
 .field :global(.ant-input-password-icon) {
   display: inline-grid;
   width: 2rem;

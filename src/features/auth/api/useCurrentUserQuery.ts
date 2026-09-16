@@ -17,6 +17,5 @@ export function useCurrentUserQuery() {
     },
     enabled: Boolean(accessToken),
     staleTime: 5 * 60_000,
-    retry: false,
   });
 }

@@ -45,7 +45,6 @@ export type AdminPaymentMethod = 'online' | 'cod';
 export interface AdminOrderListParams {
   status?: AdminOrderStatus;
   paymentMethod?: AdminPaymentMethod;
-  shopId?: string;
   dateFrom?: string;
   dateTo?: string;
   page: number;
@@ -55,6 +54,7 @@ export interface AdminOrder {
   id: string;
   orderNumber: string;
   buyerName: string | null;
+  buyerPhone: string | null;
   totalAmount: number;
   paymentMethod: AdminPaymentMethod | null;
   status: AdminOrderStatus;
@@ -107,6 +107,8 @@ export interface AdminOrderPaymentDetail {
 }
 
 export interface AdminOrderDetail {
+  summary: AdminOrder | null;
+  deliveryAddress: string | null;
   sellerOrders: AdminSubOrder[];
   items: AdminOrderItemDetail[];
   shipments: AdminOrderShipmentDetail[];

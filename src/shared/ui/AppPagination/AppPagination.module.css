@@ -1,0 +1,24 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.pagination :global(.ant-pagination-item),
+.pagination :global(.ant-pagination-prev),
+.pagination :global(.ant-pagination-next) {
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 575px) {
+  .pagination {
+    justify-content: center;
+  }
+
+  .pagination :global(.ant-pagination-total-text) {
+    width: 100%;
+    text-align: center;
+  }
+}

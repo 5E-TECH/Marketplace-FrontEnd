@@ -1,0 +1,15 @@
+.input {
+  height: 42px;
+  border-radius: var(--radius-md);
+}
+
+.input :global(.ant-input-prefix) {
+  margin-inline-end: 8px;
+}
+
+.icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}

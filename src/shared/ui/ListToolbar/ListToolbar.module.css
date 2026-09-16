@@ -8,7 +8,6 @@
 
 .search {
   width: 100%;
-  height: 44px;
   background: var(--color-surface-subtle);
   border-color: var(--color-border);
   border-radius: var(--radius-md);
@@ -27,7 +26,7 @@
 }
 
 .actions :global(.ant-btn) {
-  height: 44px;
+  height: 42px;
   border-radius: var(--radius-sm);
 }
 

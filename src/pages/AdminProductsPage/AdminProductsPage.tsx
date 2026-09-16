@@ -1,6 +1,6 @@
-import { App, Button, Input, Select } from 'antd';
+import { App, Button, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowRight, Image as ImageIcon, RotateCcw, Search } from 'lucide-react';
+import { ArrowRight, Image as ImageIcon, RotateCcw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -25,6 +25,8 @@ import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
+import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
+import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 import styles from './AdminProductsPage.module.css';
 
 type StatusFilter = 'ALL' | Extract<ProductStatus, 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK'>;
@@ -160,12 +162,10 @@ export default function AdminProductsPage() {
       />
 
       <FilterPanel className={styles.filters} aria-label={t('admin.common.filters')}>
-        <Input
-          prefix={<Search aria-hidden />}
-          allowClear
+        <SearchInput
           value={search}
           placeholder={t('adminProducts.search')}
-          onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+          onValueChange={(value) => { setSearch(value); setPage(1); }}
         />
         <Input
           allowClear
@@ -174,7 +174,7 @@ export default function AdminProductsPage() {
           placeholder={t('adminProducts.shopPlaceholder')}
           onChange={(event) => { setShopId(event.target.value); setPage(1); }}
         />
-        <Select<StatusFilter>
+        <FilterSelect<StatusFilter>
           value={status}
           aria-label={t('adminProducts.productStatus')}
           options={[
@@ -186,7 +186,7 @@ export default function AdminProductsPage() {
           ]}
           onChange={(value) => { setStatus(value); setPage(1); }}
         />
-        <Select<ModerationFilter>
+        <FilterSelect<ModerationFilter>
           value={moderation}
           aria-label={t('adminProducts.moderationStatus')}
           options={[

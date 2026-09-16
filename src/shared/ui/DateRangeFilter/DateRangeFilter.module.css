@@ -1,0 +1,45 @@
+.fields {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.field > span {
+  color: var(--color-text-secondary);
+  font: var(--font-label);
+  letter-spacing: .03em;
+}
+
+.picker {
+  width: 100%;
+  min-height: 42px;
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.picker:hover {
+  border-color: var(--color-border-hover);
+}
+
+.picker :global(.ant-picker-input > input) {
+  color: var(--color-text);
+}
+
+.picker :global(.ant-picker-input > input::placeholder),
+.picker :global(.ant-picker-suffix) {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 575px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+}
