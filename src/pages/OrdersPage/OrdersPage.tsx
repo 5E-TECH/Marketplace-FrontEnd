@@ -1,6 +1,7 @@
-import { Ban, Check, Eye, RotateCcw, Truck } from 'lucide-react';
+import { Ban, Check, Eye, Printer, RotateCcw, Truck } from 'lucide-react';
 import { App, Button, Input, Popconfirm, Select, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import type { Key } from 'react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { SellerOrder, SellerOrderStatus } from '../../features/orders/model/orderTypes';
@@ -24,6 +25,7 @@ import { DetailList } from '../../shared/ui/DetailList/DetailList';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
+import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
 
 type StatusFilter = 'ALL' | SellerOrderStatus;
 export default function OrdersPage() {
@@ -33,7 +35,7 @@ export default function OrdersPage() {
   const statusOptions: Array<{ value: StatusFilter; label: string }> = [
     { value: 'ALL', label: t('order.allStatuses') },
     { value: 'CONFIRMED', label: t('status.confirmed') }, { value: 'PENDING', label: t('status.pending') },
-    { value: 'SHIPMENT_CREATED', label: t('status.shipmentCreated') }, { value: 'ON_THE_ROAD', label: t('status.onTheRoad') },
+    { value: 'SHIPMENT_CREATED', label: t('status.shipmentCreated') }, { value: 'RECEIVED', label: t('status.receivedByElchi') }, { value: 'ON_THE_ROAD', label: t('status.onTheRoad') },
     { value: 'DELIVERED', label: t('status.delivered') }, { value: 'CANCELLED', label: t('status.cancelled') },
     { value: 'RETURNED', label: t('status.returned') },
   ];
@@ -47,6 +49,8 @@ export default function OrdersPage() {
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
   const [customerPhone, setCustomerPhone] = useState('');
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
+  const [printLoading, setPrintLoading] = useState(false);
   const deferredSearch = useDebouncedValue(search.trim());
   const ordersQuery = useSellerOrdersQuery({
     page, limit: 20,
@@ -69,6 +73,12 @@ export default function OrdersPage() {
 
   const resetPage = () => setPage(1);
   const resetFilters = () => { setSearch(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); };
+  const printLabels = async (ids: string[]) => {
+    setPrintLoading(true);
+    try { await openOrderLabels('seller', ids); }
+    catch (error) { void message.error(getAuthErrorMessage(error)); }
+    finally { setPrintLoading(false); }
+  };
   const columns: ColumnsType<SellerOrder> = [
     { title: t('order.order'), width: 130, render: (_, order) => <span className={styles.orderId}><strong>#{order.salesOrderId}</strong><small>{t('order.internalId', { id: order.id })}</small></span> },
     { title: t('order.buyer'), dataIndex: 'buyerName', responsive: ['md'], render: (name: string | null) => name || <span className={styles.muted}>{t('order.unknownBuyer')}</span> },
@@ -89,8 +99,8 @@ export default function OrdersPage() {
       <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('order.startDate')} endLabel={t('order.endDate')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); resetPage(); }} />
       {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>{t('adminOrders.clear')}</Button> : null}
     </>} />
-    <TablePanel className={styles.tableCard} title={t('order.list')} caption={t('order.resultCount', { count: ordersQuery.data.total })}>
-      <DataTable rowKey="id" columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+    <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? `${selectedRowKeys.length} ta tanlandi` : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>Yorliqlarni chop etish</Button>}>
+      <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? 'Avval posilka yarating' : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
     </TablePanel>
     <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} width="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>
@@ -99,6 +109,7 @@ export default function OrdersPage() {
           <Popconfirm title={t('order.confirmQuestion')} disabled={!canConfirm} onConfirm={() => confirmMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CONFIRMED' } : current); setNextStatus('CONFIRMED'); void message.success(t('order.confirmed')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}><Button type="primary" icon={<Check size={16} />} disabled={!canConfirm} loading={confirmMutation.isPending}>{t('common.confirm')}</Button></Popconfirm>
           <Popconfirm title={t('order.cancelQuestion')} description={t('order.cancelDescription')} disabled={!canCancel} onConfirm={() => cancelMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CANCELLED' } : current); setNextStatus('CANCELLED'); void message.success(t('order.cancelled')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}><Button danger icon={<Ban size={16} />} disabled={!canCancel} loading={cancelMutation.isPending}>{t('common.cancel')}</Button></Popconfirm>
         </div>
+        <Button block icon={<Printer size={16} />} disabled={!selectedOrder.elchiShipmentId} loading={printLoading} onClick={() => void printLabels([selectedOrder.id])}>Yorliqni chop etish</Button>
         <section className={styles.statusEditor} aria-label={t('order.updateStatus')}>
           <div><strong>{t('order.updateStatus')}</strong><span>{t('order.updateStatusDescription')}</span></div>
           <Select<SellerOrderStatus> virtual={false} placement="topLeft" aria-label={t('order.newStatus')} value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} disabled={updateStatusMutation.isPending} onChange={setNextStatus} />

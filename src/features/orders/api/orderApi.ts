@@ -2,7 +2,7 @@ import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
 import type { AdminOrder, AdminOrderDetail, AdminOrderHistoryEntry, AdminOrderItemDetail, AdminOrderListParams, AdminOrderPaymentDetail, AdminOrderShipmentDetail, AdminOrderStatus, AdminOrdersPage, AdminSubOrder, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
-const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
+const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'RECEIVED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 const adminStatuses: AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED', 'CANCELLED', 'REFUNDED'];
 
 function numberField(record: Record<string, unknown>, key: string): number {

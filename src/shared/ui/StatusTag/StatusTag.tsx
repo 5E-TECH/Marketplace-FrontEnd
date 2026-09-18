@@ -25,6 +25,7 @@ const STATUS_CONFIG = {
   ARCHIVED: { color: 'default', label: 'status.archived' },
   OUT_OF_STOCK: { color: 'error', label: 'status.outOfStock' },
   SHIPMENT_CREATED: { color: 'processing', label: 'status.shipmentCreated' },
+  RECEIVED: { color: 'blue', label: 'status.receivedByElchi' },
   ON_THE_ROAD: { color: 'cyan', label: 'status.onTheRoad' },
   RETURNED: { color: 'orange', label: 'status.returned' },
 } as const;

@@ -1,4 +1,4 @@
-export type SellerOrderStatus = 'NEW' | 'CONFIRMED' | 'PENDING' | 'SHIPMENT_CREATED' | 'ON_THE_ROAD' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
+export type SellerOrderStatus = 'NEW' | 'CONFIRMED' | 'PENDING' | 'SHIPMENT_CREATED' | 'RECEIVED' | 'ON_THE_ROAD' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
 
 export interface SellerOrder {
   id: string;

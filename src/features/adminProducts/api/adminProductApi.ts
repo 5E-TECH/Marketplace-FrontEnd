@@ -31,10 +31,9 @@ export async function getAdminProduct(
   return parseProduct(data);
 }
 
-export async function suspendAdminProduct(productId: string): Promise<void> {
-  await httpClient.post(`/admin/products/${encodeURIComponent(productId)}/suspend`);
-}
-
-export async function reactivateAdminProduct(productId: string): Promise<void> {
-  await httpClient.post(`/admin/products/${encodeURIComponent(productId)}/reactivate`);
+export async function setAdminProductHidden({ productId, hidden, reason }: { productId: string; hidden: boolean; reason?: string }): Promise<void> {
+  await httpClient.post(`/admin/products/${encodeURIComponent(productId)}/hide`, {
+    hidden,
+    ...(reason ? { reason } : {}),
+  });
 }

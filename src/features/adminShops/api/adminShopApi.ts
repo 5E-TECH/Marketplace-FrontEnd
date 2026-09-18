@@ -37,6 +37,9 @@ function parseShop(value: unknown): AdminShop {
     ordersCount: typeof shop.ordersCount === 'number' ? shop.ordersCount : 0,
     elchiMarketId: nullableText('elchiMarketId'),
     isDeleted: shop.isDeleted === true,
+    isFeatured: shop.isFeatured === true || shop.featured === true,
+    tariffHome: typeof shop.tariffHome === 'number' ? shop.tariffHome : typeof shop.tariff_home === 'number' ? shop.tariff_home : 0,
+    tariffCenter: typeof shop.tariffCenter === 'number' ? shop.tariffCenter : typeof shop.tariff_center === 'number' ? shop.tariff_center : 0,
     createdAt: text(shop, 'createdAt'),
     updatedAt: text(shop, 'updatedAt'),
   };
@@ -66,7 +69,21 @@ export async function getAdminShopDetail(shopId: string, signal?: AbortSignal): 
   const status = text(row, 'status').toUpperCase() as AdminShopStatus;
   if ((typeof row.id !== 'string' && typeof row.id !== 'number') || (typeof row.ownerUserId !== 'string' && typeof row.ownerUserId !== 'number') || typeof row.name !== 'string' || !statuses.includes(status)) throw new Error('Market tafsilotining majburiy maydonlari yo‘q');
   const count = (key: string) => typeof stats[key] === 'number' && Number.isFinite(stats[key]) ? stats[key] : 0;
-  return { id: String(row.id), ownerUserId: String(row.ownerUserId), name: row.name, status, stats: { products: count('products'), orders: count('orders'), warehouses: count('warehouses') } };
+  return {
+    id: String(row.id), ownerUserId: String(row.ownerUserId), name: row.name, status,
+    isFeatured: row.isFeatured === true || row.featured === true,
+    tariffHome: typeof row.tariffHome === 'number' ? row.tariffHome : typeof row.tariff_home === 'number' ? row.tariff_home : 0,
+    tariffCenter: typeof row.tariffCenter === 'number' ? row.tariffCenter : typeof row.tariff_center === 'number' ? row.tariff_center : 0,
+    stats: { products: count('products'), orders: count('orders'), warehouses: count('warehouses') },
+  };
+}
+
+export async function setAdminShopFeatured({ shopId, featured }: { shopId: string; featured: boolean }): Promise<void> {
+  await httpClient.post(`/admin/shops/${encodeURIComponent(shopId)}/feature`, { featured });
+}
+
+export async function updateAdminShopTariffs({ shopId, tariffHome, tariffCenter }: { shopId: string; tariffHome: number; tariffCenter: number }): Promise<void> {
+  await httpClient.patch(`/admin/shops/${encodeURIComponent(shopId)}/tariffs`, { tariffHome, tariffCenter });
 }
 
 export async function rejectAdminShop({ shopId, reason }: { shopId: string; reason: string }): Promise<void> {

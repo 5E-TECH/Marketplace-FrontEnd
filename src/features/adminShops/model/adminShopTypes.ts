@@ -17,6 +17,9 @@ export interface AdminShop {
   ordersCount: number;
   elchiMarketId: string | null;
   isDeleted: boolean;
+  isFeatured: boolean;
+  tariffHome: number;
+  tariffCenter: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -40,5 +43,8 @@ export interface AdminShopDetail {
   ownerUserId: string;
   name: string;
   status: AdminShopStatus;
+  isFeatured: boolean;
+  tariffHome: number;
+  tariffCenter: number;
   stats: { products: number; orders: number; warehouses: number };
 }

@@ -127,3 +127,41 @@ test('TC3: Elchi status timeline va tracking link ko‘rsatiladi', async ({ page
   await expect(timeline).toContainText('Jo‘natma #987');
   await expect(timeline.getByRole('link', { name: 'Elchi’da kuzatish' })).toHaveAttribute('href', 'https://elchi.uz/track/987');
 });
+
+test('TC5: seller bitta va bir nechta backend PDF yorlig‘ini chop etadi', async ({ page }) => {
+  const singleIds: string[] = [];
+  const batches: unknown[] = [];
+  await page.route('**/api/v1/seller/orders/*/label', async (route) => {
+    singleIds.push(new URL(route.request().url()).pathname.split('/').at(-2) ?? '');
+    await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 seller') });
+  });
+  await page.route('**/api/v1/seller/orders/labels', async (route) => {
+    batches.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 batch') });
+  });
+  await page.reload();
+
+  const batchButton = page.getByRole('button', { name: 'Yorliqlarni chop etish' });
+  await expect(batchButton).toBeDisabled();
+  await expect(page.getByRole('row', { name: /Madina Karimova/ }).getByRole('checkbox')).toBeDisabled();
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await page.getByRole('row', { name: /Noma’lum xaridor/ }).getByRole('checkbox').check();
+  await batchButton.click();
+  await expect.poll(() => batches).toEqual([{ orderIds: ['31', '33'] }]);
+
+  await page.getByRole('button', { name: '#12 buyurtmani ko‘rish' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Buyurtma #12' });
+  await drawer.getByRole('button', { name: 'Yorliqni chop etish' }).click();
+  await expect.poll(() => singleIds).toEqual(['31']);
+});
+
+test('TC6: RECEIVED holati filtr va timeline’da ko‘rinadi', async ({ page }) => {
+  const received = { ...orders[0], status: 'RECEIVED' };
+  await page.route('**/api/v1/seller/orders**', async (route) => {
+    await route.fulfill({ json: { data: { items: [received], total: 1, page: 1, limit: 20, totalPages: 1 } } });
+  });
+  await page.reload();
+  await expect(page.getByText('Elchi qabul qildi')).toBeVisible();
+  await page.getByRole('button', { name: '#12 buyurtmani ko‘rish' }).click();
+  await expect(page.getByLabel('Elchi status timeline')).toContainText('Posilka skaner orqali Elchi hisobiga o‘tdi');
+});

@@ -1,4 +1,4 @@
-import { App, Button, Tag } from 'antd';
+import { App, Button, Form, Input, Modal, Tag } from 'antd';
 import {
   BadgeDollarSign,
   Barcode,
@@ -20,8 +20,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   useAdminProductQuery,
-  useReactivateAdminProductMutation,
-  useSuspendAdminProductMutation,
+  useSetAdminProductHiddenMutation,
 } from '../../features/adminProducts/api/adminProductQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { AdminProduct } from '../../features/adminProducts/model/adminProductTypes';
@@ -30,7 +29,6 @@ import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
-import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DetailPage, type DetailPageSection } from '../../shared/ui/DetailPage/DetailPage';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
@@ -111,8 +109,8 @@ export default function AdminProductDetailPage() {
   const { locale, t } = useTranslation();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const query = useAdminProductQuery(productId ?? '');
-  const suspendMutation = useSuspendAdminProductMutation();
-  const reactivateMutation = useReactivateAdminProductMutation();
+  const mutation = useSetAdminProductHiddenMutation();
+  const [moderationForm] = Form.useForm<{ reason: string }>();
   const product = query.data;
 
   if (!productId || query.isPending || query.isError || !product) {
@@ -135,7 +133,6 @@ export default function AdminProductDetailPage() {
   }
 
   const actionConfig = getAdminProductModerationConfig(product.isBlocked);
-  const mutation = actionConfig.action === 'reactivate' ? reactivateMutation : suspendMutation;
   const images = Array.from(new Set([product.imageUrl, ...product.images].filter((value): value is string => Boolean(value))));
 
   return (
@@ -192,22 +189,26 @@ export default function AdminProductDetailPage() {
           </section>
         ) : null}
       </DetailPage>
-      <ConfirmDialog
+      <Modal
         open={confirmationOpen}
         title={t(actionConfig.titleKey)}
-        description={t(actionConfig.descriptionKey, { name: product.name })}
-        confirmText={t(actionConfig.labelKey)}
-        danger={actionConfig.danger}
-        loading={mutation.isPending}
-        onCancel={() => setConfirmationOpen(false)}
-        onConfirm={() => mutation.mutate(product.id, {
+        okText={t(actionConfig.labelKey)}
+        okButtonProps={{ danger: actionConfig.danger, loading: mutation.isPending }}
+        onCancel={() => { setConfirmationOpen(false); moderationForm.resetFields(); }}
+        onOk={() => moderationForm.submit()}
+      >
+        <p>{t(actionConfig.descriptionKey, { name: product.name })}</p>
+        <Form form={moderationForm} layout="vertical" onFinish={({ reason }) => mutation.mutate({ productId: product.id, hidden: !product.isBlocked, ...(reason?.trim() ? { reason: reason.trim() } : {}) }, {
           onSuccess: () => {
             setConfirmationOpen(false);
+            moderationForm.resetFields();
             void message.success(t(actionConfig.successKey));
           },
           onError: (error) => void message.error(getAuthErrorMessage(error)),
-        })}
-      />
+        })}>
+          {!product.isBlocked ? <Form.Item name="reason" label="Yashirish sababi" rules={[{ required: true, whitespace: true, message: 'Sotuvchiga yuboriladigan sababni kiriting' }, { min: 5 }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount /></Form.Item> : null}
+        </Form>
+      </Modal>
     </>
   );
 }

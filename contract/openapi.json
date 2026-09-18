@@ -2317,6 +2317,7 @@
                 "PENDING",
                 "CONFIRMED",
                 "SHIPMENT_CREATED",
+                "RECEIVED",
                 "ON_THE_ROAD",
                 "DELIVERED",
                 "CANCELLED",
@@ -2632,6 +2633,7 @@
                 "PENDING",
                 "CONFIRMED",
                 "SHIPMENT_CREATED",
+                "RECEIVED",
                 "ON_THE_ROAD",
                 "DELIVERED",
                 "CANCELLED",
@@ -5890,6 +5892,319 @@
           "admin-team"
         ]
       }
+    },
+    "/api/v1/seller/orders/{id}/label": {
+      "get": {
+        "operationId": "SellerOrdersController_label",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF yorliq",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "seller"
+        ]
+      }
+    },
+    "/api/v1/seller/orders/labels": {
+      "post": {
+        "operationId": "SellerOrdersController_labels",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orderIds"
+                ],
+                "properties": {
+                  "orderIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PDF yorliq",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "seller"
+        ]
+      }
+    },
+    "/api/v1/admin/orders/{id}/label": {
+      "get": {
+        "operationId": "AdminOrdersController_label",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF yorliq",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin-orders"
+        ]
+      }
+    },
+    "/api/v1/admin/orders/labels": {
+      "post": {
+        "operationId": "AdminOrdersController_labels",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orderIds"
+                ],
+                "properties": {
+                  "orderIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PDF yorliq",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin-orders"
+        ]
+      }
+    },
+    "/api/v1/admin/shops/{id}/feature": {
+      "post": {
+        "operationId": "AdminShopsController_feature",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "featured"
+                ],
+                "properties": {
+                  "featured": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin-shops"
+        ]
+      }
+    },
+    "/api/v1/admin/shops/{id}/tariffs": {
+      "patch": {
+        "operationId": "AdminShopsController_tariffs",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tariffHome",
+                  "tariffCenter"
+                ],
+                "properties": {
+                  "tariffHome": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "tariffCenter": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin-shops"
+        ]
+      }
+    },
+    "/api/v1/admin/products/{id}/hide": {
+      "post": {
+        "operationId": "AdminProductsController_hide",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "hidden"
+                ],
+                "properties": {
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin-products"
+        ]
+      }
     }
   },
   "info": {
@@ -7675,6 +7990,7 @@
               "PENDING",
               "CONFIRMED",
               "SHIPMENT_CREATED",
+              "RECEIVED",
               "ON_THE_ROAD",
               "DELIVERED",
               "CANCELLED",
@@ -7767,6 +8083,7 @@
               "PENDING",
               "CONFIRMED",
               "SHIPMENT_CREATED",
+              "RECEIVED",
               "ON_THE_ROAD",
               "DELIVERED",
               "CANCELLED",
