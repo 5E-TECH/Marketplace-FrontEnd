@@ -1777,6 +1777,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/seller/orders/{id}/label": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SellerOrdersController_label"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/seller/orders/labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["SellerOrdersController_labels"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/orders/{id}/label": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminOrdersController_label"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/orders/labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminOrdersController_labels"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/shops/{id}/feature": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminShopsController_feature"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/shops/{id}/tariffs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminShopsController_tariffs"];
+        trace?: never;
+    };
+    "/api/v1/admin/products/{id}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminProductsController_hide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2552,7 +2664,7 @@ export interface components {
             /** @example 450000 */
             codAmount: number;
             /** @enum {string} */
-            status: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
+            status: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
             /** @example 987 */
             elchiShipmentId: unknown;
             /** @example https://elchi.uz/track/987 */
@@ -2582,7 +2694,7 @@ export interface components {
         };
         UpdateSellerOrderStatusDto: {
             /** @enum {string} */
-            status: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
+            status: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
         };
         SellerDashboardDto: {
             /** @example 42 */
@@ -4484,7 +4596,7 @@ export interface operations {
     SellerOrdersController_orders: {
         parameters: {
             query?: {
-                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
+                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
                 dateFrom?: string;
                 dateTo?: string;
                 search?: string;
@@ -4651,7 +4763,7 @@ export interface operations {
     SellerOrdersController_listShipments: {
         parameters: {
             query?: {
-                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
+                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
                 dateFrom?: string;
                 dateTo?: string;
                 search?: string;
@@ -6365,6 +6477,179 @@ export interface operations {
             };
             /** @description Oxirgi SUPERADMIN himoyalangan */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SellerOrdersController_label: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF yorliq */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+        };
+    };
+    SellerOrdersController_labels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    orderIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description PDF yorliq */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+        };
+    };
+    AdminOrdersController_label: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF yorliq */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+        };
+    };
+    AdminOrdersController_labels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    orderIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description PDF yorliq */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+        };
+    };
+    AdminShopsController_feature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    featured: boolean;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminShopsController_tariffs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    tariffHome: number;
+                    tariffCenter: number;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminProductsController_hide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    hidden: boolean;
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

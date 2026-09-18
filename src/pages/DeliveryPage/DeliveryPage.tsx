@@ -23,6 +23,7 @@ type ShipmentStatusFilter = 'ALL' | SellerOrderStatus;
 const statusOptions: Array<{ value: ShipmentStatusFilter; label: string }> = [
   { value: 'ALL', label: 'Barcha holatlar' },
   { value: 'SHIPMENT_CREATED', label: 'Pochtaga topshirildi' },
+  { value: 'RECEIVED', label: 'Elchi qabul qildi' },
   { value: 'ON_THE_ROAD', label: 'Yo‘lda' },
   { value: 'DELIVERED', label: 'Yetkazildi' },
   { value: 'RETURNED', label: 'Qaytarildi' },

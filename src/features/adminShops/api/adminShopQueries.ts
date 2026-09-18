@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { activateAdminShop, approveAdminShop, getAdminShopDetail, getAdminShops, rejectAdminShop, suspendAdminShop } from './adminShopApi';
+import { activateAdminShop, approveAdminShop, getAdminShopDetail, getAdminShops, rejectAdminShop, setAdminShopFeatured, suspendAdminShop, updateAdminShopTariffs } from './adminShopApi';
 import type { AdminShopListParams } from '../model/adminShopTypes';
 
 export const adminShopKeys = {
@@ -29,3 +29,5 @@ function useStatusMutation<T>(mutationFn: (variables: T) => Promise<void>) {
 export const useRejectAdminShopMutation = () => useStatusMutation(rejectAdminShop);
 export const useSuspendAdminShopMutation = () => useStatusMutation(suspendAdminShop);
 export const useActivateAdminShopMutation = () => useStatusMutation(activateAdminShop);
+export const useSetAdminShopFeaturedMutation = () => useStatusMutation(setAdminShopFeatured);
+export const useUpdateAdminShopTariffsMutation = () => useStatusMutation(updateAdminShopTariffs);

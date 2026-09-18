@@ -32,25 +32,14 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
   await expect(page.getByRole('row').filter({ hasText: 'Ali Valiyev' })).toContainText('Tasdiqlangan');
 });
 
-test('Print faqat tanlangan buyurtmalar labelini chiqaradi va QR joyini bo‘sh qoldiradi', async ({ page }) => {
-  const detailIds: string[] = [];
-  await page.addInitScript(() => {
-    window.print = () => {
-      const labels = document.querySelectorAll('[class*="shippingLabel"]');
-      document.body.dataset.printCount = String(labels.length);
-      document.body.dataset.printText = Array.from(labels).map((label) => label.textContent).join('\n');
-      document.body.dataset.qrCount = String(document.querySelectorAll('[aria-label="QR kod uchun joy"]').length);
-      document.body.dataset.labelBreakAfter = labels[0] ? getComputedStyle(labels[0]).breakAfter : '';
-      document.body.dataset.labelBreakInside = labels[0] ? getComputedStyle(labels[0]).breakInside : '';
-    };
-  });
+test('Print faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ page }) => {
+  const labelIds: string[] = [];
   await page.route('**/api/v1/admin/orders**', async route => {
     const path = new URL(route.request().url()).pathname;
-    const id = path.match(/\/admin\/orders\/(\d+)$/)?.[1];
+    const id = path.match(/\/admin\/orders\/(\d+)\/label$/)?.[1];
     if (id) {
-      detailIds.push(id);
-      const order = allOrders.find((item) => item.id === id)!;
-      await route.fulfill({ json: { data: { ...order, deliveryAddress: 'Andijon shahri', sellerOrders: [{ id: `SO-${id}`, shopId: order.shopId, shopName: order.shopName, items: [{ id: `I-${id}`, productName: `Mahsulot ${id}`, quantity: 1, unitPrice: order.totalAmount }] }] } } });
+      labelIds.push(id);
+      await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 test') });
       return;
     }
     await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
@@ -61,13 +50,25 @@ test('Print faqat tanlangan buyurtmalar labelini chiqaradi va QR joyini bo‘sh 
   await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
   await expect(printButton).toBeEnabled();
   await printButton.click();
-  await expect.poll(() => page.evaluate(() => document.body.dataset.printCount)).toBe('1');
-  expect(detailIds).toEqual(['91']);
-  expect(await page.evaluate(() => document.body.dataset.printText)).toContain('Ali Valiyev');
-  expect(await page.evaluate(() => document.body.dataset.printText)).not.toContain('Aziza Karimova');
-  expect(await page.evaluate(() => document.body.dataset.qrCount)).toBe('1');
-  expect(await page.evaluate(() => document.body.dataset.labelBreakAfter)).not.toBe('page');
-  expect(await page.evaluate(() => document.body.dataset.labelBreakInside)).toBe('avoid');
+  await expect.poll(() => labelIds).toEqual(['91']);
+});
+
+test('Print bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi', async ({ page }) => {
+  let requestBody: unknown;
+  await page.route('**/api/v1/admin/orders**', async route => {
+    const request = route.request();
+    if (request.method() === 'POST' && new URL(request.url()).pathname.endsWith('/admin/orders/labels')) {
+      requestBody = request.postDataJSON();
+      await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 batch') });
+      return;
+    }
+    await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
+  });
+  await page.goto('/admin/orders');
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Print' }).click();
+  await expect.poll(() => requestBody).toEqual({ orderIds: ['91', '92'] });
 });
 
 test('TC2: har bir filtr natijani o‘zgartiradi, birgalikda ishlaydi va tozalanadi', async ({ page }) => {
@@ -162,7 +163,8 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => { throw error; });
   page.on('request', request => {
     if (new URL(request.url()).pathname.startsWith('/api/v1/admin/orders')) {
-      expect(request.method()).toBe('GET');
+      const isBatchLabel = new URL(request.url()).pathname.endsWith('/admin/orders/labels');
+      expect(request.method()).toBe(isBatchLabel ? 'POST' : 'GET');
     }
   });
   await seedAccessToken(page);

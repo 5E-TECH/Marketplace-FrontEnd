@@ -73,19 +73,15 @@ test('admin mahsulotlar ro‘yxati mock popup o‘rniga backend ma’lumotlarini
 
 test('mahsulot detail page barcha muhim fieldlarni va suspend/reactivate amallarini ko‘rsatadi', async ({ page }) => {
   let blocked = false;
-  let suspended = 0;
-  let reactivated = 0;
+  let hidden = 0;
+  let shown = 0;
+  let hideBody: unknown;
   await page.route('**/api/v1/admin/products**', async route => {
     const url = route.request().url();
-    if (url.endsWith('/12/suspend')) {
-      blocked = true;
-      suspended += 1;
-      await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
-      return;
-    }
-    if (url.endsWith('/12/reactivate')) {
-      blocked = false;
-      reactivated += 1;
+    if (url.endsWith('/12/hide')) {
+      hideBody = route.request().postDataJSON();
+      blocked = Boolean((hideBody as { hidden?: boolean }).hidden);
+      if (blocked) hidden += 1; else shown += 1;
       await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
       return;
     }
@@ -102,13 +98,16 @@ test('mahsulot detail page barcha muhim fieldlarni va suspend/reactivate amallar
   await expect(page.getByText('IPHONE-16-BLACK-256')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Bloklash' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Bloklash' }).click();
-  await expect.poll(() => suspended).toBe(1);
-  await expect(page.getByRole('button', { name: 'Qayta faollashtirish' })).toBeVisible();
+  await page.getByRole('button', { name: 'Yashirish' }).click();
+  await page.getByRole('dialog').getByLabel('Yashirish sababi').fill('Marketplace qoidalariga mos emas');
+  await page.getByRole('dialog').getByRole('button', { name: 'Yashirish' }).click();
+  await expect.poll(() => hidden).toBe(1);
+  expect(hideBody).toEqual({ hidden: true, reason: 'Marketplace qoidalariga mos emas' });
+  await expect(page.getByRole('button', { name: 'Ko‘rsatish' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Qayta faollashtirish' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Qayta faollashtirish' }).click();
-  await expect.poll(() => reactivated).toBe(1);
-  await expect(page.getByRole('button', { name: 'Bloklash' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ko‘rsatish' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Ko‘rsatish' }).click();
+  await expect.poll(() => shown).toBe(1);
+  expect(hideBody).toEqual({ hidden: false });
+  await expect(page.getByRole('button', { name: 'Yashirish' })).toBeVisible();
 });

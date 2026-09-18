@@ -2,7 +2,7 @@ import { App, Button } from 'antd';
 import type { Key } from 'react';
 import type { ColumnsType } from 'antd/es/table';
 import { Eye, Printer, RotateCcw } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminOrdersByStatusesQuery } from '../../features/orders/api/orderQueries';
 import type { AdminOrder, AdminOrderDetail, AdminOrderStatus, AdminPaymentMethod } from '../../features/orders/model/orderTypes';
@@ -26,7 +26,7 @@ import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
-import { getAdminOrder } from '../../features/orders/api/orderApi';
+import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
 
 type PaymentFilter = 'ALL' | AdminPaymentMethod;
 
@@ -55,7 +55,6 @@ export default function AdminOrdersPage() {
   const { locale, t } = useTranslation();
   const navigate = useNavigate();
   const [statusesFilter, setStatusesFilter] = useState<AdminOrderStatus[]>([]); const [payment, setPayment] = useState<PaymentFilter>('ALL'); const [search, setSearch] = useState(''); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState(''); const [page, setPage] = useState(1); const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
-  const [printOrders, setPrintOrders] = useState<AdminOrderDetail[]>([]);
   const [printLoading, setPrintLoading] = useState(false);
   const deferredSearch = useDebouncedValue(search.trim());
   const query = useAdminOrdersByStatusesQuery({ page, limit: 20, ...(payment !== 'ALL' ? { paymentMethod: payment } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) }, statusesFilter, deferredSearch);
@@ -70,19 +69,11 @@ export default function AdminOrdersPage() {
     { title: t('users.actions'), width: 80, align: 'center', render: (_, order) => <span className={styles.rowActions}><Button type="text" icon={<Eye size={17}/>} aria-label={t('adminOrders.detail')} onClick={() => void navigate(`/admin/orders/${encodeURIComponent(order.id)}`, { state: { order } })} /></span> },
   ];
   const hasFilters = statusesFilter.length > 0 || payment !== 'ALL' || Boolean(search || dateFrom || dateTo);
-  useEffect(() => {
-    if (!printOrders.length) return;
-    const frame = requestAnimationFrame(() => {
-      window.print();
-      setPrintOrders([]);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [printOrders]);
   const printSelected = async () => {
     if (!selectedRowKeys.length || printLoading) return;
     setPrintLoading(true);
     try {
-      setPrintOrders(await Promise.all(selectedRowKeys.map((id) => getAdminOrder(String(id)))));
+      await openOrderLabels('admin', selectedRowKeys.map(String));
     } catch (error) {
       void message.error(getAuthErrorMessage(error));
     } finally {
@@ -98,33 +89,7 @@ export default function AdminOrdersPage() {
       <div className={styles.filterAction}><Button icon={<RotateCcw size={16}/>} disabled={!hasFilters} onClick={reset}>{t('adminOrders.clear')}</Button></div>
     </FilterPanel>
     {query.isError ? <ContentState state="error" title={t('adminOrders.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} /> : query.isPending || !query.data ? <ContentState state="loading" /> : <TablePanel title={t('adminOrders.title')} caption={selectedRowKeys.length ? t('adminOrders.selected', { count: selectedRowKeys.length }) : t('pagination.total', { total: query.data.total })} action={<Button icon={<Printer size={16}/>} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printSelected()}>{t('adminOrders.print')}</Button>}><DataTable loading={query.isFetching} rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys }} columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{...createTablePagination(20, (total) => t('pagination.total', { total })),current:page,total:query.data.total}} onChange={(pagination) => setPage(pagination.current ?? 1)} /></TablePanel>}
-    <PrintableOrderLabels orders={printOrders} />
   </main>;
-}
-
-function PrintableOrderLabels({ orders }: { orders: AdminOrderDetail[] }) {
-  return <section className={styles.printArea} aria-hidden={!orders.length}>{orders.map((detail, index) => {
-    const order = detail.summary;
-    const products = detail.items.map((item) => `${item.name} x${item.quantity ?? 1}`).join(', ') || '—';
-    const shops = detail.sellerOrders.map((item) => item.shopName || (item.shopId ? `#${item.shopId}` : null)).filter(Boolean).join(', ') || order?.shopName || '—';
-    return <article className={styles.shippingLabel} key={order?.id ?? index}>
-      <div className={styles.labelAside}>
-        <strong>ELCHI<br />POCHTA</strong>
-        <div className={styles.qrPlaceholder} aria-label="QR kod uchun joy" />
-        <b>{order?.createdAt ? order.createdAt.slice(0, 10).split('-').reverse().join('/') : '—'}</b>
-      </div>
-      <dl className={styles.labelDetails}>
-        <div><dt>F.I.O:</dt><dd>{order?.buyerName || '—'}</dd></div>
-        <div><dt>Telefon:</dt><dd>{order?.buyerPhone || '—'}</dd></div>
-        <div><dt>Manzil:</dt><dd>{detail.deliveryAddress || '—'}</dd></div>
-        <div><dt>Jami:</dt><dd>{order ? `${formatMoney(order.totalAmount)} so‘m` : '—'}</dd></div>
-        <div><dt>Jo‘natuvchi:</dt><dd>{shops}</dd></div>
-        <div><dt>Mahsulot:</dt><dd>{products}</dd></div>
-        <div><dt>Mo‘ljal:</dt><dd>—</dd></div>
-        <div><dt>Izoh:</dt><dd>{order ? `Marketplace buyurtma #${order.orderNumber}` : '—'}</dd></div>
-      </dl>
-    </article>;
-  })}</section>;
 }
 export function AppDetailNotice({ value }: { value: AdminOrderDetail | undefined }) {
   const { locale, t } = useTranslation();

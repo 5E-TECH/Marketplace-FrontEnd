@@ -8,12 +8,12 @@ const stages = [
   { statuses: ['NEW', 'PENDING'], title: 'Buyurtma qabul qilindi', description: 'Sotuvchi tasdiqlashi kutilmoqda' },
   { statuses: ['CONFIRMED'], title: 'Buyurtma tasdiqlandi', description: 'Buyurtma yetkazishga tayyorlanmoqda' },
   { statuses: ['SHIPMENT_CREATED'], title: 'Elchi jo‘natmasi yaratildi', description: 'Jo‘natma Elchi tizimiga topshirildi' },
+  { statuses: ['RECEIVED'], title: 'Elchi qabul qildi', description: 'Posilka skaner orqali Elchi hisobiga o‘tdi' },
   { statuses: ['ON_THE_ROAD'], title: 'Kuryer yo‘lda', description: 'Buyurtma xaridor tomon harakatlanmoqda' },
   { statuses: ['DELIVERED'], title: 'Yetkazildi', description: 'Buyurtma xaridorga topshirildi' },
 ] as const;
 
 export function ElchiTimeline({ order }: { order: SellerOrder }) {
-  <></>
   const currentIndex = stages.findIndex((stage) => (stage.statuses as readonly string[]).includes(order.status));
   const terminal = order.status === 'CANCELLED' ? { title: 'Bekor qilindi', color: 'red' } : order.status === 'RETURNED' ? { title: 'Qaytarildi', color: 'orange' } : null;
   const items = stages.map((stage, index) => ({

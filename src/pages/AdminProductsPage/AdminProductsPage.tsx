@@ -1,12 +1,11 @@
-import { App, Button, Input } from 'antd';
+import { App, Button, Form, Input, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ArrowRight, Image as ImageIcon, RotateCcw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   useAdminProductsQuery,
-  useReactivateAdminProductMutation,
-  useSuspendAdminProductMutation,
+  useSetAdminProductHiddenMutation,
 } from '../../features/adminProducts/api/adminProductQueries';
 import type { AdminProduct } from '../../features/adminProducts/model/adminProductTypes';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
@@ -14,7 +13,6 @@ import type { ProductStatus } from '../../features/products/model/productTypes';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
 import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
@@ -54,8 +52,8 @@ export default function AdminProductsPage() {
     ...(status !== 'ALL' ? { status } : {}),
     ...(moderation !== 'ALL' ? { blocked: moderation === 'BLOCKED' } : {}),
   });
-  const suspendMutation = useSuspendAdminProductMutation();
-  const reactivateMutation = useReactivateAdminProductMutation();
+  const moderationMutation = useSetAdminProductHiddenMutation();
+  const [moderationForm] = Form.useForm<{ reason: string }>();
 
   const columns = useMemo<ColumnsType<AdminProduct>>(() => [
     {
@@ -152,7 +150,6 @@ export default function AdminProductsPage() {
 
   const hasFilters = Boolean(search || shopId) || status !== 'ALL' || moderation !== 'ALL';
   const actionConfig = pendingAction ? getAdminProductModerationConfig(pendingAction.isBlocked) : null;
-  const actionMutation = actionConfig?.action === 'reactivate' ? reactivateMutation : suspendMutation;
 
   return (
     <main className={styles.page}>
@@ -223,27 +220,29 @@ export default function AdminProductsPage() {
         />
       </TablePanel>
 
-      <ConfirmDialog
+      <Modal
         open={Boolean(pendingAction && actionConfig)}
         title={actionConfig ? t(actionConfig.titleKey) : ''}
-        description={actionConfig && pendingAction
-          ? t(actionConfig.descriptionKey, { name: pendingAction.name })
-          : ''}
-        confirmText={actionConfig ? t(actionConfig.labelKey) : undefined}
-        danger={actionConfig?.danger}
-        loading={actionMutation.isPending}
-        onCancel={() => setPendingAction(null)}
-        onConfirm={() => {
+        okText={actionConfig ? t(actionConfig.labelKey) : undefined}
+        okButtonProps={{ danger: actionConfig?.danger, loading: moderationMutation.isPending }}
+        onCancel={() => { setPendingAction(null); moderationForm.resetFields(); }}
+        onOk={() => moderationForm.submit()}
+      >
+        <p>{actionConfig && pendingAction ? t(actionConfig.descriptionKey, { name: pendingAction.name }) : ''}</p>
+        <Form form={moderationForm} layout="vertical" onFinish={({ reason }) => {
           if (!pendingAction || !actionConfig) return;
-          actionMutation.mutate(pendingAction.id, {
+          moderationMutation.mutate({ productId: pendingAction.id, hidden: !pendingAction.isBlocked, ...(reason?.trim() ? { reason: reason.trim() } : {}) }, {
             onSuccess: () => {
               void message.success(t(actionConfig.successKey));
               setPendingAction(null);
+              moderationForm.resetFields();
             },
             onError: (error) => void message.error(getAuthErrorMessage(error)),
           });
-        }}
-      />
+        }}>
+          {!pendingAction?.isBlocked ? <Form.Item name="reason" label="Yashirish sababi" rules={[{ required: true, whitespace: true, message: 'Sotuvchiga yuboriladigan sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: mahsulot marketplace qoidalariga mos emas" /></Form.Item> : null}
+        </Form>
+      </Modal>
     </main>
   );
 }

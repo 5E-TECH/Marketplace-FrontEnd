@@ -2,8 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getAdminProduct,
   getAdminProducts,
-  reactivateAdminProduct,
-  suspendAdminProduct,
+  setAdminProductHidden,
 } from './adminProductApi';
 import type { AdminProductListParams } from '../model/adminProductTypes';
 
@@ -29,15 +28,14 @@ export function useAdminProductQuery(productId: string) {
   });
 }
 
-function useModerationMutation(mutationFn: (productId: string) => Promise<void>) {
+function useModerationMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn,
+    mutationFn: setAdminProductHidden,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: adminProductKeys.all });
     },
   });
 }
 
-export const useSuspendAdminProductMutation = () => useModerationMutation(suspendAdminProduct);
-export const useReactivateAdminProductMutation = () => useModerationMutation(reactivateAdminProduct);
+export const useSetAdminProductHiddenMutation = useModerationMutation;

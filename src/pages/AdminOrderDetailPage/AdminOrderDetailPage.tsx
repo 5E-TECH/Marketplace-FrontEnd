@@ -1,5 +1,7 @@
-import { CalendarClock, CreditCard, Hash, Store, UserRound } from 'lucide-react';
+import { CalendarClock, CreditCard, Hash, Printer, Store, UserRound } from 'lucide-react';
+import { App, Button } from 'antd';
 import { useLocation, useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useAdminOrderQuery } from '../../features/orders/api/orderQueries';
 import type { AdminOrder } from '../../features/orders/model/orderTypes';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
@@ -13,6 +15,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { AppDetailNotice } from '../AdminOrdersPage/AdminOrdersPage';
 import styles from './AdminOrderDetailPage.module.css';
+import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
 
 interface OrderLocationState {
   order?: AdminOrder;
@@ -22,6 +25,8 @@ export default function AdminOrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const location = useLocation();
   const { locale, t } = useTranslation();
+  const { message } = App.useApp();
+  const [printing, setPrinting] = useState(false);
   const query = useAdminOrderQuery(orderId ?? null);
   const routeOrder = (location.state as OrderLocationState | null)?.order;
   const order = query.data?.summary ?? (routeOrder?.id === orderId ? routeOrder : null);
@@ -50,6 +55,12 @@ export default function AdminOrderDetailPage() {
     .filter((value): value is string => Boolean(value))
     .join(', ');
   const status = order?.status;
+  const printLabel = async () => {
+    setPrinting(true);
+    try { await openOrderLabels('admin', [orderId]); }
+    catch (error) { void message.error(getAuthErrorMessage(error)); }
+    finally { setPrinting(false); }
+  };
   const sections: DetailPageSection[] = [{
     key: 'summary',
     icon: <Hash aria-hidden />,
@@ -70,6 +81,7 @@ export default function AdminOrderDetailPage() {
       backFallback="/admin/orders"
       title={`${t('adminOrders.order')} #${order?.orderNumber ?? orderId}`}
       description={t('adminOrders.detailSubtitle')}
+      actions={<Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>Yorliqni chop etish</Button>}
       hero={{
         avatarFallback: (order?.buyerName || orderId).slice(0, 2).toUpperCase(),
         title: order?.buyerName || `${t('adminOrders.order')} #${orderId}`,

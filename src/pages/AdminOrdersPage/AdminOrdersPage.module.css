@@ -33,28 +33,7 @@
 .history strong { color: var(--color-text); font-size: .875rem; }
 .history small { color: var(--color-text-muted); }
 .history p { margin: 3px 0 0; color: var(--color-text-secondary); font-size: .8125rem; }
-.printArea { display: none; }
-.shippingLabel { display: grid; width: 190mm; min-height: 100mm; margin-bottom: 4mm; color: #000; background: #fff; border: 2px solid #000; grid-template-columns: 48mm 1fr; break-inside: avoid; page-break-inside: avoid; font-family: Arial, sans-serif; }
-.shippingLabel:last-child { margin-bottom: 0; }
-.labelAside { display: grid; padding: 3mm; border-right: 2px solid #000; align-content: start; justify-items: center; gap: 3mm; }
-.labelAside strong { font-size: 14pt; line-height: 1; text-align: center; }
-.labelAside b { font-size: 12pt; }
-.qrPlaceholder { width: 38mm; height: 38mm; border: 2px solid #000; background: #fff; }
-.labelDetails { margin: 0; }
-.labelDetails > div { display: grid; min-height: 11mm; border-bottom: 1px solid #000; grid-template-columns: 30mm 1fr; }
-.labelDetails > div:last-child { border-bottom: 0; }
-.labelDetails dt, .labelDetails dd { display: flex; margin: 0; padding: 2mm; align-items: center; font-size: 11pt; }
-.labelDetails dt { border-right: 1px solid #000; font-weight: 700; }
-.labelDetails dd { overflow-wrap: anywhere; font-weight: 700; }
 .details :global(.ant-descriptions-view) { overflow: hidden; border-color: var(--color-border) !important; border-radius: var(--radius-md); }
 @media (max-width: 1399px) { .filterPanel { grid-template-columns: repeat(2, minmax(220px, 1fr)); } .dateRange { grid-column: 1 / -1; } .filterAction { display: flex; justify-content: flex-end; } }
 @media (max-width: 899px) { .filterPanel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .searchField { grid-column: 1 / -1; } }
 @media (max-width: 575px) { .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); } .searchField, .dateRange { grid-column: auto; } .filterAction, .filterAction :global(.ant-btn) { width: 100%; } }
-
-@media print {
-  @page { size: A4 portrait; margin: 8mm; }
-  :global(body *) { visibility: hidden !important; }
-  .printArea, .printArea * { visibility: visible !important; }
-  .printArea { position: absolute; inset: 0 auto auto 0; display: block; width: 100%; }
-  .shippingLabel { max-width: 100%; }
-}
