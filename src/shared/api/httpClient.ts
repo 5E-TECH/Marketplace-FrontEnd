@@ -4,25 +4,19 @@ const DEFAULT_API_URL = '/api';
 
 /**
  * Production'da HTTPS majburiy: aks holda token va parollar ochiq ketadi.
- * Yagona istisno — domen hali olinmagan va API IP orqali sinalayotgan holat.
- * Unda `VITE_ALLOW_INSECURE_API=true` ni ataylab qo'yish kerak, ya'ni bu
- * tasodifan sodir bo'lmaydi.
+ *
+ * CHETLASHUV YO'Q (C5.3). Ilgari `VITE_ALLOW_INSECURE_API=true` bilan HTTP'ga
+ * ruxsat berish mumkin edi — u domen olinmagan paytdagi vaqtinchalik yechim
+ * edi. Domen (elchimarket.uz) 2026-09 dan beri ishlaydi, shuning uchun bayroq
+ * butunlay olib tashlandi: qolsa, kimdir uni yoqib qo'yishi va production
+ * jimgina HTTPS'siz qolishi mumkin edi.
  */
 function resolveApiUrl(value: string | undefined): string {
   const apiUrl = value?.trim() || DEFAULT_API_URL;
-  const insecureAllowed = import.meta.env.VITE_ALLOW_INSECURE_API === 'true';
 
-  if (import.meta.env.PROD && /^http:\/\//i.test(apiUrl) && !insecureAllowed) {
+  if (import.meta.env.PROD && /^http:\/\//i.test(apiUrl)) {
     throw new Error(
-      'Production API manzili HTTPS bo‘lishi kerak. ' +
-        'Domen hali yo‘q bo‘lsa VITE_ALLOW_INSECURE_API=true bilan ataylab ruxsat bering.',
-    );
-  }
-
-  if (insecureAllowed && import.meta.env.PROD) {
-    console.warn(
-      'DIQQAT: API HTTPS emas — token va parollar shifrlanmagan ketadi. ' +
-        'Bu faqat sinov uchun.',
+      'Production API manzili HTTPS bo‘lishi kerak: ' + apiUrl,
     );
   }
 
