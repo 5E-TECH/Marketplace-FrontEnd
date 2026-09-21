@@ -93,6 +93,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Yetishmayotgan secret AYNAN nomi bilan aytiladi. Busiz nosozlik
+      # rsync qadamida "Permission denied" bo'lib chiqadi va "secret yo'q"
+      # bilan "kalit serverda ruxsat etilmagan" holatlari bir xil ko'rinadi.
+      - name: Deploy secretlari tekshiruvi
+        run: |
+          missing=''
+          for key in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            eval "value=\${$key:-}"
+            [ -n "$value" ] || missing="$missing $key"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Deploy secretlari yo'q:$missing"
+            echo "Qo'shing: Settings → Secrets and variables → Actions" >&2
+            echo "  DEPLOY_HOST = server IP" >&2
+            echo "  DEPLOY_USER = deploy" >&2
+            echo "  DEPLOY_SSH_KEY = maxfiy kalitning base64 nusxasi (bir qatorli)" >&2
+            echo "  DEPLOY_KNOWN_HOSTS = ssh-keyscan -H <IP> chiqishi" >&2
+            exit 1
+          fi
+
       - name: SSH konfiguratsiyasini tayyorlash
         run: |
           install -m 700 -d ~/.ssh
@@ -100,12 +120,46 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
+          # Kalit base64'dan to'g'ri ochilganini darhol tekshiramiz: secret'ga
+          # qator uzilishi tushsa yoki xom matn qo'yilsa, xato shu yerda
+          # tushunarli chiqadi, rsync ichida emas.
+          ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1 || {
+            echo "::error::DEPLOY_SSH_KEY buzuq — base64 emas yoki nusxalashda qator uzilishi tushgan"
+            exit 1
+          }
+
+      # Eng ko'p uchraydigan nosozlik: kalit serverdagi authorized_keys da yo'q.
+      # Buni rsync'dan OLDIN aniqlasak, xato bir qatorda tushunarli bo'ladi.
+      - name: SSH ulanishini tekshirish
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+              -o BatchMode=yes -o ConnectTimeout=15 \
+              "$DEPLOY_USER@$DEPLOY_HOST" 'echo "SSH ulanishi OK: $(whoami)@$(hostname)"' || {
+            echo "::error::Serverga SSH ulanib bo'lmadi. Ehtimoliy sabablar:"
+            echo "  1) ochiq kalit /home/deploy/.ssh/authorized_keys ga qo'shilmagan" >&2
+            echo "  2) DEPLOY_USER noto'g'ri (kutilgani: deploy)" >&2
+            echo "  3) DEPLOY_KNOWN_HOSTS server kalitiga mos emas" >&2
+            exit 1
+          }
+
+      # `docker image prune -f` deploy oxirida eski (endi tegsiz) image'ni
+      # o'chiradi — ya'ni teg qo'yilmasa orqaga qaytish yo'li yo'qoladi.
+      - name: Hozirgi image'ni orqaga qaytish uchun teglash
+        continue-on-error: true
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o BatchMode=yes \
+              "$DEPLOY_USER@$DEPLOY_HOST" \
+              'docker image inspect marketplace-frontend:latest >/dev/null 2>&1 &&
+               docker tag marketplace-frontend:latest marketplace-frontend:rollback-previous &&
+               echo "Orqaga qaytish tegi: marketplace-frontend:rollback-previous" ||
+               echo "Oldingi image yo'q — birinchi deploy"'
 
       - name: Fayllarni serverga yuborish
         run: |
           rsync -az --delete \
             --exclude '.git/' \
             --exclude '.env.production' \
+            --exclude '.env.production.bak*' \
             --exclude 'node_modules/' \
             --exclude 'dist/' \
             --exclude 'playwright-report/' \
@@ -158,3 +212,20 @@ jobs:
           docker image prune -f
           echo "Deploy muvaffaqiyatli."
           REMOTE
+
+      # Konteyner ichidagi healthcheck faqat konteyner tirikligini bildiradi.
+      # Kabinet HAQIQATAN tashqaridan ochilayotganini Caddy/tunnel orqali
+      # tekshiramiz — backend deploy'ida ham aynan shu qadam bor.
+      - name: Tashqaridan tekshirish
+        run: |
+          for attempt in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://admin.elchimarket.uz/healthz || true)
+            if [ "$code" = "200" ]; then
+              echo "Kabinet tashqaridan sog'lom ($code)"
+              exit 0
+            fi
+            echo "Kutilmoqda... ($attempt/10, oxirgi javob: $code)"
+            sleep 6
+          done
+          echo "::error::Kabinet tashqaridan javob bermadi. Konteyner ko'tarilgan, lekin Caddy yoki tunnel yo'lida muammo bor."
+          exit 1
