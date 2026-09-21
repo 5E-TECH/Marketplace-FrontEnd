@@ -20,9 +20,11 @@ Internet ──► :8080 ──► frontend konteyneri     (SPA)
 Internet ──► :80   ──► Caddy ──► api-gateway   (API)
 ```
 
-Bu holda `.env.production` da `VITE_ALLOW_INSECURE_API=true` bo'lishi shart,
-aks holda production build HTTPS talab qilib to'xtaydi. Token va parollar
-shifrlanmagan ketadi — faqat sinov uchun.
+⚠️ Bu sxema TARIXIY — domen olinmagan paytda ishlatilgan. 2026-09 dan beri
+kabinet `https://admin.elchimarket.uz` da, API esa `https://api.elchimarket.uz`
+da ishlaydi. HTTP'ga ruxsat beradigan `VITE_ALLOW_INSECURE_API` bayrog'i
+C5.3 doirasida BUTUNLAY olib tashlandi: `VITE_API_URL` endi `https://` yoki
+nisbiy (`/api/v1`) bo'lishi shart, aks holda build to'xtaydi.
 
 ## Bir marta bajariladigan sozlash
 

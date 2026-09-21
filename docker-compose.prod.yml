@@ -11,8 +11,6 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:?VITE_API_URL kerak — masalan https://api.elchimarket.uz/api/v1}
-        # Domen hali yo'q va API HTTP orqali sinalayotgan bo'lsa `true`.
-        VITE_ALLOW_INSECURE_API: ${VITE_ALLOW_INSECURE_API:-false}
     image: marketplace-frontend:latest
     restart: unless-stopped
     # Domen bo'lmasa SPA shu port orqali ochiladi (http://SERVER_IP:8080).
