@@ -1,4 +1,4 @@
-import { Banknote, ChartNoAxesCombined, ClipboardList, ListTree, PackageSearch, ScrollText, ServerCog, Store, UserRoundCog } from 'lucide-react';
+import { Banknote, ChartNoAxesCombined, ClipboardList, GalleryHorizontalEnd, ListTree, PackageSearch, ScrollText, ServerCog, Store, UserRoundCog } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../../shared/i18n/translations';
 import type { UserRole } from '../../auth/model/authTypes';
@@ -21,6 +21,7 @@ export const adminNavigation: AdminNavGroup[] = [
   { key: 'orders', label: 'adminNav.orders', icon: <ClipboardList />, items: [{ path: '/admin/orders', label: 'adminNav.orders', roles: ADMIN_ROLES }] },
   { key: 'products', label: 'adminNav.productModeration', icon: <PackageSearch />, items: [{ path: '/admin/products', label: 'adminNav.productModeration', roles: ADMIN_ROLES }] },
   { key: 'categories', label: 'adminNav.categories', icon: <ListTree />, items: [{ path: '/admin/categories', label: 'adminNav.categories', roles: ADMIN_ROLES }] },
+  { key: 'banners', label: 'adminNav.banners', icon: <GalleryHorizontalEnd />, items: [{ path: '/admin/banners', label: 'adminNav.banners', roles: ADMIN_ROLES }] },
   { key: 'audit', label: 'adminNav.auditLogs', icon: <ScrollText />, items: [{ path: '/admin/audit-logs', label: 'adminNav.auditLogs', roles: ADMIN_ROLES }] },
   { key: 'finance', label: 'adminNav.finance', icon: <Banknote />, items: [{ path: '/admin/finance', label: 'adminNav.finance', roles: SUPERADMIN_ONLY }] },
   { key: 'system', label: 'adminNav.systemHealth', icon: <ServerCog />, items: [{ path: '/admin/system-settings', label: 'adminNav.systemHealth', roles: ADMIN_ROLES }] },

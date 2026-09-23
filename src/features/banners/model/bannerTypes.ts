@@ -1,0 +1,25 @@
+/** C6.9 — bosh sahifa reklama bannerlari (backend: /admin/content/banners). */
+export interface Banner {
+  id: string;
+  title: string;
+  imageUrl: string;
+  linkUrl: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+  /** Backend hisoblaydi: shu daqiqada storefront'da ko'rinayaptimi. */
+  isVisible: boolean;
+}
+
+export interface BannerPayload {
+  title?: string;
+  imageUrl?: string;
+  linkUrl?: string | null;
+  sortOrder?: number;
+  isActive?: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+}
+
+export interface BannerOrderItem { id: string; sortOrder: number }
