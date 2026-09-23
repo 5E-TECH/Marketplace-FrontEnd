@@ -44,6 +44,7 @@ const AdminAuditPage = lazy(routeImports.adminAudit);
 const AdminSystemHealthPage = lazy(routeImports.adminSystemHealth);
 const AdminOverviewPage = lazy(routeImports.adminOverview);
 const AdminCategoriesPage = lazy(() => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'));
+const AdminBannersPage = lazy(() => import('../../pages/AdminBannersPage/AdminBannersPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
   : null;
@@ -87,6 +88,7 @@ export function AppRouter() {
                 </Route>
                 <Route path="admin/system-settings" element={<AdminSystemHealthPage />} />
                 <Route path="admin/categories" element={<AdminCategoriesPage />} />
+                <Route path="admin/banners" element={<AdminBannersPage />} />
                 <Route path="admin/profile" element={<ProfilePage />} />
               </Route>
             </Route>
