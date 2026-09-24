@@ -8,6 +8,8 @@ import {
   useSetAdminProductHiddenMutation,
 } from '../../features/adminProducts/api/adminProductQueries';
 import type { AdminProduct } from '../../features/adminProducts/model/adminProductTypes';
+import { useAdminShopNames } from '../../features/adminShops/api/adminShopQueries';
+import { useAdminCategoryNames } from '../../features/categories/api/categoryQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { ProductStatus } from '../../features/products/model/productTypes';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
@@ -53,6 +55,8 @@ export default function AdminProductsPage() {
     ...(status !== 'ALL' ? { status } : {}),
     ...(moderation !== 'ALL' ? { blocked: moderation === 'BLOCKED' } : {}),
   });
+  const shopNames = useAdminShopNames(query.data?.items.map(({ shopId }) => shopId) ?? []);
+  const categoryNames = useAdminCategoryNames();
   const moderationMutation = useSetAdminProductHiddenMutation();
   const [moderationForm] = Form.useForm<{ reason: string }>();
 
@@ -83,16 +87,18 @@ export default function AdminProductsPage() {
     {
       title: t('adminProducts.shop'),
       dataIndex: 'shopId',
-      width: 110,
+      width: 160,
+      ellipsis: true,
       responsive: ['md'],
-      render: (value: string) => value ? `#${value}` : '—',
+      render: (value: string) => value ? shopNames.get(value) ?? `#${value}` : '—',
     },
     {
       title: t('adminProducts.category'),
       dataIndex: 'categoryId',
-      width: 120,
+      width: 160,
+      ellipsis: true,
       responsive: ['lg'],
-      render: (value: string) => value ? `#${value}` : '—',
+      render: (value: string) => value ? categoryNames.get(value) ?? `#${value}` : '—',
     },
     {
       title: t('adminProducts.price'),
@@ -137,7 +143,7 @@ export default function AdminProductsPage() {
         );
       },
     },
-  ], [navigate, t, setPendingAction]);
+  ], [navigate, t, setPendingAction, shopNames, categoryNames]);
 
   if (query.isPending) return <ContentState state="loading" />;
   if (query.isError) return (
@@ -211,7 +217,7 @@ export default function AdminProductsPage() {
           rowKey="id"
           columns={columns}
           dataSource={query.data.items}
-          scroll={{ x: 980 }}
+          scroll={{ x: 1200 }}
           emptyState={<EmptyState compact title={t('adminProducts.empty')} description={t('adminProducts.emptyDescription')} />}
           pagination={{ current: page, total: query.data.total, onChange: setPage }}
         />
