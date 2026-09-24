@@ -8,48 +8,9 @@
 }
 
 .table :global(.ant-table-pagination.ant-pagination) {
-  min-height: 64px;
-  margin: var(--space-6) var(--space-4) var(--space-4) !important;
+  margin: 0 !important;
   padding: var(--space-3) var(--space-4);
-  align-items: center;
-  background: color-mix(in srgb, var(--color-surface-subtle) 78%, transparent);
   border-top: 1px solid var(--color-border);
-}
-
-.table :global(.ant-table-pagination-left) {
-  justify-content: flex-start;
-}
-
-.table :global(.ant-table-pagination-center) {
-  justify-content: center;
-}
-
-.table :global(.ant-pagination-item),
-.table :global(.ant-pagination-prev),
-.table :global(.ant-pagination-next) {
-  min-width: 34px;
-  height: 34px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  line-height: 32px;
-}
-
-.table :global(.ant-pagination-item-active) {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
-.table :global(.ant-pagination-item-active a) {
-  color: var(--color-black);
-  font-weight: 800;
-}
-
-.table :global(.ant-pagination-options-quick-jumper input) {
-  width: 52px;
-  height: 34px;
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  border-radius: var(--radius-sm);
 }
 
 .table :global(.ant-table-selection-column) {
@@ -77,14 +38,7 @@
 
 @media (max-width: 575px) {
   .table :global(.ant-table-pagination.ant-pagination) {
-    min-height: 56px;
-    margin-inline: var(--space-3) !important;
     padding: var(--space-3);
-  }
-
-  .table :global(.ant-pagination-total-text),
-  .table :global(.ant-pagination-options) {
-    display: none;
   }
 
   .search {

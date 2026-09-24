@@ -128,9 +128,9 @@ test('TC1: users jadvali, qidiruv va pagination backend bilan ishlaydi', async (
   await expect(page.getByText('Noyob Admin User')).toBeVisible();
 
   await page.getByPlaceholder('Ism yoki telefon...').clear();
-  const secondPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '2');
-  await page.getByTitle('2').click();
-  await secondPageRequest;
+  const lastPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '3');
+  await page.getByTitle('3').click();
+  await lastPageRequest;
   await expect(page.getByText('Noyob Admin User')).toBeVisible();
 });
 

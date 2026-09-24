@@ -1,6 +1,6 @@
 import { App, Button, Space, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Check, CirclePause, RotateCcw } from 'lucide-react';
+import { Check, CirclePause } from 'lucide-react';
 import { useState } from 'react';
 import { useAdminPayoutsQuery, useFinanceReportQuery, usePayoutActionMutation } from '../../features/adminFinance/api/adminFinanceQueries';
 import type { AdminPayout, PayoutAction, PayoutStatus, ReportParams } from '../../features/adminFinance/model/adminFinanceTypes';
@@ -10,7 +10,8 @@ import { flattenPrimitiveEntries } from '../../shared/lib/primitiveEntries';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
@@ -29,7 +30,7 @@ const payoutStatuses: PayoutStatus[] = ['PENDING', 'APPROVED', 'HELD', 'PAID'];
 export default function AdminFinancePage() {
   const { message } = App.useApp(); const { locale, t } = useTranslation(); const [tab, setTab] = useState<FinanceTab>('payouts'); const [shopId, setShopId] = useState(''); const [status, setStatus] = useState<StatusFilter>('ALL'); const [page, setPage] = useState(1); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState('');
   const reportParams: ReportParams = { ...(shopId ? { shopId } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) };
-  const payouts = useAdminPayoutsQuery({ page, limit: 20, ...(shopId ? { shopId } : {}), ...(status !== 'ALL' ? { status } : {}) }, tab === 'payouts');
+  const payouts = useAdminPayoutsQuery({ page, limit: TABLE_PAGE_SIZE, ...(shopId ? { shopId } : {}), ...(status !== 'ALL' ? { status } : {}) }, tab === 'payouts');
   const reports = useFinanceReportQuery('reports', reportParams, tab === 'reports'); const reconciliation = useFinanceReportQuery('reconciliation', reportParams, tab === 'reconciliation'); const mutation = usePayoutActionMutation();
   const runAction = (row: AdminPayout, action: PayoutAction) => mutation.mutate({ id: row.id, action }, { onSuccess: () => void message.success(t('admin.finance.updated')), onError: error => void message.error(getAuthErrorMessage(error)) });
   const columns: ColumnsType<AdminPayout> = [
@@ -38,8 +39,8 @@ export default function AdminFinancePage() {
   ];
   const activeReport = tab === 'reports' ? reports : reconciliation;
   return <main><PageHeader title={t('admin.finance.title')} description={t('admin.finance.description')} /><Tabs activeKey={tab} onChange={value => setTab(value as FinanceTab)} items={[{ key: 'payouts', label: t('admin.finance.payouts') }, { key: 'reports', label: t('admin.finance.report') }, { key: 'reconciliation', label: t('admin.finance.reconciliation') }]} />
-    <FilterPanel className={styles.toolbar} aria-label={t('admin.common.filters')}><SearchInput value={shopId} inputMode="numeric" placeholder={t('admin.finance.shopId')} aria-label={t('admin.finance.shopId')} onValueChange={value => { setShopId(value.replace(/\D/g, '')); setPage(1); }} />{tab === 'payouts' ? <FilterSelect<StatusFilter> value={status} aria-label={t('admin.finance.payoutStatus')} options={[{ value: 'ALL', label: t('admin.finance.allStatuses') }, ...payoutStatuses.map(value => ({ value, label: value }))]} onChange={value => { setStatus(value); setPage(1); }} /> : <DateRangeFilter value={[dateFrom, dateTo]} startLabel={t('admin.finance.dateFrom')} endLabel={t('admin.finance.dateTo')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); }} />}<Button icon={<RotateCcw size={16} />} disabled={!shopId && status === 'ALL' && !dateFrom && !dateTo} onClick={() => { setShopId(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); }}>{t('adminOrders.clear')}</Button></FilterPanel>
-    {tab === 'payouts' ? payouts.isPending ? <ContentState state="loading" /> : payouts.isError ? <ContentState state="error" description={getAuthErrorMessage(payouts.error)} onAction={() => void payouts.refetch()} /> : <TablePanel title={t('admin.finance.payouts')} caption={t('pagination.total', { total: payouts.data.total })}><DataTable rowKey="id" columns={columns} dataSource={payouts.data.items} scroll={{ x: 820 }} emptyState={<EmptyState compact title={t('admin.finance.empty')} description={t('admin.finance.emptyDescription')} />} pagination={{ ...createTablePagination(20), current: page, total: payouts.data.total }} onChange={value => setPage(value.current ?? 1)} /></TablePanel> : activeReport.isPending ? <ContentState state="loading" /> : activeReport.isError ? <ContentState state="error" description={getAuthErrorMessage(activeReport.error)} onAction={() => void activeReport.refetch()} /> : <ReportView value={activeReport.data} />}
+    <FilterPanel className={styles.toolbar} aria-label={t('admin.common.filters')}><SearchInput value={shopId} inputMode="numeric" placeholder={t('admin.finance.shopId')} aria-label={t('admin.finance.shopId')} onValueChange={value => { setShopId(value.replace(/\D/g, '')); setPage(1); }} />{tab === 'payouts' ? <FilterSelect<StatusFilter> value={status} aria-label={t('admin.finance.payoutStatus')} options={[{ value: 'ALL', label: t('admin.finance.allStatuses') }, ...payoutStatuses.map(value => ({ value, label: value }))]} onChange={value => { setStatus(value); setPage(1); }} /> : <DateRangeFilter value={[dateFrom, dateTo]} startLabel={t('admin.finance.dateFrom')} endLabel={t('admin.finance.dateTo')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); }} />}<ResetFiltersButton disabled={!shopId && status === 'ALL' && !dateFrom && !dateTo} onClick={() => { setShopId(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); }} /></FilterPanel>
+    {tab === 'payouts' ? payouts.isPending ? <ContentState state="loading" /> : payouts.isError ? <ContentState state="error" description={getAuthErrorMessage(payouts.error)} onAction={() => void payouts.refetch()} /> : <TablePanel title={t('admin.finance.payouts')} caption={t('pagination.total', { total: payouts.data.total })}><DataTable rowKey="id" columns={columns} dataSource={payouts.data.items} scroll={{ x: 820 }} emptyState={<EmptyState compact title={t('admin.finance.empty')} description={t('admin.finance.emptyDescription')} />} pagination={{ current: page, total: payouts.data.total, onChange: setPage }} /></TablePanel> : activeReport.isPending ? <ContentState state="loading" /> : activeReport.isError ? <ContentState state="error" description={getAuthErrorMessage(activeReport.error)} onAction={() => void activeReport.refetch()} /> : <ReportView value={activeReport.data} />}
   </main>;
 }
 

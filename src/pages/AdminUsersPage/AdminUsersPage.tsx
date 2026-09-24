@@ -1,6 +1,6 @@
 import { App, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -19,7 +19,8 @@ import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionButton';
@@ -46,7 +47,7 @@ export default function AdminUsersPage() {
   const blockMutation = useSetAdminUserBlockedMutation();
   const query = useAdminUsersQuery({
     page,
-    limit: 20,
+    limit: TABLE_PAGE_SIZE,
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
     ...(role !== 'ALL' ? { role } : {}),
     ...(block !== 'ALL' ? { blocked: block === 'BLOCKED' } : {}),
@@ -189,8 +190,7 @@ export default function AdminUsersPage() {
             setPage(1);
           }}
         />
-        <Button
-          icon={<RotateCcw size={16} />}
+        <ResetFiltersButton
           disabled={!hasFilters}
           onClick={() => {
             setSearch('');
@@ -198,9 +198,7 @@ export default function AdminUsersPage() {
             setBlock('ALL');
             setPage(1);
           }}
-        >
-          {t('adminOrders.clear')}
-        </Button>
+        />
       </FilterPanel>
 
       <TablePanel title={t('admin.users.user')} caption={t('pagination.total', { total: query.data.total })}>
@@ -216,12 +214,7 @@ export default function AdminUsersPage() {
               description={t('admin.users.emptyDescription')}
             />
           }
-          pagination={{
-            ...createTablePagination(20, (total) => t('pagination.total', { total })),
-            current: page,
-            total: query.data.total,
-          }}
-          onChange={(value) => setPage(value.current ?? 1)}
+          pagination={{ current: page, total: query.data.total, onChange: setPage }}
         />
       </TablePanel>
 

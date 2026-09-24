@@ -65,10 +65,6 @@
   background: var(--color-surface-hover) !important;
 }
 
-.tableCard :global(.ant-pagination) {
-  padding: 0 12px 12px;
-}
-
 .imagePlaceholder {
   display: grid;
   width: 36px;

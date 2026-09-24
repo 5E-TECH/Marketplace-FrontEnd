@@ -1,5 +1,5 @@
-import { ExternalLink, RotateCcw } from 'lucide-react';
-import { Button, Typography } from 'antd';
+import { ExternalLink } from 'lucide-react';
+import { Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useDeferredValue, useState } from 'react';
 import type {
@@ -12,7 +12,8 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
@@ -30,7 +31,6 @@ const statusOptions: Array<{ value: ShipmentStatusFilter; label: string }> = [
   { value: 'CANCELLED', label: 'Bekor qilindi' },
 ];
 
-const PAGE_SIZE = 20;
 const money = new Intl.NumberFormat('uz-UZ');
 const formatMoney = (value: number) =>
   `${money.format(value).replaceAll(',', ' ')} so‘m`;
@@ -48,7 +48,7 @@ export default function DeliveryPage() {
 
   const shipmentsQuery = useSellerShipmentsQuery({
     page,
-    limit: PAGE_SIZE,
+    limit: TABLE_PAGE_SIZE,
     ...(deferredSearch ? { search: deferredSearch } : {}),
     ...(status !== 'ALL' ? { status } : {}),
   });
@@ -140,16 +140,13 @@ export default function DeliveryPage() {
               }}
             />
             {hasFilters ? (
-              <Button
-                icon={<RotateCcw size={16} />}
+              <ResetFiltersButton
                 onClick={() => {
                   setSearch('');
                   setStatus('ALL');
                   setPage(1);
                 }}
-              >
-                Tozalash
-              </Button>
+              />
             ) : null}
           </>
         }
@@ -166,16 +163,11 @@ export default function DeliveryPage() {
             description="Buyurtma Elchi’ga topshirilganda shu yerda ko‘rinadi."
           />
         }
-        pagination={
-          shipmentsQuery.data.total > PAGE_SIZE
-            ? {
-                ...createTablePagination(PAGE_SIZE),
-                current: page,
-                total: shipmentsQuery.data.total,
-              }
-            : false
-        }
-        onChange={(pagination) => setPage(pagination.current ?? 1)}
+        pagination={{
+          current: page,
+          total: shipmentsQuery.data.total,
+          onChange: setPage,
+        }}
       />
     </>
   );

@@ -1,6 +1,5 @@
-import { Button, Input, Tag, Typography } from 'antd';
+import { Input, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useAdminAuditLogsQuery } from '../../features/adminAudit/api/adminAuditQueries';
 import type { AdminAuditLog } from '../../features/adminAudit/model/adminAuditTypes';
@@ -10,7 +9,8 @@ import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
@@ -18,8 +18,6 @@ import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import styles from './AdminAuditPage.module.css';
-
-const PAGE_SIZE = 20;
 
 export default function AdminAuditPage() {
   const { locale, t } = useTranslation();
@@ -32,7 +30,7 @@ export default function AdminAuditPage() {
   const debouncedAction = useDebouncedValue(action.trim());
   const query = useAdminAuditLogsQuery({
     page,
-    limit: PAGE_SIZE,
+    limit: TABLE_PAGE_SIZE,
     ...(debouncedActorId ? { actorId: debouncedActorId } : {}),
     ...(debouncedAction ? { action: debouncedAction } : {}),
     ...(dateFrom ? { dateFrom } : {}),
@@ -102,13 +100,10 @@ export default function AdminAuditPage() {
           endLabel={t('admin.audit.dateTo')}
           onChange={([from, to]) => { setDateFrom(from); setDateTo(to); setPage(1); }}
         />
-        <Button
-          icon={<RotateCcw size={16} />}
+        <ResetFiltersButton
           disabled={!actorId && !action && !dateFrom && !dateTo}
           onClick={clearFilters}
-        >
-          {t('admin.audit.clear')}
-        </Button>
+        />
       </FilterPanel>
 
       {query.isPending ? <ContentState state="loading" /> : query.isError ? (
@@ -127,12 +122,7 @@ export default function AdminAuditPage() {
             dataSource={query.data.items}
             scroll={{ x: 760 }}
             emptyState={<EmptyState compact title={t('admin.audit.empty')} description={t('admin.audit.emptyDescription')} />}
-            pagination={{
-              ...createTablePagination(PAGE_SIZE, (total) => t('pagination.total', { total })),
-              current: page,
-              total: query.data.total,
-            }}
-            onChange={(pagination) => setPage(pagination.current ?? 1)}
+            pagination={{ current: page, total: query.data.total, onChange: setPage }}
           />
         </TablePanel>
       )}

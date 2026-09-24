@@ -260,9 +260,7 @@ export default function StorefrontShopPage() {
             <div className={styles.empty}><ContentState state="empty" title={t('storefront.empty')} description={t('storefront.emptyDescription')} /></div>
           )}
 
-          {shopQuery.data.products.total > PAGE_SIZE ? (
-            <AppPagination current={page} pageSize={PAGE_SIZE} total={shopQuery.data.products.total} onChange={(next) => updateParams({ page: next }, false)} />
-          ) : null}
+          <AppPagination current={page} pageSize={PAGE_SIZE} total={shopQuery.data.products.total} onChange={(next) => updateParams({ page: next }, false)} />
         </section>
       </main>
     </div>

@@ -11,7 +11,7 @@ import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
@@ -40,7 +40,7 @@ export default function AdminShopsPage() {
   const [tariffShop, setTariffShop] = useState<AdminShop | null>(null);
   const [tariffForm] = Form.useForm<TariffValues>();
   const debounced = useDebouncedValue(search.trim());
-  const query = useAdminShopsQuery({ page, limit: 20, ...(debounced ? { search: debounced } : {}), ...(status !== 'ALL' ? { status } : {}) });
+  const query = useAdminShopsQuery({ page, limit: TABLE_PAGE_SIZE, ...(debounced ? { search: debounced } : {}), ...(status !== 'ALL' ? { status } : {}) });
   const selectedShopId = searchParams.get('shopId');
   const selected = selectedShop ?? query.data?.items.find(({ id }) => id === selectedShopId) ?? null;
   const detail = useAdminShopDetailQuery(selected?.id ?? null);
@@ -82,7 +82,7 @@ export default function AdminShopsPage() {
       title={t('adminShops.market')}
       caption={t('pagination.total', { total: query.data.total })}
     >
-      <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminShops.empty')} description={t('adminShops.emptyDescription')} />} pagination={{ ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: query.data.total }} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+      <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminShops.empty')} description={t('adminShops.emptyDescription')} />} pagination={{ current: page, total: query.data.total, onChange: setPage }} />
     </TablePanel>
     <DetailDrawer title={selected?.name ?? 'Do‘kon tafsiloti'} subtitle="Do‘kon moderatsiyasi" width="min(560px, 100vw)" open={Boolean(selected)} onClose={closeDetail} extra={selected ? <Tag color={statusColor[selected.status]}>{selected.status}</Tag> : null}>
       {detail.isPending ? <ContentState state="loading" /> : detail.isError ? <ContentState state="error" description={getUserErrorMessage(detail.error, language)} onAction={() => void detail.refetch()} /> : detail.data && selected ? <>

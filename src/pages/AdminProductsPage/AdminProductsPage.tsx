@@ -1,6 +1,6 @@
 import { App, Button, Form, Input, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowRight, Image as ImageIcon, RotateCcw } from 'lucide-react';
+import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -15,7 +15,8 @@ import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionButton';
@@ -46,7 +47,7 @@ export default function AdminProductsPage() {
   const deferredShopId = useDebouncedValue(shopId.trim());
   const query = useAdminProductsQuery({
     page,
-    limit: 20,
+    limit: TABLE_PAGE_SIZE,
     ...(deferredSearch ? { search: deferredSearch } : {}),
     ...(deferredShopId ? { shopId: deferredShopId } : {}),
     ...(status !== 'ALL' ? { status } : {}),
@@ -193,8 +194,7 @@ export default function AdminProductsPage() {
           ]}
           onChange={(value) => { setModeration(value); setPage(1); }}
         />
-        <Button
-          icon={<RotateCcw size={16} />}
+        <ResetFiltersButton
           disabled={!hasFilters}
           onClick={() => {
             setSearch('');
@@ -203,9 +203,7 @@ export default function AdminProductsPage() {
             setModeration('ALL');
             setPage(1);
           }}
-        >
-          {t('adminOrders.clear')}
-        </Button>
+        />
       </FilterPanel>
 
       <TablePanel title={t('adminProducts.list')} caption={t('adminProducts.resultCount', { count: query.data.total })}>
@@ -215,8 +213,7 @@ export default function AdminProductsPage() {
           dataSource={query.data.items}
           scroll={{ x: 980 }}
           emptyState={<EmptyState compact title={t('adminProducts.empty')} description={t('adminProducts.emptyDescription')} />}
-          pagination={{ ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
-          onChange={(pagination) => setPage(pagination.current ?? 1)}
+          pagination={{ current: page, total: query.data.total, onChange: setPage }}
         />
       </TablePanel>
 
