@@ -46,6 +46,29 @@ export async function reorderBanners(items: BannerOrderItem[]): Promise<Banner[]
   const { data } = await httpClient.patch<unknown>('/admin/content/banners/order', { items });
   return parseList(unwrapApiData(data));
 }
+/**
+ * Banner rasmi MinIO'ning ochiq `banners/` papkasiga yuklanadi. `/files/upload`
+ * ishlatilmaydi: u faqat sotuvchi uchun va rasmni mahsulotga biriktiradi.
+ */
+export async function uploadBannerImage(
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<string> {
+  if (!(file instanceof File) || file.size === 0) throw new Error('Yuklash uchun fayl tanlang');
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await httpClient.post<unknown>('/admin/content/banners/image', formData, {
+    timeout: 60_000,
+    onUploadProgress: ({ loaded, total }) => {
+      if (total) onProgress?.(Math.min(99, Math.round((loaded / total) * 100)));
+    },
+  });
+  const result = unwrapApiData(data);
+  const url = result && typeof result === 'object' ? (result as Record<string, unknown>).url : undefined;
+  if (typeof url !== 'string' || !url.trim()) throw new Error('Rasm yuklandi, ammo server manzil qaytarmadi');
+  return url;
+}
+
 export async function deleteBanner(id: string): Promise<void> {
   await httpClient.delete(`/admin/content/banners/${encodeURIComponent(id)}`);
 }

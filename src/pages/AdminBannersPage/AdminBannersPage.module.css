@@ -12,10 +12,18 @@
 .actions { display: flex; align-items: center; gap: 4px; }
 .formIntro { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--admin-text-muted, #6b7280); }
 .alert { margin-bottom: 12px; }
-.previewBox { display: grid; gap: 6px; margin-bottom: 12px; }
+.previewBox { display: grid; gap: 6px; margin-bottom: 16px; }
 .previewBox > span { color: var(--admin-text-muted, #6b7280); font-size: 12px; }
-.previewImage { aspect-ratio: 16 / 7; overflow: hidden; border: 1px solid var(--admin-border, #e5e7eb); border-radius: 10px; background: #f3f4f6; }
-.previewImage img { width: 100%; height: 100%; object-fit: cover; }
+/* Storefront bilan bir xil kesim: kompyuterda 16:7, telefonda 16:9 (globals.css .home-banner). */
+.previewGrid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: start; gap: 12px; }
+.previewFrame { display: grid; gap: 4px; margin: 0; }
+.previewFrame figcaption { color: var(--admin-text-muted, #6b7280); font-size: 11px; }
+.previewDesktop, .previewPhone { position: relative; overflow: hidden; border: 1px solid var(--admin-border, #e5e7eb); border-radius: 10px; background: #f3f4f6; }
+.previewDesktop { aspect-ratio: 16 / 7; }
+.previewPhone { aspect-ratio: 16 / 9; }
+.previewDesktop img, .previewPhone img { width: 100%; height: 100%; object-fit: cover; }
+.previewTitle { display: -webkit-box; position: absolute; right: 0; bottom: 0; left: 0; overflow: hidden; padding: 18px 8px 6px; background: linear-gradient(to top, rgba(10,10,14,.86) 0%, rgba(10,10,14,.76) 70%, rgba(10,10,14,0) 100%); color: #fff; font-size: 12px; font-weight: 700; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.previewPhone .previewTitle { font-size: 10px; }
 .formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
 
 @media (max-width: 720px) {
@@ -24,4 +32,5 @@
   .copy { grid-area: copy; }
   .actions { grid-area: actions; justify-content: flex-end; }
   .formGrid { grid-template-columns: 1fr; }
+  .previewGrid { grid-template-columns: 1fr; }
 }
