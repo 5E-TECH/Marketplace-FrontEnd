@@ -17,7 +17,7 @@ import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
 import styles from './ProductsPage.module.css';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
@@ -56,7 +56,7 @@ export default function ProductsPage() {
   const deferredQuery = useDebouncedValue(query.trim());
   const productsQuery = useMyProductsQuery({
     page,
-    limit: 8,
+    limit: TABLE_PAGE_SIZE,
     ...(deferredQuery ? { search: deferredQuery } : {}),
     ...(status !== 'ALL' && ['DRAFT', 'ACTIVE', 'ARCHIVED', 'OUT_OF_STOCK'].includes(status) ? { status: status as 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK' } : {}),
     ...(categoryId !== 'ALL' ? { categoryId } : {}),
@@ -212,8 +212,7 @@ export default function ProductsPage() {
           columns={columns}
           dataSource={products}
           tableLayout="auto"
-          pagination={{ ...createTablePagination(8, (total) => t('pagination.total', { total })), current: page, total: productsQuery.data?.total ?? 0 }}
-          onChange={(pagination) => setPage(pagination.current ?? 1)}
+          pagination={{ current: page, total: productsQuery.data?.total ?? 0, onChange: setPage }}
         />
       </TablePanel>
       <ConfirmDialog

@@ -35,7 +35,7 @@ test('seller operator search va pagination backend kontraktiga mos client-side i
   await expect(page.getByText('Operator 1', { exact: true })).toHaveCount(0);
 
   await page.getByPlaceholder('Ism yoki telefon...').clear();
-  await page.getByTitle('2').click();
+  await page.getByTitle('3').click();
   await expect(page.getByText('Noyob Operator')).toBeVisible();
   expect(requests).toBe(1);
 });

@@ -59,15 +59,15 @@ test('admin mahsulotlar ro‘yxati mock popup o‘rniga backend ma’lumotlarini
   await expect(page.getByText('iPhone 16 Pro', { exact: true })).toBeVisible();
   await expect(page.getByText('Add Product moderation')).toHaveCount(0);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect.poll(() => requestedUrl).toContain('/api/v1/admin/products?page=1&limit=20');
+  await expect.poll(() => requestedUrl).toContain('/api/v1/admin/products?page=1&limit=10');
 
   await page.getByPlaceholder('Nomi yoki slug bo‘yicha qidiring...').fill('iphone-16');
   await expect.poll(() => requestedUrl).toContain('search=iphone-16');
   await expect(page.getByText('Jami 1 ta mahsulot')).toBeVisible();
   await page.getByPlaceholder('Nomi yoki slug bo‘yicha qidiring...').clear();
-  await expect(page.getByTitle('2')).toBeVisible();
-  await page.getByTitle('2').click();
-  await expect.poll(() => requestedUrl).toContain('page=2');
+  await expect(page.getByTitle('3')).toBeVisible();
+  await page.getByTitle('3').click();
+  await expect.poll(() => requestedUrl).toContain('page=3');
   await expect(page.getByText('Test mahsulot 21')).toBeVisible();
 });
 

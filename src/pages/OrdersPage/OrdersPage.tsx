@@ -1,4 +1,4 @@
-import { Ban, Check, Eye, Printer, RotateCcw, Truck } from 'lucide-react';
+import { Ban, Check, Eye, Printer, Truck } from 'lucide-react';
 import { App, Button, Input, Popconfirm, Select, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { Key } from 'react';
@@ -11,7 +11,8 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
@@ -53,7 +54,7 @@ export default function OrdersPage() {
   const [printLoading, setPrintLoading] = useState(false);
   const deferredSearch = useDebouncedValue(search.trim());
   const ordersQuery = useSellerOrdersQuery({
-    page, limit: 20,
+    page, limit: TABLE_PAGE_SIZE,
     ...(deferredSearch ? { search: deferredSearch } : {}),
     ...(status !== 'ALL' ? { status } : {}),
     ...(dateFrom ? { dateFrom } : {}),
@@ -97,10 +98,10 @@ export default function OrdersPage() {
     <ListToolbar value={search} placeholder={t('order.search')} onChange={(value) => { setSearch(value); resetPage(); }} actions={<>
       <FilterSelect<StatusFilter> className={styles.statusFilter} value={status} options={statusOptions} title={t('order.status')} onChange={(value) => { setStatus(value); resetPage(); }} />
       <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('order.startDate')} endLabel={t('order.endDate')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); resetPage(); }} />
-      {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>{t('adminOrders.clear')}</Button> : null}
+      {search || status !== 'ALL' || dateFrom || dateTo ? <ResetFiltersButton onClick={resetFilters} /> : null}
     </>} />
     <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? `${selectedRowKeys.length} ta tanlandi` : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>Yorliqlarni chop etish</Button>}>
-      <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? 'Avval posilka yarating' : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+      <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? 'Avval posilka yarating' : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={{ current: page, total: ordersQuery.data.total, onChange: setPage }} />
     </TablePanel>
     <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} width="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>

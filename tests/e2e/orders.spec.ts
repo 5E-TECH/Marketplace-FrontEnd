@@ -91,9 +91,9 @@ test('TC2.1: seller order pagination page query orqali backendga yuboriladi', as
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: manyOrders.slice((pageNumber - 1) * limit, pageNumber * limit), total: manyOrders.length, page: pageNumber, limit, totalPages: 2 } }) });
   });
   await page.reload();
-  const secondPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '2');
-  await page.getByTitle('2').click();
-  await secondPageRequest;
+  const lastPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '3');
+  await page.getByTitle('3').click();
+  await lastPageRequest;
   await expect(page.getByText('Xaridor 21')).toBeVisible();
   await expect(page.getByText('Xaridor 1', { exact: true })).toHaveCount(0);
 });

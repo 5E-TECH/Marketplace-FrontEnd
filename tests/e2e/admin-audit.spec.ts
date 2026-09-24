@@ -68,8 +68,8 @@ test('TC1: audit jurnali chiqadi va sahifalanadi', async ({ page }) => {
   await expect(page.getByText('Ali Admin').first()).toBeVisible();
   await expect(page.getByText('shop.suspend').first()).toBeVisible();
   await expect(page.getByText('shop').first()).toBeVisible();
-  await page.getByTitle('2').click();
-  await expect.poll(() => requestedUrls.at(-1)).toContain('page=2');
+  await page.getByTitle('3').click();
+  await expect.poll(() => requestedUrls.at(-1)).toContain('page=3');
   await expect(page.getByText('Nodir Admin')).toBeVisible();
 });
 

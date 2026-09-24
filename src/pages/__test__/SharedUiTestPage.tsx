@@ -47,7 +47,6 @@ export default function SharedUiTestPage() {
             rowKey="id"
             columns={columns}
             dataSource={records}
-            pagination={{ pageSize: 10, showSizeChanger: false }}
             search={{
               placeholder: 'Test yozuvini qidirish',
               filter: (record, query) =>

@@ -4,8 +4,9 @@ import type { ReactNode } from 'react';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { EmptyState } from '../EmptyState/EmptyState';
 import styles from './DataTable.module.css';
-import { createTablePagination } from './tablePagination';
+import { TABLE_PAGE_SIZE } from '../../config/pagination';
 import { useTranslation } from '../../i18n/useTranslation';
+import { usePaginationProps } from '../AppPagination/usePaginationProps';
 import { SearchInput } from '../SearchInput/SearchInput';
 
 interface DataTableSearch<RecordType> {
@@ -21,23 +22,27 @@ interface DataTableProps<RecordType extends object>
   dataSource: readonly RecordType[];
   search?: DataTableSearch<RecordType>;
   toolbarExtra?: ReactNode;
+  /**
+   * Umumiy sozlamalar (10 ta qator, "1–10 / 57" matni, ko'rinish) ichkarida
+   * qo'shiladi. Server pagination uchun yetarli:
+   * `{ current: page, total, onChange: setPage }`.
+   */
   pagination?: false | TablePaginationConfig;
   emptyState?: ReactNode;
 }
-
-const defaultPagination = createTablePagination();
 
 export function DataTable<RecordType extends object>({
   dataSource,
   search,
   toolbarExtra,
-  pagination = defaultPagination,
+  pagination = {},
   emptyState,
   onChange,
   className,
   ...tableProps
 }: DataTableProps<RecordType>) {
   const { language, t } = useTranslation();
+  const paginationDefaults = usePaginationProps();
   const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase(language));
@@ -50,13 +55,11 @@ export function DataTable<RecordType extends object>({
     [dataSource, deferredQuery, search],
   );
 
-  const effectiveCurrentPage =
-    pagination === false
-      ? 1
-      : Math.min(
-          currentPage,
-          Math.max(1, Math.ceil(filteredData.length / (pagination.pageSize ?? 10))),
-        );
+  const pageSize = (pagination !== false && pagination.pageSize) || TABLE_PAGE_SIZE;
+  const effectiveCurrentPage = Math.min(
+    currentPage,
+    Math.max(1, Math.ceil(filteredData.length / pageSize)),
+  );
 
   return (
     <>
@@ -93,7 +96,11 @@ export function DataTable<RecordType extends object>({
           pagination === false
             ? false
             : {
+                ...paginationDefaults,
+                placement: ['bottomEnd'],
                 ...pagination,
+                pageSize,
+                className: `${paginationDefaults.className} ${pagination.className ?? ''}`.trim(),
                 current: pagination.current ?? effectiveCurrentPage,
               }
         }

@@ -11,12 +11,12 @@ const makeProduct = (index: number) => ({
   categoryId: '1',
   price: index * 100_000,
   stock: index,
-  status: index <= 5 ? 'LOW' : 'ACTIVE',
+  status: index <= 5 ? 'LOW' : index <= 10 ? 'ACTIVE' : 'DRAFT',
   imageUrl: index === 1 ? 'https://cdn.example.com/product-1.jpg' : null,
 });
 
 async function mockProductsApi(page: Page) {
-  let products = Array.from({ length: 10 }, (_, index) => makeProduct(index + 1));
+  let products = Array.from({ length: 11 }, (_, index) => makeProduct(index + 1));
 
   await page.route('**/api/v1/products/my**', async (route) => {
     const url = new URL(route.request().url());
@@ -24,7 +24,7 @@ async function mockProductsApi(page: Page) {
     const status = url.searchParams.get('status');
     const categoryId = url.searchParams.get('categoryId');
     const page = Number(url.searchParams.get('page') ?? 1);
-    const limit = Number(url.searchParams.get('limit') ?? 8);
+    const limit = Number(url.searchParams.get('limit') ?? 10);
     const filtered = products.filter((product) =>
       (!search || `${product.name} ${product.slug}`.toLocaleLowerCase('uz').includes(search)) &&
       (!status || product.status === status) &&
@@ -68,10 +68,10 @@ test.beforeEach(async ({ page }) => {
 
 test('TC1: products pagination ishlaydi', async ({ page }) => {
   await expect(page.getByText('Mahsulot 01', { exact: true })).toBeVisible();
-  await expect(page.getByText('Mahsulot 09', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Mahsulot 11', { exact: true })).toHaveCount(0);
 
   await page.getByTitle('2').click();
-  await expect(page.getByText('Mahsulot 09', { exact: true })).toBeVisible();
+  await expect(page.getByText('Mahsulot 11', { exact: true })).toBeVisible();
   await expect(page.getByText('Mahsulot 01', { exact: true })).toHaveCount(0);
 });
 
@@ -83,7 +83,7 @@ test('TC2: products search filtr ishlaydi', async ({ page }) => {
 
   await expect(page.getByText('Noyob Kamera', { exact: true })).toBeVisible();
   await expect(page.getByText('Mahsulot 01', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('Jami 1 ta')).toBeVisible();
+  await expect(page.getByText(/^1 ta natija/)).toBeVisible();
 });
 
 test('status filter serverga status query yuboradi va natijani filtrlaydi', async ({ page }) => {
@@ -129,7 +129,7 @@ test('TC3: delete tasdiqlangach mahsulot ro‘yxatdan yo‘qoladi', async ({ pag
 
   await expect(page.getByText('Mahsulot o‘chirildi')).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Mahsulot 01', exact: true })).toHaveCount(0);
-  await expect(page.getByText('Jami 9 ta')).toBeVisible();
+  await expect(page.getByText('10 ta natija', { exact: true })).toBeVisible();
 });
 
 test('product PATCH /products/12 orqali Bearer token bilan yangilanadi', async ({ page }) => {

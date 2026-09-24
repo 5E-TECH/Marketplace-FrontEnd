@@ -8,7 +8,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
 import { FilterTabs } from '../../shared/ui/FilterTabs/FilterTabs';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
 import { NumberControl, TextAreaControl } from '../../shared/ui/FormControls/FormControls';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
@@ -32,7 +32,7 @@ export default function StockPage() {
   const attempt = useRef<{ signature: string; key: string } | null>(null);
   const [action, setAction] = useState<StockAction>(null);
   const search = useDebouncedValue(query.trim());
-  const stockQuery = useStockQuery({ page, limit: 20, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}), ...(warehouseId ? { warehouseId } : {}), ...(productId ? { productId } : {}) });
+  const stockQuery = useStockQuery({ page, limit: TABLE_PAGE_SIZE, ...(search ? { search } : {}), ...(lowOnly ? { lowOnly: true } : {}), ...(warehouseId ? { warehouseId } : {}), ...(productId ? { productId } : {}) });
   const inboundMutation = useInboundStockMutation();
   const adjustMutation = useAdjustStockMutation();
 
@@ -79,7 +79,7 @@ export default function StockPage() {
     <ListToolbar value={query} placeholder={t('stock.search')} onChange={(value) => { setQuery(value); setPage(1); }} actions={<><Input aria-label="Ombor ID" placeholder="Ombor ID" inputMode="numeric" value={warehouseId} onChange={(event) => { setWarehouseId(event.target.value.replace(/\D/g, '')); setPage(1); }} /><Input aria-label="Mahsulot ID" placeholder="Mahsulot ID" inputMode="numeric" value={productId} onChange={(event) => { setProductId(event.target.value.replace(/\D/g, '')); setPage(1); }} /></>} />
     <Card>
       <FilterTabs value={lowOnly ? 'LOW' : 'ALL'} ariaLabel={t('stock.title')} options={[{ value: 'ALL', label: t('stock.all') }, { value: 'LOW', label: t('stock.low') }]} onChange={(value) => { setLowOnly(value === 'LOW'); setPage(1); }} />
-      <DataTable rowKey={(item) => `${item.variantId}-${item.warehouseId}`} columns={columns} dataSource={stockQuery.data.items} rowClassName={(item) => item.available <= item.lowStockThreshold ? styles.lowStock : ''} tableLayout="auto" pagination={{ ...createTablePagination(20), current: page, total: stockQuery.data.total }} emptyState={<ContentState state="empty" title={t('stock.empty.title')} description={t('stock.empty.description')} />} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+      <DataTable rowKey={(item) => `${item.variantId}-${item.warehouseId}`} columns={columns} dataSource={stockQuery.data.items} rowClassName={(item) => item.available <= item.lowStockThreshold ? styles.lowStock : ''} tableLayout="auto" pagination={{ current: page, total: stockQuery.data.total, onChange: setPage }} emptyState={<ContentState state="empty" title={t('stock.empty.title')} description={t('stock.empty.description')} />} />
     </Card>
     <FormModal title={action?.type === 'inbound' ? 'Tovar kirimi' : 'Qoldiqni tuzatish'} open={Boolean(action)} form={form} submitText={action?.type === 'inbound' ? 'Kirim qilish' : 'Tuzatish'} loading={inboundMutation.isPending || adjustMutation.isPending} onCancel={() => setAction(null)} onSubmit={submit}>
       {action ? <p className={styles.context}><strong>{action.item.productName}</strong> · {action.item.variantName || 'Default'} · {action.item.warehouseName}</p> : null}

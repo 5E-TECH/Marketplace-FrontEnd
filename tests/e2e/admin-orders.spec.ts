@@ -12,7 +12,7 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
   await page.route('**/api/v1/admin/orders**', async route => {
     const url = new URL(route.request().url());
     expect(route.request().method()).toBe('GET');
-    expect(Object.fromEntries(url.searchParams)).toEqual({ page: '1', limit: '20' });
+    expect(Object.fromEntries(url.searchParams)).toEqual({ page: '1', limit: '10' });
     await route.fulfill({ json: { data: { items: allOrders, total: 3, page: 1, limit: 20, totalPages: 1 } } });
   });
   await page.goto('/admin/orders');
@@ -285,12 +285,12 @@ test('admin orders pagination backendga page va limit yuboradi', async ({ page }
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: orders.slice((pageNumber - 1) * limit, pageNumber * limit), total: orders.length, page: pageNumber, limit, totalPages: 2 } }) });
   });
   await page.goto('/admin/orders');
-  const secondPageRequest = page.waitForRequest(request => {
+  const lastPageRequest = page.waitForRequest(request => {
     const url = new URL(request.url());
-    return url.searchParams.get('page') === '2' && url.searchParams.get('limit') === '20';
+    return url.searchParams.get('page') === '3' && url.searchParams.get('limit') === '10';
   });
-  await page.getByTitle('2').click();
-  await secondPageRequest;
+  await page.getByTitle('3').click();
+  await lastPageRequest;
   await expect(page.getByText('Xaridor 21')).toBeVisible();
   const resetPageRequest = page.waitForRequest(request => {
     const url = new URL(request.url());
