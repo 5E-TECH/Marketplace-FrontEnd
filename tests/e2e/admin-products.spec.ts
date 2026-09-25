@@ -29,6 +29,17 @@ test.beforeEach(async ({ page }) => {
     contentType: 'application/json',
     body: JSON.stringify({ data: { id: 'admin-e2e', role: 'SUPERADMIN', name: 'Super Admin', phone: '+998901234567', isActive: true, isDeleted: false } }),
   }));
+  // Jadval do'kon va kategoriya nomini ID bo'yicha alohida so'raydi.
+  await page.route(/\/api\/v1\/admin\/shops\/5$/, route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { id: '5', ownerUserId: '42', name: 'Texno Market', status: 'ACTIVE', stats: {} } }),
+  }));
+  await page.route('**/api/v1/admin/categories', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: [{ id: '9', name: 'Elektronika', children: [{ id: '1', name: 'Smartfonlar', parentId: '9', children: [] }] }] }),
+  }));
 });
 
 test('admin mahsulotlar ro‘yxati mock popup o‘rniga backend ma’lumotlarini ko‘rsatadi', async ({ page }) => {
@@ -57,6 +68,10 @@ test('admin mahsulotlar ro‘yxati mock popup o‘rniga backend ma’lumotlarini
 
   await expect(page.getByRole('heading', { name: 'Mahsulot moderatsiyasi' })).toBeVisible();
   await expect(page.getByText('iPhone 16 Pro', { exact: true })).toBeVisible();
+  const productRow = page.getByRole('row').filter({ hasText: 'iPhone 16 Pro' });
+  await expect(productRow).toContainText('Texno Market');
+  await expect(productRow).toContainText('Smartfonlar');
+  await expect(productRow).not.toContainText('#5');
   await expect(page.getByText('Add Product moderation')).toHaveCount(0);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect.poll(() => requestedUrl).toContain('/api/v1/admin/products?page=1&limit=10');

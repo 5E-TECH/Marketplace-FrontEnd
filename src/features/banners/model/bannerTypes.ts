@@ -35,3 +35,13 @@ export const MAX_BANNERS = 100;
  */
 export const BANNER_LINK_PATTERN =
   /^(?:\/(?![/\\])(?!(?:api|storefront)(?:[/?#]|$))[^\s\\]*|https?:\/\/[^\s\\/?#]+[^\s\\]*)$/i;
+
+/** Storefront do'kon sahifasi (Marketplace-Storefront: `src/app/dokon/[slug]`). */
+export const shopBannerLink = (slug: string): string => `/dokon/${encodeURIComponent(slug)}`;
+
+/** `/dokon/:slug` havolasidan slug; boshqa havola bo'lsa null. */
+export function shopSlugFromBannerLink(link: string | null): string | null {
+  const match = link?.match(/^\/dokon\/([^/?#]+)\/?$/);
+  if (!match) return null;
+  try { return decodeURIComponent(match[1]); } catch { return null; }
+}

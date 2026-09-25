@@ -17,13 +17,26 @@ const banner = (overrides: Partial<BannerRow> & { id: string; title: string }): 
 
 type Request = { method: string; path: string; body: Record<string, unknown> };
 
+const SHOPS = [
+  { id: '5', ownerUserId: '42', name: 'Texno Market', slug: 'texno-market', phone: '+998901112233', status: 'ACTIVE' },
+  { id: '6', ownerUserId: '43', name: 'Kitob Olami', slug: 'kitob-olami', phone: '+998901112244', status: 'ACTIVE' },
+];
+
 // Banner DTO va endpointlar 5E-TECH/marketplace banner.service.ts bo'yicha.
 async function setup(page: Page, initial: BannerRow[], options: { failReorderOnce?: boolean } = {}) {
   await seedAccessToken(page);
   await page.route('**/api/v1/auth/me', route => route.fulfill({ json: { data: { id: '1', role: 'ADMIN', name: 'Admin', phone: '+998900000000', isActive: true, isDeleted: false } } }));
   page.on('pageerror', error => { throw error; });
+  await page.route('**/api/v1/admin/shops?**', route => {
+    const url = new URL(route.request().url());
+    shopQueries.push(url.search);
+    const search = (url.searchParams.get('search') ?? '').toLocaleLowerCase('uz');
+    const items = SHOPS.filter(shop => !search || shop.name.toLocaleLowerCase('uz').includes(search));
+    return route.fulfill({ json: { data: { items, total: items.length, page: 1, limit: 20 } } });
+  });
   await page.route('https://api.elchimarket.uz/media/**', route => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="28"><rect width="64" height="28" fill="#d9f2ee"/></svg>' }));
 
+  const shopQueries: string[] = [];
   let rows = [...initial];
   let failReorder = Boolean(options.failReorderOnce);
   const requests: Request[] = [];
@@ -66,7 +79,7 @@ async function setup(page: Page, initial: BannerRow[], options: { failReorderOnc
     await route.fulfill({ json: { data: rows.find(row => row.id === id) } });
   });
   await page.goto('/admin/banners');
-  return { requests, read: () => sorted(), listCalls: () => listCalls };
+  return { requests, shopQueries, read: () => sorted(), listCalls: () => listCalls };
 }
 
 const openCreate = async (page: Page) => {
@@ -75,6 +88,13 @@ const openCreate = async (page: Page) => {
 };
 const uploadImage = (page: Page, file = { name: 'kuz.jpg', mimeType: 'image/jpeg', buffer: JPEG }) =>
   page.getByRole('dialog').locator('input[type=file]').setInputFiles(file);
+/** Do'kon nomi bo'yicha qidirib tanlaydi (server qidiruvi). */
+const pickShop = async (page: Page, name: string) => {
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Do‘kon').click();
+  await dialog.getByLabel('Do‘kon').fill(name.slice(0, 5));
+  await page.locator('.ant-select-item-option').filter({ hasText: name }).click();
+};
 
 test('admin rasmni yuklab banner qo‘shadi — yuklangan manzil POST ga ketadi', async ({ page }) => {
   const { requests } = await setup(page, []);
@@ -86,21 +106,22 @@ test('admin rasmni yuklab banner qo‘shadi — yuklangan manzil POST ga ketadi'
   await expect(dialog.getByText('Kompyuterda')).toBeVisible();
   await expect(dialog.getByText('Telefonda')).toBeVisible();
 
-  await dialog.getByLabel('Banner sarlavhasi').fill('Kuzgi aksiya');
-  await dialog.getByLabel('Havola').fill('/katalog/telefon');
-  // Sarlavha preview'da rasm ustida chiqadi (desktop va telefon).
-  await expect(dialog.getByText('Kuzgi aksiya')).toHaveCount(2);
+  await pickShop(page, 'Texno Market');
+  // Do'kon nomi storefront'dagidek preview'da rasm ustida chiqadi (desktop va telefon).
+  await expect(dialog.locator('figure').getByText('Texno Market')).toHaveCount(2);
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
+  // Sarlavha va havola do'kondan olinadi: bosilganda storefront'da do'kon sahifasi ochiladi.
   await expect.poll(() => requests.find(item => item.method === 'POST' && !item.path.endsWith('/image'))?.body).toMatchObject({
-    title: 'Kuzgi aksiya', imageUrl: UPLOADED, linkUrl: '/katalog/telefon', isActive: true,
+    title: 'Texno Market', imageUrl: UPLOADED, linkUrl: '/dokon/texno-market', isActive: true,
   });
-  await expect(page.locator('[data-banner-id] strong')).toHaveText(['Kuzgi aksiya']);
+  await expect(page.locator('[data-banner-id] strong')).toHaveText(['Texno Market']);
+  await expect(page.locator('[data-banner-id]')).toContainText('/dokon/texno-market');
 });
 
 test('rasmsiz banner saqlanmaydi', async ({ page }) => {
   const { requests } = await setup(page, []);
   const dialog = await openCreate(page);
-  await dialog.getByLabel('Banner sarlavhasi').fill('Rasmsiz');
+  await pickShop(page, 'Texno Market');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
   await expect(dialog.getByText('Banner rasmini yuklang')).toBeVisible();
   expect(requests.filter(item => item.method === 'POST')).toHaveLength(0);
@@ -116,26 +137,32 @@ test('noto‘g‘ri turdagi yoki 5 MB dan katta fayl serverga yuborilmaydi', asy
   expect(requests.filter(item => item.path.endsWith('/image'))).toHaveLength(0);
 });
 
-for (const link of ['katalog/telefon', 'elchimarket.uz/aksiya', '/storefront/products?categoryId=7', '//evil.example.com']) {
-  test(`storefront bosa olmaydigan havola saqlanmaydi: ${link}`, async ({ page }) => {
-    const { requests } = await setup(page, []);
-    const dialog = await openCreate(page);
-    await uploadImage(page);
-    await expect(dialog.getByRole('button', { name: 'Rasmni almashtirish' })).toBeVisible();
-    await dialog.getByLabel('Banner sarlavhasi').fill('Aksiya');
-    await dialog.getByLabel('Havola').fill(link);
-    await dialog.getByRole('button', { name: 'Saqlash' }).click();
-    await expect(dialog.getByText('Havola / bilan boshlanuvchi sayt yo‘li')).toBeVisible();
-    expect(requests.filter(item => item.method === 'POST' && !item.path.endsWith('/image'))).toHaveLength(0);
-  });
-}
+test('do‘kon tanlanmasa banner saqlanmaydi', async ({ page }) => {
+  const { requests } = await setup(page, []);
+  const dialog = await openCreate(page);
+  await uploadImage(page);
+  await expect(dialog.getByRole('button', { name: 'Rasmni almashtirish' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Saqlash' }).click();
+  await expect(dialog.getByText('Do‘konni tanlang', { exact: true })).toBeVisible();
+  expect(requests.filter(item => item.method === 'POST' && !item.path.endsWith('/image'))).toHaveLength(0);
+});
+
+test('do‘kon qidiruvi serverga faqat faol do‘konlar uchun ketadi', async ({ page }) => {
+  const { shopQueries } = await setup(page, []);
+  await openCreate(page);
+  await page.getByRole('dialog').getByLabel('Do‘kon').click();
+  await page.getByRole('dialog').getByLabel('Do‘kon').fill('Kitob');
+  await expect.poll(() => shopQueries.at(-1)).toContain('search=Kitob');
+  expect(shopQueries.at(-1)).toContain('status=ACTIVE');
+  await expect(page.locator('.ant-select-item-option')).toHaveText(['Kitob Olami']);
+});
 
 test('sichqoncha bilan tanlangan sana "OK" bosilmasa ham saqlanadi', async ({ page }) => {
   const { requests } = await setup(page, []);
   const dialog = await openCreate(page);
   await uploadImage(page);
   await expect(dialog.getByRole('button', { name: 'Rasmni almashtirish' })).toBeVisible();
-  await dialog.getByLabel('Banner sarlavhasi').fill('Rejalashtirilgan');
+  await pickShop(page, 'Texno Market');
   await dialog.getByLabel('Boshlanishi').click();
   const cell = page.locator('.ant-picker-dropdown:visible .ant-picker-cell-in-view').last();
   const picked = await cell.getAttribute('title');
@@ -157,7 +184,7 @@ test('yangi banner ro‘yxat oxiriga tushadi (eng katta tartib + 1)', async ({ p
   const dialog = await openCreate(page);
   await uploadImage(page);
   await expect(dialog.getByRole('button', { name: 'Rasmni almashtirish' })).toBeVisible();
-  await dialog.getByLabel('Banner sarlavhasi').fill('Uchinchi');
+  await pickShop(page, 'Kitob Olami');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
   await expect.poll(() => requests.find(item => item.method === 'POST' && !item.path.endsWith('/image'))?.body.sortOrder).toBe(8);
 });
@@ -203,13 +230,23 @@ test('tartiblash xato bersa ro‘yxat qayta olinadi — eskirgan ro‘yxatda qol
 });
 
 test('tahrir faqat o‘zgargan maydonni yuboradi, tartibga tegmaydi', async ({ page }) => {
-  const { requests } = await setup(page, [banner({ id: '7', title: 'Aksiya', sortOrder: 3, isActive: true })]);
-  await page.getByRole('button', { name: 'Aksiya bannerini tahrirlash' }).click();
+  const { requests } = await setup(page, [banner({ id: '7', title: 'Texno Market', linkUrl: '/dokon/texno-market', sortOrder: 3, isActive: true })]);
+  await page.getByRole('button', { name: 'Texno Market bannerini tahrirlash' }).click();
   const dialog = page.getByRole('dialog', { name: 'Bannerni tahrirlash' });
   await expect(dialog.getByLabel('Tartib')).toHaveCount(0);
-  await dialog.getByLabel('Banner sarlavhasi').fill('Yangi kolleksiya');
+  // Bannerdagi do'kon tanlangan holda ochiladi — faqat "Faol" o'zgarsa, sarlavha/havola yuborilmaydi.
+  await expect(dialog.locator('.ant-select-content')).toHaveText('Texno Market');
+  await dialog.getByRole('switch').click();
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
-  await expect.poll(() => requests.find(item => item.method === 'PATCH')?.body).toEqual({ title: 'Yangi kolleksiya' });
+  await expect.poll(() => requests.find(item => item.method === 'PATCH')?.body).toEqual({ isActive: false });
+});
+
+test('tahrirda do‘kon almashtirilsa sarlavha va havola birga yangilanadi', async ({ page }) => {
+  const { requests } = await setup(page, [banner({ id: '7', title: 'Texno Market', linkUrl: '/dokon/texno-market' })]);
+  await page.getByRole('button', { name: 'Texno Market bannerini tahrirlash' }).click();
+  await pickShop(page, 'Kitob Olami');
+  await page.getByRole('dialog').getByRole('button', { name: 'Saqlash' }).click();
+  await expect.poll(() => requests.find(item => item.method === 'PATCH')?.body).toEqual({ title: 'Kitob Olami', linkUrl: '/dokon/kitob-olami' });
 });
 
 test('o‘chirish DELETE yuboradi va banner ro‘yxatdan yo‘qoladi', async ({ page }) => {
@@ -225,7 +262,7 @@ test('teskari muddat serverga yuborilmaydi', async ({ page }) => {
   const dialog = await openCreate(page);
   await uploadImage(page);
   await expect(dialog.getByRole('button', { name: 'Rasmni almashtirish' })).toBeVisible();
-  await dialog.getByLabel('Banner sarlavhasi').fill('Xato muddat');
+  await pickShop(page, 'Texno Market');
   await dialog.getByLabel('Boshlanishi').fill('2026-10-01 10:00:00');
   await dialog.getByLabel('Boshlanishi').press('Enter');
   await dialog.getByLabel('Tugashi').fill('2026-09-01 10:00:00');
