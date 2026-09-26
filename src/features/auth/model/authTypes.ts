@@ -21,6 +21,7 @@ export interface AuthUser {
   isBlocked: boolean;
 }
 
+/** `PATCH /auth/profile` — barcha maydon ixtiyoriy (UpdateProfileDto). */
 export interface UpdateAuthProfilePayload {
   name?: string;
   phone?: string;
@@ -33,6 +34,3 @@ export interface AuthSession extends LoginResponse {
   user: AuthUser;
 }
 export interface AuthDeviceSession { id: string; userAgent: string; ipAddress: string; createdAt: string; lastUsedAt: string | null; current: boolean }
-
-/** `PATCH /auth/profile` — barcha maydon ixtiyoriy (UpdateProfileDto). */
-export type UpdateProfilePayload = UpdateAuthProfilePayload;

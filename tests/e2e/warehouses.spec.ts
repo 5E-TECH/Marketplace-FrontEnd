@@ -91,6 +91,21 @@ test('GET detail, PATCH edit va DELETE ishlaydi', async ({ page }) => {
   await expect.poll(() => state?.deletedId).toBe('2');
 });
 
+test('saqlash xato bilan tugasa, tahrirlangan qiymat asl holiga qaytmaydi', async ({ page }) => {
+  await page.route('**/api/v1/inventory/warehouses/2', async (route) => {
+    if (route.request().method() !== 'PATCH') { await route.fallback(); return; }
+    await route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ message: 'Bu nomdagi ombor allaqachon bor' }) });
+  });
+  await page.getByRole('button', { name: 'Chilonzor ombori omborini tahrirlash' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Omborni tahrirlash' });
+  const nameInput = dialog.getByLabel('Ombor nomi');
+  await expect(nameInput).toHaveValue('Chilonzor ombori');
+  await nameInput.fill('Yangi nom');
+  await dialog.getByRole('button', { name: 'Saqlash' }).click();
+  await expect(page.getByText('Bu nomdagi ombor allaqachon bor')).toBeVisible();
+  await expect(nameInput).toHaveValue('Yangi nom');
+});
+
 test('403 javobida login xabari emas, serverning aniq sababi ko‘rsatiladi', async ({ page }) => {
   await page.route('**/api/v1/inventory/warehouses', (route) => route.fulfill({
     status: 403,

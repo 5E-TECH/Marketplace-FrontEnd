@@ -12,6 +12,7 @@ import { useAdminShopNames } from '../../features/adminShops/api/adminShopQuerie
 import { useAdminCategoryNames } from '../../features/categories/api/categoryQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { ProductStatus } from '../../features/products/model/productTypes';
+import { getProductCover } from '../../features/products/lib/getProductCover';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -64,11 +65,14 @@ export default function AdminProductsPage() {
     {
       title: '',
       width: 72,
-      render: (_, product) => product.imageUrl ? (
-        <img className={styles.thumbnail} src={product.imageUrl} alt="" loading="lazy" />
-      ) : (
-        <span className={styles.thumbnailFallback}><ImageIcon aria-hidden /></span>
-      ),
+      render: (_, product) => {
+        const cover = getProductCover(product);
+        return cover ? (
+          <img className={styles.thumbnail} src={cover} alt="" loading="lazy" />
+        ) : (
+          <span className={styles.thumbnailFallback}><ImageIcon aria-hidden /></span>
+        );
+      },
     },
     {
       title: t('adminProducts.product'),

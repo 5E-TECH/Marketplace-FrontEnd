@@ -7,6 +7,6 @@ interface DetailDrawerProps extends Omit<DrawerProps, 'title'> {
   subtitle?: ReactNode;
 }
 
-export function DetailDrawer({ title, subtitle, children, rootClassName = '', width = 'min(520px, 100vw)', ...props }: DetailDrawerProps) {
-  return <Drawer rootClassName={`${styles.drawer} ${rootClassName}`.trim()} size={width} title={<div className={styles.heading}><strong>{title}</strong>{subtitle ? <span>{subtitle}</span> : null}</div>} {...props}>{children}</Drawer>;
+export function DetailDrawer({ title, subtitle, children, rootClassName = '', size = 'min(520px, 100vw)', ...props }: DetailDrawerProps) {
+  return <Drawer rootClassName={`${styles.drawer} ${rootClassName}`.trim()} size={size} title={<div className={styles.heading}><strong>{title}</strong>{subtitle ? <span>{subtitle}</span> : null}</div>} {...props}>{children}</Drawer>;
 }

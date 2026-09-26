@@ -2,7 +2,7 @@ import axios from 'axios';
 import { httpClient } from '../../../shared/api/httpClient';
 
 /** Kontrakt: ShippingLabelsBatchDto.orderIds — maxItems 100. */
-export const MAX_LABELS_PER_REQUEST = 100;
+const MAX_LABELS_PER_REQUEST = 100;
 
 /**
  * `responseType: 'blob'` bo'lganda backendning JSON xatosi ham Blob bo'lib keladi —

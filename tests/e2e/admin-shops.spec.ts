@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { seedAccessToken } from './support/auth';
+import { collectUnconnectedFormWarnings } from './support/console';
 
 const pendingShop = { id: '15', ownerUserId: '42', name: 'Ali Market', slug: 'ali-market', description: null, logoUrl: null, bannerUrl: null, status: 'PENDING', phone: '+998901234567', regionId: '1', districtId: '2', address: 'Toshkent', rating: 0, ordersCount: 0, elchiMarketId: null, isDeleted: false, isFeatured: false, tariffHome: 25000, tariffCenter: 15000, createdAt: '2026-09-01T10:00:00Z', updatedAt: '2026-09-01T10:00:00Z' };
 
@@ -26,6 +27,7 @@ test('pending list va detail statistikasi ko‘rinadi, approve ishlaydi', async 
 });
 
 test('reject sababini backendga yuboradi', async ({ page }) => {
+  const formWarnings = collectUnconnectedFormWarnings(page);
   let reason = '';
   await page.route('**/api/v1/admin/shops/15/reject', async (route) => { reason = (route.request().postDataJSON() as { reason: string }).reason; await route.fulfill({ status: 201, body: '{}' }); });
   await page.goto('/admin/shops');
@@ -34,9 +36,11 @@ test('reject sababini backendga yuboradi', async ({ page }) => {
   await page.getByLabel('Rad etish sababi').fill('Hujjatlar to‘liq emas');
   await page.getByLabel('Do‘konni rad etish').getByRole('button', { name: 'Rad etish' }).click();
   await expect.poll(() => reason).toBe('Hujjatlar to‘liq emas');
+  expect(formWarnings).toEqual([]);
 });
 
 test('featured holati va yetkazish tariflari backendga yuboriladi', async ({ page }) => {
+  const formWarnings = collectUnconnectedFormWarnings(page);
   let featureBody: unknown;
   let tariffBody: unknown;
   let tariffMethod = '';
@@ -54,11 +58,14 @@ test('featured holati va yetkazish tariflari backendga yuboriladi', async ({ pag
   await expect.poll(() => featureBody).toEqual({ featured: true });
   await page.getByRole('button', { name: 'Tariflar' }).click();
   const dialog = page.getByRole('dialog', { name: 'Ali Market tariflari' });
+  await expect(dialog.getByLabel('Uyga yetkazish tarifi')).toHaveValue('25000');
+  await expect(dialog.getByLabel('Elchi markazigacha yetkazish tarifi')).toHaveValue('15000');
   await dialog.getByLabel('Uyga yetkazish tarifi').fill('30000');
   await dialog.getByLabel('Elchi markazigacha yetkazish tarifi').fill('18000');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
   expect(tariffMethod).toBe('PATCH');
   await expect.poll(() => tariffBody).toEqual({ tariffHome: 30000, tariffCenter: 18000 });
+  expect(formWarnings).toEqual([]);
 });
 
 test('telefonsiz do‘kon ro‘yxatni yiqitmaydi va tavsiyadan olib tashlash mumkin', async ({ page }) => {

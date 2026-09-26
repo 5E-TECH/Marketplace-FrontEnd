@@ -12,6 +12,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { Product } from '../../features/products/model/productTypes';
+import { getProductCover } from '../../features/products/lib/getProductCover';
 import { useDeleteProductMutation, useMyProductsQuery } from '../../features/products/api/productQueries';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
@@ -131,9 +132,12 @@ export default function ProductsPage() {
     {
       title: '',
       width: 64,
-      render: (_, product) => product.imageUrl
-        ? <img className={styles.productImage} src={product.imageUrl} alt="" loading="lazy" />
-        : <span className={styles.imagePlaceholder}><PictureOutlined /></span>,
+      render: (_, product) => {
+        const cover = getProductCover(product);
+        return cover
+          ? <img className={styles.productImage} src={cover} alt="" loading="lazy" />
+          : <span className={styles.imagePlaceholder}><PictureOutlined /></span>;
+      },
     },
     { title: t('product.product'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name), render: (name: string, product) => <span className={styles.productInfo}><Typography.Text strong>{name}</Typography.Text><small>ID: {product.id}</small></span> },
     { title: 'Slug', dataIndex: 'slug', width: 170, responsive: ['xl'], render: (slug: string) => <code className={styles.sku}>{slug || '—'}</code> },
@@ -192,7 +196,6 @@ export default function ProductsPage() {
             loading={categoriesQuery.isPending}
             showSearch
             virtual={false}
-            optionFilterProp="label"
             title={t('product.filterCategory')}
             aria-label={t('product.filterCategory')}
             onChange={(value) => { setCategoryId(value); setPage(1); }}

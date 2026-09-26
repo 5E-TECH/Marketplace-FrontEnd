@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createAdminUser, getAdminUser, getAdminUsers, setAdminUserBlocked } from './adminUserApi';
 import type { AdminUserListParams, CreateAdminUserPayload } from '../model/adminUserTypes';
 
-export const adminUserKeys = {
+const adminUserKeys = {
   all: ['admin-users'] as const,
   list: (params: AdminUserListParams) => [...adminUserKeys.all, 'list', params] as const,
   detail: (id: string) => [...adminUserKeys.all, 'detail', id] as const,

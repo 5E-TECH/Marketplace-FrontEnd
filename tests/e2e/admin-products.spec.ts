@@ -22,6 +22,9 @@ const baseProduct = {
   variants: [{ id: '25', productId: '12', sku: 'IPHONE-16-BLACK-256', name: 'Qora — 256 GB', attributes: { color: 'Qora' }, price: 16_000_000, oldPrice: null, barcode: '4780012345678', imageUrl: null, isActive: true }],
 };
 
+// Backend asosiy rasmni ko'pincha faqat `images` da qaytaradi (`imageUrl: null`).
+const galleryImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='orange'/%3E%3C/svg%3E";
+
 test.beforeEach(async ({ page }) => {
   await seedAccessToken(page);
   await page.route('**/api/v1/auth/me', route => route.fulfill({
@@ -132,4 +135,45 @@ test('mahsulot detail page barcha muhim fieldlarni va suspend/reactivate amallar
   await page.getByRole('dialog').getByRole('button', { name: 'Ko‘rsatish' }).click();
   await expect.poll(() => shown).toBe(1);
   await expect(page.getByRole('button', { name: 'Yashirish' })).toBeVisible();
+});
+
+test('rasm faqat images massivida kelsa ham jadvalda ko‘rinadi', async ({ page }) => {
+  await page.route('**/api/v1/admin/products**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { items: [{ ...baseProduct, imageUrl: null, images: [galleryImage], isBlocked: false }], total: 1, page: 1, limit: 10, totalPages: 1 } }),
+  }));
+  await page.goto('/admin/products');
+  const row = page.getByRole('row').filter({ hasText: 'iPhone 16 Pro' });
+  await expect(row.locator(`img[src="${galleryImage}"]`)).toHaveCount(1);
+});
+
+test('detail sahifa ixcham: muqova images’dan, ID o‘rniga nomlar, takroriy maydonlarsiz', async ({ page }) => {
+  await page.route('**/api/v1/admin/products**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { ...baseProduct, imageUrl: null, images: [galleryImage], isBlocked: false } }),
+  }));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/admin/products/12');
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByRole('heading', { name: 'iPhone 16 Pro' })).toBeVisible();
+  // Hero avatari va galereya: muqova images[0] dan olinadi.
+  await expect(detailPage.locator(`img[src="${galleryImage}"]`)).toHaveCount(2);
+  await expect(detailPage).toContainText('Smartfonlar');
+  await expect(detailPage).toContainText('Texno Market');
+  for (const duplicate of ['Mahsulot ID', 'Nomi', 'Slug', 'Kategoriya ID', 'Do‘kon ID', 'Moderatsiya holati']) {
+    await expect(detailPage.getByText(duplicate, { exact: true })).toHaveCount(0);
+  }
+  // 1440px: asosiy ma'lumotlar 3 ustunda — birinchi uch maydon bir qatorda.
+  const tops = await Promise.all(['Kategoriya', 'Do‘kon', 'Sotuvchi ID'].map(async (label) => (await detailPage.getByText(label, { exact: true }).boundingBox())?.y ?? -1));
+  expect(Math.min(...tops)).toBeGreaterThan(0);
+  expect(Math.max(...tops) - Math.min(...tops)).toBeLessThan(2);
+
+  // 390px: sarlavha va amal tugmasi orasida bo'sh joy qolmaydi.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('button', { name: 'Yashirish' })).toBeVisible();
+  const titleBox = await page.getByRole('heading', { name: 'Mahsulot tafsilotlari' }).boundingBox();
+  const actionBox = await page.getByRole('button', { name: 'Yashirish' }).boundingBox();
+  expect(actionBox!.y - (titleBox!.y + titleBox!.height)).toBeLessThan(80);
 });

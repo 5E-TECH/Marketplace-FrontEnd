@@ -9,17 +9,21 @@ gaplashadi (`/api/v1`).
 
 ## Stack
 
-React 19 · TypeScript · Vite 7 · Ant Design 6 · Redux Toolkit (sessiya) ·
+React 19 · TypeScript · Vite 8 · Ant Design 6 · Redux Toolkit (sessiya) ·
 TanStack Query (server holati) · React Router 7 · Playwright (e2e)
 
 ## Ishga tushirish (dev)
 
-Talab: **Node 22+**.
+Talab: **Node 22.13+** (ESLint 10 va Vite 8 talabi).
 
 ```bash
 npm install
 npm run dev            # http://localhost:5273
 ```
+
+Loyihadagi `.npmrc` paketlarni rasmiy `registry.npmjs.org` dan o'rnatadi —
+global mirror (masalan npmmirror) sozlangan bo'lsa ham `package-lock.json`
+dagi manzillar aralashib ketmaydi.
 
 Dev'da API bir xil origin orqali ishlaydi: Vite `/api` ni
 `http://localhost:3000` ga proxy qiladi (`.env.development`). Shu sababli
@@ -40,7 +44,7 @@ echo 'VITE_DEV_API_PROXY=http://192.168.1.10:3000' >> .env.local
 | `npm run lint`           | ESLint                                            |
 | `npm run typecheck`      | TypeScript tekshiruvi                             |
 | `npm run contract:check` | Backend kontraktiga moslikni tekshirish           |
-| `npm run test:e2e`       | Playwright e2e testlar                            |
+| `npm run test:e2e`       | Playwright e2e testlar (2 worker)                 |
 
 ## Tuzilma (Feature-Sliced Design)
 

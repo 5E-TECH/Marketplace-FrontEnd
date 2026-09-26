@@ -158,12 +158,11 @@ export function ProductForm({
             >
               <Select
                 allowClear
-                showSearch
+                showSearch={{ optionFilterProp: 'label' }}
                 virtual={false}
                 loading={categoriesQuery.isPending}
                 placeholder={t('product.selectCategory')}
                 options={categoryOptions}
-                optionFilterProp="label"
               />
             </Form.Item>
             <Form.Item label={t('common.status')} name="status" rules={[{ required: true, message: t('product.statusRequired') }]}>

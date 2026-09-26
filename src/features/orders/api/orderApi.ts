@@ -85,8 +85,6 @@ export async function getSellerOrderHistory(id: string, signal?: AbortSignal): P
 export async function confirmSellerOrder(id: string): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/confirm`); }
 export async function cancelSellerOrder(id: string): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/cancel`); }
 export async function createSellerShipment({ id, customerPhone }: CreateShipmentPayload): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/shipment`, { customerPhone }); }
-export async function getSellerShipment(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/seller/shipments/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
-export async function getSellerShipmentTracking(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/seller/shipments/${encodeURIComponent(id)}/tracking`, { signal }); return unwrapApiData(data); }
 
 const optionalNumber = (record: Record<string, unknown>, keys: string[]) => { for (const key of keys) if (typeof record[key] === 'number') return record[key]; return 0; };
 const optionalText = (record: Record<string, unknown>, keys: string[]) => { for (const key of keys) if (typeof record[key] === 'string') return record[key]; return null; };

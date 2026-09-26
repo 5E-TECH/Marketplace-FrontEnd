@@ -1,6 +1,6 @@
 import { Ban, CircleCheckBig } from 'lucide-react';
 
-export const ADMIN_PRODUCT_MODERATION_CONFIG = {
+const ADMIN_PRODUCT_MODERATION_CONFIG = {
   active: {
     action: 'suspend' as const,
     Icon: Ban,

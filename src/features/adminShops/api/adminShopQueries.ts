@@ -9,7 +9,7 @@ const invalidateShopViews = (client: QueryClient) => Promise.all([
   client.invalidateQueries({ queryKey: ['admin', 'dashboard'] }),
 ]);
 
-export const adminShopKeys = {
+const adminShopKeys = {
   all: ['admin-shops'] as const,
   list: (params: AdminShopListParams) => ['admin-shops', params] as const,
   detail: (id: string) => ['admin-shops', 'detail', id] as const,

@@ -21,6 +21,9 @@
     margin-bottom: var(--space-4);
   }
 
+  /* Ustun rejimida `flex-basis: 320px` balandlikka aylanib, sarlavha ostida bo'sh joy qoldirardi. */
+  .heading { flex: none; }
+
   .title {
     font-size: 22px !important;
     line-height: 30px !important;

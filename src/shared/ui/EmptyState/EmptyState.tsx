@@ -27,7 +27,7 @@ export function EmptyState({
   return (
     <Empty
       image={image ?? Empty.PRESENTED_IMAGE_SIMPLE}
-      imageStyle={compact ? { height: 44 } : undefined}
+      styles={compact ? { image: { height: 44 } } : undefined}
       description={
         <span>
           <strong>{resolvedTitle}</strong>

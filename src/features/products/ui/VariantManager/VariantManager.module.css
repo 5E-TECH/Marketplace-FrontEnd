@@ -7,7 +7,6 @@
 .defaultVariant > div { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 8px; }
 .defaultVariant span { grid-column: 2; color: var(--color-text-muted); font-size: 12px; }
 .defaultVariant b { white-space: nowrap; color: var(--color-text); }
-.modalForm { padding-top: 12px; }
 .modalGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .attributesHeading { display: flex; flex-direction: column; margin: var(--space-3) 0 var(--space-2); gap: var(--space-1); }
 .attributesHeading span { color: var(--color-text-secondary); font-size: var(--font-size-sm); }

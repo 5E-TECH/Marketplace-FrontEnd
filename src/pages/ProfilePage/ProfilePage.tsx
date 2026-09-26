@@ -122,7 +122,7 @@ export default function ProfilePage() {
               </Tag>
             </div>
           </div>
-          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => { form.setFieldsValue(initialValues); setOpen(true); }}>
+          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => setOpen(true)}>
             Tahrirlash
           </Button>
         </header>
@@ -134,7 +134,7 @@ export default function ProfilePage() {
           <div><dt><Camera /> Avatar</dt><dd>{user.avatarUrl || 'Kiritilmagan'}</dd></div>
         </dl>
       </section>
-      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
+      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} initialValues={initialValues} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
         <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { min: 1 }, { max: 255, message: 'Ism 255 belgidan oshmasligi kerak' }]}>
           <TextControl autoComplete="name" maxLength={255} />
         </Form.Item>

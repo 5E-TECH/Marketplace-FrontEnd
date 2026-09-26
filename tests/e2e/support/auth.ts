@@ -79,7 +79,7 @@ export async function mockDashboard(page: Page): Promise<void> {
 }
 
 /** Do'kon profili — kabinetning ko'p sahifasi shu ma'lumotga tayanadi. */
-export const authenticatedShop = {
+const authenticatedShop = {
   id: '15',
   ownerUserId: 'seller-e2e',
   name: 'MarketHub Store',
@@ -125,7 +125,7 @@ export async function mockProducts(page: Page): Promise<void> {
  * Ichma-ich tugun ataylab bor: `createCategoryOptions` chuqurlikni "— " bilan
  * ko'rsatadi, tekis ro'yxatda bu xatti-harakat umuman sinalmay qolardi.
  */
-export const publicCategoryTree = [
+const publicCategoryTree = [
   {
     id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null,
     iconUrl: null, sortOrder: 1, isActive: true,
@@ -142,7 +142,7 @@ export const publicCategoryTree = [
   },
 ] as const;
 
-export async function mockPublicCategories(page: Page): Promise<void> {
+async function mockPublicCategories(page: Page): Promise<void> {
   await page.route('**/api/v1/categories', async (route) => {
     await route.fulfill({
       status: 200,

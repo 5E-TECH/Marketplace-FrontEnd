@@ -15,6 +15,7 @@ import { useStorefrontShopQuery } from '../../features/storefront/api/storefront
 import type { StorefrontSort } from '../../features/storefront/model/storefrontTypes';
 import { usePublicCategoriesQuery } from '../../features/categories/api/categoryQueries';
 import { createCategoryOptions } from '../../features/categories/lib/categoryOptions';
+import { getProductCover } from '../../features/products/lib/getProductCover';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
@@ -237,12 +238,14 @@ export default function StorefrontShopPage() {
 
           {products.length ? (
             <div className={styles.productGrid}>
-              {products.map((product) => (
+              {products.map((product) => {
+                const cover = getProductCover(product);
+                return (
                 <Link className={styles.productLink} to={`/mahsulot/${encodeURIComponent(product.id)}`} key={product.id}>
                 <article className={styles.productCard}>
                   <div className={styles.productMedia}>
                     <span><ImageIcon /><small>{t('storefront.noImage')}</small></span>
-                    {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" onError={(event) => event.currentTarget.remove()} /> : null}
+                    {cover ? <img src={cover} alt={product.name} loading="lazy" onError={(event) => event.currentTarget.remove()} /> : null}
                     {product.oldPrice && product.oldPrice > product.price
                       ? <span className={styles.discount}>−{Math.round((1 - product.price / product.oldPrice) * 100)}%</span>
                       : null}
@@ -258,7 +261,8 @@ export default function StorefrontShopPage() {
                   </div>
                 </article>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className={styles.empty}><ContentState state="empty" title={t('storefront.empty')} description={t('storefront.emptyDescription')} /></div>
