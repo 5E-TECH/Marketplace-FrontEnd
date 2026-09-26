@@ -41,7 +41,7 @@ export default function MainLayout() {
         ) : null}
         <Drawer
           placement="left"
-          width={288}
+          size={288}
           open={!showSidebar && mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           styles={{ body: { padding: 0, background: 'var(--color-drawer-bg)' } }}

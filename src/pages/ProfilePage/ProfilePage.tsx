@@ -7,7 +7,8 @@ import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
 import { loggedOut, selectAuthUser } from '../../features/auth/model/authSlice';
 import type { UpdateAuthProfilePayload, UserRole } from '../../features/auth/model/authTypes';
 import { useUpdateAuthProfileMutation } from '../../features/auth/api/useUpdateAuthProfileMutation';
-import { getApiFieldErrors, getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiFieldErrors } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
@@ -101,7 +102,7 @@ export default function ProfilePage() {
       if (fieldErrors.length) {
         form.setFields(fieldErrors.map(({ name, errors }) => ({ name: [name as keyof ProfileFormValues], errors })));
       } else {
-        void message.error(getAuthErrorMessage(error));
+        void message.error(getApiErrorMessage(error));
       }
     }
   };

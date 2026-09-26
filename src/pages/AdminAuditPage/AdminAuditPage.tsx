@@ -3,7 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { useAdminAuditLogsQuery } from '../../features/adminAudit/api/adminAuditQueries';
 import type { AdminAuditLog } from '../../features/adminAudit/model/adminAuditTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -110,7 +110,7 @@ export default function AdminAuditPage() {
         <ContentState
           state="error"
           title={t('admin.audit.loadError')}
-          description={getAuthErrorMessage(query.error)}
+          description={getApiErrorMessage(query.error)}
           onAction={() => void query.refetch()}
         />
       ) : (
@@ -120,7 +120,6 @@ export default function AdminAuditPage() {
             className={styles.table}
             columns={columns}
             dataSource={query.data.items}
-            scroll={{ x: 760 }}
             emptyState={<EmptyState compact title={t('admin.audit.empty')} description={t('admin.audit.emptyDescription')} />}
             pagination={{ current: page, total: query.data.total, onChange: setPage }}
           />

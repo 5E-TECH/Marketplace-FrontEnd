@@ -90,3 +90,14 @@ test('GET detail, PATCH edit va DELETE ishlaydi', async ({ page }) => {
   await page.getByRole('dialog', { name: 'Ombor o‘chirilsinmi?' }).getByRole('button', { name: 'O‘chirish' }).click();
   await expect.poll(() => state?.deletedId).toBe('2');
 });
+
+test('403 javobida login xabari emas, serverning aniq sababi ko‘rsatiladi', async ({ page }) => {
+  await page.route('**/api/v1/inventory/warehouses', (route) => route.fulfill({
+    status: 403,
+    contentType: 'application/json',
+    body: JSON.stringify({ statusCode: 403, errorCode: 'FORBIDDEN', message: 'Do‘koningiz hali tasdiqlanmagan' }),
+  }));
+  await page.goto('/warehouses');
+  await expect(page.getByText('Do‘koningiz hali tasdiqlanmagan')).toBeVisible();
+  await expect(page.getByText(/seller kabinetiga kirish mumkin emas/)).toHaveCount(0);
+});

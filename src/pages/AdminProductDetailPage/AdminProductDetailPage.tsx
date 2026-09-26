@@ -24,7 +24,7 @@ import {
 } from '../../features/adminProducts/api/adminProductQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { AdminProduct } from '../../features/adminProducts/model/adminProductTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -124,7 +124,7 @@ export default function AdminProductDetailPage() {
         {!productId ? (
           <ContentState state="error" title={t('adminProducts.notIdentified')} description={t('adminProducts.notIdentifiedDescription')} />
         ) : query.isError ? (
-          <ContentState state="error" title={t('adminProducts.detailLoadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} />
+          <ContentState state="error" title={t('adminProducts.detailLoadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} />
         ) : (
           <ContentState state="loading" />
         )}
@@ -204,7 +204,7 @@ export default function AdminProductDetailPage() {
             moderationForm.resetFields();
             void message.success(t(actionConfig.successKey));
           },
-          onError: (error) => void message.error(getAuthErrorMessage(error)),
+          onError: (error) => void message.error(getApiErrorMessage(error)),
         })}>
           {!product.isBlocked ? <Form.Item name="reason" label="Yashirish sababi" rules={[{ required: true, whitespace: true, message: 'Sotuvchiga yuboriladigan sababni kiriting' }, { min: 5 }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount /></Form.Item> : null}
         </Form>

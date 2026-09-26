@@ -14,5 +14,7 @@
 .attributeList { display: grid; margin-bottom: var(--space-5); gap: var(--space-2); }
 .attributeRow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: start; gap: var(--space-2); }
 .attributeRow :global(.ant-form-item) { margin-bottom: 0; }
-@media (max-width: 650px) { .header, .defaultVariant { align-items: stretch; flex-direction: column; } .modalGrid { grid-template-columns: 1fr; gap: 0; } }
-@media (max-width: 520px) { .attributeRow { grid-template-columns: 1fr auto; } .attributeRow :global(.ant-form-item):nth-child(2) { grid-column: 1; } }
+@container content (max-width: 575px) { .header, .defaultVariant { align-items: stretch; flex-direction: column; } }
+/* Variant modali portal orqali body'da — viewport bo'yicha. */
+@media (max-width: 767px) { .modalGrid { grid-template-columns: 1fr; gap: 0; } }
+@media (max-width: 575px) { .attributeRow { grid-template-columns: 1fr auto; } .attributeRow :global(.ant-form-item):nth-child(2) { grid-column: 1; } }

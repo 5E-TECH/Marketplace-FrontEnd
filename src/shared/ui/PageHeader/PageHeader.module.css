@@ -1,8 +1,10 @@
 .header {
   margin-bottom: var(--space-6);
+  flex-wrap: wrap;
 }
 
-.heading { min-width: 0; }
+/* Sarlavha kamida 320px oladi; joy yetmasa amallar uning ostiga o'tadi. */
+.heading { min-width: 0; flex: 1 1 320px; }
 .before { margin-bottom: 8px; }
 .before :global(.ant-btn) { margin-inline-start: -12px; color: var(--color-text-secondary); }
 .before :global(.ant-btn:hover) { color: var(--color-accent) !important; }
@@ -12,10 +14,16 @@
   font: var(--font-display) !important;
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .header {
     align-items: stretch;
     flex-direction: column;
     margin-bottom: var(--space-4);
+  }
+
+  .title {
+    font-size: 22px !important;
+    line-height: 30px !important;
+    overflow-wrap: anywhere;
   }
 }

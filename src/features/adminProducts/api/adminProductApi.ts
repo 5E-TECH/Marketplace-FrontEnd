@@ -31,9 +31,9 @@ export async function getAdminProduct(
   return parseProduct(data);
 }
 
+/** Kontrakt: yashirish — `POST /hide` `{ reason }` (majburiy); qayta ko'rsatish — alohida `POST /reactivate`. */
 export async function setAdminProductHidden({ productId, hidden, reason }: { productId: string; hidden: boolean; reason?: string }): Promise<void> {
-  await httpClient.post(`/admin/products/${encodeURIComponent(productId)}/hide`, {
-    hidden,
-    ...(reason ? { reason } : {}),
-  });
+  const id = encodeURIComponent(productId);
+  if (hidden) await httpClient.post(`/admin/products/${id}/hide`, { reason: reason ?? '' });
+  else await httpClient.post(`/admin/products/${id}/reactivate`);
 }

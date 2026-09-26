@@ -5,6 +5,7 @@
 .orderId, .amount { display: grid; gap: 3px; }
 .orderId small, .muted, .drawerCaption { color: var(--color-text-muted); font-size: 12px; }
 .amount small { color: var(--color-text-muted); font-size: 11px; }
+.amount strong { white-space: nowrap; }
 .tableCard :global(.ant-table-thead > tr > th) { color: var(--color-text-muted); background: var(--color-panel-deep); border-bottom-color: var(--color-border); font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .tableCard :global(.ant-table-tbody > tr > td) { height: 64px; border-bottom-color: var(--color-border); }
 .tableCard :global(.ant-table-tbody > tr:hover > td) { background: var(--color-surface-hover) !important; }
@@ -24,4 +25,4 @@
 .apiData > div { display: grid; grid-template-columns: minmax(90px, .4fr) minmax(0, 1fr); gap: 12px; padding: 9px 10px; background: var(--color-surface-subtle); border-radius: var(--radius-sm); }
 .apiData span { color: var(--color-text-muted); font-size: 12px; overflow-wrap: anywhere; }
 .apiData strong { font-size: 12px; font-weight: 500; overflow-wrap: anywhere; }
-@media (max-width: 575px) { .statusFilter, .dateRange { width: 100%; } }
+@container content (max-width: 575px) { .statusFilter, .dateRange { width: 100%; } }

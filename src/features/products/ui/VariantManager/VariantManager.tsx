@@ -127,10 +127,10 @@ export function VariantManager({ disabled = false, enabled, basePrice, value = [
           </Form.Item>
           <div className={styles.modalGrid}>
             <Form.Item label={t('product.price')} name="price" rules={[{ required: true, message: t('product.priceRequired') }]}>
-              <NumberControl min={1} precision={0} addonAfter={t('product.currency')} />
+              <NumberControl min={1} precision={0} suffix={t('product.currency')} />
             </Form.Item>
             <Form.Item label={t('product.oldPrice')} name="oldPrice">
-              <NumberControl min={0} precision={0} addonAfter={t('product.currency')} />
+              <NumberControl min={0} precision={0} suffix={t('product.currency')} />
             </Form.Item>
           </div>
           <Form.Item label={t('variant.barcode')} name="barcode" rules={[{ max: 80 }]}>
@@ -146,8 +146,8 @@ export function VariantManager({ disabled = false, enabled, basePrice, value = [
           <Form.List name="attributeEntries">
             {(fields, { add, remove }) => (
               <div className={styles.attributeList}>
-                {fields.map((field) => (
-                  <div className={styles.attributeRow} key={field.key}>
+                {fields.map(({ key, ...field }) => (
+                  <div className={styles.attributeRow} key={key}>
                     <Form.Item {...field} name={[field.name, 'key']} rules={[{ required: true, whitespace: true, message: t('product.attributeNameRequired') }]}>
                       <TextControl placeholder={t('product.attributeNamePlaceholder')} maxLength={80} />
                     </Form.Item>

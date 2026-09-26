@@ -34,6 +34,6 @@
 .history small { color: var(--color-text-muted); }
 .history p { margin: 3px 0 0; color: var(--color-text-secondary); font-size: .8125rem; }
 .details :global(.ant-descriptions-view) { overflow: hidden; border-color: var(--color-border) !important; border-radius: var(--radius-md); }
-@media (max-width: 1399px) { .filterPanel { grid-template-columns: repeat(2, minmax(220px, 1fr)); } .dateRange { grid-column: 1 / -1; } .filterAction { display: flex; justify-content: flex-end; } }
-@media (max-width: 899px) { .filterPanel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .searchField { grid-column: 1 / -1; } }
-@media (max-width: 575px) { .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); } .searchField, .dateRange { grid-column: auto; } .filterAction, .filterAction :global(.ant-btn) { width: 100%; } }
+@container content (max-width: 1199px) { .filterPanel { grid-template-columns: repeat(2, minmax(220px, 1fr)); } .dateRange { grid-column: 1 / -1; } .filterAction { display: flex; justify-content: flex-end; } }
+@container content (max-width: 767px) { .filterPanel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .searchField { grid-column: 1 / -1; } }
+@container content (max-width: 575px) { .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); } .searchField, .dateRange { grid-column: auto; } .filterAction, .filterAction :global(.ant-btn) { width: 100%; } }

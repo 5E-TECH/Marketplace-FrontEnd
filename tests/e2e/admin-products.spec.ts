@@ -95,8 +95,16 @@ test('mahsulot detail page barcha muhim fieldlarni va suspend/reactivate amallar
     const url = route.request().url();
     if (url.endsWith('/12/hide')) {
       hideBody = route.request().postDataJSON();
-      blocked = Boolean((hideBody as { hidden?: boolean }).hidden);
-      if (blocked) hidden += 1; else shown += 1;
+      blocked = true;
+      hidden += 1;
+      await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
+      return;
+    }
+    if (url.endsWith('/12/reactivate')) {
+      expect(route.request().method()).toBe('POST');
+      expect(route.request().postData()).toBeFalsy();
+      blocked = false;
+      shown += 1;
       await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' });
       return;
     }
@@ -117,12 +125,11 @@ test('mahsulot detail page barcha muhim fieldlarni va suspend/reactivate amallar
   await page.getByRole('dialog').getByLabel('Yashirish sababi').fill('Marketplace qoidalariga mos emas');
   await page.getByRole('dialog').getByRole('button', { name: 'Yashirish' }).click();
   await expect.poll(() => hidden).toBe(1);
-  expect(hideBody).toEqual({ hidden: true, reason: 'Marketplace qoidalariga mos emas' });
+  expect(hideBody).toEqual({ reason: 'Marketplace qoidalariga mos emas' });
   await expect(page.getByRole('button', { name: 'Ko‘rsatish' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Ko‘rsatish' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Ko‘rsatish' }).click();
   await expect.poll(() => shown).toBe(1);
-  expect(hideBody).toEqual({ hidden: false });
   await expect(page.getByRole('button', { name: 'Yashirish' })).toBeVisible();
 });

@@ -21,7 +21,7 @@
   font-weight: 700;
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .actions {
     width: 100%;
     justify-content: flex-start;

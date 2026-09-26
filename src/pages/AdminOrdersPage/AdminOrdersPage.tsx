@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminOrdersByStatusesQuery } from '../../features/orders/api/orderQueries';
 import type { AdminOrder, AdminOrderDetail, AdminOrderStatus, AdminPaymentMethod } from '../../features/orders/model/orderTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
@@ -36,6 +36,7 @@ const statuses: AdminOrderStatus[] = [
   'PENDING_PAYMENT',
   'PAID',
   'CONFIRMED',
+  'PARTIALLY_FULFILLED',
   'FULFILLED',
   'CANCELLED',
   'REFUNDED',
@@ -76,7 +77,7 @@ export default function AdminOrdersPage() {
     try {
       await openOrderLabels('admin', selectedRowKeys.map(String));
     } catch (error) {
-      void message.error(getAuthErrorMessage(error));
+      void message.error(getApiErrorMessage(error));
     } finally {
       setPrintLoading(false);
     }
@@ -89,7 +90,7 @@ export default function AdminOrdersPage() {
       <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('adminOrders.dateFrom')} endLabel={t('adminOrders.dateTo')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); setPage(1); }} />
       <div className={styles.filterAction}><ResetFiltersButton disabled={!hasFilters} onClick={reset} /></div>
     </FilterPanel>
-    {query.isError ? <ContentState state="error" title={t('adminOrders.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} /> : query.isPending || !query.data ? <ContentState state="loading" /> : <TablePanel title={t('adminOrders.title')} caption={selectedRowKeys.length ? t('adminOrders.selected', { count: selectedRowKeys.length }) : t('pagination.total', { total: query.data.total })} action={<Button icon={<Printer size={16}/>} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printSelected()}>{t('adminOrders.print')}</Button>}><DataTable loading={query.isFetching} rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys }} columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{ current: page, total: query.data.total, onChange: setPage }} /></TablePanel>}
+    {query.isError ? <ContentState state="error" title={t('adminOrders.loadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} /> : query.isPending || !query.data ? <ContentState state="loading" /> : <TablePanel title={t('adminOrders.title')} caption={selectedRowKeys.length ? t('adminOrders.selected', { count: selectedRowKeys.length }) : t('pagination.total', { total: query.data.total })} action={<Button icon={<Printer size={16}/>} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printSelected()}>{t('adminOrders.print')}</Button>}><DataTable loading={query.isFetching} rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys }} columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{ current: page, total: query.data.total, onChange: setPage }} /></TablePanel>}
   </main>;
 }
 export function AppDetailNotice({ value }: { value: AdminOrderDetail | undefined }) {

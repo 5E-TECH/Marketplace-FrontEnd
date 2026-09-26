@@ -148,3 +148,15 @@ test('do‘kon sahifasi 375px ekranda gorizontal overflow bermaydi', async ({ pa
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('storefront-shop-mobile.png'), fullPage: true });
 });
+
+test('URL’dagi noma’lum sort qiymati backendga yuborilmaydi va sahifa ochiladi', async ({ page }) => {
+  await mockCategories(page);
+  const sorts: Array<string | null> = [];
+  await page.route('**/api/v1/storefront/shops/ali-market**', (route) => {
+    sorts.push(new URL(route.request().url()).searchParams.get('sort'));
+    return route.fulfill({ json: { data: { shop, products: { items: [product('1', '15', 'iPhone 16 Pro', 14999000)], total: 1, page: 1, limit: 12, totalPages: 1 } } } });
+  });
+  await page.goto('/dokon/ali-market?sort=foo;drop');
+  await expect(page.getByText('iPhone 16 Pro')).toBeVisible();
+  expect(sorts.every((value) => value === null || value === 'createdAt:desc')).toBe(true);
+});

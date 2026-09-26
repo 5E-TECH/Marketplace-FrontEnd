@@ -2,7 +2,7 @@ import axios from 'axios';
 import { CircleCheck, Plus, Store } from 'lucide-react';
 import { App, Button, Form } from 'antd';
 import { useState } from 'react';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import {
   useCreateSellerShopMutation,
   useSellerShopQuery,
@@ -43,7 +43,7 @@ export default function ShopPage() {
       <ContentState
         state="error"
         title="Do‘kon profilini yuklab bo‘lmadi"
-        description={getAuthErrorMessage(shopQuery.error)}
+        description={getApiErrorMessage(shopQuery.error)}
         onAction={() => void shopQuery.refetch()}
       />
     );
@@ -77,7 +77,7 @@ export default function ShopPage() {
         setCreateOpen(false);
             void message.success('Seller va do‘kon muvaffaqiyatli yaratildi');
       },
-      onError: (error) => void message.error(getAuthErrorMessage(error)),
+      onError: (error) => void message.error(getApiErrorMessage(error)),
     });
   };
 
@@ -137,7 +137,7 @@ export default function ShopPage() {
         setEditing(false);
             void message.success('Do‘kon ma’lumotlari saqlandi');
       },
-      onError: (error) => void message.error(getAuthErrorMessage(error)),
+      onError: (error) => void message.error(getApiErrorMessage(error)),
     });
   };
 

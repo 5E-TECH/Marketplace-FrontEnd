@@ -492,3 +492,11 @@ test('allaqachon bekor qilingan buyurtmada idempotent xabar chiqadi', async ({ p
   await page.getByRole('dialog').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
   await expect(page.getByText('Bu buyurtma allaqachon bekor qilingan')).toBeVisible();
 });
+
+test('yorliq xatosida serverning JSON xabari ko‘rsatiladi (blob javob)', async ({ page }) => {
+  await page.route('**/api/v1/admin/orders/91', route => route.fulfill({ json: { data: { ...allOrders[0], sellerOrders: [] } } }));
+  await page.route('**/api/v1/admin/orders/91/label', route => route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ statusCode: 409, message: 'Jo‘natma hali yaratilmagan' }) }));
+  await page.goto('/admin/orders/91');
+  await page.getByRole('button', { name: 'Yorliqni chop etish' }).click();
+  await expect(page.locator('.ant-message')).toContainText('Jo‘natma hali yaratilmagan');
+});

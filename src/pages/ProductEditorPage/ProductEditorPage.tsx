@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ProductForm, type ProductFormSubmission, type ProductFormValues } from '../../features/products/ui/ProductForm/ProductForm';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useCreateProductMutation, useProductQuery, useUpdateProductMutation } from '../../features/products/api/productQueries';
 import { updateProduct } from '../../features/products/api/productApi';
 import { productKeys } from '../../features/products/api/productQueries';
@@ -116,7 +116,7 @@ export default function ProductEditorPage() {
       void message.success(isEditing ? t('product.updated') : t('product.created'));
       void navigate('/products', { replace: true });
     } catch (error) {
-      void message.error(getAuthErrorMessage(error));
+      void message.error(getApiErrorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -124,7 +124,7 @@ export default function ProductEditorPage() {
 
   if (isEditing && productQuery.isPending) return <ContentState state="loading" />;
   if (isEditing && productQuery.isError) {
-    return <ContentState state="error" title={t('product.loadError')} description={getAuthErrorMessage(productQuery.error)} onAction={() => void productQuery.refetch()} />;
+    return <ContentState state="error" title={t('product.loadError')} description={getApiErrorMessage(productQuery.error)} onAction={() => void productQuery.refetch()} />;
   }
 
   return (

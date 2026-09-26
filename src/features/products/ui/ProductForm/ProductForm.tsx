@@ -170,10 +170,10 @@ export function ProductForm({
               <Select options={[{ value: 'DRAFT', label: t('status.draft') }, { value: 'ACTIVE', label: t('status.active') }, { value: 'ARCHIVED', label: t('status.archived') }, { value: 'OUT_OF_STOCK', label: t('status.outOfStock') }]} />
             </Form.Item>
             <Form.Item label={t('product.price')} name="price" rules={[{ required: true, message: t('product.priceRequired') }]}>
-              <NumberControl min={1} precision={0} addonAfter={t('product.currency')} placeholder="14 999 000" />
+              <NumberControl min={1} precision={0} suffix={t('product.currency')} placeholder="14 999 000" />
             </Form.Item>
             <Form.Item label={t('product.oldPrice')} name="oldPrice" dependencies={['price']} rules={[({ getFieldValue }) => ({ validator(_, value: number | null) { const price = getFieldValue('price') as number | null; return value === null || price === null || value > price ? Promise.resolve() : Promise.reject(new Error(t('product.oldPriceInvalid'))); } })]}>
-              <NumberControl min={1} precision={0} addonAfter={t('product.currency')} placeholder="15 999 000" />
+              <NumberControl min={1} precision={0} suffix={t('product.currency')} placeholder="15 999 000" />
             </Form.Item>
             <Form.Item label={t('product.hasVariants')} name="hasVariants" valuePropName="checked">
               <Switch checkedChildren={t('common.yes')} unCheckedChildren={t('common.no')} />
@@ -194,8 +194,9 @@ export function ProductForm({
                         {t('product.addAttribute')}
                       </Button>
                     </div>
-                    {fields.map((field) => (
-                      <div className={styles.attributeRow} key={field.key}>
+                    {fields.map(({ key, ...field }) => (
+                      // `key` spread qilinmaydi: aks holda ikkala Form.Item bir xil kalit oladi.
+                      <div className={styles.attributeRow} key={key}>
                         <Form.Item
                           {...field}
                           name={[field.name, 'key']}

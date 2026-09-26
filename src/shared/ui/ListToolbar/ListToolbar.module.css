@@ -22,6 +22,8 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
+  /* Label'li maydonlar (sana oralig'i) bilan label'siz select pastki chiziqda tekis turadi. */
+  align-items: flex-end;
   gap: var(--space-2);
 }
 
@@ -30,23 +32,33 @@
   border-radius: var(--radius-sm);
 }
 
-@media (max-width: 767px) {
+/*
+ * O'rta kenglik: qidiruv alohida qatorda, filtrlar uning ostida o'sib qatorga
+ * o'raladi; tugmalar o'z kengligida qoladi.
+ */
+@container content (max-width: 991px) {
   .toolbar {
     grid-template-columns: 1fr;
   }
 
-  .actions {
-    display: grid;
-    grid-template-columns: minmax(180px, 1fr) repeat(2, auto);
+  .actions > :not(:global(.ant-btn)) {
+    flex: 1 1 200px;
   }
 }
 
-@media (max-width: 575px) {
+/*
+ * Telefon: select/sana kabi maydonlar to'liq kenglikda, tugmalar ikkitadan
+ * juft. Maydondan keyin yolg'iz qolgan oxirgi tugma ham to'liq kenglikni oladi.
+ */
+@container content (max-width: 575px) {
   .actions {
-    grid-template-columns: 1fr 1fr;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .actions > :first-child {
+  .actions > :not(:global(.ant-btn)),
+  .actions > :not(:global(.ant-btn)) + :global(.ant-btn):last-child {
+    width: 100%;
     grid-column: 1 / -1;
   }
 

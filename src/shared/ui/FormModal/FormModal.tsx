@@ -57,7 +57,7 @@ export function FormModal<Values extends object>({
       cancelText={cancelText ?? t('common.cancel')}
       confirmLoading={loading}
       closable={!loading}
-      maskClosable={!loading}
+      mask={{ closable: !loading }}
       keyboard={!loading}
       destroyOnHidden
       onOk={() => void form.submit()}

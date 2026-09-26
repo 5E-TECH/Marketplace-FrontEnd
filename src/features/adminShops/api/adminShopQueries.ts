@@ -1,7 +1,13 @@
-import { useMutation, useQueries, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient, type QueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { activateAdminShop, approveAdminShop, getAdminShopDetail, getAdminShops, rejectAdminShop, setAdminShopFeatured, suspendAdminShop, updateAdminShopTariffs } from './adminShopApi';
 import type { AdminShopDetail, AdminShopListParams } from '../model/adminShopTypes';
+
+/** Moderatsiya dashboard'dagi "kutilmoqda" hisoblagichlariga ham ta'sir qiladi. */
+const invalidateShopViews = (client: QueryClient) => Promise.all([
+  client.invalidateQueries({ queryKey: adminShopKeys.all }),
+  client.invalidateQueries({ queryKey: ['admin', 'dashboard'] }),
+]);
 
 export const adminShopKeys = {
   all: ['admin-shops'] as const,
@@ -17,7 +23,7 @@ export const useAdminShopsQuery = (params: AdminShopListParams) => useQuery({
 
 export function useApproveAdminShopMutation() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: approveAdminShop, onSuccess: () => client.invalidateQueries({ queryKey: adminShopKeys.all }) });
+  return useMutation({ mutationFn: approveAdminShop, onSuccess: () => invalidateShopViews(client) });
 }
 
 export const useAdminShopDetailQuery = (id: string | null) => useQuery({ queryKey: adminShopKeys.detail(id ?? ''), queryFn: ({ signal }) => getAdminShopDetail(id as string, signal), enabled: Boolean(id) });
@@ -48,7 +54,7 @@ export function useAdminShopNames(ids: readonly string[]): ReadonlyMap<string, s
 
 function useStatusMutation<T>(mutationFn: (variables: T) => Promise<void>) {
   const client = useQueryClient();
-  return useMutation({ mutationFn, onSuccess: () => client.invalidateQueries({ queryKey: adminShopKeys.all }) });
+  return useMutation({ mutationFn, onSuccess: () => invalidateShopViews(client) });
 }
 
 export const useRejectAdminShopMutation = () => useStatusMutation(rejectAdminShop);

@@ -2,7 +2,7 @@ import { Button } from 'antd';
 import { Activity, CheckCircle2, Clock3, Database, RefreshCw, Server, TriangleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useSystemHealthQuery, useSystemReadinessQuery } from '../../features/systemHealth/api/systemHealthQueries';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { asRecord, readNumber, readText } from '../../shared/api/responseFields';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -26,7 +26,7 @@ export default function AdminSystemHealthPage() {
       <SummaryCard icon={<Server />} label={t('admin.health.readyServices')} value={`${readyCount} / ${services.length}`} caption={readText(readinessData, 'status') || 'readiness'} tone={readyCount === services.length && services.length > 0 ? 'success' : 'warning'} />
       <SummaryCard icon={<Clock3 />} label={t('admin.health.uptime')} value={formatUptime(readNumber(healthData, ['uptime']), t)} caption={readText(healthData, 'timestamp') ? formatDateTime(readText(healthData, 'timestamp'), locale) : '—'} />
     </section>
-    {health.isError || readiness.isError ? <section className={styles.alert}><TriangleAlert /><div><strong>{t('admin.health.partialFailure')}</strong><span>{health.isError ? getAuthErrorMessage(health.error) : getAuthErrorMessage(readiness.error)}</span></div></section> : null}
+    {health.isError || readiness.isError ? <section className={styles.alert}><TriangleAlert /><div><strong>{t('admin.health.partialFailure')}</strong><span>{health.isError ? getApiErrorMessage(health.error) : getApiErrorMessage(readiness.error)}</span></div></section> : null}
     <section className={styles.servicesSection}><div className={styles.sectionHeading}><div><h2>{t('admin.health.microservices')}</h2><p>{t('admin.health.microservicesDescription')}</p></div><code>GET /health/readiness</code></div>
       {readiness.isPending ? <div className={styles.skeletonGrid}>{[1, 2, 3, 4].map(item => <span key={item} />)}</div> : services.length ? <div className={styles.serviceGrid}>{services.map(service => <ServiceCard key={service.key} service={service} />)}</div> : <div className={styles.empty}><Database /><strong>{t('admin.health.noServices')}</strong><span>{t('admin.health.noServicesDescription')}</span></div>}
     </section>

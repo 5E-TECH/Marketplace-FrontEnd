@@ -51,7 +51,7 @@ export function ShopProfileHero({
             <Tag
               icon={<CheckCircleFilled />}
               color={status === 'ACTIVE' ? 'success' : status === 'PENDING' ? 'warning' : 'error'}
-              bordered={false}
+              variant="filled"
             >
               {status === 'ACTIVE'
                 ? 'Faol'

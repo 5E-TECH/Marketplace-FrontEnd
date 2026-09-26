@@ -15,6 +15,14 @@ function nullableString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value : null;
 }
 
+/** Tashqi havola sifatida faqat http(s) — `javascript:`/`data:` kabi sxemalar `href` ga tushmaydi. */
+function safeHttpUrl(value: unknown): string | null {
+  const text = nullableString(value);
+  if (!text) return null;
+  try { return ['http:', 'https:'].includes(new URL(text).protocol) ? text : null; }
+  catch { return null; }
+}
+
 function parseOrder(value: unknown): SellerOrder {
   if (typeof value !== 'object' || value === null) throw new Error('Buyurtma noto‘g‘ri formatda keldi');
   const order = value as Record<string, unknown>;
@@ -28,7 +36,7 @@ function parseOrder(value: unknown): SellerOrder {
     codAmount: numberField(order, 'codAmount'),
     status: order.status as SellerOrderStatus,
     elchiShipmentId: nullableString(order.elchiShipmentId),
-    trackingUrl: nullableString(order.trackingUrl),
+    trackingUrl: safeHttpUrl(order.trackingUrl),
     itemsCount: numberField(order, 'itemsCount'),
     createdAt: order.createdAt,
   };

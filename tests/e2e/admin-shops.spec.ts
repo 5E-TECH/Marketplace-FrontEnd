@@ -60,3 +60,31 @@ test('featured holati va yetkazish tariflari backendga yuboriladi', async ({ pag
   expect(tariffMethod).toBe('PATCH');
   await expect.poll(() => tariffBody).toEqual({ tariffHome: 30000, tariffCenter: 18000 });
 });
+
+test('telefonsiz do‘kon ro‘yxatni yiqitmaydi va tavsiyadan olib tashlash mumkin', async ({ page }) => {
+  const featuredShop = { ...pendingShop, phone: null, isFeatured: true };
+  const featureBodies: unknown[] = [];
+  await page.route('**/api/v1/admin/shops?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [featuredShop], total: 1, page: 1, limit: 20 } }) }));
+  await page.route('**/api/v1/admin/shops/15/feature', async (route) => { featureBodies.push(route.request().postDataJSON()); await route.fulfill({ status: 201, body: '{}' }); });
+  await page.goto('/admin/shops');
+  await expect(page.getByText('Ali Market', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
+  // Detail DTO'da isFeatured yo'q — holat ro'yxat qatoridan olinadi.
+  await page.getByRole('button', { name: 'Tavsiyadan olish' }).click();
+  await expect.poll(() => featureBodies).toEqual([{ featured: false }]);
+  await expect(page.getByRole('button', { name: 'Tavsiya etish' })).toBeVisible();
+});
+
+test('tarif 0 kiritilsa backendga 0 yuborilmaydi — minimal 1 ga to‘g‘rilanadi', async ({ page }) => {
+  let tariffBody: { tariffHome?: number } | undefined;
+  await page.route('**/api/v1/admin/shops/15/tariffs', async (route) => { tariffBody = route.request().postDataJSON() as { tariffHome: number }; await route.fulfill({ status: 200, body: '{}' }); });
+  await page.goto('/admin/shops');
+  await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
+  await page.getByRole('button', { name: 'Tariflar' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Ali Market tariflari' });
+  await dialog.getByLabel('Uyga yetkazish tarifi').fill('0');
+  await dialog.getByLabel('Uyga yetkazish tarifi').blur();
+  await dialog.getByRole('button', { name: 'Saqlash' }).click();
+  // Kontrakt: UpdateShopTariffsDto.tariffHome minimum 1.
+  await expect.poll(() => tariffBody?.tariffHome).toBe(1);
+});

@@ -20,6 +20,12 @@ test.describe('OPERATOR roli', () => {
     });
   });
 
+  test('admin URL ochilsa operator o‘ziga ochiq birinchi bo‘limga yo‘naltiriladi', async ({ page }) => {
+    await page.goto('/admin/overview');
+    await expect(page).toHaveURL(/\/orders$/);
+    await expect(page.getByRole('heading', { name: 'Buyurtmalar' })).toBeVisible();
+  });
+
   test('menyuda faqat ochiq bo‘limlar ko‘rinadi', async ({ page }) => {
     await page.goto('/orders');
     const sidebar = page.getByRole('complementary');

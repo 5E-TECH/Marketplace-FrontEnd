@@ -24,6 +24,8 @@ import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { AppPagination } from '../../shared/ui/AppPagination/AppPagination';
 import styles from './StorefrontShopPage.module.css';
 
+const STOREFRONT_SORTS: readonly StorefrontSort[] = ['createdAt:asc', 'createdAt:desc', 'price:asc', 'price:desc', 'name:asc', 'name:desc'];
+
 const PAGE_SIZE = 12;
 
 function readPositiveNumber(value: string | null): number | undefined {
@@ -55,7 +57,9 @@ export default function StorefrontShopPage() {
   const debouncedSearch = useDebouncedValue(search.trim());
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const categoryId = searchParams.get('categoryId') ?? '';
-  const sort = (searchParams.get('sort') ?? 'createdAt:desc') as StorefrontSort;
+  // URL'dagi noma'lum qiymat backend enum'ida 400 berib butun sahifani xato holatiga tushirardi.
+  const requestedSort = searchParams.get('sort');
+  const sort: StorefrontSort = STOREFRONT_SORTS.includes(requestedSort as StorefrontSort) ? requestedSort as StorefrontSort : 'createdAt:desc';
   const minPrice = readPositiveNumber(searchParams.get('minPrice'));
   const maxPrice = readPositiveNumber(searchParams.get('maxPrice'));
   const [priceDraft, setPriceDraft] = useState<[number | null, number | null]>([

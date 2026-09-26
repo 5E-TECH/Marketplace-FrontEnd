@@ -54,6 +54,19 @@ src/
   shared/     httpClient, xato ishlovchisi, umumiy UI komponentlar
 ```
 
+## Responsive qoidalar
+
+- Layout kontenti `content` nomli CSS container. Sahifa va uning komponentlari
+  ekran emas, **kontent kengligiga** qarab moslashadi:
+  `@container content (max-width: …)`. Sidebar ochiq/yopiq holati shu tufayli
+  avtomatik hisobga olinadi.
+- Faqat 4 ta breakpoint: **575** (telefon), **767** (tor), **991** (o'rta),
+  **1199** (keng).
+- Portal orqali `body` ga chiqadigan modal/drawer, header, login va storefront
+  sahifalari layout kontentidan tashqarida — ularda oddiy `@media` ishlatiladi.
+- Jadvallar `DataTable` orqali: sig'masa ustunlar siqilmaydi, panel ichida
+  gorizontal scroll bo'ladi (`scroll.x = 'max-content'`).
+
 ## Auth va sessiya
 
 - Login `POST /auth/login` — **access token** javob tanasida, **refresh token**

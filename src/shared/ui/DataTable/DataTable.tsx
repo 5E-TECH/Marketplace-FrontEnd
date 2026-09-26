@@ -39,6 +39,7 @@ export function DataTable<RecordType extends object>({
   emptyState,
   onChange,
   className,
+  scroll = { x: 'max-content' },
   ...tableProps
 }: DataTableProps<RecordType>) {
   const { language, t } = useTranslation();
@@ -90,6 +91,8 @@ export function DataTable<RecordType extends object>({
       ) : null}
       <Table<RecordType>
         {...tableProps}
+        // Tor ekranda ustunlar siqilmaydi va paneldan chiqmaydi — jadval ichida gorizontal scroll bo'ladi.
+        scroll={scroll}
         className={`${styles.table} ${className ?? ''}`.trim()}
         dataSource={filteredData}
         pagination={

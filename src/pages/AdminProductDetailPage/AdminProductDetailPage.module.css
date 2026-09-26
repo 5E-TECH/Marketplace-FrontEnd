@@ -14,4 +14,4 @@
 .variants article > div { display: grid; min-width: 0; gap: 3px; }
 .variants strong { overflow: hidden; color: var(--color-text); text-overflow: ellipsis; white-space: nowrap; }
 .variants code { color: var(--color-text-muted); }
-@media (max-width: 620px) { .mediaCard > header { padding: var(--space-4); } .gallery { padding: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); } .variants article { grid-template-columns: 1fr auto; } .variants article > :global(.ant-tag) { grid-column: 1 / -1; width: max-content; } }
+@container content (max-width: 575px) { .mediaCard > header { padding: var(--space-4); } .gallery { padding: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); } .variants article { grid-template-columns: 1fr auto; } .variants article > :global(.ant-tag) { grid-column: 1 / -1; width: max-content; } }

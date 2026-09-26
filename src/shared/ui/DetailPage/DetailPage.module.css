@@ -146,7 +146,7 @@
   font-weight: 600;
 }
 
-@media (max-width: 700px) {
+@container content (max-width: 575px) {
   .detailGrid {
     padding: var(--space-4);
     grid-template-columns: 1fr;
@@ -158,9 +158,13 @@
   }
 }
 
-@media (max-width: 480px) {
+@container content (max-width: 575px) {
   .hero {
     align-items: flex-start;
+  }
+
+  .identity h2 {
+    font-size: 1.125rem;
   }
 
   .avatar {

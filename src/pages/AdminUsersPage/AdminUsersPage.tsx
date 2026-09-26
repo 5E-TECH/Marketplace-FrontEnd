@@ -12,7 +12,7 @@ import type { AdminUser, AdminUserRole } from '../../features/adminUsers/model/a
 import {
   ADMIN_USER_BLOCK_ACTION_CONFIG,
 } from '../../features/adminUsers/ui/adminUserActionConfig';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
       <ContentState
         state="error"
         title={t('admin.users.loadError')}
-        description={getAuthErrorMessage(query.error)}
+        description={getApiErrorMessage(query.error)}
         onAction={() => void query.refetch()}
       />
     );
@@ -206,7 +206,6 @@ export default function AdminUsersPage() {
           rowKey="id"
           columns={columns}
           dataSource={query.data.items}
-          scroll={{ x: 900 }}
           emptyState={
             <EmptyState
               compact
@@ -239,7 +238,7 @@ export default function AdminUsersPage() {
                 );
                 setPendingBlockAction(null);
               },
-              onError: (error) => void message.error(getAuthErrorMessage(error)),
+              onError: (error) => void message.error(getApiErrorMessage(error)),
             },
           );
         }}
