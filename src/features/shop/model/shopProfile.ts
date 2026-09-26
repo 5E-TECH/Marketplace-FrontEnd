@@ -12,7 +12,7 @@ export interface ShopProfile {
 
 export type ShopProfileFormValues = ShopProfile;
 
-export const initialShopProfile: ShopProfile = {
+const initialShopProfile: ShopProfile = {
   name: 'MarketHub Store',
   slug: 'markethub-store',
   description:

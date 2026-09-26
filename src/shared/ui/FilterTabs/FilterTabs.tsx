@@ -1,6 +1,6 @@
 import styles from './FilterTabs.module.css';
 
-export interface FilterTabOption<Value extends string> {
+interface FilterTabOption<Value extends string> {
   value: Value;
   label: string;
 }

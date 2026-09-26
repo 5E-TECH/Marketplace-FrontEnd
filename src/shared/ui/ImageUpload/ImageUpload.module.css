@@ -55,4 +55,4 @@
 .compact .cardActions button svg { width: 13px; }
 .compact .progress { right: 5px; bottom: 38px; left: 5px; padding: 3px 5px; }
 .compact .sortHint { margin-top: 8px; font-size: 10px; line-height: 1.4; }
-@media (max-width: 560px) { .root :global(.ant-upload-list) { grid-template-columns: repeat(2, minmax(0, 1fr)); } .previewButton { height: 112px; } .cardActions button:first-child { font-size: 0; } .cardActions button:first-child svg { margin: 0; } }
+@container content (max-width: 575px) { .root :global(.ant-upload-list) { grid-template-columns: repeat(2, minmax(0, 1fr)); } .previewButton { height: 112px; } .cardActions button:first-child { font-size: 0; } .cardActions button:first-child svg { margin: 0; } }

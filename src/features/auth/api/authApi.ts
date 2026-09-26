@@ -6,7 +6,6 @@ import type {
   LoginCredentials,
   LoginResponse,
   UpdateAuthProfilePayload,
-  UpdateProfilePayload,
   UserRole,
   AuthDeviceSession,
 } from '../model/authTypes';
@@ -76,7 +75,7 @@ function parseLoginResponse(value: unknown): LoginResponse {
   };
 }
 
-export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
+async function login(credentials: LoginCredentials): Promise<LoginResponse> {
   const { data } = await httpClient.post<unknown>('/auth/login', credentials);
 
   return parseLoginResponse(data);
@@ -116,8 +115,6 @@ export async function updateAuthProfile(
   const candidate = value && typeof value === 'object' && 'user' in value ? value.user : value;
   return parseAuthUser(candidate);
 }
-
-export const updateProfile = (payload: UpdateProfilePayload) => updateAuthProfile(payload);
 
 export async function logout(): Promise<void> {
   await httpClient.post('/auth/logout');

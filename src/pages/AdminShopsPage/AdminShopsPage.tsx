@@ -1,4 +1,4 @@
-import { App, Button, Form, Input, InputNumber, Modal, Space, Statistic, Tag, Typography } from 'antd';
+import { App, Button, Form, Input, InputNumber, Space, Statistic, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { Ban, Check, DollarSign, Eye, Play, Star, X } from 'lucide-react';
 import { useState } from 'react';
@@ -18,6 +18,7 @@ import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { DetailDrawer } from '../../shared/ui/DetailDrawer/DetailDrawer';
 import { DetailList } from '../../shared/ui/DetailList/DetailList';
+import { FormModal } from '../../shared/ui/FormModal/FormModal';
 import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import styles from './AdminShopsPage.module.css';
@@ -65,7 +66,7 @@ export default function AdminShopsPage() {
   const columns: ColumnsType<AdminShop> = [
     { title: t('adminShops.market'), render: (_, shop) => <Typography.Text strong>{shop.name}</Typography.Text> },
     { title: t('adminShops.ownerId'), dataIndex: 'ownerUserId', width: 100, responsive: ['lg'], render: (value: string) => `#${value}` },
-    { title: t('users.phone'), dataIndex: 'phone', responsive: ['sm'] },
+    { title: t('users.phone'), dataIndex: 'phone', responsive: ['sm'], render: (phone: string | null) => phone || '—' },
     { title: t('adminShops.address'), dataIndex: 'address', responsive: ['lg'], render: (value: string | null) => value || '—' },
     { title: t('users.status'), dataIndex: 'status', width: 120, render: (value: AdminShopStatus) => <Tag color={statusColor[value]}>{value}</Tag> },
     { title: 'Bosh sahifa', dataIndex: 'isFeatured', width: 120, responsive: ['lg'], render: (value: boolean) => <Tag color={value ? 'gold' : 'default'}>{value ? 'Tavsiya etilgan' : 'Oddiy'}</Tag> },
@@ -77,32 +78,30 @@ export default function AdminShopsPage() {
   if (query.isError) return <ContentState state="error" title={t('adminShops.loadError')} description={getUserErrorMessage(query.error, language)} onAction={() => void query.refetch()} />;
   return <main className={styles.page}>
     <PageHeader title={t('adminShops.title')} description="Kutilayotgan do‘konlarni tekshiring, tasdiqlang yoki sabab bilan rad eting" />
-    <ListToolbar value={search} placeholder={t('adminShops.search')} onChange={(value) => { setSearch(value); setPage(1); }} actions={<FilterSelect<StatusFilter> className={styles.filter} value={status} options={['PENDING','ALL','ACTIVE','SUSPENDED','REJECTED','INACTIVE'].map((value) => ({ value, label: value === 'ALL' ? t('users.allStatuses') : value }))} onChange={(value) => { setStatus(value); setPage(1); }} />} />
+    <ListToolbar value={search} placeholder={t('adminShops.search')} onChange={(value) => { setSearch(value); setPage(1); }} actions={<FilterSelect<StatusFilter> className={styles.filter} value={status} options={['PENDING','ALL','ACTIVE','SUSPENDED','REJECTED'].map((value) => ({ value, label: value === 'ALL' ? t('users.allStatuses') : value }))} onChange={(value) => { setStatus(value); setPage(1); }} />} />
     <TablePanel
       title={t('adminShops.market')}
       caption={t('pagination.total', { total: query.data.total })}
     >
       <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminShops.empty')} description={t('adminShops.emptyDescription')} />} pagination={{ current: page, total: query.data.total, onChange: setPage }} />
     </TablePanel>
-    <DetailDrawer title={selected?.name ?? 'Do‘kon tafsiloti'} subtitle="Do‘kon moderatsiyasi" width="min(560px, 100vw)" open={Boolean(selected)} onClose={closeDetail} extra={selected ? <Tag color={statusColor[selected.status]}>{selected.status}</Tag> : null}>
+    <DetailDrawer title={selected?.name ?? 'Do‘kon tafsiloti'} subtitle="Do‘kon moderatsiyasi" size="min(560px, 100vw)" open={Boolean(selected)} onClose={closeDetail} extra={selected ? <Tag color={statusColor[selected.status]}>{selected.status}</Tag> : null}>
       {detail.isPending ? <ContentState state="loading" /> : detail.isError ? <ContentState state="error" description={getUserErrorMessage(detail.error, language)} onAction={() => void detail.refetch()} /> : detail.data && selected ? <>
-        <DetailList items={[{ label: 'Do‘kon', value: detail.data.name }, { label: 'Do‘kon ID', value: `#${detail.data.id}` }, { label: 'Seller ID', value: `#${detail.data.ownerUserId}` }, { label: 'Telefon', value: selected.phone }, { label: 'Manzil', value: selected.address || '—' }, { label: 'Uyga yetkazish', value: `${formatMoney(detail.data.tariffHome)} so‘m` }, { label: 'Markazgacha', value: `${formatMoney(detail.data.tariffCenter)} so‘m` }]} />
+        <DetailList items={[{ label: 'Do‘kon', value: detail.data.name }, { label: 'Do‘kon ID', value: `#${detail.data.id}` }, { label: 'Seller ID', value: `#${detail.data.ownerUserId}` }, { label: 'Telefon', value: selected.phone || '—' }, { label: 'Manzil', value: selected.address || '—' }, { label: 'Uyga yetkazish', value: `${formatMoney(detail.data.tariffHome)} so‘m` }, { label: 'Markazgacha', value: `${formatMoney(detail.data.tariffCenter)} so‘m` }]} />
         <div className={styles.stats}><Statistic title="Mahsulotlar" value={detail.data.stats.products} /><Statistic title="Buyurtmalar" value={detail.data.stats.orders} /><Statistic title="Omborlar" value={detail.data.stats.warehouses} /></div>
         <Space wrap className={styles.actions}>
-          {selected.status === 'PENDING' ? <><Button type="primary" icon={<Check />} loading={approve.isPending} onClick={() => approve.mutate(selected.id, { onSuccess: () => closeAfter('Do‘kon tasdiqlandi'), onError: notifyError })}>Tasdiqlash</Button><Button danger icon={<X />} onClick={() => { rejectForm.resetFields(); setRejecting(selected); }}>Rad etish</Button></> : null}
+          {selected.status === 'PENDING' ? <><Button type="primary" icon={<Check />} loading={approve.isPending} onClick={() => approve.mutate(selected.id, { onSuccess: () => closeAfter('Do‘kon tasdiqlandi'), onError: notifyError })}>Tasdiqlash</Button><Button danger icon={<X />} onClick={() => setRejecting(selected)}>Rad etish</Button></> : null}
           {selected.status === 'ACTIVE' ? <Button danger icon={<Ban />} loading={suspend.isPending} onClick={() => suspend.mutate(selected.id, { onSuccess: () => closeAfter('Do‘kon vaqtincha to‘xtatildi'), onError: notifyError })}>To‘xtatish</Button> : null}
           {selected.status === 'SUSPENDED' ? <Button type="primary" icon={<Play />} loading={activate.isPending} onClick={() => activate.mutate(selected.id, { onSuccess: () => closeAfter('Do‘kon qayta faollashtirildi'), onError: notifyError })}>Faollashtirish</Button> : null}
-          <Button icon={<Star />} loading={feature.isPending} onClick={() => feature.mutate({ shopId: selected.id, featured: !detail.data.isFeatured }, { onSuccess: () => { void detail.refetch(); void message.success(detail.data.isFeatured ? 'Do‘kon tavsiyalardan olib tashlandi' : 'Do‘kon bosh sahifaga chiqarildi'); }, onError: notifyError })}>{detail.data.isFeatured ? 'Tavsiyadan olish' : 'Tavsiya etish'}</Button>
-          <Button icon={<DollarSign />} onClick={() => { tariffForm.setFieldsValue({ tariffHome: detail.data.tariffHome, tariffCenter: detail.data.tariffCenter }); setTariffShop(selected); }}>Tariflar</Button>
+          <Button icon={<Star />} loading={feature.isPending} onClick={() => feature.mutate({ shopId: selected.id, featured: !selected.isFeatured }, { onSuccess: () => { setSelectedShop({ ...selected, isFeatured: !selected.isFeatured }); void message.success(selected.isFeatured ? 'Do‘kon tavsiyalardan olib tashlandi' : 'Do‘kon bosh sahifaga chiqarildi'); }, onError: notifyError })}>{selected.isFeatured ? 'Tavsiyadan olish' : 'Tavsiya etish'}</Button>
+          <Button icon={<DollarSign />} onClick={() => setTariffShop(selected)}>Tariflar</Button>
         </Space>
       </> : null}
     </DetailDrawer>
-    <Modal title="Do‘konni rad etish" open={Boolean(rejecting)} okText="Rad etish" cancelText="Bekor qilish" okButtonProps={{ danger: true, loading: reject.isPending }} onCancel={() => setRejecting(null)} onOk={() => rejectForm.submit()} destroyOnHidden><Form<RejectValues> form={rejectForm} layout="vertical" onFinish={({ reason }) => { if (!rejecting) return; reject.mutate({ shopId: rejecting.id, reason: reason.trim() }, { onSuccess: () => { setRejecting(null); closeDetail(); void message.success('Do‘kon rad etildi'); }, onError: notifyError }); }}><Form.Item name="reason" label="Rad etish sababi" rules={[{ required: true, whitespace: true, message: 'Sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: hujjatlar to‘liq emas" /></Form.Item></Form></Modal>
-    <Modal title={`${tariffShop?.name ?? 'Do‘kon'} tariflari`} open={Boolean(tariffShop)} okText="Saqlash" cancelText="Bekor qilish" okButtonProps={{ loading: tariffs.isPending }} onCancel={() => setTariffShop(null)} onOk={() => tariffForm.submit()} destroyOnHidden>
-      <Form<TariffValues> form={tariffForm} layout="vertical" onFinish={(values) => { if (!tariffShop) return; tariffs.mutate({ shopId: tariffShop.id, tariffHome: values.tariffHome, tariffCenter: values.tariffCenter }, { onSuccess: () => { setTariffShop(null); void detail.refetch(); void message.success('Yetkazib berish tariflari saqlandi'); }, onError: notifyError }); }}>
-        <Form.Item name="tariffHome" label="Uyga yetkazish tarifi" extra="So‘mda kiriting" rules={[{ required: true, message: 'Uyga tarifni kiriting' }, { type: 'number', min: 0, message: 'Tarif manfiy bo‘lmasligi kerak' }]}><InputNumber min={0} step={1000} suffix="so‘m" style={{ width: '100%' }} /></Form.Item>
-        <Form.Item name="tariffCenter" label="Elchi markazigacha yetkazish tarifi" extra="So‘mda kiriting" rules={[{ required: true, message: 'Markaz tarifni kiriting' }, { type: 'number', min: 0, message: 'Tarif manfiy bo‘lmasligi kerak' }]}><InputNumber min={0} step={1000} suffix="so‘m" style={{ width: '100%' }} /></Form.Item>
-      </Form>
-    </Modal>
+    <FormModal<RejectValues> title="Do‘konni rad etish" open={Boolean(rejecting)} form={rejectForm} submitText="Rad etish" cancelText="Bekor qilish" danger loading={reject.isPending} onCancel={() => setRejecting(null)} onSubmit={({ reason }) => { if (!rejecting) return; reject.mutate({ shopId: rejecting.id, reason: reason.trim() }, { onSuccess: () => { setRejecting(null); closeDetail(); void message.success('Do‘kon rad etildi'); }, onError: notifyError }); }}><Form.Item name="reason" label="Rad etish sababi" rules={[{ required: true, whitespace: true, message: 'Sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: hujjatlar to‘liq emas" /></Form.Item></FormModal>
+    <FormModal<TariffValues> title={`${tariffShop?.name ?? 'Do‘kon'} tariflari`} open={Boolean(tariffShop)} form={tariffForm} initialValues={detail.data ? { tariffHome: detail.data.tariffHome, tariffCenter: detail.data.tariffCenter } : undefined} submitText="Saqlash" cancelText="Bekor qilish" loading={tariffs.isPending} onCancel={() => setTariffShop(null)} onSubmit={(values) => { if (!tariffShop) return; tariffs.mutate({ shopId: tariffShop.id, tariffHome: values.tariffHome, tariffCenter: values.tariffCenter }, { onSuccess: () => { setTariffShop(null); void detail.refetch(); void message.success('Yetkazib berish tariflari saqlandi'); }, onError: notifyError }); }}>
+      <Form.Item name="tariffHome" label="Uyga yetkazish tarifi" extra="So‘mda kiriting" rules={[{ required: true, message: 'Uyga tarifni kiriting' }, { type: 'number', min: 1, message: 'Tarif kamida 1 so‘m bo‘lishi kerak' }]}><InputNumber min={1} step={1000} suffix="so‘m" style={{ width: '100%' }} /></Form.Item>
+      <Form.Item name="tariffCenter" label="Elchi markazigacha yetkazish tarifi" extra="So‘mda kiriting" rules={[{ required: true, message: 'Markaz tarifni kiriting' }, { type: 'number', min: 1, message: 'Tarif kamida 1 so‘m bo‘lishi kerak' }]}><InputNumber min={1} step={1000} suffix="so‘m" style={{ width: '100%' }} /></Form.Item>
+    </FormModal>
   </main>;
 }

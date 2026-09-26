@@ -13,7 +13,7 @@ export function PageLoader({ compact = false }: PageLoaderProps) {
       justify="center"
       role="status"
     >
-      <Spin size="large" tip="Yuklanmoqda...">
+      <Spin size="large" description="Yuklanmoqda...">
         <span className={styles.placeholder} />
       </Spin>
     </Flex>

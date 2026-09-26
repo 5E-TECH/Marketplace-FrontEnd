@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { useAdminOrderQuery, useCancelAdminOrderMutation, useRefundAdminOrderMutation } from '../../features/orders/api/orderQueries';
 import type { AdminOrder, AdminOrderStatus } from '../../features/orders/model/orderTypes';
 import { getAdminOrderActionErrorMessage } from '../../features/orders/lib/getAdminOrderActionErrorMessage';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
@@ -56,7 +56,7 @@ export default function AdminOrderDetailPage() {
         {!orderId ? (
           <ContentState state="error" description={t('adminOrders.detailFormat')} />
         ) : query.isError ? (
-          <ContentState state="error" title={t('adminOrders.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} />
+          <ContentState state="error" title={t('adminOrders.loadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} />
         ) : (
           <ContentState state="loading" />
         )}
@@ -72,7 +72,7 @@ export default function AdminOrderDetailPage() {
   const printLabel = async () => {
     setPrinting(true);
     try { await openOrderLabels('admin', [orderId]); }
-    catch (error) { void message.error(getAuthErrorMessage(error)); }
+    catch (error) { void message.error(getApiErrorMessage(error)); }
     finally { setPrinting(false); }
   };
   const canRefund = order?.paymentMethod === 'online' && Boolean(status && REFUNDABLE_STATUSES.includes(status));
@@ -139,7 +139,7 @@ export default function AdminOrderDetailPage() {
         okButtonProps={{ danger: true, loading: actionPending }}
         cancelButtonProps={{ disabled: actionPending }}
         closable={!actionPending}
-        maskClosable={!actionPending}
+        mask={{ closable: !actionPending }}
         keyboard={!actionPending}
         onCancel={closeAction}
         onOk={() => actionForm.submit()}

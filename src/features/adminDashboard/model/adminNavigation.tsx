@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../../shared/i18n/translations';
 import type { UserRole } from '../../auth/model/authTypes';
 
-export interface AdminNavItem {
+interface AdminNavItem {
   path: string;
   label: TranslationKey;
   icon?: ReactNode;
@@ -27,8 +27,5 @@ export const adminNavigation: AdminNavGroup[] = [
   { key: 'system', label: 'adminNav.systemHealth', icon: <ServerCog />, items: [{ path: '/admin/system-settings', label: 'adminNav.systemHealth', roles: ADMIN_ROLES }] },
 ];
 
-export const adminLeafRoutes = adminNavigation.flatMap(({ items }) => items);
 export const getAdminNavigation = (role: UserRole | undefined): AdminNavGroup[] =>
   adminNavigation.filter(({ items }) => role && items.some((item) => item.roles.includes(role)));
-export const adminRouteTitle = (pathname: string): TranslationKey =>
-  adminLeafRoutes.find(({ path }) => pathname === path)?.label ?? 'adminNav.management';

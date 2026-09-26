@@ -114,7 +114,6 @@ export default function AdminBannersPage() {
   const openForm = (banner: Banner | null) => {
     setSaveError('');
     setUploadPercent(null);
-    form.resetFields();
     // Yangi banner ro'yxat oxiriga tushadi: `banners.length` bo'sh o'rin
     // bo'lmasa o'rtaga yoki boshqasi bilan bir xil tartibga tushardi.
     const nextOrder = banners.reduce((max, item) => Math.max(max, item.sortOrder + 1), 0);

@@ -41,7 +41,7 @@ export default function SharedUiTestPage() {
 
   return (
     <main style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
-      <Space direction="vertical" size={24} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={24} style={{ width: '100%' }}>
         <Card title="DataTable">
           <DataTable
             rowKey="id"

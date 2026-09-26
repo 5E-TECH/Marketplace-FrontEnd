@@ -5,7 +5,7 @@
 
 .content {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .hero,
@@ -17,8 +17,7 @@
 
 .hero {
   display: flex;
-  min-height: 132px;
-  padding: var(--space-6);
+  padding: var(--space-4) var(--space-5);
   background:
     linear-gradient(120deg, var(--color-accent-soft), transparent 48%),
     var(--color-surface);
@@ -31,7 +30,7 @@
   color: var(--color-accent) !important;
   background: var(--color-surface-hover) !important;
   border: 2px solid var(--color-accent);
-  font-size: 1.25rem !important;
+  font-size: 1.125rem !important;
   font-weight: 800;
 }
 
@@ -49,19 +48,19 @@
 .identity h2 {
   overflow: hidden;
   color: var(--color-text);
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .identity p {
-  margin-top: var(--space-1);
+  margin-top: 2px;
   color: var(--color-text-secondary);
 }
 
 .badges {
   display: flex;
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -73,21 +72,21 @@
 
 .cardHeading {
   display: flex;
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-3) var(--space-5);
   border-bottom: 1px solid var(--color-border);
   align-items: center;
   gap: var(--space-3);
 }
 
 .cardHeading > svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   color: var(--color-accent);
 }
 
 .cardHeading h3 {
   color: var(--color-text);
-  font-size: 1rem;
+  font-size: .9375rem;
 }
 
 .cardHeading p {
@@ -96,31 +95,36 @@
   font-size: .75rem;
 }
 
+/* Ixcham ro'yxat: keng ekranda 3 ustun, maydon balandligi ~56px. */
 .detailGrid {
   display: grid;
   margin: 0;
-  padding: var(--space-6);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
 }
 
 .detailItem {
   display: grid;
   min-width: 0;
-  min-height: 74px;
-  padding: var(--space-3);
+  padding: 10px var(--space-3);
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.detailItemWide {
+  grid-column: 1 / -1;
   align-items: start;
-  gap: var(--space-3);
 }
 
 .detailIcon {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   color: var(--color-text-secondary);
   background: var(--color-surface-hover);
   border-radius: var(--radius-sm);
@@ -128,12 +132,12 @@
 }
 
 .detailIcon svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
 .detailItem dt {
-  margin-bottom: 5px;
+  margin-bottom: 2px;
   color: var(--color-text-muted);
   font-size: .75rem;
 }
@@ -146,26 +150,34 @@
   font-weight: 600;
 }
 
-@media (max-width: 700px) {
+@container content (max-width: 991px) {
   .detailGrid {
-    padding: var(--space-4);
-    grid-template-columns: 1fr;
-  }
-
-  .hero,
-  .cardHeading {
-    padding: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 480px) {
+@container content (max-width: 575px) {
   .hero {
+    padding: var(--space-3) var(--space-4);
     align-items: flex-start;
   }
 
+  .cardHeading {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .detailGrid {
+    padding: var(--space-3);
+    grid-template-columns: 1fr;
+  }
+
+  .identity h2 {
+    font-size: 1.125rem;
+  }
+
   .avatar {
-    width: 58px !important;
-    height: 58px !important;
-    line-height: 58px !important;
+    width: 52px !important;
+    height: 52px !important;
+    line-height: 52px !important;
   }
 }

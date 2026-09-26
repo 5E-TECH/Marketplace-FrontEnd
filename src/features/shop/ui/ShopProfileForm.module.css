@@ -18,4 +18,4 @@
 .form :global(.ant-select-disabled) { opacity: 1; }
 .form :global(.ant-select-disabled .ant-select-selection-item) { color: var(--color-text-soft) !important; -webkit-text-fill-color: var(--color-text-soft); }
 .form :global(.ant-select-disabled .ant-select-arrow) { color: var(--color-text-faint); }
-@media (max-width: 767px) { .profileCard { padding: 16px; border-radius: 0 0 16px 16px; } .cardHeader { margin-bottom: 20px; align-items: stretch; flex-direction: column; } .cardHeader > :global(.ant-btn), .cardHeader > :global(.ant-space) { width: 100%; } .cardHeader :global(.ant-btn) { flex: 1; } }
+@container content (max-width: 767px) { .profileCard { padding: 16px; border-radius: 0 0 16px 16px; } .cardHeader { margin-bottom: 20px; align-items: stretch; flex-direction: column; } .cardHeader > :global(.ant-btn), .cardHeader > :global(.ant-space) { width: 100%; } .cardHeader :global(.ant-space-item) { flex: 1; } .cardHeader :global(.ant-space .ant-btn) { width: 100%; } }

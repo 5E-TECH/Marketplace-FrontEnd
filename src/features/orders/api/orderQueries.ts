@@ -1,9 +1,9 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { cancelAdminOrder, cancelSellerOrder, confirmSellerOrder, createSellerShipment, getAdminOrder, getAdminOrders, getSellerOrder, getSellerOrderHistory, getSellerOrderItems, getSellerOrders, getSellerShipment, getSellerShipments, getSellerShipmentTracking, refundAdminOrder, updateSellerOrderStatus } from './orderApi';
+import { cancelAdminOrder, cancelSellerOrder, confirmSellerOrder, createSellerShipment, getAdminOrder, getAdminOrders, getSellerOrder, getSellerOrderHistory, getSellerOrderItems, getSellerOrders, getSellerShipments, refundAdminOrder, updateSellerOrderStatus } from './orderApi';
 import type { AdminOrderActionPayload, AdminOrderActionResult, AdminOrderListParams, AdminOrderStatus, SellerOrderListParams } from '../model/orderTypes';
 
-export const orderKeys = { all: ['seller-orders'] as const, list: (params: SellerOrderListParams) => [...orderKeys.all, params] as const };
-export const shipmentKeys = { all: ['seller-shipments'] as const, list: (params: SellerOrderListParams) => [...shipmentKeys.all, params] as const };
+const orderKeys = { all: ['seller-orders'] as const, list: (params: SellerOrderListParams) => [...orderKeys.all, params] as const };
+const shipmentKeys = { all: ['seller-shipments'] as const, list: (params: SellerOrderListParams) => [...shipmentKeys.all, params] as const };
 
 export function useSellerOrdersQuery(params: SellerOrderListParams) {
   return useQuery({
@@ -49,10 +49,7 @@ export const useCreateSellerShipmentMutation = () => {
     ]);
   } });
 };
-export const useSellerShipmentQuery = (id: string | null) => useQuery({ queryKey: [...shipmentKeys.all, 'detail', id], queryFn: ({ signal }) => getSellerShipment(id!, signal), enabled: Boolean(id) });
-export const useSellerShipmentTrackingQuery = (id: string | null) => useQuery({ queryKey: [...shipmentKeys.all, 'tracking', id], queryFn: ({ signal }) => getSellerShipmentTracking(id!, signal), enabled: Boolean(id) });
-export const adminOrderKeys = { all: ['admin-orders'] as const, list: (params: AdminOrderListParams) => ['admin-orders', params] as const, detail: (id: string) => ['admin-orders', 'detail', id] as const };
-export const useAdminOrdersQuery = (params: AdminOrderListParams) => useQuery({ queryKey: adminOrderKeys.list(params), queryFn: ({ signal }) => getAdminOrders(params, signal), placeholderData: (previous) => previous });
+const adminOrderKeys = { all: ['admin-orders'] as const, list: (params: AdminOrderListParams) => ['admin-orders', params] as const, detail: (id: string) => ['admin-orders', 'detail', id] as const };
 
 const ADMIN_ORDER_BATCH_SIZE = 100;
 

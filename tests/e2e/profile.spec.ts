@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { authenticatedUser, installAuthenticatedSession, TEST_ACCESS_TOKEN } from './support/auth';
+import { collectUnconnectedFormWarnings } from './support/console';
 
 async function mockProfileUpdate(page: Page) {
   let requestBody: Record<string, unknown> | undefined;
@@ -34,10 +35,12 @@ for (const role of ['SELLER', 'ADMIN', 'SUPERADMIN', 'OPERATOR'] as const) {
 }
 
 test('profil ma’lumotlarini PATCH /auth/profile orqali yangilaydi', async ({ page }) => {
+  const formWarnings = collectUnconnectedFormWarnings(page);
   const api = await mockProfileUpdate(page);
   await page.goto('/profile');
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
   const dialog = page.getByRole('dialog', { name: 'Profilni tahrirlash' });
+  await expect(dialog.getByLabel('Ism')).toHaveValue(authenticatedUser.name);
   await dialog.getByLabel('Ism').fill('Ali Valiyev');
   await dialog.getByLabel('Email').fill('ali@example.com');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
@@ -46,6 +49,21 @@ test('profil ma’lumotlarini PATCH /auth/profile orqali yangilaydi', async ({ p
   expect(api.body()).toEqual({ name: 'Ali Valiyev', email: 'ali@example.com' });
   expect(api.authorization()).toBe(`Bearer ${TEST_ACCESS_TOKEN}`);
   await expect(page.getByRole('heading', { name: 'Ali Valiyev' })).toBeVisible();
+  expect(formWarnings).toEqual([]);
+});
+
+test('bekor qilingan tahrir qayta ochilganda asl qiymatlar ko‘rinadi', async ({ page }) => {
+  const formWarnings = collectUnconnectedFormWarnings(page);
+  await page.goto('/profile');
+  await page.getByRole('button', { name: 'Tahrirlash' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Profilni tahrirlash' });
+  await dialog.getByLabel('Ism').fill('Saqlanmagan ism');
+  await dialog.getByRole('button', { name: 'Bekor' }).click();
+  await expect(dialog).toBeHidden();
+
+  await page.getByRole('button', { name: 'Tahrirlash' }).click();
+  await expect(page.getByRole('dialog', { name: 'Profilni tahrirlash' }).getByLabel('Ism')).toHaveValue(authenticatedUser.name);
+  expect(formWarnings).toEqual([]);
 });
 
 test('parolsiz update requestida password yuborilmaydi', async ({ page }) => {

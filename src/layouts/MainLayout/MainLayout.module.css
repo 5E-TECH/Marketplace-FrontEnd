@@ -199,11 +199,18 @@
 
 .headerContent {
   height: 100%;
+  gap: var(--space-3);
+}
+
+.headerStart {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 
 .globalSearch {
-  width: min(36vw, 420px);
+  width: 100%;
+  max-width: 420px;
   height: 42px;
   background: var(--color-surface-subtle);
   border-color: var(--color-border);
@@ -320,7 +327,8 @@
 
 .accountSummary {
   display: flex;
-  min-width: 152px;
+  min-width: 0;
+  max-width: 220px;
   padding: var(--space-1) var(--space-2);
   color: inherit;
   font: inherit;
@@ -383,6 +391,13 @@
   margin-inline: auto;
   padding: 24px clamp(20px, 3vw, 44px) 20px;
   background: var(--color-bg);
+  /*
+   * Sahifa ichidagi komponentlar ekran emas, shu kontent kengligiga qarab
+   * moslashadi (`@container content (...)`): sidebar ochiq/yopiqligi va
+   * planshet/desktop farqi avtomatik hisobga olinadi. Breakpointlar:
+   * 575 (telefon), 767 (tor), 991 (o'rta), 1199 (keng).
+   */
+  container: content / inline-size;
 }
 
 .breadcrumb {
@@ -397,6 +412,18 @@
 
 .breadcrumb :global(a:hover) {
   color: var(--color-accent-bright);
+}
+
+/* Planshet va tor desktop: ism o'rniga avatar — global qidiruvga joy qoladi. */
+@media (max-width: 1199px) {
+  .accountText,
+  .headerDivider {
+    display: none;
+  }
+
+  .accountSummary {
+    padding: var(--space-1);
+  }
 }
 
 @media (max-width: 991px) {
@@ -435,11 +462,13 @@
 
   .languageButton,
   .notificationButton,
-  .headerDivider,
-  .accountText,
   .accountSummary {
-    min-width: auto;
     padding: var(--space-1);
+  }
+
+  /* Telefonda faqat avatar: uzun ism header'ni ekrandan chiqarib yubormasin. */
+  .accountText {
+    display: none;
   }
 
   .headerDivider {

@@ -12,7 +12,7 @@ import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
 import { NumberControl, TextAreaControl } from '../../shared/ui/FormControls/FormControls';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import styles from './StockPage.module.css';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -60,7 +60,7 @@ export default function StockPage() {
         setAction(null);
         void message.success(type === 'inbound' ? 'Kirim muvaffaqiyatli bajarildi' : 'Qoldiq tuzatildi');
       },
-      onError: (error: Error) => void message.error(getAuthErrorMessage(error)),
+      onError: (error: Error) => void message.error(getApiErrorMessage(error)),
     };
 
     if (type === 'inbound') {
@@ -72,7 +72,7 @@ export default function StockPage() {
   };
 
   if (stockQuery.isPending) return <ContentState state="loading" />;
-  if (stockQuery.isError) return <ContentState state="error" title="Qoldiqni yuklab bo‘lmadi" description={getAuthErrorMessage(stockQuery.error)} onAction={() => void stockQuery.refetch()} />;
+  if (stockQuery.isError) return <ContentState state="error" title="Qoldiqni yuklab bo‘lmadi" description={getApiErrorMessage(stockQuery.error)} onAction={() => void stockQuery.refetch()} />;
 
   return <main className={styles.page}>
     <PageHeader title={t('stock.title')} description={t('stock.description')} />

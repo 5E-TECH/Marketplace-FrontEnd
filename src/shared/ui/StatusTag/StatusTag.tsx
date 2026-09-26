@@ -37,7 +37,7 @@ export function StatusTag({ status }: { status: AppStatus }) {
   const config = STATUS_CONFIG[status];
 
   return (
-    <Tag className={styles.tag} color={config.color} bordered={false}>
+    <Tag className={styles.tag} color={config.color} variant="filled">
       {t(config.label)}
     </Tag>
   );

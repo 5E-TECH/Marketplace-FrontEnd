@@ -7,7 +7,8 @@ import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
 import { loggedOut, selectAuthUser } from '../../features/auth/model/authSlice';
 import type { UpdateAuthProfilePayload, UserRole } from '../../features/auth/model/authTypes';
 import { useUpdateAuthProfileMutation } from '../../features/auth/api/useUpdateAuthProfileMutation';
-import { getApiFieldErrors, getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiFieldErrors } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
@@ -101,7 +102,7 @@ export default function ProfilePage() {
       if (fieldErrors.length) {
         form.setFields(fieldErrors.map(({ name, errors }) => ({ name: [name as keyof ProfileFormValues], errors })));
       } else {
-        void message.error(getAuthErrorMessage(error));
+        void message.error(getApiErrorMessage(error));
       }
     }
   };
@@ -121,7 +122,7 @@ export default function ProfilePage() {
               </Tag>
             </div>
           </div>
-          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => { form.setFieldsValue(initialValues); setOpen(true); }}>
+          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => setOpen(true)}>
             Tahrirlash
           </Button>
         </header>
@@ -133,7 +134,7 @@ export default function ProfilePage() {
           <div><dt><Camera /> Avatar</dt><dd>{user.avatarUrl || 'Kiritilmagan'}</dd></div>
         </dl>
       </section>
-      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
+      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} initialValues={initialValues} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
         <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { min: 1 }, { max: 255, message: 'Ism 255 belgidan oshmasligi kerak' }]}>
           <TextControl autoComplete="name" maxLength={255} />
         </Form.Item>

@@ -1,13 +1,14 @@
 import { ExternalLink } from 'lucide-react';
 import { Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useDeferredValue, useState } from 'react';
+import { useState } from 'react';
+import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import type {
   SellerOrder,
   SellerOrderStatus,
 } from '../../features/orders/model/orderTypes';
 import { useSellerShipmentsQuery } from '../../features/orders/api/orderQueries';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
@@ -17,6 +18,7 @@ import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFilt
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
+import { formatDateTime } from '../../shared/lib/date';
 
 /** Jo'natma holatlari — Elchi yaratilgandan keyingi bosqichlar. */
 type ShipmentStatusFilter = 'ALL' | SellerOrderStatus;
@@ -34,17 +36,13 @@ const statusOptions: Array<{ value: ShipmentStatusFilter; label: string }> = [
 const money = new Intl.NumberFormat('uz-UZ');
 const formatMoney = (value: number) =>
   `${money.format(value).replaceAll(',', ' ')} so‘m`;
-const formatDate = (value: string) =>
-  new Date(value).toLocaleString('uz-UZ', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 
 export default function DeliveryPage() {
   const [status, setStatus] = useState<ShipmentStatusFilter>('ALL');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const deferredSearch = useDeferredValue(search.trim());
+  // Har harfda emas, yozish to'xtagach so'rov yuboriladi (boshqa ro'yxatlardagi kabi).
+  const deferredSearch = useDebouncedValue(search.trim());
 
   const shipmentsQuery = useSellerShipmentsQuery({
     page,
@@ -77,7 +75,7 @@ export default function DeliveryPage() {
       render: (amount: number) =>
         amount > 0 ? formatMoney(amount) : 'Oldindan to‘langan',
     },
-    { title: 'Sana', dataIndex: 'createdAt', width: 150, render: formatDate },
+    { title: 'Sana', dataIndex: 'createdAt', width: 150, render: (value: string) => formatDateTime(value) },
     {
       title: 'Holati',
       dataIndex: 'status',
@@ -106,7 +104,7 @@ export default function DeliveryPage() {
       <ContentState
         state="error"
         title="Jo‘natmalarni yuklab bo‘lmadi"
-        description={getAuthErrorMessage(shipmentsQuery.error)}
+        description={getApiErrorMessage(shipmentsQuery.error)}
         onAction={() => void shipmentsQuery.refetch()}
       />
     );
@@ -155,7 +153,6 @@ export default function DeliveryPage() {
         rowKey="id"
         columns={columns}
         dataSource={shipments}
-        scroll={{ x: 820 }}
         emptyState={
           <EmptyState
             compact

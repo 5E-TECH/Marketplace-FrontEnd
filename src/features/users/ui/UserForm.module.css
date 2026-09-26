@@ -38,7 +38,7 @@
   border-color: var(--color-token-rgb-245-158-11-42) !important;
 }
 
-@media (max-width: 767px) {
+@container content (max-width: 575px) {
   .card :global(.ant-card-body) { padding: 18px 16px; }
   .form { grid-template-columns: 1fr; }
   .actions { grid-column: auto; }

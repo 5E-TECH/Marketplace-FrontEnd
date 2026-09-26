@@ -5,6 +5,10 @@ const INVALID_CREDENTIALS_MESSAGE = 'Telefon yoki parol noto‘g‘ri';
 const ACCESS_DENIED_MESSAGE = 'Bu akkaunt orqali seller kabinetiga kirish mumkin emas.';
 
 /**
+ * FAQAT login/registratsiya formalari uchun — ma'lumot sahifalarida
+ * `getApiErrorMessage` ishlating (aks holda har qanday 403 "kabinetga kirish
+ * mumkin emas" bo'lib chiqadi va serverning aniq sababi yo'qoladi).
+ *
  * Login/registratsiya formalari uchun xabar. 401 va 403 da serverning matni
  * emas, aniq va bir xil xabar ko'rsatiladi (foydalanuvchi mavjudligini
  * oshkor qilmaslik uchun). Qolgan holatlarda umumiy xato ishlovchisi —

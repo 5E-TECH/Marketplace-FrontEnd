@@ -1,16 +1,13 @@
-import { App, Button, Form, Input, Modal, Tag } from 'antd';
+import { App, Button, Form, Image, Input, Modal, Tag } from 'antd';
 import {
   BadgeDollarSign,
-  Barcode,
   Boxes,
   CalendarClock,
   FileText,
-  Fingerprint,
   Image as ImageIcon,
   Layers3,
   PackageSearch,
   Percent,
-  ShieldCheck,
   Star,
   Store,
   Tags,
@@ -24,7 +21,10 @@ import {
 } from '../../features/adminProducts/api/adminProductQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { AdminProduct } from '../../features/adminProducts/model/adminProductTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { useAdminShopNames } from '../../features/adminShops/api/adminShopQueries';
+import { useAdminCategoryNames } from '../../features/categories/api/categoryQueries';
+import { getProductCover } from '../../features/products/lib/getProductCover';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -38,7 +38,11 @@ import styles from './AdminProductDetailPage.module.css';
 
 type Translate = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
-function createSections(product: AdminProduct, locale: string, t: Translate): DetailPageSection[] {
+/**
+ * Nom, slug, ID va holat hero'da turadi — bu yerda takrorlanmaydi.
+ * Kategoriya va do'kon ID o'rniga nomi bilan (topilmasa `#ID`).
+ */
+function createSections(product: AdminProduct, locale: string, t: Translate, names: { shop?: string; category?: string }): DetailPageSection[] {
   const attributeFields = Object.entries(product.attributes).map(([key, value]) => ({
     key: `attribute-${key}`,
     icon: <Tags />,
@@ -47,50 +51,21 @@ function createSections(product: AdminProduct, locale: string, t: Translate): De
   }));
   return [
     {
-      key: 'catalog',
+      key: 'overview',
       icon: <PackageSearch aria-hidden />,
-      title: t('adminProducts.catalogInfo'),
-      description: t('adminProducts.catalogInfoDescription'),
+      title: t('adminProducts.overview'),
+      description: t('adminProducts.overviewDescription'),
       fields: [
-        { key: 'id', icon: <Fingerprint />, label: t('adminProducts.productId'), value: `#${product.id}` },
-        { key: 'name', icon: <PackageSearch />, label: t('adminProducts.name'), value: product.name },
-        { key: 'slug', icon: <Barcode />, label: t('adminProducts.slug'), value: product.slug || '—' },
-        { key: 'category', icon: <Layers3 />, label: t('adminProducts.categoryId'), value: product.categoryId ? `#${product.categoryId}` : '—' },
-        { key: 'description', icon: <FileText />, label: t('adminProducts.productDescription'), value: product.description || '—' },
-        { key: 'variants', icon: <Boxes />, label: t('adminProducts.hasVariants'), value: product.hasVariants ? t('common.yes') : t('common.no') },
-      ],
-    },
-    {
-      key: 'ownership',
-      icon: <Store aria-hidden />,
-      title: t('adminProducts.ownership'),
-      description: t('adminProducts.ownershipDescription'),
-      fields: [
-        { key: 'shop', icon: <Store />, label: t('adminProducts.shopId'), value: product.shopId ? `#${product.shopId}` : '—' },
+        { key: 'category', icon: <Layers3 />, label: t('adminProducts.category'), value: product.categoryId ? names.category ?? `#${product.categoryId}` : '—' },
+        { key: 'shop', icon: <Store />, label: t('adminProducts.shop'), value: product.shopId ? names.shop ?? `#${product.shopId}` : '—' },
         { key: 'owner', icon: <UserRound />, label: t('adminProducts.ownerId'), value: product.ownerUserId ? `#${product.ownerUserId}` : '—' },
-      ],
-    },
-    {
-      key: 'commercial',
-      icon: <BadgeDollarSign aria-hidden />,
-      title: t('adminProducts.commercialInfo'),
-      description: t('adminProducts.commercialInfoDescription'),
-      fields: [
         { key: 'price', icon: <BadgeDollarSign />, label: t('adminProducts.price'), value: <MoneyText value={product.price} /> },
         { key: 'oldPrice', icon: <Percent />, label: t('adminProducts.oldPrice'), value: product.oldPrice === null ? '—' : <MoneyText value={product.oldPrice} /> },
         { key: 'rating', icon: <Star />, label: t('adminProducts.rating'), value: product.rating > 0 ? product.rating.toFixed(2) : '—' },
-      ],
-    },
-    {
-      key: 'moderation',
-      icon: <ShieldCheck aria-hidden />,
-      title: t('adminProducts.moderation'),
-      description: t('adminProducts.moderationDescription'),
-      fields: [
-        { key: 'status', icon: <ShieldCheck />, label: t('adminProducts.productStatus'), value: <StatusTag status={product.status} /> },
-        { key: 'blocked', icon: <ShieldCheck />, label: t('adminProducts.moderationStatus'), value: <StatusTag status={product.isBlocked ? 'BLOCKED' : 'ACTIVE'} /> },
+        { key: 'variants', icon: <Boxes />, label: t('adminProducts.hasVariants'), value: product.hasVariants ? t('common.yes') : t('common.no') },
         { key: 'created', icon: <CalendarClock />, label: t('common.createdAt'), value: product.createdAt ? formatDateTime(product.createdAt, locale) : '—' },
         { key: 'updated', icon: <CalendarClock />, label: t('common.updatedAt'), value: product.updatedAt ? formatDateTime(product.updatedAt, locale) : '—' },
+        { key: 'description', icon: <FileText />, label: t('adminProducts.productDescription'), value: product.description || '—', wide: true },
       ],
     },
     {
@@ -112,6 +87,8 @@ export default function AdminProductDetailPage() {
   const mutation = useSetAdminProductHiddenMutation();
   const [moderationForm] = Form.useForm<{ reason: string }>();
   const product = query.data;
+  const shopNames = useAdminShopNames(product?.shopId ? [product.shopId] : []);
+  const categoryNames = useAdminCategoryNames();
 
   if (!productId || query.isPending || query.isError || !product) {
     return (
@@ -124,7 +101,7 @@ export default function AdminProductDetailPage() {
         {!productId ? (
           <ContentState state="error" title={t('adminProducts.notIdentified')} description={t('adminProducts.notIdentifiedDescription')} />
         ) : query.isError ? (
-          <ContentState state="error" title={t('adminProducts.detailLoadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} />
+          <ContentState state="error" title={t('adminProducts.detailLoadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} />
         ) : (
           <ContentState state="loading" />
         )}
@@ -152,14 +129,14 @@ export default function AdminProductDetailPage() {
           </Button>
         }
         hero={{
-          avatarUrl: product.imageUrl,
+          avatarUrl: getProductCover(product),
           avatarShape: 'square',
           avatarFallback: product.name.slice(0, 2).toUpperCase(),
           title: product.name,
           subtitle: product.slug || `#${product.id}`,
           badges: <><StatusTag status={product.status} />{product.isBlocked ? <StatusTag status="BLOCKED" /> : null}</>,
         }}
-        sections={createSections(product, locale, t)}
+        sections={createSections(product, locale, t, { shop: shopNames.get(product.shopId), category: categoryNames.get(product.categoryId) })}
       >
         <section className={styles.mediaCard}>
           <header>
@@ -167,9 +144,11 @@ export default function AdminProductDetailPage() {
             <div><h3>{t('adminProducts.images')}</h3><p>{t('adminProducts.imagesDescription')}</p></div>
           </header>
           {images.length ? (
-            <div className={styles.gallery}>
-              {images.map((image, index) => <img key={image} src={image} alt={t('adminProducts.imageAlt', { index: index + 1, name: product.name })} loading="lazy" />)}
-            </div>
+            <Image.PreviewGroup>
+              <div className={styles.gallery}>
+                {images.map((image, index) => <Image key={image} src={image} alt={t('adminProducts.imageAlt', { index: index + 1, name: product.name })} loading="lazy" />)}
+              </div>
+            </Image.PreviewGroup>
           ) : (
             <div className={styles.noMedia}><ImageIcon aria-hidden /><span>{t('adminProducts.noImages')}</span></div>
           )}
@@ -204,7 +183,7 @@ export default function AdminProductDetailPage() {
             moderationForm.resetFields();
             void message.success(t(actionConfig.successKey));
           },
-          onError: (error) => void message.error(getAuthErrorMessage(error)),
+          onError: (error) => void message.error(getApiErrorMessage(error)),
         })}>
           {!product.isBlocked ? <Form.Item name="reason" label="Yashirish sababi" rules={[{ required: true, whitespace: true, message: 'Sotuvchiga yuboriladigan sababni kiriting' }, { min: 5 }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount /></Form.Item> : null}
         </Form>

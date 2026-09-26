@@ -17,4 +17,4 @@
 .nameRow :global(.ant-tag) { display: inline-flex; align-items: center; gap: 4px; }
 .storeUrl { display: block; margin: 4px 0 9px; color: var(--color-accent) !important; font-size: 13px; }
 .identityCopy :global(.ant-typography) { max-width: 760px; margin-bottom: 0; color: var(--color-text-secondary); }
-@media (max-width: 767px) { .banner { height: 148px; } .bannerAction { right: 14px; top: 14px; } .identity { padding: 0 16px 18px; align-items: flex-start; flex-direction: column; gap: 8px; } .logo { width: 80px; height: 80px; border-radius: 18px; } .logoWrap { margin-top: -40px; } .nameRow { align-items: flex-start; flex-direction: column; } }
+@container content (max-width: 767px) { .banner { height: 148px; } .bannerAction { right: 14px; top: 14px; } .identity { padding: 0 16px 18px; align-items: flex-start; flex-direction: column; gap: 8px; } .logo { width: 80px; height: 80px; border-radius: 18px; } .logoWrap { margin-top: -40px; } .nameRow { align-items: flex-start; flex-direction: column; } }

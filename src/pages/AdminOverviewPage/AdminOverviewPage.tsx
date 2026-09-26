@@ -63,7 +63,7 @@ export default function AdminOverviewPage() {
   const columns: ColumnsType<AdminShop> = [
     { title: t('adminShops.market'), dataIndex: 'name', render: (name: string) => <strong>{name}</strong> },
     { title: t('adminShops.ownerId'), dataIndex: 'ownerUserId', width: 130, responsive: ['sm'], render: (id: string) => `#${id}` },
-    { title: t('users.phone'), dataIndex: 'phone', responsive: ['md'] },
+    { title: t('users.phone'), dataIndex: 'phone', responsive: ['md'], render: (phone: string | null) => phone || '—' },
     { title: t('users.status'), dataIndex: 'status', width: 120, render: () => <Tag color="warning">PENDING</Tag> },
     { title: t('users.actions'), width: 100, align: 'center', render: (_, shop) => <Button type="text" icon={<Eye size={16} />} onClick={() => void navigate(`/admin/shops?shopId=${encodeURIComponent(shop.id)}`)}>Ko‘rish</Button> },
   ];

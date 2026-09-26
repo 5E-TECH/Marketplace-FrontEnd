@@ -91,21 +91,21 @@ test('admin alohida sahifada yangi foydalanuvchi yaratadi', async ({ page }) => 
   await expect(page).toHaveURL(/\/admin\/users\/new$/);
   await expect(page.getByRole('heading', { name: 'Yangi foydalanuvchi' })).toBeVisible();
 
-  await page.getByLabel('To‘liq ism').fill('Yangi Operator');
+  await page.getByLabel('To‘liq ism').fill('Yangi Sotuvchi');
   await page.getByLabel('Telefon raqami').fill('+998901234568');
-  await page.getByLabel('Email').fill('operator@example.com');
+  await page.getByLabel('Email').fill('seller@example.com');
   await page.getByLabel('Foydalanuvchi roli').click();
-  await page.locator('.ant-select-item-option').filter({ hasText: 'Operator' }).click();
+  await page.locator('.ant-select-item-option').filter({ hasText: 'Sotuvchi' }).click();
   await page.getByLabel('Parol', { exact: true }).fill('Secret123');
   await page.getByLabel('Parolni tasdiqlash').fill('Secret123');
   await page.getByRole('button', { name: 'Foydalanuvchi yaratish' }).click();
 
   await expect(page).toHaveURL(/\/admin\/users$/);
   expect(requestBody).toEqual({
-    name: 'Yangi Operator',
+    name: 'Yangi Sotuvchi',
     phone: '+998901234568',
-    email: 'operator@example.com',
-    role: 'OPERATOR',
+    email: 'seller@example.com',
+    role: 'SELLER',
     password: 'Secret123',
   });
 });
@@ -188,4 +188,38 @@ test('admin payout action va report endpointlari ishlaydi', async ({ page }) => 
   await page.getByRole('tab', { name: 'Solishtirish' }).click();
   await expect.poll(() => reconciliation).toBeGreaterThan(0);
   await expect(page.getByText('450 000')).toBeVisible();
+});
+
+test('SUPERADMIN administratorni /admin/team orqali qo‘shadi, operator varianti yo‘q', async ({ page }) => {
+  let teamBody: Record<string, unknown> | undefined;
+  let registerCalled = false;
+  await page.route('**/api/v1/admin/users**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 } }) }));
+  await page.route('**/api/v1/auth/register', route => { registerCalled = true; return route.fulfill({ status: 400, body: '{}' }); });
+  await page.route('**/api/v1/admin/team', async route => {
+    expect(route.request().method()).toBe('POST');
+    teamBody = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ data: { id: '90' } }) });
+  });
+  await page.goto('/admin/users/new');
+  await page.getByLabel('To‘liq ism').fill('Yangi Admin');
+  await page.getByLabel('Telefon raqami').fill('+998901234569');
+  await page.getByLabel('Email').fill('admin@example.com');
+  await page.getByLabel('Foydalanuvchi roli').click();
+  const options = page.locator('.ant-select-dropdown:visible .ant-select-item-option');
+  await expect(options.filter({ hasText: /^Operator$/ })).toHaveCount(0);
+  await options.filter({ hasText: /^Administrator$/ }).click();
+  await page.getByLabel('Parol', { exact: true }).fill('Secret123');
+  await page.getByLabel('Parolni tasdiqlash').fill('Secret123');
+  await page.getByRole('button', { name: 'Foydalanuvchi yaratish' }).click();
+  await expect(page).toHaveURL(/\/admin\/users$/);
+  // CreateAdminTeamMemberDto'da email yo'q.
+  expect(teamBody).toEqual({ name: 'Yangi Admin', phone: '+998901234569', role: 'ADMIN', password: 'Secret123' });
+  expect(registerCalled).toBe(false);
+});
+
+test('oddiy ADMIN yangi foydalanuvchiga faqat xaridor yoki sotuvchi rolini bera oladi', async ({ page }) => {
+  await page.route('**/api/v1/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { id: 'admin-2', role: 'ADMIN', name: 'Admin', phone: '+998901234560', isActive: true, isDeleted: false } }) }));
+  await page.goto('/admin/users/new');
+  await page.getByLabel('Foydalanuvchi roli').click();
+  await expect(page.locator('.ant-select-dropdown:visible .ant-select-item-option')).toHaveText(['Xaridor', 'Sotuvchi']);
 });

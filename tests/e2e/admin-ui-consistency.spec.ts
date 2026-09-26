@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { findClippedBlocks } from './support/layout';
 
 const admin = {
   id: 'ui-admin', role: 'ADMIN', name: 'UI Admin', phone: '+998901234567',
@@ -87,4 +88,17 @@ test('kategoriya va audit shared panelda, sidebar va audit matni o‘qiladigan o
   const tableFontSize = await auditPanel.locator('tbody td').first().evaluate((node) => getComputedStyle(node).fontSize);
   expect(Number.parseFloat(sidebarFontSize)).toBeGreaterThanOrEqual(15);
   expect(Number.parseFloat(tableFontSize)).toBeGreaterThanOrEqual(14);
+});
+
+test('1024px da sidebar bilan audit sahifasi va header kontentdan chiqib kesilmaydi', async ({ page }) => {
+  await installAuthenticatedSession(page, { ...admin, name: 'Gulnora Saidakbarova-Mirzaahmedova' });
+  await page.route('**/api/v1/admin/audit**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { items: [{ id: '1', actorId: '2', action: 'shop.suspend', entityType: 'Shop', entityId: '3', createdAt: '2026-09-12T09:37:00.000Z' }], total: 1, page: 1, limit: 20, totalPages: 1 } }),
+  }));
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto('/admin/audit-logs');
+  await expect(page.getByText('Jami 1 ta', { exact: true })).toBeVisible();
+  expect(await findClippedBlocks(page)).toEqual([]);
 });

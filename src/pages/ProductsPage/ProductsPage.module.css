@@ -160,13 +160,14 @@
   background: var(--color-token-rgb-239-68-68-10) !important;
 }
 
-@media (max-width: 991px) {
+@container content (max-width: 767px) {
   .stats {
     gap: 8px;
   }
 }
 
-@media (max-width: 767px) {
+/* Telefon: statistik kartalar gorizontal karusel, jadval ekran chetigacha. */
+@container content (max-width: 575px) {
   .stats {
     display: flex;
     margin-inline: calc(var(--space-3) * -1);
@@ -177,7 +178,7 @@
   }
 
   .stats > * {
-    min-width: min(82vw, 300px);
+    flex: 0 0 min(78%, 280px);
     scroll-snap-align: start;
   }
 
@@ -188,11 +189,8 @@
     border-inline: 0;
     border-radius: 0;
   }
-}
 
-@media (max-width: 575px) {
   .statusFilter {
     width: 100%;
   }
-
 }

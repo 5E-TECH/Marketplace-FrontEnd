@@ -1,6 +1,6 @@
 import { Form, Modal } from 'antd';
 import type { FormInstance } from 'antd';
-import { useEffect, type ReactNode } from 'react';
+import { useLayoutEffect, type ReactNode } from 'react';
 import styles from './FormModal.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
 
@@ -10,14 +10,33 @@ interface FormModalProps<Values extends object> {
   title: ReactNode;
   form: FormInstance<Values>;
   children: ReactNode;
+  /** Har ochilishda forma shu qiymatlardan boshlanadi — ochishdan oldin `form.setFieldsValue` shart emas. */
   initialValues?: Partial<Values>;
+  /** `<Form name>`: maydon id'lari sahifadagi boshqa forma bilan to'qnashmasligi uchun. */
+  name?: string;
   submitText?: string;
   cancelText?: string;
   loading?: boolean;
-  resetOnClose?: boolean;
+  /** Tasdiqlash tugmasi xavfli amal rangida (masalan, rad etish). */
+  danger?: boolean;
   scrollToFirstError?: boolean | { focus?: boolean };
   onSubmit: (values: Values) => void | Promise<void>;
   onCancel: () => void;
+}
+
+/**
+ * Modal har ochilganda formani `initialValues` ga keltiradi.
+ *
+ * Form ichida va maydonlardan KEYIN turadi: effekt Form DOM'ga ulangach va
+ * maydonlar ro'yxatdan o'tgach ishlaydi. Ochiq turganda `initialValues`
+ * yangilansa (ota-sahifa qayta render bo'lib yangi obyekt uzatsa),
+ * foydalanuvchi kiritgan qiymatlar ustidan yozilmaydi.
+ */
+function ResetOnOpen({ form, open }: { form: FormInstance; open: boolean }) {
+  useLayoutEffect(() => {
+    if (open) form.resetFields();
+  }, [form, open]);
+  return null;
 }
 
 export function FormModal<Values extends object>({
@@ -27,21 +46,16 @@ export function FormModal<Values extends object>({
   form,
   children,
   initialValues,
+  name,
   submitText,
   cancelText,
   loading = false,
-  resetOnClose = true,
+  danger = false,
   scrollToFirstError = { focus: true },
   onSubmit,
   onCancel,
 }: FormModalProps<Values>) {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    if (open && initialValues) {
-      form.setFieldsValue(initialValues);
-    }
-  }, [form, initialValues, open]);
 
   const close = () => {
     if (!loading) onCancel();
@@ -55,21 +69,19 @@ export function FormModal<Values extends object>({
       title={title}
       okText={submitText ?? t('common.save')}
       cancelText={cancelText ?? t('common.cancel')}
+      okButtonProps={danger ? { danger: true } : undefined}
       confirmLoading={loading}
       closable={!loading}
-      maskClosable={!loading}
+      mask={{ closable: !loading }}
       keyboard={!loading}
       destroyOnHidden
       onOk={() => void form.submit()}
       onCancel={close}
-      afterOpenChange={(isOpen) => {
-        if (!isOpen && resetOnClose) {
-          form.resetFields();
-        }
-      }}
     >
       <Form<Values>
         form={form}
+        name={name}
+        initialValues={initialValues}
         layout="vertical"
         requiredMark
         scrollToFirstError={scrollToFirstError}
@@ -80,6 +92,7 @@ export function FormModal<Values extends object>({
         }}
       >
         {children}
+        <ResetOnOpen form={form} open={open} />
       </Form>
     </Modal>
   );

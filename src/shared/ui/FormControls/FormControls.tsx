@@ -35,7 +35,7 @@ export function NumberControl({
   );
 }
 
-export interface SelectControlOption {
+interface SelectControlOption {
   value: string;
   label: string;
   description?: string;

@@ -67,10 +67,20 @@ function readErrorMessage(value: unknown): string {
 }
 
 /**
+ * Kontrakt: `RegisterDto.role` faqat BUYER | SELLER; admin jamoasi (ADMIN |
+ * SUPERADMIN) alohida `POST /admin/team` orqali, joriy admin sessiyasi bilan
+ * qo'shiladi (DTO'da email yo'q). Operatorlarni seller o'z do'koni uchun yaratadi.
+ *
  * Register endpoint refresh cookie qaytaradi. Adminning joriy sessiyasi
  * almashib ketmasligi uchun javob credentials'siz olinadi.
  */
 export async function createAdminUser(payload: CreateAdminUserPayload): Promise<void> {
+  if (payload.role === 'ADMIN' || payload.role === 'SUPERADMIN') {
+    const { name, phone, role, password } = payload;
+    await httpClient.post('/admin/team', { name, phone, role, password });
+    return;
+  }
+
   const apiBaseUrl = (import.meta.env.VITE_API_URL?.trim() || '/api').replace(/\/$/, '');
   const response = await fetch(`${apiBaseUrl}/auth/register`, {
     method: 'POST',

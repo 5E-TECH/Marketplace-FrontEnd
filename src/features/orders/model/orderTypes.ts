@@ -36,10 +36,7 @@ export interface UpdateSellerOrderStatusPayload {
 }
 
 export interface CreateShipmentPayload { id: string; customerPhone: string }
-export interface SellerOrderHistory { id: string; status: SellerOrderStatus; createdAt: string }
-export interface SellerOrderItem { id: string; name: string; quantity: number; price: number }
 
-export type PaymentMethod = 'COD' | 'PAYME' | 'CLICK';
 export type AdminOrderStatus = 'DRAFT' | 'PENDING_PAYMENT' | 'PAID' | 'CONFIRMED' | 'PARTIALLY_FULFILLED' | 'FULFILLED' | 'CANCELLED' | 'REFUNDED';
 export type AdminPaymentMethod = 'online' | 'cod';
 export interface AdminOrderListParams {

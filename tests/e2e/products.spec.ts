@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { collectUnconnectedFormWarnings } from './support/console';
 
 const makeProduct = (index: number) => ({
   id: index === 1 ? '12' : `product-${index}`,
@@ -13,6 +14,7 @@ const makeProduct = (index: number) => ({
   stock: index,
   status: index <= 5 ? 'LOW' : index <= 10 ? 'ACTIVE' : 'DRAFT',
   imageUrl: index === 1 ? 'https://cdn.example.com/product-1.jpg' : null,
+  images: index === 2 ? ['https://cdn.example.com/product-2.jpg'] : [],
 });
 
 async function mockProductsApi(page: Page) {
@@ -102,6 +104,8 @@ test('status filter serverga status query yuboradi va natijani filtrlaydi', asyn
 
 test('jadval backenddan kelgan cover rasmni ko‘rsatadi', async ({ page }) => {
   await expect(page.locator('img[src="https://cdn.example.com/product-1.jpg"]')).toBeVisible();
+  // imageUrl bo'sh, rasm faqat images massivida.
+  await expect(page.locator('img[src="https://cdn.example.com/product-2.jpg"]')).toBeVisible();
 });
 
 test('create alohida to‘liq sahifada ochiladi va kategoriya filteri APIga ulanadi', async ({ page }) => {
@@ -342,6 +346,7 @@ test('product create yangi API contractiga mos payload yuboradi', async ({ page 
 });
 
 test('variant jadvalida qo‘shish, tahrirlash va o‘chirish UI ishlaydi', async ({ page }) => {
+  const formWarnings = collectUnconnectedFormWarnings(page);
   await page.goto('/products/new');
   await page.getByLabel('Narxi', { exact: true }).fill('120000');
   await expect(page.getByLabel('Standart variant')).toContainText('120 000 so‘m');
@@ -356,6 +361,8 @@ test('variant jadvalida qo‘shish, tahrirlash va o‘chirish UI ishlaydi', asyn
   await expect(page.getByRole('cell', { name: 'Qora / XL', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Qora / XL variantini tahrirlash' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Variantni tahrirlash' });
+  await expect(editDialog.getByLabel('Variant nomi')).toHaveValue('Qora / XL');
+  await expect(editDialog.getByLabel('SKU')).toHaveValue('MAS-001-QORA-XL');
   await editDialog.getByLabel('Variant nomi').fill('Oq / L');
   await editDialog.getByRole('button', { name: 'Saqlash' }).click();
   await expect(page.getByRole('cell', { name: 'Oq / L', exact: true })).toBeVisible();
@@ -363,6 +370,7 @@ test('variant jadvalida qo‘shish, tahrirlash va o‘chirish UI ishlaydi', asyn
   await page.getByRole('button', { name: 'Oq / L variantini o‘chirish' }).click();
   await page.getByRole('button', { name: 'O‘chirish', exact: true }).click();
   await expect(page.getByText('Hali variant qo‘shilmagan')).toBeVisible();
+  expect(formWarnings).toEqual([]);
 });
 
 test('TC1: variant qo‘shish va saqlash backendda persist qilinadi', async ({ page }) => {

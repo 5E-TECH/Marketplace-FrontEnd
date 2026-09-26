@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createBanner, deleteBanner, getBanners, reorderBanners, updateBanner, uploadBannerImage } from './bannerApi';
 
-export const bannerKey = ['admin', 'content', 'banners'] as const;
+const bannerKey = ['admin', 'content', 'banners'] as const;
 
 /**
  * Xatoda ham ro'yxat qayta olinadi: parallel o'chirish yoki tahrirdan keyin

@@ -55,13 +55,17 @@
 .previewPhone .previewTitle { font-size: 10px; }
 .formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
 
-@media (max-width: 720px) {
+@container content (max-width: 767px) {
   .rows { padding: var(--space-2); }
   .row { grid-template-columns: 112px minmax(0, 1fr); grid-template-areas: 'thumb copy' 'actions actions'; gap: var(--space-3); padding: var(--space-3); }
   .position { display: none; }
   .thumb { width: 112px; grid-area: thumb; }
   .copy { grid-area: copy; }
   .actions { grid-area: actions; justify-content: flex-end; padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
+}
+
+/* Banner modali portal orqali body'da — viewport bo'yicha. */
+@media (max-width: 767px) {
   .formGrid { grid-template-columns: 1fr; }
   .previewGrid { grid-template-columns: 1fr; }
 }

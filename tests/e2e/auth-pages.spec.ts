@@ -123,3 +123,34 @@ test('noto‘g‘ri parol server xatosini ko‘rsatadi va token saqlamaydi', asy
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
   ).toBeNull();
 });
+
+test('login formasi bo‘sh va noto‘g‘ri qiymatlarni serverga yubormaydi', async ({ page }) => {
+  let loginRequests = 0;
+  await page.route('**/api/v1/auth/login', (route) => { loginRequests++; return route.abort(); });
+  await page.goto('/login');
+  const phone = page.getByLabel('Telefon raqami');
+  const password = page.getByLabel('Parol');
+  const submit = page.getByRole('button', { name: /platformaga kirish/i });
+
+  await submit.click();
+  await expect(page.getByText('Telefon raqamini kiriting')).toBeVisible();
+  await expect(page.getByText('Parolni kiriting')).toBeVisible();
+
+  // Harf va belgilar tashlanadi, 9 raqamdan ortig'i kesiladi.
+  await phone.fill('90-abc 12');
+  await expect(phone).toHaveValue('9012');
+  await phone.fill('9012345678901');
+  await expect(phone).toHaveValue('901234567');
+  // Joylangan to'liq raqamda 998 prefiksi tashlanadi.
+  await phone.fill('+998 90 123 45 67');
+  await expect(phone).toHaveValue('901234567');
+  await phone.fill('998931112233');
+  await expect(phone).toHaveValue('931112233');
+
+  await phone.fill('90123456');
+  await password.fill('x'.repeat(300));
+  await expect(password).toHaveValue('x'.repeat(128));
+  await submit.click();
+  await expect(page.getByText('9 xonali telefon raqamini kiriting')).toBeVisible();
+  expect(loginRequests).toBe(0);
+});

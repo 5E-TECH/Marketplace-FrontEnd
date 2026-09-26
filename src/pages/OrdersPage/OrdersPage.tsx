@@ -15,7 +15,7 @@ import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import styles from './OrdersPage.module.css';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
@@ -77,7 +77,7 @@ export default function OrdersPage() {
   const printLabels = async (ids: string[]) => {
     setPrintLoading(true);
     try { await openOrderLabels('seller', ids); }
-    catch (error) { void message.error(getAuthErrorMessage(error)); }
+    catch (error) { void message.error(getApiErrorMessage(error)); }
     finally { setPrintLoading(false); }
   };
   const columns: ColumnsType<SellerOrder> = [
@@ -91,7 +91,7 @@ export default function OrdersPage() {
   ];
 
   if (ordersQuery.isPending) return <ContentState state="loading" />;
-  if (ordersQuery.isError) return <ContentState state="error" title={t('order.loadError')} description={getAuthErrorMessage(ordersQuery.error)} onAction={() => void ordersQuery.refetch()} />;
+  if (ordersQuery.isError) return <ContentState state="error" title={t('order.loadError')} description={getApiErrorMessage(ordersQuery.error)} onAction={() => void ordersQuery.refetch()} />;
 
   return <main className={styles.page}>
     <PageHeader title={t('order.title')} description={t('order.description')} />
@@ -103,12 +103,12 @@ export default function OrdersPage() {
     <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? `${selectedRowKeys.length} ta tanlandi` : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>Yorliqlarni chop etish</Button>}>
       <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? 'Avval posilka yarating' : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={{ current: page, total: ordersQuery.data.total, onChange: setPage }} />
     </TablePanel>
-    <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} width="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
+    <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} size="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>
         <DetailList items={[{ label: t('order.buyer'), value: selectedOrder.buyerName || t('common.unknown') }, { label: t('order.items'), value: t('order.itemCount', { count: selectedOrder.itemsCount }) }, { label: t('order.amount'), value: formatPrice(selectedOrder.subtotal) }, { label: t('order.codAmount'), value: formatPrice(selectedOrder.codAmount) }, { label: t('common.status'), value: <StatusTag status={selectedOrder.status} /> }]} />
         <div className={styles.quickActions}>
-          <Popconfirm title={t('order.confirmQuestion')} disabled={!canConfirm} onConfirm={() => confirmMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CONFIRMED' } : current); setNextStatus('CONFIRMED'); void message.success(t('order.confirmed')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}><Button type="primary" icon={<Check size={16} />} disabled={!canConfirm} loading={confirmMutation.isPending}>{t('common.confirm')}</Button></Popconfirm>
-          <Popconfirm title={t('order.cancelQuestion')} description={t('order.cancelDescription')} disabled={!canCancel} onConfirm={() => cancelMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CANCELLED' } : current); setNextStatus('CANCELLED'); void message.success(t('order.cancelled')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}><Button danger icon={<Ban size={16} />} disabled={!canCancel} loading={cancelMutation.isPending}>{t('common.cancel')}</Button></Popconfirm>
+          <Popconfirm title={t('order.confirmQuestion')} disabled={!canConfirm} onConfirm={() => confirmMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CONFIRMED' } : current); setNextStatus('CONFIRMED'); void message.success(t('order.confirmed')); }, onError: (error) => void message.error(getApiErrorMessage(error)) })}><Button type="primary" icon={<Check size={16} />} disabled={!canConfirm} loading={confirmMutation.isPending}>{t('common.confirm')}</Button></Popconfirm>
+          <Popconfirm title={t('order.cancelQuestion')} description={t('order.cancelDescription')} disabled={!canCancel} onConfirm={() => cancelMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CANCELLED' } : current); setNextStatus('CANCELLED'); void message.success(t('order.cancelled')); }, onError: (error) => void message.error(getApiErrorMessage(error)) })}><Button danger icon={<Ban size={16} />} disabled={!canCancel} loading={cancelMutation.isPending}>{t('common.cancel')}</Button></Popconfirm>
         </div>
         <Button block icon={<Printer size={16} />} disabled={!selectedOrder.elchiShipmentId} loading={printLoading} onClick={() => void printLabels([selectedOrder.id])}>Yorliqni chop etish</Button>
         <section className={styles.statusEditor} aria-label={t('order.updateStatus')}>
@@ -122,14 +122,14 @@ export default function OrdersPage() {
                 setSelectedOrder((current) => current ? { ...current, status: submittedStatus } : current);
                 void message.success(t('order.statusUpdated'));
               },
-              onError: (error) => void message.error(getAuthErrorMessage(error)),
+              onError: (error) => void message.error(getApiErrorMessage(error)),
             });
           }}>{t('order.saveStatus')}</Button>
         </section>
         <section className={styles.shipmentEditor} aria-label={t('order.createShipment')}>
           <div><strong>{t('order.shipment')}</strong><span>{t('order.phoneDescription')}</span></div>
           <Input value={customerPhone} placeholder="+998901234567" inputMode="tel" maxLength={13} onChange={(event) => setCustomerPhone(event.target.value.replace(/[^+\d]/g, ''))} />
-          <Button icon={<Truck size={16} />} loading={shipmentMutation.isPending} disabled={!canCreateShipment || !/^\+998\d{9}$/.test(customerPhone)} onClick={() => shipmentMutation.mutate({ id: selectedOrder.id, customerPhone }, { onSuccess: () => { setCustomerPhone(''); setSelectedOrder((current) => current ? { ...current, status: 'SHIPMENT_CREATED' } : current); setNextStatus('SHIPMENT_CREATED'); void message.success(t('order.shipmentCreated')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}>{t('order.createShipment')}</Button>
+          <Button icon={<Truck size={16} />} loading={shipmentMutation.isPending} disabled={!canCreateShipment || !/^\+998\d{9}$/.test(customerPhone)} onClick={() => shipmentMutation.mutate({ id: selectedOrder.id, customerPhone }, { onSuccess: () => { setCustomerPhone(''); setSelectedOrder((current) => current ? { ...current, status: 'SHIPMENT_CREATED' } : current); setNextStatus('SHIPMENT_CREATED'); void message.success(t('order.shipmentCreated')); }, onError: (error) => void message.error(getApiErrorMessage(error)) })}>{t('order.createShipment')}</Button>
         </section>
         <Tabs className={styles.orderTabs} items={[
           { key: 'detail', label: t('order.details'), children: <ApiDataState query={detailQuery} empty={t('order.noDetails')} /> },

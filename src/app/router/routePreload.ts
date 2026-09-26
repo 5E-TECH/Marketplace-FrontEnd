@@ -28,7 +28,7 @@ export const routeImports = {
   adminOverview: () => import('../../pages/AdminOverviewPage/AdminOverviewPage'),
 };
 
-export const routePreloaders: Array<[
+const routePreloaders: Array<[
   prefix: string,
   preload: () => Promise<unknown>,
 ]> = [

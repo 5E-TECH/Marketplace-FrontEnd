@@ -18,9 +18,9 @@ export function ElchiTimeline({ order }: { order: SellerOrder }) {
   const terminal = order.status === 'CANCELLED' ? { title: 'Bekor qilindi', color: 'red' } : order.status === 'RETURNED' ? { title: 'Qaytarildi', color: 'orange' } : null;
   const items = stages.map((stage, index) => ({
     color: terminal ? (index === 0 ? 'green' : 'gray') : index <= currentIndex ? 'green' : 'gray',
-    children: <div className={styles.stage}><strong>{stage.title}</strong><span>{stage.description}</span>{index === 0 ? <time>{formatDateTime(order.createdAt)}</time> : null}</div>,
+    content: <div className={styles.stage}><strong>{stage.title}</strong><span>{stage.description}</span>{index === 0 ? <time>{formatDateTime(order.createdAt)}</time> : null}</div>,
   }));
-  if (terminal) items.push({ color: terminal.color, children: <div className={styles.stage}><strong>{terminal.title}</strong><span>Elchi yetkazib berish jarayoni yakunlandi</span></div> });
+  if (terminal) items.push({ color: terminal.color, content: <div className={styles.stage}><strong>{terminal.title}</strong><span>Elchi yetkazib berish jarayoni yakunlandi</span></div> });
 
   return <section className={styles.root} aria-label="Elchi status timeline">
     <div className={styles.heading}><span><MapPin size={18} /></span><div><strong>Elchi yo‘nalish tarixi</strong><small>{order.elchiShipmentId ? `Jo‘natma #${order.elchiShipmentId}` : 'Jo‘natma hali yaratilmagan'}</small></div></div>

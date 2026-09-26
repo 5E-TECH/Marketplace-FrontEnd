@@ -2,7 +2,7 @@ import { Boxes, CircleDollarSign, PackageCheck, ShoppingCart, TriangleAlert } fr
 import { Card, Col, Empty, Flex, Progress, Row, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useSellerDashboardQuery } from '../../features/dashboard/api/dashboardQueries';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
 import { MetricCard } from './components/MetricCard/MetricCard';
@@ -19,7 +19,7 @@ export default function HomePage() {
       <Typography.Text type="secondary">Ma’lumotlar avtomatik yangilanadi</Typography.Text>
     </Flex>
     {dashboardQuery.isPending ? <ContentState state="loading" /> : null}
-    {dashboardQuery.isError ? <ContentState state="error" title="Statistikani yuklab bo‘lmadi" description={getAuthErrorMessage(dashboardQuery.error)} onAction={() => void dashboardQuery.refetch()} /> : null}
+    {dashboardQuery.isError ? <ContentState state="error" title="Statistikani yuklab bo‘lmadi" description={getApiErrorMessage(dashboardQuery.error)} onAction={() => void dashboardQuery.refetch()} /> : null}
     {dashboard ? <>
     <Row gutter={[16, 16]}>
       <Col xs={24} sm={12} xl={6}><MetricCard title="Jami daromad" value={`${formatMoney(dashboard.revenue)} so‘m`} icon={<CircleDollarSign />} tone="violet" hint="yetkazilgan buyurtmalardan" /></Col>

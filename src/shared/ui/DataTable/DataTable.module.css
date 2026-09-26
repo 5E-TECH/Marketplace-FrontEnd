@@ -36,7 +36,7 @@
   background: var(--color-accent-soft) !important;
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .table :global(.ant-table-pagination.ant-pagination) {
     padding: var(--space-3);
   }

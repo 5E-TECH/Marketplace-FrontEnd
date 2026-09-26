@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { collectUnconnectedFormWarnings } from './support/console';
 
 const operators = Array.from({ length: 21 }, (_, index) => ({
   id: String(index + 1),
@@ -38,4 +39,25 @@ test('seller operator search va pagination backend kontraktiga mos client-side i
   await page.getByTitle('3').click();
   await expect(page.getByText('Noyob Operator')).toBeVisible();
   expect(requests).toBe(1);
+});
+
+test('operatorni tahrirlash oynasi joriy qiymatlar bilan ochiladi va PATCH yuboradi', async ({ page }) => {
+  await installAuthenticatedSession(page);
+  const formWarnings = collectUnconnectedFormWarnings(page);
+  let patchBody: unknown;
+  await page.route('**/api/v1/sellers/operators', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: operators.slice(0, 2) }) }));
+  await page.route('**/api/v1/sellers/operators/2', async route => {
+    patchBody = route.request().postDataJSON();
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { ...operators[1], ...(patchBody as object) } }) });
+  });
+
+  await page.goto('/users');
+  await page.getByRole('row', { name: /Operator 2/ }).getByRole('button', { name: 'Tahrirlash' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Operatorni tahrirlash' });
+  await expect(dialog.getByLabel('Ism')).toHaveValue('Operator 2');
+  await expect(dialog.getByLabel('Telefon')).toHaveValue('+998901234501');
+  await dialog.getByLabel('Ism').fill('Yangi Operator');
+  await dialog.getByRole('button', { name: 'O‘zgarishlarni saqlash' }).click();
+  await expect.poll(() => patchBody).toEqual({ name: 'Yangi Operator', phone: '+998901234501' });
+  expect(formWarnings).toEqual([]);
 });

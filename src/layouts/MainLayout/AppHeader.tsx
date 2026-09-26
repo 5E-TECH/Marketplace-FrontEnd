@@ -40,7 +40,7 @@ export function AppHeader({
   return (
     <Layout.Header className={styles.header}>
       <Flex align="center" justify="space-between" className={styles.headerContent}>
-        <Flex align="center" gap={16}>
+        <Flex align="center" gap={16} className={styles.headerStart}>
           <Button
             type="text"
             icon={mobile || collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -75,7 +75,7 @@ export function AppHeader({
               aria-label={t('header.notifications')}
             />
           </Badge>
-          <Divider type="vertical" className={styles.headerDivider} />
+          <Divider orientation="vertical" className={styles.headerDivider} />
           <button
             className={styles.accountSummary}
             type="button"

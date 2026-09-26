@@ -21,7 +21,7 @@ import type { AdminUser } from '../../features/adminUsers/model/adminUserTypes';
 import {
   ADMIN_USER_BLOCK_ACTION_CONFIG,
 } from '../../features/adminUsers/ui/adminUserActionConfig';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -125,7 +125,7 @@ export default function AdminUserDetailPage() {
             user.blocked ? t('admin.users.unblocked') : t('admin.users.blocked'),
           );
         },
-        onError: (error) => void message.error(getAuthErrorMessage(error)),
+        onError: (error) => void message.error(getApiErrorMessage(error)),
       },
     );
   };
@@ -148,7 +148,7 @@ export default function AdminUserDetailPage() {
           <ContentState
             state="error"
             title={t('admin.users.detailLoadError')}
-            description={getAuthErrorMessage(userQuery.error)}
+            description={getApiErrorMessage(userQuery.error)}
             onAction={() => void userQuery.refetch()}
           />
         ) : (

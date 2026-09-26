@@ -15,6 +15,7 @@ import { useStorefrontShopQuery } from '../../features/storefront/api/storefront
 import type { StorefrontSort } from '../../features/storefront/model/storefrontTypes';
 import { usePublicCategoriesQuery } from '../../features/categories/api/categoryQueries';
 import { createCategoryOptions } from '../../features/categories/lib/categoryOptions';
+import { getProductCover } from '../../features/products/lib/getProductCover';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
@@ -23,6 +24,8 @@ import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitc
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { AppPagination } from '../../shared/ui/AppPagination/AppPagination';
 import styles from './StorefrontShopPage.module.css';
+
+const STOREFRONT_SORTS: readonly StorefrontSort[] = ['createdAt:asc', 'createdAt:desc', 'price:asc', 'price:desc', 'name:asc', 'name:desc'];
 
 const PAGE_SIZE = 12;
 
@@ -55,7 +58,9 @@ export default function StorefrontShopPage() {
   const debouncedSearch = useDebouncedValue(search.trim());
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const categoryId = searchParams.get('categoryId') ?? '';
-  const sort = (searchParams.get('sort') ?? 'createdAt:desc') as StorefrontSort;
+  // URL'dagi noma'lum qiymat backend enum'ida 400 berib butun sahifani xato holatiga tushirardi.
+  const requestedSort = searchParams.get('sort');
+  const sort: StorefrontSort = STOREFRONT_SORTS.includes(requestedSort as StorefrontSort) ? requestedSort as StorefrontSort : 'createdAt:desc';
   const minPrice = readPositiveNumber(searchParams.get('minPrice'));
   const maxPrice = readPositiveNumber(searchParams.get('maxPrice'));
   const [priceDraft, setPriceDraft] = useState<[number | null, number | null]>([
@@ -233,12 +238,14 @@ export default function StorefrontShopPage() {
 
           {products.length ? (
             <div className={styles.productGrid}>
-              {products.map((product) => (
+              {products.map((product) => {
+                const cover = getProductCover(product);
+                return (
                 <Link className={styles.productLink} to={`/mahsulot/${encodeURIComponent(product.id)}`} key={product.id}>
                 <article className={styles.productCard}>
                   <div className={styles.productMedia}>
                     <span><ImageIcon /><small>{t('storefront.noImage')}</small></span>
-                    {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" onError={(event) => event.currentTarget.remove()} /> : null}
+                    {cover ? <img src={cover} alt={product.name} loading="lazy" onError={(event) => event.currentTarget.remove()} /> : null}
                     {product.oldPrice && product.oldPrice > product.price
                       ? <span className={styles.discount}>−{Math.round((1 - product.price / product.oldPrice) * 100)}%</span>
                       : null}
@@ -254,7 +261,8 @@ export default function StorefrontShopPage() {
                   </div>
                 </article>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className={styles.empty}><ContentState state="empty" title={t('storefront.empty')} description={t('storefront.emptyDescription')} /></div>

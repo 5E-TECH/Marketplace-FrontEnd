@@ -63,6 +63,17 @@ test('TC2: faqat o‘sha do‘konning mahsulotlari chiqadi', async ({ page }) =>
   await expect(page.getByText('Boshqa do‘kon mahsuloti')).toHaveCount(0);
 });
 
+test('rasm faqat images massivida kelsa ham mahsulot kartasida ko‘rinadi', async ({ page }) => {
+  const image = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='teal'/%3E%3C/svg%3E";
+  await mockCategories(page);
+  await page.route('**/api/v1/storefront/shops/ali-market**', (route) => route.fulfill({ json: { data: {
+    shop,
+    products: { items: [{ ...product('1', '15', 'iPhone 16 Pro', 14999000), images: [image] }], total: 1, page: 1, limit: 12, totalPages: 1 },
+  } } }));
+  await page.goto('/dokon/ali-market');
+  await expect(page.getByRole('img', { name: 'iPhone 16 Pro' })).toHaveAttribute('src', image);
+});
+
 test('qidiruv, kategoriya, narx, saralash va pagination backend querylariga ulanadi', async ({ page }) => {
   await mockCategories(page);
   const requests: URL[] = [];
@@ -147,4 +158,16 @@ test('do‘kon sahifasi 375px ekranda gorizontal overflow bermaydi', async ({ pa
   await expect(page.getByRole('heading', { level: 1, name: 'Ali Market' })).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('storefront-shop-mobile.png'), fullPage: true });
+});
+
+test('URL’dagi noma’lum sort qiymati backendga yuborilmaydi va sahifa ochiladi', async ({ page }) => {
+  await mockCategories(page);
+  const sorts: Array<string | null> = [];
+  await page.route('**/api/v1/storefront/shops/ali-market**', (route) => {
+    sorts.push(new URL(route.request().url()).searchParams.get('sort'));
+    return route.fulfill({ json: { data: { shop, products: { items: [product('1', '15', 'iPhone 16 Pro', 14999000)], total: 1, page: 1, limit: 12, totalPages: 1 } } } });
+  });
+  await page.goto('/dokon/ali-market?sort=foo;drop');
+  await expect(page.getByText('iPhone 16 Pro')).toBeVisible();
+  expect(sorts.every((value) => value === null || value === 'createdAt:desc')).toBe(true);
 });

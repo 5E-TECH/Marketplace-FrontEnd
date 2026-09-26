@@ -12,7 +12,8 @@ import { useAdminShopNames } from '../../features/adminShops/api/adminShopQuerie
 import { useAdminCategoryNames } from '../../features/categories/api/categoryQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { ProductStatus } from '../../features/products/model/productTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getProductCover } from '../../features/products/lib/getProductCover';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
@@ -64,11 +65,14 @@ export default function AdminProductsPage() {
     {
       title: '',
       width: 72,
-      render: (_, product) => product.imageUrl ? (
-        <img className={styles.thumbnail} src={product.imageUrl} alt="" loading="lazy" />
-      ) : (
-        <span className={styles.thumbnailFallback}><ImageIcon aria-hidden /></span>
-      ),
+      render: (_, product) => {
+        const cover = getProductCover(product);
+        return cover ? (
+          <img className={styles.thumbnail} src={cover} alt="" loading="lazy" />
+        ) : (
+          <span className={styles.thumbnailFallback}><ImageIcon aria-hidden /></span>
+        );
+      },
     },
     {
       title: t('adminProducts.product'),
@@ -150,7 +154,7 @@ export default function AdminProductsPage() {
     <ContentState
       state="error"
       title={t('adminProducts.loadError')}
-      description={getAuthErrorMessage(query.error)}
+      description={getApiErrorMessage(query.error)}
       onAction={() => void query.refetch()}
     />
   );
@@ -217,7 +221,6 @@ export default function AdminProductsPage() {
           rowKey="id"
           columns={columns}
           dataSource={query.data.items}
-          scroll={{ x: 1200 }}
           emptyState={<EmptyState compact title={t('adminProducts.empty')} description={t('adminProducts.emptyDescription')} />}
           pagination={{ current: page, total: query.data.total, onChange: setPage }}
         />
@@ -240,7 +243,7 @@ export default function AdminProductsPage() {
               setPendingAction(null);
               moderationForm.resetFields();
             },
-            onError: (error) => void message.error(getAuthErrorMessage(error)),
+            onError: (error) => void message.error(getApiErrorMessage(error)),
           });
         }}>
           {!pendingAction?.isBlocked ? <Form.Item name="reason" label="Yashirish sababi" rules={[{ required: true, whitespace: true, message: 'Sotuvchiga yuboriladigan sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: mahsulot marketplace qoidalariga mos emas" /></Form.Item> : null}

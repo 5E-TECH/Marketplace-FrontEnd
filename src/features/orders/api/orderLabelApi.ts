@@ -1,4 +1,21 @@
+import axios from 'axios';
 import { httpClient } from '../../../shared/api/httpClient';
+
+/** Kontrakt: ShippingLabelsBatchDto.orderIds — maxItems 100. */
+const MAX_LABELS_PER_REQUEST = 100;
+
+/**
+ * `responseType: 'blob'` bo'lganda backendning JSON xatosi ham Blob bo'lib keladi —
+ * umumiy xato ishlovchisi uni o'qiy olmaydi va "server bilan bog'lanib bo'lmadi"
+ * deb chiqaradi. Blob'ni JSON'ga qaytaramiz.
+ */
+async function withReadableErrorBody(error: unknown): Promise<unknown> {
+  if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+    try { error.response.data = JSON.parse(await error.response.data.text()) as unknown; }
+    catch { /* JSON bo'lmasa asl xato qoladi. */ }
+  }
+  return error;
+}
 
 export type OrderLabelScope = 'seller' | 'admin';
 
@@ -17,6 +34,7 @@ async function requestLabel(scope: OrderLabelScope, orderIds: string[]): Promise
 /** PDF ko‘rish oynasi brauzer tomonidan bloklanmasligi uchun oynani klik paytida ochadi. */
 export async function openOrderLabels(scope: OrderLabelScope, orderIds: string[]): Promise<void> {
   if (!orderIds.length) return;
+  if (orderIds.length > MAX_LABELS_PER_REQUEST) throw new Error(`Bir vaqtda ko‘pi bilan ${MAX_LABELS_PER_REQUEST} ta yorliq chop etiladi. ${orderIds.length} ta tanlangan.`);
   const preview = window.open('about:blank', '_blank');
   if (preview) preview.opener = null;
   try {
@@ -32,6 +50,6 @@ export async function openOrderLabels(scope: OrderLabelScope, orderIds: string[]
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
   } catch (error) {
     preview?.close();
-    throw error;
+    throw await withReadableErrorBody(error);
   }
 }
