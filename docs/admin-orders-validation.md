@@ -17,8 +17,9 @@ Backend manbasi: [5E-TECH/marketplace — SellerOrdersService](https://github.co
 
 - TC1: turli sotuvchilar, jadval ustunlari, pagination.
 - TC2: holat/to‘lov/do‘kon/sana filtrlari, birgalikdagi filtr, reset, sahifani 1 ga qaytarish, API xatosidan tiklanish.
-- TC3: sub-buyurtma/item/jo‘natma/to‘lov/tarix, backend formatidagi javob, desktop/mobile, detail loading va 404 dan qayta urinish. Admin buyurtmalarga faqat GET yuborilishi tekshiriladi.
+- TC3: sub-buyurtma/item/jo‘natma/to‘lov/tarix, backend formatidagi javob, desktop/mobile, detail loading va 404 dan qayta urinish. Admin buyurtmalarga faqat GET yuboriladi; istisno — yorliq (`POST /admin/orders/labels`) va refund/cancel (`POST /admin/orders/{id}/refund|cancel`).
 - TC4: boshlang‘ich loading, buyurtmasiz va filtr natijasiz holatlar.
+- Refund/cancel (v1 — faqat COD: refund tugmasi hech bir buyurtmada ko‘rinmaydi, u v2 online to‘lov uchun; cancel DRAFT/PENDING_PAYMENT uchun ishlaydi): tugma faqat mos holatda ko‘rinadi (refund — online va PAID/CONFIRMED/PARTIALLY_FULFILLED/FULFILLED; cancel — DRAFT/PENDING_PAYMENT), sabab 5–500 belgi, ikki marta bosishda bitta so‘rov, `idempotent: true` va 400/403/404 xabarlari.
 
 Testlar HTTP javoblarini mock qiladi; backend formatidagi fixture yuqoridagi commit kodidan tekshirilgan. Bu jonli backend va DB bilan integratsion test o‘rnini bosmaydi.
 

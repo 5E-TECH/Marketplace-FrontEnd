@@ -1,6 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { AdminOrder, AdminOrderDetail, AdminOrderHistoryEntry, AdminOrderItemDetail, AdminOrderListParams, AdminOrderPaymentDetail, AdminOrderShipmentDetail, AdminOrderStatus, AdminOrdersPage, AdminSubOrder, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
+import type { AdminOrder, AdminOrderActionPayload, AdminOrderActionResult, AdminOrderDetail, AdminOrderHistoryEntry, AdminOrderItemDetail, AdminOrderListParams, AdminOrderPaymentDetail, AdminOrderShipmentDetail, AdminOrderStatus, AdminOrdersPage, AdminSubOrder, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'RECEIVED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 const adminStatuses: AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED', 'CANCELLED', 'REFUNDED'];
@@ -171,3 +171,14 @@ function parseAdminOrderDetail(value: unknown): AdminOrderDetail {
   };
 }
 export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<AdminOrderDetail> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return parseAdminOrderDetail(unwrapApiData(data)); }
+
+/** Refund/cancel javobi: `{ status, idempotent }`. Amal bajarilgan bo‘lishi mumkin, shuning uchun javob shakli qat’iy tekshirilmaydi. */
+function parseAdminOrderActionResult(data: unknown): AdminOrderActionResult {
+  return { idempotent: asRecord(unwrapApiData(data))?.idempotent === true };
+}
+export async function refundAdminOrder({ id, reason }: AdminOrderActionPayload): Promise<AdminOrderActionResult> {
+  const { data } = await httpClient.post<unknown>(`/admin/orders/${encodeURIComponent(id)}/refund`, { reason }); return parseAdminOrderActionResult(data);
+}
+export async function cancelAdminOrder({ id, reason }: AdminOrderActionPayload): Promise<AdminOrderActionResult> {
+  const { data } = await httpClient.post<unknown>(`/admin/orders/${encodeURIComponent(id)}/cancel`, { reason }); return parseAdminOrderActionResult(data);
+}

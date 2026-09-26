@@ -64,6 +64,9 @@ export interface AdminOrder {
   createdAt: string;
 }
 export interface AdminOrdersPage { items: AdminOrder[]; total: number; page: number; limit: number; totalPages: number }
+export interface AdminOrderActionPayload { id: string; reason: string }
+/** `idempotent: true` — buyurtma allaqachon shu holatda edi, yangi yon ta’sir bo‘lmadi. */
+export interface AdminOrderActionResult { idempotent: boolean }
 
 export interface AdminSubOrder {
   id: string;
