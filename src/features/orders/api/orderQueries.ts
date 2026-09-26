@@ -1,6 +1,6 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { cancelSellerOrder, confirmSellerOrder, createSellerShipment, getAdminOrder, getAdminOrders, getSellerOrder, getSellerOrderHistory, getSellerOrderItems, getSellerOrders, getSellerShipment, getSellerShipments, getSellerShipmentTracking, updateSellerOrderStatus } from './orderApi';
-import type { AdminOrderListParams, AdminOrderStatus, SellerOrderListParams } from '../model/orderTypes';
+import { cancelAdminOrder, cancelSellerOrder, confirmSellerOrder, createSellerShipment, getAdminOrder, getAdminOrders, getSellerOrder, getSellerOrderHistory, getSellerOrderItems, getSellerOrders, getSellerShipment, getSellerShipments, getSellerShipmentTracking, refundAdminOrder, updateSellerOrderStatus } from './orderApi';
+import type { AdminOrderActionPayload, AdminOrderActionResult, AdminOrderListParams, AdminOrderStatus, SellerOrderListParams } from '../model/orderTypes';
 
 export const orderKeys = { all: ['seller-orders'] as const, list: (params: SellerOrderListParams) => [...orderKeys.all, params] as const };
 export const shipmentKeys = { all: ['seller-shipments'] as const, list: (params: SellerOrderListParams) => [...shipmentKeys.all, params] as const };
@@ -161,3 +161,10 @@ export function useAdminOrdersByStatusesQuery(
   });
 }
 export const useAdminOrderQuery = (id: string | null) => useQuery({ queryKey: adminOrderKeys.detail(id ?? ''), queryFn: ({ signal }) => getAdminOrder(id!, signal), enabled: Boolean(id) });
+/** Muvaffaqiyatdan keyin ro‘yxat va detail qayta yuklanadi; refetch tugaguncha mutation `isPending` bo‘lib turadi. */
+const useAdminOrderActionMutation = (mutationFn: (payload: AdminOrderActionPayload) => Promise<AdminOrderActionResult>) => {
+  const client = useQueryClient();
+  return useMutation({ mutationFn, onSuccess: () => client.invalidateQueries({ queryKey: adminOrderKeys.all }) });
+};
+export const useRefundAdminOrderMutation = () => useAdminOrderActionMutation(refundAdminOrder);
+export const useCancelAdminOrderMutation = () => useAdminOrderActionMutation(cancelAdminOrder);

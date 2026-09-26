@@ -163,8 +163,8 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => { throw error; });
   page.on('request', request => {
     if (new URL(request.url()).pathname.startsWith('/api/v1/admin/orders')) {
-      const isBatchLabel = new URL(request.url()).pathname.endsWith('/admin/orders/labels');
-      expect(request.method()).toBe(isBatchLabel ? 'POST' : 'GET');
+      const isPostAction = /\/admin\/orders\/(labels|[^/]+\/(refund|cancel))$/.test(new URL(request.url()).pathname);
+      expect(request.method()).toBe(isPostAction ? 'POST' : 'GET');
     }
   });
   await seedAccessToken(page);
@@ -396,4 +396,99 @@ test('TC4: ro‘yxat loading va empty holatlarini ko‘rsatadi', async ({ page }
   releaseResponse!();
   await expect(page.getByText('Buyurtmalar topilmadi')).toBeVisible();
   await expect(page.getByText('Filterlarni o‘zgartiring yoki yangi buyurtmalarni kuting.')).toBeVisible();
+});
+
+/** Detail GET va refund/cancel POST'ni mock qiladi; muvaffaqiyatli amaldan keyin detail yangi holat bilan qaytadi. */
+async function mockOrderAction(page: import('@playwright/test').Page, order: Record<string, unknown>, action: 'refund' | 'cancel', response: { status: number; json: unknown }) {
+  const state = { order: { ...order }, bodies: [] as unknown[] };
+  await page.route('**/api/v1/admin/orders/**', async route => {
+    const request = route.request();
+    const pathname = new URL(request.url()).pathname;
+    if (request.method() === 'POST' && pathname.endsWith(`/${order.id as string}/${action}`)) {
+      state.bodies.push(request.postDataJSON());
+      if (response.status < 300) state.order = { ...state.order, status: action === 'refund' ? 'REFUNDED' : 'CANCELLED' };
+      await route.fulfill(response);
+      return;
+    }
+    await route.fulfill({ json: { data: { ...state.order, sellerOrders: [] } } });
+  });
+  return state;
+}
+
+test('online to‘langan buyurtmada refund sabab bilan yuboriladi va tugma yashiriladi', async ({ page }) => {
+  const state = await mockOrderAction(page, allOrders[1], 'refund', { status: 201, json: { data: { id: '92', status: 'REFUNDED', idempotent: false } } });
+  await page.goto('/admin/orders/92');
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByRole('button', { name: 'Buyurtmani bekor qilish' })).toHaveCount(0);
+  await detailPage.getByRole('button', { name: 'Pulni qaytarish' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Buyurtma summasi to‘liq qaytariladi: 120 000 so‘m');
+  await dialog.getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await expect(dialog).toContainText('Sababni kiriting');
+  await dialog.getByLabel('Sabab').fill('abc');
+  await dialog.getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await expect(dialog).toContainText('Kamida 5 ta belgi kiriting');
+  expect(state.bodies).toHaveLength(0);
+  await dialog.getByLabel('Sabab').fill('  Mahsulot mavjud emas  ');
+  await dialog.getByRole('button', { name: 'Pulni qaytarish' }).dblclick();
+  await expect(page.getByText('Pul qaytarildi')).toBeVisible();
+  expect(state.bodies).toEqual([{ reason: 'Mahsulot mavjud emas' }]);
+  await expect(dialog).toHaveCount(0);
+  await expect(detailPage).toContainText('Qaytarilgan');
+  await expect(detailPage.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+});
+
+test('takroriy refund idempotent javobida "allaqachon qaytarilgan" chiqadi', async ({ page }) => {
+  await mockOrderAction(page, allOrders[1], 'refund', { status: 201, json: { data: { id: '92', status: 'REFUNDED', idempotent: true } } });
+  await page.goto('/admin/orders/92');
+  await page.getByTestId('detail-page').getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await page.getByRole('dialog').getByLabel('Sabab').fill('Takroriy so‘rov');
+  await page.getByRole('dialog').getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await expect(page.getByText('Bu buyurtma allaqachon qaytarilgan')).toBeVisible();
+  await expect(page.getByText('Pul qaytarildi')).toHaveCount(0);
+});
+
+test('COD buyurtmada refund tugmasi ko‘rinmaydi', async ({ page }) => {
+  await mockOrderAction(page, allOrders[0], 'refund', { status: 201, json: {} });
+  await page.goto('/admin/orders/91');
+  await expect(page.getByTestId('detail-page')).toContainText('Ali Valiyev');
+  await expect(page.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+});
+
+for (const { status, json, text } of [
+  { status: 400, json: { message: 'COD buyurtmani qaytarib bo‘lmaydi' }, text: 'COD buyurtmani qaytarib bo‘lmaydi' },
+  { status: 403, json: { message: 'Forbidden resource' }, text: 'Bu amal uchun ruxsat yo‘q' },
+  { status: 404, json: { message: 'Not Found' }, text: 'Buyurtma topilmadi' },
+]) {
+  test(`refund ${status} xatosida mos xabar chiqadi va oyna ochiq qoladi`, async ({ page }) => {
+    await mockOrderAction(page, allOrders[1], 'refund', { status, json });
+    await page.goto('/admin/orders/92');
+    await page.getByTestId('detail-page').getByRole('button', { name: 'Pulni qaytarish' }).click();
+    await page.getByRole('dialog').getByLabel('Sabab').fill('Mahsulot mavjud emas');
+    await page.getByRole('dialog').getByRole('button', { name: 'Pulni qaytarish' }).click();
+    await expect(page.locator('.ant-message')).toContainText(text);
+    await expect(page.getByRole('dialog')).toBeVisible();
+  });
+}
+
+test('PENDING_PAYMENT buyurtma sabab bilan bekor qilinadi', async ({ page }) => {
+  const state = await mockOrderAction(page, { ...allOrders[1], status: 'PENDING_PAYMENT' }, 'cancel', { status: 201, json: { data: { id: '92', status: 'CANCELLED', idempotent: false } } });
+  await page.goto('/admin/orders/92');
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+  await detailPage.getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await page.getByRole('dialog').getByLabel('Sabab').fill('Xaridor to‘lamadi');
+  await page.getByRole('dialog').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await expect(page.getByText('Buyurtma bekor qilindi')).toBeVisible();
+  expect(state.bodies).toEqual([{ reason: 'Xaridor to‘lamadi' }]);
+  await expect(detailPage.getByRole('button', { name: 'Buyurtmani bekor qilish' })).toHaveCount(0);
+});
+
+test('allaqachon bekor qilingan buyurtmada idempotent xabar chiqadi', async ({ page }) => {
+  await mockOrderAction(page, { ...allOrders[1], status: 'DRAFT' }, 'cancel', { status: 201, json: { data: { id: '92', status: 'CANCELLED', idempotent: true } } });
+  await page.goto('/admin/orders/92');
+  await page.getByTestId('detail-page').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await page.getByRole('dialog').getByLabel('Sabab').fill('Takroriy so‘rov');
+  await page.getByRole('dialog').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await expect(page.getByText('Bu buyurtma allaqachon bekor qilingan')).toBeVisible();
 });
