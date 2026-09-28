@@ -120,7 +120,7 @@ export default function AdminProductsPage() {
     {
       title: t('common.status'),
       width: 125,
-      render: (_, product) => <StatusTag status={product.isBlocked ? 'BLOCKED' : product.status} />,
+      render: (_, product) => <StatusTag status={product.isBlocked ? 'HIDDEN' : product.status} />,
     },
     {
       title: t('common.actions'),
@@ -200,7 +200,7 @@ export default function AdminProductsPage() {
           options={[
             { value: 'ALL', label: t('adminProducts.allModerationStatuses') },
             { value: 'ACTIVE', label: t('adminProducts.available') },
-            { value: 'BLOCKED', label: t('status.blocked') },
+            { value: 'BLOCKED', label: t('status.hidden') },
           ]}
           onChange={(value) => { setModeration(value); setPage(1); }}
         />

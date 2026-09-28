@@ -31,7 +31,11 @@ export async function getAdminProduct(
   return parseProduct(data);
 }
 
-/** Kontrakt: yashirish — `POST /hide` `{ reason }` (majburiy); qayta ko'rsatish — alohida `POST /reactivate`. */
+/**
+ * Kontrakt: yashirish — `POST /hide` `{ reason }` (majburiy); qayta ko'rsatish — alohida `POST /reactivate`.
+ * Backend yashirish va to'xtatishni bitta `isBlocked` bilan saqlaydi, shuning uchun UI bu holatni
+ * "Yashirilgan" deb ko'rsatadi; ularni ajratish uchun backendda alohida maydon kerak.
+ */
 export async function setAdminProductHidden({ productId, hidden, reason }: { productId: string; hidden: boolean; reason?: string }): Promise<void> {
   const id = encodeURIComponent(productId);
   if (hidden) await httpClient.post(`/admin/products/${id}/hide`, { reason: reason ?? '' });

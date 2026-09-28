@@ -72,6 +72,7 @@ export interface AdminSubOrder {
   status: string;
   amount: number | null;
   createdAt: string | null;
+  elchiShipmentId: string | null;
 }
 
 export interface AdminOrderItemDetail {

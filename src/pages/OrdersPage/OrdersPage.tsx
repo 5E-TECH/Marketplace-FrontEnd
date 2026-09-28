@@ -26,7 +26,7 @@ import { DetailList } from '../../shared/ui/DetailList/DetailList';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
-import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
+import { formatSkippedLabels, openOrderLabels } from '../../features/orders/api/orderLabelApi';
 
 type StatusFilter = 'ALL' | SellerOrderStatus;
 export default function OrdersPage() {
@@ -60,6 +60,12 @@ export default function OrdersPage() {
     ...(dateFrom ? { dateFrom } : {}),
     ...(dateTo ? { dateTo } : {}),
   });
+  // Posilka yaratilgach ro'yxat qayta yuklanadi — panel yangi posilka ma'lumotini shu yerdan
+  // oladi, aks holda "Yorliqni chop etish" panel yopib qayta ochilguncha o'chiq qolardi.
+  const liveOrder = selectedOrder ? ordersQuery.data?.items.find(({ id }) => id === selectedOrder.id) : undefined;
+  const drawerOrder = selectedOrder && !selectedOrder.elchiShipmentId && liveOrder?.elchiShipmentId
+    ? { ...selectedOrder, elchiShipmentId: liveOrder.elchiShipmentId, trackingUrl: liveOrder.trackingUrl }
+    : selectedOrder;
   const updateStatusMutation = useUpdateSellerOrderStatusMutation();
   const detailQuery = useSellerOrderQuery(selectedOrder?.id ?? null);
   const itemsQuery = useSellerOrderItemsQuery(selectedOrder?.id ?? null);
@@ -70,13 +76,18 @@ export default function OrdersPage() {
   const orders = ordersQuery.data?.items ?? [];
   const canConfirm = selectedOrder?.status === 'PENDING' || selectedOrder?.status === 'NEW';
   const canCancel = Boolean(selectedOrder && !['DELIVERED', 'CANCELLED', 'RETURNED'].includes(selectedOrder.status));
-  const canCreateShipment = selectedOrder?.status === 'CONFIRMED' && !selectedOrder.elchiShipmentId;
+  const canCreateShipment = drawerOrder?.status === 'CONFIRMED' && !drawerOrder.elchiShipmentId;
 
   const resetPage = () => setPage(1);
   const resetFilters = () => { setSearch(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); };
   const printLabels = async (ids: string[]) => {
     setPrintLoading(true);
-    try { await openOrderLabels('seller', ids); }
+    try {
+      const { skipped } = await openOrderLabels('seller', ids);
+      // Yuborilgan ichki id qaytsa, sotuvchi jadvalda ko'radigan buyurtma raqami (#salesOrderId) ko'rsatiladi.
+      const numbers = new Map(ordersQuery.data?.items.filter(({ id }) => ids.includes(id)).map(({ id, salesOrderId }) => [id, salesOrderId]));
+      if (skipped.length) void message.warning(t('order.labelsSkipped', { count: skipped.length, list: formatSkippedLabels(skipped.map((label) => ({ ...label, id: (label.id && numbers.get(label.id)) || label.id }))) }));
+    }
     catch (error) { void message.error(getApiErrorMessage(error)); }
     finally { setPrintLoading(false); }
   };
@@ -100,7 +111,7 @@ export default function OrdersPage() {
       <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('order.startDate')} endLabel={t('order.endDate')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); resetPage(); }} />
       {search || status !== 'ALL' || dateFrom || dateTo ? <ResetFiltersButton onClick={resetFilters} /> : null}
     </>} />
-    <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? `${selectedRowKeys.length} ta tanlandi` : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>Yorliqlarni chop etish</Button>}>
+    <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? t('order.selected', { count: selectedRowKeys.length }) : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>{t('order.printLabels')}</Button>}>
       <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? 'Avval posilka yarating' : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={{ current: page, total: ordersQuery.data.total, onChange: setPage }} />
     </TablePanel>
     <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} size="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
@@ -110,7 +121,7 @@ export default function OrdersPage() {
           <Popconfirm title={t('order.confirmQuestion')} disabled={!canConfirm} onConfirm={() => confirmMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CONFIRMED' } : current); setNextStatus('CONFIRMED'); void message.success(t('order.confirmed')); }, onError: (error) => void message.error(getApiErrorMessage(error)) })}><Button type="primary" icon={<Check size={16} />} disabled={!canConfirm} loading={confirmMutation.isPending}>{t('common.confirm')}</Button></Popconfirm>
           <Popconfirm title={t('order.cancelQuestion')} description={t('order.cancelDescription')} disabled={!canCancel} onConfirm={() => cancelMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CANCELLED' } : current); setNextStatus('CANCELLED'); void message.success(t('order.cancelled')); }, onError: (error) => void message.error(getApiErrorMessage(error)) })}><Button danger icon={<Ban size={16} />} disabled={!canCancel} loading={cancelMutation.isPending}>{t('common.cancel')}</Button></Popconfirm>
         </div>
-        <Button block icon={<Printer size={16} />} disabled={!selectedOrder.elchiShipmentId} loading={printLoading} onClick={() => void printLabels([selectedOrder.id])}>Yorliqni chop etish</Button>
+        <Button block icon={<Printer size={16} />} disabled={!drawerOrder?.elchiShipmentId} loading={printLoading} onClick={() => void printLabels([selectedOrder.id])}>{t('order.printLabel')}</Button>
         <section className={styles.statusEditor} aria-label={t('order.updateStatus')}>
           <div><strong>{t('order.updateStatus')}</strong><span>{t('order.updateStatusDescription')}</span></div>
           <Select<SellerOrderStatus> virtual={false} placement="topLeft" aria-label={t('order.newStatus')} value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} disabled={updateStatusMutation.isPending} onChange={setNextStatus} />
@@ -128,7 +139,7 @@ export default function OrdersPage() {
         </section>
         <section className={styles.shipmentEditor} aria-label={t('order.createShipment')}>
           <div><strong>{t('order.shipment')}</strong><span>{t('order.phoneDescription')}</span></div>
-          <Input value={customerPhone} placeholder="+998901234567" inputMode="tel" maxLength={13} onChange={(event) => setCustomerPhone(event.target.value.replace(/[^+\d]/g, ''))} />
+          <Input value={customerPhone} aria-label={t('order.customerPhone')} placeholder="+998901234567" inputMode="tel" maxLength={13} onChange={(event) => setCustomerPhone(event.target.value.replace(/[^+\d]/g, ''))} />
           <Button icon={<Truck size={16} />} loading={shipmentMutation.isPending} disabled={!canCreateShipment || !/^\+998\d{9}$/.test(customerPhone)} onClick={() => shipmentMutation.mutate({ id: selectedOrder.id, customerPhone }, { onSuccess: () => { setCustomerPhone(''); setSelectedOrder((current) => current ? { ...current, status: 'SHIPMENT_CREATED' } : current); setNextStatus('SHIPMENT_CREATED'); void message.success(t('order.shipmentCreated')); }, onError: (error) => void message.error(getApiErrorMessage(error)) })}>{t('order.createShipment')}</Button>
         </section>
         <Tabs className={styles.orderTabs} items={[
@@ -136,7 +147,7 @@ export default function OrdersPage() {
           { key: 'items', label: t('order.items'), children: <ApiDataState query={itemsQuery} empty={t('order.noItems')} /> },
           { key: 'history', label: t('order.history'), children: <ApiDataState query={historyQuery} empty={t('order.noHistory')} /> },
         ]} />
-        <ElchiTimeline order={selectedOrder} />
+        <ElchiTimeline order={drawerOrder ?? selectedOrder} />
       </> : null}
     </DetailDrawer>
   </main>;

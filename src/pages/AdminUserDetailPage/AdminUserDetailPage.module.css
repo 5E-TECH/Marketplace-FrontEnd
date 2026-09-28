@@ -31,3 +31,5 @@
     flex: 1 1 auto;
   }
 }
+
+.roleWarning { margin-bottom: var(--space-4); }

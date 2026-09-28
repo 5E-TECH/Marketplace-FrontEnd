@@ -6,6 +6,8 @@ const STATUS_CONFIG = {
   ACTIVE: { color: 'success', label: 'status.active' },
   INACTIVE: { color: 'default', label: 'status.inactive' },
   BLOCKED: { color: 'error', label: 'status.blocked' },
+  /** Mahsulot moderatsiyasi: backend yashirish va to'xtatishni bitta `isBlocked` bilan saqlaydi. */
+  HIDDEN: { color: 'error', label: 'status.hidden' },
   PENDING: { color: 'warning', label: 'status.pending' },
   NEW: { color: 'processing', label: 'status.new' },
   CONFIRMED: { color: 'success', label: 'status.confirmed' },

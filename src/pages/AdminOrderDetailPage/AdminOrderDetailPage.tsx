@@ -16,7 +16,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { AppDetailNotice } from '../AdminOrdersPage/AdminOrdersPage';
 import styles from './AdminOrderDetailPage.module.css';
-import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
+import { formatSkippedLabels, openOrderLabels, openParcelLabel, type LabelPrintResult } from '../../features/orders/api/orderLabelApi';
 
 interface OrderLocationState {
   order?: AdminOrder;
@@ -35,6 +35,7 @@ export default function AdminOrderDetailPage() {
   const { locale, t } = useTranslation();
   const { message } = App.useApp();
   const [printing, setPrinting] = useState(false);
+  const [printingParcelId, setPrintingParcelId] = useState<string | null>(null);
   const [action, setAction] = useState<OrderAction | null>(null);
   const [actionForm] = Form.useForm<{ reason: string }>();
   // Form validatsiyasi asinxron: isPending yoqilguncha ikkinchi bosish ham onFinish'ga yetadi.
@@ -69,11 +70,21 @@ export default function AdminOrderDetailPage() {
     .filter((value): value is string => Boolean(value))
     .join(', ');
   const status = order?.status;
+  const warnSkipped = ({ skipped }: LabelPrintResult) => {
+    if (skipped.length) void message.warning(t('order.labelsSkipped', { count: skipped.length, list: formatSkippedLabels(skipped) }));
+  };
   const printLabel = async () => {
     setPrinting(true);
-    try { await openOrderLabels('admin', [orderId]); }
+    try { warnSkipped(await openOrderLabels('admin', [orderId])); }
     catch (error) { void message.error(getApiErrorMessage(error)); }
     finally { setPrinting(false); }
+  };
+  const printParcel = async (sellerOrderId: string) => {
+    if (printingParcelId) return;
+    setPrintingParcelId(sellerOrderId);
+    try { warnSkipped(await openParcelLabel(orderId, sellerOrderId)); }
+    catch (error) { void message.error(getApiErrorMessage(error)); }
+    finally { setPrintingParcelId(null); }
   };
   const canRefund = order?.paymentMethod === 'online' && Boolean(status && REFUNDABLE_STATUSES.includes(status));
   const canCancel = Boolean(status && CANCELLABLE_STATUSES.includes(status));
@@ -118,7 +129,7 @@ export default function AdminOrderDetailPage() {
           <Space wrap>
             {canCancel ? <Button icon={<Ban size={16} />} disabled={actionPending} onClick={() => setAction('cancel')}>{t('adminOrders.cancel')}</Button> : null}
             {canRefund ? <Button danger icon={<Undo2 size={16} />} disabled={actionPending} onClick={() => setAction('refund')}>{t('adminOrders.refund')}</Button> : null}
-            <Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>Yorliqni chop etish</Button>
+            <Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>{t('order.printLabel')}</Button>
           </Space>
         }
         hero={{
@@ -129,7 +140,7 @@ export default function AdminOrderDetailPage() {
         }}
         sections={sections}
       >
-        <AppDetailNotice value={query.data} />
+        <AppDetailNotice value={query.data} onPrintParcel={(sellerOrderId) => void printParcel(sellerOrderId)} printingParcelId={printingParcelId} />
       </DetailPage>
       <Modal
         open={Boolean(action)}

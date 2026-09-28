@@ -4,7 +4,11 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  accessToken: string;
+  /**
+   * `null` — backend tokenni tanada bermadi (`AUTH_TOKENS_IN_BODY=false`):
+   * sessiya faqat HttpOnly cookie'da, JS token ko'rmaydi va saqlamaydi.
+   */
+  accessToken: string | null;
 }
 
 export type UserRole = 'SELLER' | 'OPERATOR' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
@@ -34,3 +38,18 @@ export interface AuthSession extends LoginResponse {
   user: AuthUser;
 }
 export interface AuthDeviceSession { id: string; userAgent: string; ipAddress: string; createdAt: string; lastUsedAt: string | null; current: boolean }
+
+/** `POST /admin/users/:id/impersonate` natijasi (15 daqiqalik, refresh qilinmaydigan token). */
+export interface ImpersonationGrant {
+  token: string;
+  expiresAt: string;
+  user: { id: string; name: string; role: UserRole };
+}
+
+/** Faol "nomidan kirish": tugaganda admin sessiyasi va sahifasi tiklanadi. */
+export interface ImpersonationSession extends ImpersonationGrant {
+  returnTo: string;
+  admin: { accessToken: string | null; cookieSession: boolean };
+}
+
+export type ImpersonationEndReason = 'exited' | 'expired';

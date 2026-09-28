@@ -7,6 +7,7 @@ import { store } from './app/store/store';
 import { refreshAccessToken } from './features/auth/api/authApi';
 import {
   accessTokenRefreshed,
+  impersonationEnded,
   loggedOut,
 } from './features/auth/model/authSlice';
 import { queryClient } from './shared/api/queryClient';
@@ -19,6 +20,12 @@ const ejectHttpInterceptors = setupHttpInterceptors({
   // Access token muddati tuganda (odatda 1 soat) sessiyani uzmaymiz:
   // HttpOnly refresh cookie orqali yangi token olinadi va so'rov qaytariladi.
   refreshAccessToken: async () => {
+    // "Nomidan kirish" token'i refresh qilinmaydi, refresh cookie esa adminniki:
+    // 401 — muddat tugagan, jimgina admin bo'lib qolmay, ochiq qaytamiz.
+    if (store.getState().auth.impersonation) {
+      store.dispatch(impersonationEnded('expired'));
+      throw new CanceledError('Nomidan kirish muddati tugadi');
+    }
     const sessionVersion = store.getState().auth.sessionVersion;
     const { accessToken } = await refreshAccessToken();
     if (store.getState().auth.sessionVersion !== sessionVersion) {
@@ -28,7 +35,12 @@ const ejectHttpInterceptors = setupHttpInterceptors({
     return accessToken;
   },
   onUnauthorized: () => {
-    if (!store.getState().auth.accessToken) {
+    const { accessToken, cookieSession, impersonation } = store.getState().auth;
+    if (impersonation) {
+      store.dispatch(impersonationEnded('expired'));
+      return;
+    }
+    if (!accessToken && !cookieSession) {
       return;
     }
 

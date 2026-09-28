@@ -115,7 +115,9 @@ const nullableNumber = (record: Record<string, unknown>, keys: string[]) => {
 const identify = (record: Record<string, unknown>, fallback: string) => optionalText(record, ['id', 'orderId', 'sellerOrderId', 'itemId', 'shipmentId', 'eventId']) ?? fallback;
 
 function parseSubOrder(record: Record<string, unknown>, index: number): AdminSubOrder {
-  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']) };
+  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']),
+    // Yorliq faqat Elchi posilkasi bor do'kon uchun chiqadi.
+    elchiShipmentId: optionalText(record, ['elchiShipmentId']) ?? optionalText(asRecord(record.shipment) ?? {}, ['id', 'shipmentId']) };
 }
 function parseAdminItem(record: Record<string, unknown>, index: number): AdminOrderItemDetail {
   const quantity = nullableNumber(record, ['quantity', 'qty']);
