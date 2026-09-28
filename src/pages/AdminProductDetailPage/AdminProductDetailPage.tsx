@@ -134,7 +134,7 @@ export default function AdminProductDetailPage() {
           avatarFallback: product.name.slice(0, 2).toUpperCase(),
           title: product.name,
           subtitle: product.slug || `#${product.id}`,
-          badges: <><StatusTag status={product.status} />{product.isBlocked ? <StatusTag status="BLOCKED" /> : null}</>,
+          badges: <><StatusTag status={product.status} />{product.isBlocked ? <StatusTag status="HIDDEN" /> : null}</>,
         }}
         sections={createSections(product, locale, t, { shop: shopNames.get(product.shopId), category: categoryNames.get(product.categoryId) })}
       >

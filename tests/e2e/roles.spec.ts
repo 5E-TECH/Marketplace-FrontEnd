@@ -58,6 +58,26 @@ test.describe('OPERATOR roli', () => {
 
     await expect(page).toHaveURL(/\/orders$/);
   });
+
+  test('operator posilka yorlig‘ini chop etadi', async ({ page }) => {
+    const labelIds: string[] = [];
+    const shipped = {
+      id: '31', salesOrderId: '12', buyerName: 'Ali Valiyev', subtotal: 450000, codAmount: 450000,
+      status: 'ON_THE_ROAD', elchiShipmentId: '987', trackingUrl: null, itemsCount: 2, createdAt: '2026-07-30T09:00:00.000Z',
+    };
+    await page.route('**/api/v1/seller/orders**', (route) => route.fulfill({
+      json: { data: { items: [shipped], total: 1, page: 1, limit: 20, totalPages: 1 } },
+    }));
+    await page.route('**/api/v1/seller/orders/31/label', (route) => {
+      labelIds.push('31');
+      return route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 operator') });
+    });
+    await page.goto('/orders');
+
+    await page.getByRole('button', { name: '#12 buyurtmani ko‘rish' }).click();
+    await page.getByRole('dialog', { name: 'Buyurtma #12' }).getByRole('button', { name: 'Yorliqni chop etish' }).click();
+    await expect.poll(() => labelIds).toEqual(['31']);
+  });
 });
 
 test('SELLER barcha bo‘limlarni ko‘radi', async ({ page }) => {

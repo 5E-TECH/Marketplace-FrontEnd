@@ -59,8 +59,17 @@ function parseAuthUser(value: unknown): AuthUser {
   };
 }
 
+/**
+ * Token tanada kelmasa (`AUTH_TOKENS_IN_BODY=false`) sessiya HttpOnly
+ * cookie'da — `accessToken: null`. Cookie haqiqatan o'rnatilganini keyingi
+ * `/auth/me` tasdiqlaydi; o'rnatilmagan bo'lsa login 401 bilan to'xtaydi.
+ */
 function parseLoginResponse(value: unknown): LoginResponse {
-  const data = unwrapApiData(value) as LoginApiResponse;
+  const unwrapped = unwrapApiData(value);
+  const data = (typeof unwrapped === 'object' && unwrapped !== null ? unwrapped : {}) as LoginApiResponse;
+  if (data.accessToken === undefined || data.accessToken === null) {
+    return { accessToken: null };
+  }
   if (
     typeof data.accessToken !== 'string' ||
     data.accessToken.length === 0 ||
@@ -102,7 +111,7 @@ export async function authenticate(
   credentials: LoginCredentials,
 ): Promise<AuthSession> {
   const authSession = await login(credentials);
-  const user = await getCurrentUser(authSession.accessToken);
+  const user = await getCurrentUser(authSession.accessToken ?? undefined);
 
   return { ...authSession, user };
 }

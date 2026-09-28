@@ -27,7 +27,7 @@ import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
-import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
+import { formatSkippedLabels, openOrderLabels } from '../../features/orders/api/orderLabelApi';
 
 type PaymentFilter = 'ALL' | AdminPaymentMethod;
 
@@ -75,7 +75,8 @@ export default function AdminOrdersPage() {
     if (!selectedRowKeys.length || printLoading) return;
     setPrintLoading(true);
     try {
-      await openOrderLabels('admin', selectedRowKeys.map(String));
+      const { skipped } = await openOrderLabels('admin', selectedRowKeys.map(String));
+      if (skipped.length) void message.warning(t('order.labelsSkipped', { count: skipped.length, list: formatSkippedLabels(skipped) }));
     } catch (error) {
       void message.error(getApiErrorMessage(error));
     } finally {
@@ -93,7 +94,8 @@ export default function AdminOrdersPage() {
     {query.isError ? <ContentState state="error" title={t('adminOrders.loadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} /> : query.isPending || !query.data ? <ContentState state="loading" /> : <TablePanel title={t('adminOrders.title')} caption={selectedRowKeys.length ? t('adminOrders.selected', { count: selectedRowKeys.length }) : t('pagination.total', { total: query.data.total })} action={<Button icon={<Printer size={16}/>} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printSelected()}>{t('adminOrders.print')}</Button>}><DataTable loading={query.isFetching} rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys }} columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminOrders.empty')} description={t('adminOrders.emptyDescription')} />} pagination={{ current: page, total: query.data.total, onChange: setPage }} /></TablePanel>}
   </main>;
 }
-export function AppDetailNotice({ value }: { value: AdminOrderDetail | undefined }) {
+/** `onPrintParcel` berilsa, har bir do'kon posilkasining yorlig'ini alohida chop etish tugmasi chiqadi. */
+export function AppDetailNotice({ value, onPrintParcel, printingParcelId = null }: { value: AdminOrderDetail | undefined; onPrintParcel?: (sellerOrderId: string) => void; printingParcelId?: string | null }) {
   const { locale, t } = useTranslation();
   if (!value) return null;
   const showDate = (date: string | null) => date ? formatDateTime(date, locale) : '—';
@@ -104,6 +106,7 @@ export function AppDetailNotice({ value }: { value: AdminOrderDetail | undefined
       {value.sellerOrders.length ? <div className={styles.cardGrid}>{value.sellerOrders.map((order) => <article className={styles.detailCard} key={order.id}>
         <div className={styles.cardTitle}><strong>#{order.id}</strong><span>{showStatus(order.status)}</span></div>
         <DetailList items={[{ label: t('adminOrders.shopId'), value: order.shopName || (order.shopId ? `#${order.shopId}` : '—') }, { label: t('adminOrders.amount'), value: order.amount === null ? '—' : `${formatMoney(order.amount)} UZS` }, { label: t('users.createdAt'), value: showDate(order.createdAt) }]} />
+        {onPrintParcel ? <div className={styles.cardFooter}><Button size="small" icon={<Printer size={15} />} disabled={!order.elchiShipmentId} loading={printingParcelId === order.id} onClick={() => onPrintParcel(order.id)}>{t('adminOrders.printParcel')}</Button></div> : null}
       </article>)}</div> : <EmptyState compact title={t('adminOrders.noSubOrders')} />}
     </section>
 

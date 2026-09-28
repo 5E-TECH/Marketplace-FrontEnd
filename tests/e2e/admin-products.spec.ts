@@ -130,6 +130,8 @@ test('mahsulot detail page barcha muhim fieldlarni va suspend/reactivate amallar
   await expect.poll(() => hidden).toBe(1);
   expect(hideBody).toEqual({ reason: 'Marketplace qoidalariga mos emas' });
   await expect(page.getByRole('button', { name: 'Ko‘rsatish' })).toBeVisible();
+  // Backend yashirish/to'xtatishni bitta `isBlocked` bilan saqlaydi — mahsulotda "Yashirilgan".
+  await expect(page.getByTestId('detail-page').getByText('Yashirilgan', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Ko‘rsatish' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Ko‘rsatish' }).click();

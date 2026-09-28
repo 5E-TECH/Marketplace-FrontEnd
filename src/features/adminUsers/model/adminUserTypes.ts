@@ -39,3 +39,6 @@ export interface AdminUsersPage {
   limit: number;
   totalPages: number;
 }
+
+/** `PATCH /admin/users/:id/role` qabul qiladigan rollar (operatorni seller yaratadi). */
+export type AssignableUserRole = Exclude<AdminUserRole, 'OPERATOR'>;

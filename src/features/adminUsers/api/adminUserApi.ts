@@ -1,7 +1,8 @@
 import { unwrapApiData } from '../../../shared/api/apiResponse';
 import { httpClient } from '../../../shared/api/httpClient';
 import { asRecord, readItems, readPagination, readText } from '../../../shared/api/responseFields';
-import type { AdminUser, AdminUserListParams, AdminUserRole, AdminUsersPage, CreateAdminUserPayload } from '../model/adminUserTypes';
+import type { ImpersonationGrant } from '../../auth/model/authTypes';
+import type { AdminUser, AdminUserListParams, AdminUserRole, AdminUsersPage, AssignableUserRole, CreateAdminUserPayload } from '../model/adminUserTypes';
 
 const roles: AdminUserRole[] = ['SELLER', 'OPERATOR', 'BUYER', 'ADMIN', 'SUPERADMIN'];
 
@@ -51,6 +52,30 @@ export async function setAdminUserBlocked({ id, blocked }: { id: string; blocked
   } else {
     await httpClient.post(`/admin/users/${userId}/unblock`);
   }
+}
+
+/** Kontrakt: `PATCH /admin/users/:id/role` — `{ role }`. */
+export async function changeAdminUserRole({ id, role }: { id: string; role: AssignableUserRole }): Promise<void> {
+  await httpClient.patch(`/admin/users/${encodeURIComponent(id)}/role`, { role });
+}
+
+/** Kontrakt: `POST /admin/users/:id/impersonate` — 15 daqiqalik, refresh qilinmaydigan token. */
+export async function impersonateAdminUser(id: string): Promise<ImpersonationGrant> {
+  const { data } = await httpClient.post<unknown>(`/admin/users/${encodeURIComponent(id)}/impersonate`);
+  const row = asRecord(unwrapApiData(data));
+  const user = asRecord(row.user);
+  const token = row.impersonationToken;
+  const role = typeof user.role === 'string' ? user.role.toUpperCase() : '';
+  const expiresAt = typeof row.expiresAt === 'string' && !Number.isNaN(Date.parse(row.expiresAt))
+    ? row.expiresAt
+    : typeof row.expiresIn === 'number' && row.expiresIn > 0 ? new Date(Date.now() + row.expiresIn * 1000).toISOString() : null;
+  if (
+    typeof token !== 'string' || !token || token.length > 16_384 || /\s/.test(token) ||
+    !expiresAt || (typeof user.id !== 'string' && typeof user.id !== 'number') || !roles.includes(role as AdminUserRole)
+  ) {
+    throw new Error('Serverdan kutilmagan javob olindi');
+  }
+  return { token, expiresAt, user: { id: String(user.id), name: readText(user, 'name') || '—', role: role as AdminUserRole } };
 }
 
 function readErrorMessage(value: unknown): string {

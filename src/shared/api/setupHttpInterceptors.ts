@@ -3,8 +3,11 @@ import { httpClient } from './httpClient';
 
 interface HttpInterceptorOptions {
   getAccessToken: () => string | null;
-  /** Refresh cookie orqali yangi access token oladi va uni saqlaydi. */
-  refreshAccessToken: () => Promise<string>;
+  /**
+   * Refresh cookie orqali sessiyani yangilaydi. Yangi access token'ni
+   * qaytaradi; cookie rejimida `null` — tokenni server cookie'da yangilaydi.
+   */
+  refreshAccessToken: () => Promise<string | null>;
   onUnauthorized: () => void;
 }
 
@@ -56,9 +59,9 @@ export function setupHttpInterceptors({
 }: HttpInterceptorOptions): () => void {
   // Bir vaqtda bir nechta so'rov 401 olsa, refresh faqat bir marta yuboriladi;
   // qolganlari o'sha va'daga ulanadi.
-  let pendingRefresh: Promise<string> | null = null;
+  let pendingRefresh: Promise<string | null> | null = null;
 
-  const refreshOnce = (): Promise<string> => {
+  const refreshOnce = (): Promise<string | null> => {
     pendingRefresh ??= refreshAccessToken().finally(() => {
       pendingRefresh = null;
     });
@@ -90,7 +93,8 @@ export function setupHttpInterceptors({
 
       try {
         const accessToken = await refreshOnce();
-        config.headers.set('Authorization', `Bearer ${accessToken}`);
+        if (accessToken) config.headers.set('Authorization', `Bearer ${accessToken}`);
+        else config.headers.delete('Authorization');
       } catch (refreshError) {
         if (axios.isAxiosError(refreshError) && refreshError.response?.status === 401) {
           onUnauthorized();
