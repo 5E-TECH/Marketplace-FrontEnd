@@ -1,13 +1,13 @@
 import {
-  BellRing as NotificationOutlined,
   LogOut as LogoutOutlined,
   PanelLeftClose as MenuFoldOutlined,
   PanelLeftOpen as MenuUnfoldOutlined,
   Search as SearchOutlined,
 } from 'lucide-react';
-import { Avatar, Badge, Button, Divider, Flex, Input, Layout, Tag, Typography } from 'antd';
+import { Avatar, Button, Divider, Flex, Input, Layout, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import type { AuthUser } from '../../features/auth/model/authTypes';
+import { NotificationBell } from '../../features/notifications/ui/NotificationBell/NotificationBell';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 import styles from './MainLayout.module.css';
@@ -65,16 +65,7 @@ export function AppHeader({
 
         <Flex className={styles.headerActions} align="center">
           <span className={styles.languageButton}><LanguageSwitcher /></span>
-          <Badge className={styles.notificationBadge} offset={[-7, 7]}>
-            <Button
-              type="text"
-              className={styles.notificationButton}
-              icon={<NotificationOutlined />}
-              disabled
-              title="Bildirishnomalar hali mavjud emas"
-              aria-label={t('header.notifications')}
-            />
-          </Badge>
+          <NotificationBell role={user?.role} onNavigate={onNavigate} badgeClassName={styles.notificationBadge} buttonClassName={styles.notificationButton} />
           <Divider orientation="vertical" className={styles.headerDivider} />
           <button
             className={styles.accountSummary}

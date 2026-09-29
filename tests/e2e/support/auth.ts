@@ -152,6 +152,15 @@ async function mockPublicCategories(page: Page): Promise<void> {
   });
 }
 
+/** Header bildirishnomalari: standart holatda bo'sh ro'yxat (test o'zinikini qo'shsa, u ustun). */
+export async function mockNotifications(page: Page): Promise<void> {
+  await page.route('**/api/v1/notifications**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ statusCode: 200, message: 'OK', data: { items: [], total: 0, unreadCount: 0, page: 1, limit: 20 } }),
+  }));
+}
+
 export async function installAuthenticatedSession(
   page: Page,
   user: Record<string, unknown> = authenticatedUser,
@@ -162,6 +171,7 @@ export async function installAuthenticatedSession(
   await mockProducts(page);
   await mockPublicCategories(page);
   await mockDashboard(page);
+  await mockNotifications(page);
   // Test o'zi `page.route` qo'shsa, Playwright keyingi qo'shilganini
   // birinchi ishlatadi — shuning uchun bu umumiy mock ustidan yozilaveradi.
   await mockSellerShop(page);
