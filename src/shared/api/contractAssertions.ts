@@ -23,6 +23,7 @@ import type { Product, ProductVariant } from '../../features/products/model/prod
 import type { AuthUser } from '../../features/auth/model/authTypes';
 import type { StockItem } from '../../features/stock/model/stockTypes';
 import type { Warehouse } from '../../features/warehouses/model/warehouseTypes';
+import type { ReturnHistoryEntry, ReturnItem, ReturnRequest, ReturnRequestDetail } from '../../features/returns/model/returnTypes';
 
 type Schemas = components['schemas'];
 
@@ -80,6 +81,14 @@ type _AuthUser  = Check<ExpectNoDrift<AuthUser,       Schemas['AuthUserDto'], Au
 type _StockItem = Check<ExpectNoDrift<StockItem,      Schemas['StockItemDto']>>;
 // prettier-ignore
 type _Warehouse = Check<ExpectNoDrift<Warehouse,      Schemas['WarehouseDto']>>;
+// prettier-ignore
+type _Return        = Check<ExpectNoDrift<ReturnRequest,       Schemas['ReturnRequestDto']>>;
+// prettier-ignore
+type _ReturnDetail  = Check<ExpectNoDrift<ReturnRequestDetail, Schemas['ReturnRequestDetailsDto']>>;
+// prettier-ignore
+type _ReturnItem    = Check<ExpectNoDrift<ReturnItem,          Schemas['ReturnRequestItemDto']>>;
+// prettier-ignore
+type _ReturnHistory = Check<ExpectNoDrift<ReturnHistoryEntry,  Schemas['ReturnRequestHistoryDto']>>;
 
 /**
  * Faqat tipdan iborat fayl modul bo'lib qolishi va yuqoridagi tekshiruvlar
@@ -93,4 +102,8 @@ export type ContractGuarded = [
   _AuthUser,
   _StockItem,
   _Warehouse,
+  _Return,
+  _ReturnDetail,
+  _ReturnItem,
+  _ReturnHistory,
 ];

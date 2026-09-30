@@ -3,6 +3,7 @@ import {
   ACCESS_TOKEN_KEY,
   TEST_ACCESS_TOKEN,
   authenticatedUser,
+  mockNotifications,
 } from './support/auth';
 
 test('login sahifasida faqat telefon va parol orqali kirish mavjud', async ({ page }) => {
@@ -46,6 +47,7 @@ for (const path of ['/register', '/register/account', '/forgot-password', '/rese
 test('SELLER login token oladi, saqlaydi va dashboardga yo‘naltiradi', async ({
   page,
 }) => {
+  await mockNotifications(page);
   await page.route('**/api/v1/seller/dashboard', async (route) => {
     await route.fulfill({
       status: 200,

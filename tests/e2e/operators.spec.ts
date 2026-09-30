@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { installAuthenticatedSession } from './support/auth';
+import { installAuthenticatedSession, mockNotifications } from './support/auth';
 
 interface OperatorRecord {
   id: string;
@@ -144,6 +144,7 @@ async function mockOperatorOrders(page: Page) {
 
 async function mockOperatorLogin(page: Page) {
   let loginBody: Record<string, unknown> | null = null;
+  await mockNotifications(page);
   await page.route('**/api/v1/auth/login', async route => {
     loginBody = route.request().postDataJSON() as Record<string, unknown>;
     await route.fulfill({ status: 201, json: { data: { accessToken: 'operator.access.token' } } });

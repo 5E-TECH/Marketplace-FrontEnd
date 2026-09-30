@@ -22,6 +22,9 @@ export async function seedAccessToken(
     ({ key, token }) => sessionStorage.setItem(key, token),
     { key: ACCESS_TOKEN_KEY, token: accessToken },
   );
+  // Header har sahifada bildirishnomalarni so'raydi. Mock bo'lmasa so'rov dev proxy
+  // orqali haqiqiy API'ga ketadi, soxta tokenga 401 qaytadi va sessiya yopiladi.
+  await mockNotifications(page);
 }
 
 export const operatorUser = {
@@ -150,6 +153,15 @@ async function mockPublicCategories(page: Page): Promise<void> {
       body: JSON.stringify({ statusCode: 200, message: 'OK', data: publicCategoryTree }),
     });
   });
+}
+
+/** Header bildirishnomalari: standart holatda bo'sh ro'yxat (test o'zinikini qo'shsa, u ustun). */
+export async function mockNotifications(page: Page): Promise<void> {
+  await page.route('**/api/v1/notifications**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ statusCode: 200, message: 'OK', data: { items: [], total: 0, unreadCount: 0, page: 1, limit: 20 } }),
+  }));
 }
 
 export async function installAuthenticatedSession(

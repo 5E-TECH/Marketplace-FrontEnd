@@ -1,6 +1,6 @@
-import { Ban, CalendarClock, CreditCard, Hash, Printer, Store, Undo2, UserRound } from 'lucide-react';
+import { Ban, CalendarClock, CreditCard, Hash, PackageOpen, Printer, Store, Undo2, UserRound } from 'lucide-react';
 import { Alert, App, Button, Form, Input, Modal, Space } from 'antd';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { useAdminOrderQuery, useCancelAdminOrderMutation, useRefundAdminOrderMutation } from '../../features/orders/api/orderQueries';
 import type { AdminOrder, AdminOrderStatus } from '../../features/orders/model/orderTypes';
@@ -31,6 +31,7 @@ const CANCELLABLE_STATUSES: readonly AdminOrderStatus[] = ['DRAFT', 'PENDING_PAY
 
 export default function AdminOrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
+  const navigate = useNavigate();
   const location = useLocation();
   const { locale, t } = useTranslation();
   const { message } = App.useApp();
@@ -130,6 +131,7 @@ export default function AdminOrderDetailPage() {
             {canCancel ? <Button icon={<Ban size={16} />} disabled={actionPending} onClick={() => setAction('cancel')}>{t('adminOrders.cancel')}</Button> : null}
             {canRefund ? <Button danger icon={<Undo2 size={16} />} disabled={actionPending} onClick={() => setAction('refund')}>{t('adminOrders.refund')}</Button> : null}
             <Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>{t('order.printLabel')}</Button>
+            <Button icon={<PackageOpen size={16} />} onClick={() => void navigate(`/admin/returns?orderId=${encodeURIComponent(orderId)}`)}>{t('returns.orderReturns')}</Button>
           </Space>
         }
         hero={{
