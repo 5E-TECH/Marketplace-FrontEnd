@@ -22,6 +22,9 @@ export async function seedAccessToken(
     ({ key, token }) => sessionStorage.setItem(key, token),
     { key: ACCESS_TOKEN_KEY, token: accessToken },
   );
+  // Header har sahifada bildirishnomalarni so'raydi. Mock bo'lmasa so'rov dev proxy
+  // orqali haqiqiy API'ga ketadi, soxta tokenga 401 qaytadi va sessiya yopiladi.
+  await mockNotifications(page);
 }
 
 export const operatorUser = {
@@ -171,7 +174,6 @@ export async function installAuthenticatedSession(
   await mockProducts(page);
   await mockPublicCategories(page);
   await mockDashboard(page);
-  await mockNotifications(page);
   // Test o'zi `page.route` qo'shsa, Playwright keyingi qo'shilganini
   // birinchi ishlatadi — shuning uchun bu umumiy mock ustidan yozilaveradi.
   await mockSellerShop(page);

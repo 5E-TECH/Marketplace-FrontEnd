@@ -33,5 +33,10 @@ export default defineConfig({
     url: 'http://127.0.0.1:5273',
     reuseExistingServer: true,
     timeout: 120_000,
+    // `.env.development` dev proxy'ni production API'ga yo'naltiradi. Testlar to'liq
+    // mock bilan ishlaydi: mock qilinmagan so'rov yopiq portga tushib darhol xato
+    // beradi — production'ga soxta token bilan chiqib, sessiyani yopib yubormaydi.
+    // (Mavjud dev server qayta ishlatilsa bu env qo'llanmaydi — mock'lar baribir shart.)
+    env: { VITE_DEV_API_PROXY: 'http://127.0.0.1:9' },
   },
 });
