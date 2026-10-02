@@ -46,6 +46,9 @@ const AdminFinancePage = lazy(routeImports.adminFinance);
 const AdminAuditPage = lazy(routeImports.adminAudit);
 const AdminSystemHealthPage = lazy(routeImports.adminSystemHealth);
 const AdminOverviewPage = lazy(routeImports.adminOverview);
+const AdminInventoryPage = lazy(routeImports.adminInventory);
+const AdminDeliveryPage = lazy(routeImports.adminDelivery);
+const AdminNotificationsPage = lazy(routeImports.adminNotifications);
 const AdminCategoriesPage = lazy(() => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'));
 const AdminBannersPage = lazy(() => import('../../pages/AdminBannersPage/AdminBannersPage'));
 const SharedUiTestPage = import.meta.env.DEV
@@ -80,6 +83,8 @@ export function AppRouter() {
                 <Route path="admin/shops" element={<AdminShopsPage />} />
                 <Route path="admin/orders" element={<AdminOrdersPage />} />
                 <Route path="admin/orders/:orderId" element={<AdminOrderDetailPage />} />
+                <Route path="admin/delivery" element={<AdminDeliveryPage />} />
+                <Route path="admin/inventory" element={<AdminInventoryPage />} />
                 <Route path="admin/returns" element={<AdminReturnsPage />} />
                 <Route path="admin/products" element={<AdminProductsPage />} />
                 <Route path="admin/products/:productId" element={<AdminProductDetailPage />} />
@@ -93,6 +98,7 @@ export function AppRouter() {
                 <Route path="admin/system-settings" element={<AdminSystemHealthPage />} />
                 <Route path="admin/categories" element={<AdminCategoriesPage />} />
                 <Route path="admin/banners" element={<AdminBannersPage />} />
+                <Route path="admin/notifications" element={<AdminNotificationsPage />} />
                 <Route path="admin/profile" element={<ProfilePage />} />
               </Route>
             </Route>

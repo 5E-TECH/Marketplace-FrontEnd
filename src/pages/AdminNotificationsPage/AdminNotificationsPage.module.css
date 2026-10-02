@@ -1,0 +1,24 @@
+.page { display: grid; width: 100%; min-width: 0; gap: var(--space-4); }
+/* Grid bolasi sukut bo‘yicha `min-width: auto` — keng jadval sahifani kengaytirib yubormasin. */
+.page > *, .stackGap > * { min-width: 0; }
+.stackGap { display: grid; gap: var(--space-4); }
+.stack { display: grid; gap: 2px; max-width: 380px; }
+.stack small { color: var(--color-text-muted); font-size: .8125rem; }
+.clamp { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.number { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.formPanel { max-width: 720px; padding: var(--space-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.variables, .previewBlock { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.variables > span, .previewBlock > span { color: var(--color-text-secondary); font-size: .8125rem; }
+.variable { cursor: pointer; font-family: var(--font-mono, monospace); }
+.messageCard { display: grid; gap: 4px; padding: var(--space-3) var(--space-4); background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.messageCard p { margin: 0; color: var(--color-text-secondary); white-space: pre-wrap; word-break: break-word; }
+.modalFooter { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.footerActions { display: inline-flex; gap: var(--space-2); }
+.confirm { display: grid; gap: var(--space-3); }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px var(--space-4); margin: 0; }
+.facts dt { color: var(--color-text-muted); }
+.facts dd { margin: 0; }
+@media (max-width: 575px) {
+  .formPanel { padding: var(--space-3); }
+  .modalFooter { flex-direction: column-reverse; align-items: stretch; }
+}

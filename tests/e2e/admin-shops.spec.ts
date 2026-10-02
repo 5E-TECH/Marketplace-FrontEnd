@@ -95,3 +95,24 @@ test('tarif 0 kiritilsa backendga 0 yuborilmaydi — minimal 1 ga to‘g‘rilan
   // Kontrakt: UpdateShopTariffsDto.tariffHome minimum 1.
   await expect.poll(() => tariffBody?.tariffHome).toBe(1);
 });
+
+test('C6.7: faol do‘konni Elchi’da qayta ro‘yxatdan o‘tkazish, pending do‘konda tugma yo‘q', async ({ page }) => {
+  await page.goto('/admin/shops');
+  await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
+  await expect(page.getByRole('button', { name: 'Tariflar' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '#15 do‘konni Elchi’da qayta ro‘yxatdan o‘tkazish' })).toHaveCount(0);
+
+  let reprovisioned = 0;
+  await page.route('**/api/v1/admin/shops?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [{ ...pendingShop, status: 'ACTIVE' }], total: 1, page: 1, limit: 20 } }) }));
+  await page.route('**/api/v1/admin/integration/shops/15/reprovision', async (route) => {
+    expect(route.request().method()).toBe('POST');
+    reprovisioned++;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { shopId: '15', elchiMarketId: '142', status: 'done', reprovisioned: true, error: null } }) });
+  });
+  await page.goto('/admin/shops');
+  await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
+  await page.getByRole('button', { name: '#15 do‘konni Elchi’da qayta ro‘yxatdan o‘tkazish' }).click();
+  await page.locator('.ant-popconfirm').getByRole('button', { name: 'OK' }).click();
+  await expect.poll(() => reprovisioned).toBe(1);
+  await expect(page.locator('.ant-message')).toContainText('Do‘kon Elchi’da yangilandi (market #142)');
+});

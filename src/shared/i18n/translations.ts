@@ -4,6 +4,8 @@ import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
 import { adminProductTranslations } from './adminProductTranslations';
 import { storefrontTranslations } from './storefrontTranslations';
+import { adminOpsTranslations } from './adminOpsTranslations';
+import { adminNotificationsTranslations } from './adminNotificationsTranslations';
 import { returnTranslations } from './returnTranslations';
 import { notificationTranslations } from './notificationTranslations';
 import { sellerFinanceTranslations } from './sellerFinanceTranslations';
@@ -77,6 +79,8 @@ export const translations = {
     ...commerceTranslations.uz,
     ...adminProductTranslations.uz,
     ...storefrontTranslations.uz,
+    ...adminOpsTranslations.uz,
+    ...adminNotificationsTranslations.uz,
     ...returnTranslations.uz,
     ...notificationTranslations.uz,
     ...sellerFinanceTranslations.uz,
@@ -149,6 +153,8 @@ export const translations = {
     ...commerceTranslations.ru,
     ...adminProductTranslations.ru,
     ...storefrontTranslations.ru,
+    ...adminOpsTranslations.ru,
+    ...adminNotificationsTranslations.ru,
     ...returnTranslations.ru,
     ...notificationTranslations.ru,
     ...sellerFinanceTranslations.ru,
@@ -221,6 +227,8 @@ export const translations = {
     ...commerceTranslations.en,
     ...adminProductTranslations.en,
     ...storefrontTranslations.en,
+    ...adminOpsTranslations.en,
+    ...adminNotificationsTranslations.en,
     ...returnTranslations.en,
     ...notificationTranslations.en,
     ...sellerFinanceTranslations.en,

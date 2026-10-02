@@ -45,10 +45,10 @@ test('TC2: ADMIN login admin sidebarni ko‘radi', async ({ page }) => {
 
   await expect(page.getByTestId('admin-layout')).toBeVisible();
   const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
-  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Qaytarishlar', 'Mahsulot moderatsiyasi', 'Kategoriyalar', 'Bannerlar', 'Audit loglar', 'Tizim holati']) {
+  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Yetkazib berish', 'Ombor va qoldiqlar', 'Qaytarishlar', 'Mahsulot moderatsiyasi', 'Kategoriyalar', 'Bannerlar', 'Xabarlar', 'Audit loglar', 'Tizim holati']) {
     await expect(sidebar.getByRole('menuitem', { name: item })).toBeVisible();
   }
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(10);
+  await expect(sidebar.getByRole('menuitem')).toHaveCount(13);
   await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toHaveCount(0);
   await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
 
@@ -68,14 +68,14 @@ test('TC1: SELLER admin URL ga kira olmaydi va redirect qilinadi', async ({ page
   await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
 });
 
-test('TC3: SUPERADMIN ishlaydigan o‘n bir bo‘limni, jumladan moliyani ko‘radi', async ({ page }) => {
+test('TC3: SUPERADMIN ishlaydigan barcha bo‘limlarni, jumladan moliyani ko‘radi', async ({ page }) => {
   await installAuthenticatedSession(page, superAdminUser);
   await mockAdminDashboard(page);
   await page.goto('/admin/overview');
 
   const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
   await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toBeVisible();
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(11);
+  await expect(sidebar.getByRole('menuitem')).toHaveCount(14);
   await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
 });
 

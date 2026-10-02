@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useActivateAdminShopMutation, useAdminShopDetailQuery, useAdminShopsQuery, useApproveAdminShopMutation, useRejectAdminShopMutation, useSetAdminShopFeaturedMutation, useSuspendAdminShopMutation, useUpdateAdminShopTariffsMutation } from '../../features/adminShops/api/adminShopQueries';
 import type { AdminShop, AdminShopStatus } from '../../features/adminShops/model/adminShopTypes';
+import { ReprovisionShopButton } from '../../features/adminDelivery/ui/ReprovisionShopButton';
 import { getUserErrorMessage } from '../../features/users/lib/getUserErrorMessage';
 import { formatDate } from '../../shared/lib/date';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
@@ -95,6 +96,7 @@ export default function AdminShopsPage() {
           {selected.status === 'SUSPENDED' ? <Button type="primary" icon={<Play />} loading={activate.isPending} onClick={() => activate.mutate(selected.id, { onSuccess: () => closeAfter('Do‘kon qayta faollashtirildi'), onError: notifyError })}>Faollashtirish</Button> : null}
           <Button icon={<Star />} loading={feature.isPending} onClick={() => feature.mutate({ shopId: selected.id, featured: !selected.isFeatured }, { onSuccess: () => { setSelectedShop({ ...selected, isFeatured: !selected.isFeatured }); void message.success(selected.isFeatured ? 'Do‘kon tavsiyalardan olib tashlandi' : 'Do‘kon bosh sahifaga chiqarildi'); }, onError: notifyError })}>{selected.isFeatured ? 'Tavsiyadan olish' : 'Tavsiya etish'}</Button>
           <Button icon={<DollarSign />} onClick={() => setTariffShop(selected)}>Tariflar</Button>
+          {selected.status === 'ACTIVE' ? <ReprovisionShopButton shopId={selected.id} /> : null}
         </Space>
       </> : null}
     </DetailDrawer>
