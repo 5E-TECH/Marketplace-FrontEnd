@@ -26,6 +26,9 @@ export const routeImports = {
   adminAudit: () => import('../../pages/AdminAuditPage/AdminAuditPage'),
   adminSystemHealth: () => import('../../pages/AdminSystemHealthPage/AdminSystemHealthPage'),
   adminOverview: () => import('../../pages/AdminOverviewPage/AdminOverviewPage'),
+  adminInventory: () => import('../../pages/AdminInventoryPage/AdminInventoryPage'),
+  adminDelivery: () => import('../../pages/AdminDeliveryPage/AdminDeliveryPage'),
+  adminNotifications: () => import('../../pages/AdminNotificationsPage/AdminNotificationsPage'),
 };
 
 export const routePreloaders: Array<[
@@ -58,6 +61,9 @@ export const routePreloaders: Array<[
   ['/admin/users', routeImports.adminUsers],
   ['/admin/finance', routeImports.adminFinance],
   ['/admin/audit-logs', routeImports.adminAudit],
+  ['/admin/inventory', routeImports.adminInventory],
+  ['/admin/delivery', routeImports.adminDelivery],
+  ['/admin/notifications', routeImports.adminNotifications],
   ['/admin/profile', routeImports.profile],
   ['/admin/system-settings', routeImports.adminSystemHealth],
   ['/', routeImports.home],

@@ -87,7 +87,7 @@ function parseAdminOrder(value: unknown): AdminOrder {
   const order = value as Record<string, unknown>; const id = optionalText(order, ['id']); const status = optionalText(order, ['status']);
   if (!id || !status || !adminStatuses.includes(status as AdminOrderStatus)) throw new Error('Admin buyurtmasining majburiy maydonlari mavjud emas');
   const payment = optionalText(order, ['paymentMethod']);
-  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), buyerPhone: optionalText(order, ['buyerPhone', 'customerPhone', 'phone']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), createdAt: optionalText(order, ['createdAt']) ?? '' };
+  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), buyerPhone: optionalText(order, ['buyerPhone', 'customerPhone', 'phone']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), shipmentsCount: typeof order.shipmentsCount === 'number' ? order.shipmentsCount : null, createdAt: optionalText(order, ['createdAt']) ?? '' };
 }
 export async function getAdminOrders(params: AdminOrderListParams, signal?: AbortSignal): Promise<AdminOrdersPage> {
   const { data } = await httpClient.get<unknown>('/admin/orders', { signal, params }); const value = unwrapApiData(data);
@@ -109,7 +109,7 @@ const nullableNumber = (record: Record<string, unknown>, keys: string[]) => {
 const identify = (record: Record<string, unknown>, fallback: string) => optionalText(record, ['id', 'orderId', 'sellerOrderId', 'itemId', 'shipmentId', 'eventId']) ?? fallback;
 
 function parseSubOrder(record: Record<string, unknown>, index: number): AdminSubOrder {
-  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']) };
+  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), elchiShipmentId: optionalText(record, ['elchiShipmentId']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']) };
 }
 function parseAdminItem(record: Record<string, unknown>, index: number): AdminOrderItemDetail {
   const quantity = nullableNumber(record, ['quantity', 'qty']);

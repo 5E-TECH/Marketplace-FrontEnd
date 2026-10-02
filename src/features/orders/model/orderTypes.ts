@@ -61,6 +61,8 @@ export interface AdminOrder {
   shopId: string | null;
   shopName: string | null;
   sellersCount: number;
+  /** Elchi posilkasi yaratilgan sub-buyurtmalar; backend bermasa null (C1.45). */
+  shipmentsCount: number | null;
   createdAt: string;
 }
 export interface AdminOrdersPage { items: AdminOrder[]; total: number; page: number; limit: number; totalPages: number }
@@ -69,6 +71,7 @@ export interface AdminSubOrder {
   id: string;
   shopId: string | null;
   shopName: string | null;
+  elchiShipmentId: string | null;
   status: string;
   amount: number | null;
   createdAt: string | null;

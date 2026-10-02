@@ -1,0 +1,22 @@
+.page { display: grid; width: 100%; min-width: 0; gap: var(--space-4); }
+/* Grid bolasi sukut bo‘yicha `min-width: auto` — keng jadval sahifani kengaytirib, qirqilib qolardi. */
+.page > * { min-width: 0; }
+.stateBar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.filters { display: grid; grid-template-columns: minmax(170px, .8fr) minmax(130px, .6fr) minmax(150px, .7fr) minmax(320px, 1.5fr) auto; gap: var(--space-3); align-items: end; }
+.webhookFilters { display: grid; grid-template-columns: minmax(170px, .9fr) minmax(140px, .6fr) minmax(140px, .6fr) minmax(170px, .8fr) minmax(320px, 1.5fr) auto; gap: var(--space-3); align-items: end; }
+.clear :global(.ant-btn) { min-height: 42px; }
+.order { display: grid; gap: 2px; }
+.order small, .muted { color: var(--color-text-muted); font-size: .8125rem; }
+.orderLink { justify-self: start; padding: 0; height: auto; font-weight: 700; }
+.shipment { display: grid; gap: 2px; }
+.number { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.payload { max-height: 60vh; margin: 0; padding: var(--space-3); overflow: auto; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: .8125rem; white-space: pre-wrap; word-break: break-word; }
+@media (max-width: 1199px) {
+  .filters, .webhookFilters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dateRange { grid-column: 1 / -1; }
+}
+@media (max-width: 575px) {
+  .filters, .webhookFilters { grid-template-columns: 1fr; }
+  .dateRange { grid-column: auto; }
+  .clear, .clear :global(.ant-btn) { width: 100%; }
+}

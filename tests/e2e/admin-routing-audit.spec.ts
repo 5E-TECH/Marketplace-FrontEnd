@@ -16,13 +16,17 @@ async function mockAdminEndpoints(page: Page) {
   await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) }));
   await page.route('**/api/v1/admin/finance/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 } }) }));
   await page.route('**/api/v1/admin/audit**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } }) }));
+  await page.route('**/api/v1/admin/inventory/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0, warnings: [], searchTruncated: false } }) }));
+  await page.route('**/api/v1/admin/integration/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 } }) }));
+  await page.route('**/api/v1/admin/notifications/templates**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) }));
+  await page.route('**/api/v1/admin/broadcasts**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 10, totalPages: 0 } }) }));
   await page.route('**/health**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'ok' }) }));
 }
 
-test('TC1: barcha to‘qqiz admin route direct URL orqali ochiladi', async ({ page }) => {
+test('TC1: barcha admin route’lar direct URL orqali ochiladi', async ({ page }) => {
   await installAuthenticatedSession(page, superadmin);
   await mockAdminEndpoints(page);
-  const routes = ['/admin/overview', '/admin/shops', '/admin/orders', '/admin/products', '/admin/users', '/admin/categories', '/admin/audit-logs', '/admin/finance', '/admin/system-settings'];
+  const routes = ['/admin/overview', '/admin/shops', '/admin/orders', '/admin/delivery', '/admin/inventory', '/admin/products', '/admin/users', '/admin/categories', '/admin/notifications', '/admin/audit-logs', '/admin/finance', '/admin/system-settings'];
   for (const path of routes) {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`${path.replaceAll('/', '\\/')}$`));

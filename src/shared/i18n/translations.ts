@@ -4,6 +4,8 @@ import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
 import { adminProductTranslations } from './adminProductTranslations';
 import { storefrontTranslations } from './storefrontTranslations';
+import { adminOpsTranslations } from './adminOpsTranslations';
+import { adminNotificationsTranslations } from './adminNotificationsTranslations';
 
 export const translations = {
   uz: {
@@ -51,7 +53,9 @@ export const translations = {
     'nav.home': 'Bosh sahifa', 'nav.shop': 'Do‘kon profili', 'nav.profile': 'Mening profilim',
     'nav.products': 'Mahsulotlar', 'nav.warehouses': 'Omborlar', 'nav.stock': 'Qoldiq',
     'nav.orders': 'Buyurtmalar', 'nav.delivery': 'Yetkazib berish', 'nav.users': 'Operatorlar', 'nav.adminShops': 'Marketlar', 'nav.adminOrders': 'Barcha buyurtmalar', 'nav.settings': 'Sozlamalar', 'nav.support': 'Yordam',
-    'adminOrders.shopCount': '{count} ta do‘kon', 'adminOrders.selected': '{count} ta buyurtma tanlandi', 'adminOrders.print': 'Print',
+    'adminOrders.shopCount': '{count} ta do‘kon', 'adminOrders.selected': '{count} ta buyurtma tanlandi', 'adminOrders.print': 'Yorliqlarni chop etish',
+    'labels.printOne': 'Yorliqni chop etish', 'labels.printMany': 'Yorliqlarni chop etish', 'labels.printParcel': '#{id} posilka yorlig‘ini chop etish',
+    'labels.needShipment': 'Avval posilka yarating', 'labels.skipped': 'Ba’zi yorliqlar chiqmadi: {list}', 'labels.selectedCount': '{count} ta tanlandi',
     'adminOrders.shopIdPlaceholder': 'Do‘kon ID bo‘yicha qidiring', 'adminOrders.search': 'Qidirish', 'adminOrders.searchPlaceholder': 'Buyurtma ID, xaridor nomi yoki telefon raqami...', 'adminOrders.filters': 'Buyurtma filtrlari',
     'adminOrders.title':'Barcha buyurtmalar','adminOrders.description':'Platformadagi barcha do‘kon buyurtmalarini kuzating','adminOrders.order':'Buyurtma','adminOrders.buyer':'Xaridor','adminOrders.shopId':'Do‘kon','adminOrders.amount':'Summa','adminOrders.payment':'To‘lov','adminOrders.allPayments':'Barcha to‘lovlar','adminOrders.dateFrom':'Boshlanish sanasi','adminOrders.dateTo':'Tugash sanasi','adminOrders.clear':'Tozalash','adminOrders.detail':'Buyurtma tafsilotlari','adminOrders.loadError':'Buyurtmalarni yuklab bo‘lmadi','adminOrders.empty':'Buyurtmalar topilmadi','adminOrders.emptyDescription':'Filterlarni o‘zgartiring yoki yangi buyurtmalarni kuting.','adminOrders.detailFormat':'Buyurtma tafsiloti formati noto‘g‘ri.','adminOrders.detailSubtitle':'Sub-buyurtma, mahsulot, jo‘natma, to‘lov va holat tarixi','adminOrders.subOrders':'Sub-buyurtmalar','adminOrders.noSubOrders':'Sub-buyurtmalar mavjud emas','adminOrders.items':'Mahsulotlar','adminOrders.item':'Mahsulot','adminOrders.quantity':'Soni','adminOrders.unitPrice':'Birlik narxi','adminOrders.total':'Jami','adminOrders.noItems':'Mahsulotlar mavjud emas','adminOrders.shipments':'Jo‘natmalar','adminOrders.provider':'Yetkazuvchi','adminOrders.tracking':'Kuzatuv','adminOrders.openTracking':'Kuzatuv sahifasini ochish','adminOrders.noShipments':'Jo‘natma mavjud emas','adminOrders.paymentDetail':'To‘lov tafsiloti','adminOrders.transaction':'Tranzaksiya ID','adminOrders.noPayment':'To‘lov ma’lumoti mavjud emas','adminOrders.history':'Holat tarixi','adminOrders.noHistory':'Holat tarixi mavjud emas',
     'adminShops.title':'Marketlar','adminShops.description':'Seller marketlarini tekshiring va faollashtiring','adminShops.search':'Market yoki telefon...','adminShops.market':'Market','adminShops.seller':'Seller','adminShops.ownerId':'Seller ID','adminShops.address':'Manzil','adminShops.approve':'Faollashtirish','adminShops.approved':'Market muvaffaqiyatli faollashtirildi','adminShops.loadError':'Marketlarni yuklab bo‘lmadi','adminShops.empty':'Marketlar topilmadi','adminShops.emptyDescription':'Qidiruv yoki status filtrini o‘zgartiring.',
@@ -73,6 +77,8 @@ export const translations = {
     ...commerceTranslations.uz,
     ...adminProductTranslations.uz,
     ...storefrontTranslations.uz,
+    ...adminOpsTranslations.uz,
+    ...adminNotificationsTranslations.uz,
   },
   ru: {
     'common.search': 'Поиск...', 'common.save': 'Сохранить', 'common.cancel': 'Отмена',
@@ -119,7 +125,9 @@ export const translations = {
     'nav.home': 'Главная', 'nav.shop': 'Профиль магазина', 'nav.profile': 'Мой профиль',
     'nav.products': 'Товары', 'nav.warehouses': 'Склады', 'nav.stock': 'Остатки',
     'nav.orders': 'Заказы', 'nav.delivery': 'Доставка', 'nav.users': 'Операторы', 'nav.adminShops': 'Маркеты', 'nav.adminOrders': 'Все заказы', 'nav.settings': 'Настройки', 'nav.support': 'Помощь',
-    'adminOrders.shopCount': 'Магазинов: {count}', 'adminOrders.selected': 'Выбрано заказов: {count}', 'adminOrders.print': 'Print',
+    'adminOrders.shopCount': 'Магазинов: {count}', 'adminOrders.selected': 'Выбрано заказов: {count}', 'adminOrders.print': 'Печать этикеток',
+    'labels.printOne': 'Печать этикетки', 'labels.printMany': 'Печать этикеток', 'labels.printParcel': 'Печать этикетки посылки #{id}',
+    'labels.needShipment': 'Сначала создайте посылку', 'labels.skipped': 'Не все этикетки созданы: {list}', 'labels.selectedCount': 'Выбрано: {count}',
     'adminOrders.shopIdPlaceholder': 'Поиск по ID магазина', 'adminOrders.search': 'Поиск', 'adminOrders.searchPlaceholder': 'ID заказа, имя или телефон покупателя...', 'adminOrders.filters': 'Фильтры заказов',
     'adminOrders.title':'Все заказы','adminOrders.description':'Отслеживайте заказы всех магазинов платформы','adminOrders.order':'Заказ','adminOrders.buyer':'Покупатель','adminOrders.shopId':'Магазин','adminOrders.amount':'Сумма','adminOrders.payment':'Оплата','adminOrders.allPayments':'Все платежи','adminOrders.dateFrom':'Дата начала','adminOrders.dateTo':'Дата окончания','adminOrders.clear':'Очистить','adminOrders.detail':'Детали заказа','adminOrders.loadError':'Не удалось загрузить заказы','adminOrders.empty':'Заказы не найдены','adminOrders.emptyDescription':'Измените фильтры или дождитесь новых заказов.','adminOrders.detailFormat':'Неверный формат деталей заказа.','adminOrders.detailSubtitle':'Подзаказы, товары, доставка, оплата и история статусов','adminOrders.subOrders':'Подзаказы','adminOrders.noSubOrders':'Подзаказов нет','adminOrders.items':'Товары','adminOrders.item':'Товар','adminOrders.quantity':'Количество','adminOrders.unitPrice':'Цена за единицу','adminOrders.total':'Итого','adminOrders.noItems':'Товаров нет','adminOrders.shipments':'Отправления','adminOrders.provider':'Служба доставки','adminOrders.tracking':'Отслеживание','adminOrders.openTracking':'Открыть отслеживание','adminOrders.noShipments':'Отправлений нет','adminOrders.paymentDetail':'Детали оплаты','adminOrders.transaction':'ID транзакции','adminOrders.noPayment':'Данных об оплате нет','adminOrders.history':'История статусов','adminOrders.noHistory':'Истории статусов нет',
     'adminShops.title':'Маркеты','adminShops.description':'Проверяйте и активируйте маркеты продавцов','adminShops.search':'Маркет или телефон...','adminShops.market':'Маркет','adminShops.seller':'Продавец','adminShops.ownerId':'ID продавца','adminShops.address':'Адрес','adminShops.approve':'Активировать','adminShops.approved':'Маркет успешно активирован','adminShops.loadError':'Не удалось загрузить маркеты','adminShops.empty':'Маркеты не найдены','adminShops.emptyDescription':'Измените поиск или фильтр статуса.',
@@ -141,6 +149,8 @@ export const translations = {
     ...commerceTranslations.ru,
     ...adminProductTranslations.ru,
     ...storefrontTranslations.ru,
+    ...adminOpsTranslations.ru,
+    ...adminNotificationsTranslations.ru,
   },
   en: {
     'common.search': 'Search...', 'common.save': 'Save', 'common.cancel': 'Cancel',
@@ -187,7 +197,9 @@ export const translations = {
     'nav.home': 'Dashboard', 'nav.shop': 'Store profile', 'nav.profile': 'My profile',
     'nav.products': 'Products', 'nav.warehouses': 'Warehouses', 'nav.stock': 'Stock',
     'nav.orders': 'Orders', 'nav.delivery': 'Delivery', 'nav.users': 'Operators', 'nav.adminShops': 'Markets', 'nav.adminOrders': 'All orders', 'nav.settings': 'Settings', 'nav.support': 'Support',
-    'adminOrders.shopCount': '{count} stores', 'adminOrders.selected': '{count} orders selected', 'adminOrders.print': 'Print',
+    'adminOrders.shopCount': '{count} stores', 'adminOrders.selected': '{count} orders selected', 'adminOrders.print': 'Print labels',
+    'labels.printOne': 'Print label', 'labels.printMany': 'Print labels', 'labels.printParcel': 'Print label for parcel #{id}',
+    'labels.needShipment': 'Create a shipment first', 'labels.skipped': 'Some labels were not generated: {list}', 'labels.selectedCount': '{count} selected',
     'adminOrders.shopIdPlaceholder': 'Search by store ID', 'adminOrders.search': 'Search', 'adminOrders.searchPlaceholder': 'Order ID, buyer name, or phone number...', 'adminOrders.filters': 'Order filters',
     'adminOrders.title':'All orders','adminOrders.description':'Track orders across all platform stores','adminOrders.order':'Order','adminOrders.buyer':'Buyer','adminOrders.shopId':'Store','adminOrders.amount':'Amount','adminOrders.payment':'Payment','adminOrders.allPayments':'All payments','adminOrders.dateFrom':'Start date','adminOrders.dateTo':'End date','adminOrders.clear':'Clear','adminOrders.detail':'Order details','adminOrders.loadError':'Could not load orders','adminOrders.empty':'No orders found','adminOrders.emptyDescription':'Change filters or wait for new orders.','adminOrders.detailFormat':'Invalid order detail format.','adminOrders.detailSubtitle':'Sub-orders, items, shipment, payment, and status history','adminOrders.subOrders':'Sub-orders','adminOrders.noSubOrders':'No sub-orders','adminOrders.items':'Items','adminOrders.item':'Item','adminOrders.quantity':'Quantity','adminOrders.unitPrice':'Unit price','adminOrders.total':'Total','adminOrders.noItems':'No items','adminOrders.shipments':'Shipments','adminOrders.provider':'Carrier','adminOrders.tracking':'Tracking','adminOrders.openTracking':'Open tracking','adminOrders.noShipments':'No shipments','adminOrders.paymentDetail':'Payment details','adminOrders.transaction':'Transaction ID','adminOrders.noPayment':'No payment information','adminOrders.history':'Status history','adminOrders.noHistory':'No status history',
     'adminShops.title':'Markets','adminShops.description':'Review and activate seller markets','adminShops.search':'Market or phone...','adminShops.market':'Market','adminShops.seller':'Seller','adminShops.ownerId':'Seller ID','adminShops.address':'Address','adminShops.approve':'Activate','adminShops.approved':'Market activated successfully','adminShops.loadError':'Could not load markets','adminShops.empty':'No markets found','adminShops.emptyDescription':'Change the search or status filter.',
@@ -209,6 +221,8 @@ export const translations = {
     ...commerceTranslations.en,
     ...adminProductTranslations.en,
     ...storefrontTranslations.en,
+    ...adminOpsTranslations.en,
+    ...adminNotificationsTranslations.en,
   },
 } as const satisfies Record<Language, Record<string, string>>;
 

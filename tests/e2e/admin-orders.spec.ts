@@ -26,13 +26,13 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
     await expect(row.getByRole('button', { name: 'Buyurtma tafsilotlari' })).toBeVisible();
   }
   await expect(page.getByRole('checkbox')).toHaveCount(allOrders.length + 1);
-  await expect(page.getByRole('button', { name: 'Print' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Yorliqlarni chop etish' })).toBeVisible();
   await expect(page.getByRole('columnheader')).toHaveCount(8);
   await expect(page.getByRole('row').filter({ hasText: 'Ali Valiyev' })).toContainText('250 000 UZS');
   await expect(page.getByRole('row').filter({ hasText: 'Ali Valiyev' })).toContainText('Tasdiqlangan');
 });
 
-test('Print faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ page }) => {
+test('chop etish faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ page }) => {
   const labelIds: string[] = [];
   await page.route('**/api/v1/admin/orders**', async route => {
     const path = new URL(route.request().url()).pathname;
@@ -45,7 +45,7 @@ test('Print faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ pa
     await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
   });
   await page.goto('/admin/orders');
-  const printButton = page.getByRole('button', { name: 'Print' });
+  const printButton = page.getByRole('button', { name: 'Yorliqlarni chop etish' });
   await expect(printButton).toBeDisabled();
   await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
   await expect(printButton).toBeEnabled();
@@ -53,7 +53,7 @@ test('Print faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ pa
   await expect.poll(() => labelIds).toEqual(['91']);
 });
 
-test('Print bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi', async ({ page }) => {
+test('chop etish bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi', async ({ page }) => {
   let requestBody: unknown;
   await page.route('**/api/v1/admin/orders**', async route => {
     const request = route.request();
@@ -67,8 +67,48 @@ test('Print bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi', asy
   await page.goto('/admin/orders');
   await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
   await page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox').check();
-  await page.getByRole('button', { name: 'Print' }).click();
+  await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
   await expect.poll(() => requestBody).toEqual({ orderIds: ['91', '92'] });
+});
+
+test('C1.45: posilkasi yo‘q buyurtmani yorliq uchun belgilab bo‘lmaydi', async ({ page }) => {
+  const items = [{ ...allOrders[0], shipmentsCount: 1 }, { ...allOrders[1], shipmentsCount: 0 }, allOrders[2]];
+  await page.route('**/api/v1/admin/orders**', route => route.fulfill({ json: { data: { items, total: items.length, page: 1, limit: 20, totalPages: 1 } } }));
+  await page.goto('/admin/orders');
+  await expect(page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox')).toBeEnabled();
+  await expect(page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox')).toBeDisabled();
+  // Eski backend `shipmentsCount` bermasa belgilash to‘sib qo‘yilmaydi.
+  await expect(page.getByRole('row', { name: /Vali Aliyev/ }).getByRole('checkbox')).toBeEnabled();
+});
+
+test('C1.45: yorliq 409 bersa backendning aniq sababi ko‘rinadi (Blob xato javobi)', async ({ page }) => {
+  await page.route('**/api/v1/admin/orders**', async route => {
+    if (new URL(route.request().url()).pathname.endsWith('/admin/orders/91/label')) {
+      await route.fulfill({ status: 409, json: { statusCode: 409, message: 'Elchi shipment QR tokeni mavjud emas', errorCode: 'CONFLICT' } });
+      return;
+    }
+    await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
+  });
+  await page.goto('/admin/orders');
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
+  await expect(page.locator('.ant-message')).toContainText('Elchi shipment QR tokeni mavjud emas');
+});
+
+test('C1.45: partiyada chiqmagan yorliqlar ogohlantirishda sababi bilan ko‘rinadi', async ({ page }) => {
+  const skipped = [{ orderId: '92', reason: 'Elchi shipment QR tokeni mavjud emas' }];
+  await page.route('**/api/v1/admin/orders**', async route => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({ status: 200, contentType: 'application/pdf', headers: { 'X-Labels-Skipped': encodeURIComponent(JSON.stringify(skipped)) }, body: Buffer.from('%PDF-1.4 batch') });
+      return;
+    }
+    await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
+  });
+  await page.goto('/admin/orders');
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
+  await expect(page.locator('.ant-message')).toContainText('Ba’zi yorliqlar chiqmadi: Elchi shipment QR tokeni mavjud emas: #92');
 });
 
 test('TC2: har bir filtr natijani o‘zgartiradi, birgalikda ishlaydi va tozalanadi', async ({ page }) => {
@@ -337,6 +377,12 @@ for (const width of [1440, 375]) {
     await expect(detailPage.getByText('To‘lov ma’lumoti mavjud emas')).toHaveCount(0);
     await expect(detailPage.getByText('Holat tarixi mavjud emas')).toBeVisible();
     await expect(detailPage.locator('input, select, textarea')).toHaveCount(0);
+    // C1.45: posilkasi bor do‘kon uchun alohida yorliq, yo‘g‘i uchun tugma o‘chiq.
+    await expect(detailPage.getByRole('button', { name: '#502 posilka yorlig‘ini chop etish' })).toBeDisabled();
+    const parcelLabel = page.waitForRequest(request => new URL(request.url()).pathname.endsWith('/admin/orders/91/sellers/501/label'));
+    await page.route('**/api/v1/admin/orders/91/sellers/501/label', route => route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 parcel') }));
+    await detailPage.getByRole('button', { name: '#501 posilka yorlig‘ini chop etish' }).click();
+    await parcelLabel;
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
@@ -370,6 +416,7 @@ test('TC3: detail loading, xato, qayta urinish va bo‘sh bo‘limlar', async ({
   await expect(detailPage.getByText('Mahsulotlar mavjud emas')).toBeVisible();
   await expect(detailPage.getByText('Jo‘natma mavjud emas')).toBeVisible();
   await expect(detailPage.getByText('Holat tarixi mavjud emas')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Yorliqni chop etish' })).toBeDisabled();
 });
 
 test('admin order detail direct URL va refreshda backenddan ochiladi', async ({ page }) => {

@@ -11,9 +11,12 @@ const availableItems = [
   ['Accountlar', '/admin/users'],
   ['Do‘konlar', '/admin/shops'],
   ['Buyurtmalar', '/admin/orders'],
+  ['Yetkazib berish', '/admin/delivery'],
+  ['Ombor va qoldiqlar', '/admin/inventory'],
   ['Mahsulot moderatsiyasi', '/admin/products'],
   ['Kategoriyalar', '/admin/categories'],
   ['Bannerlar', '/admin/banners'],
+  ['Xabarlar', '/admin/notifications'],
   ['Audit loglar', '/admin/audit-logs'],
   ['Moliya', '/admin/finance'],
   ['Tizim holati', '/admin/system-settings'],
@@ -44,6 +47,10 @@ async function mockAdminEndpoints(page: Page) {
   await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
   await page.route('**/api/v1/admin/content/banners**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
   await page.route('**/api/v1/admin/audit**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
+  await page.route('**/api/v1/admin/inventory/**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0, warnings: [], searchTruncated: false } } }));
+  await page.route('**/api/v1/admin/integration/**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 } } }));
+  await page.route('**/api/v1/admin/notifications/templates**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
+  await page.route('**/api/v1/admin/broadcasts**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 10, totalPages: 0 } } }));
   await page.route('**/api/v1/admin/finance/**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
   await page.route('**/health**', (route) => route.fulfill({ status: 200, json: { status: 'ok' } }));
 }

@@ -25,7 +25,7 @@ import { DetailList } from '../../shared/ui/DetailList/DetailList';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
-import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
+import { describeSkippedLabels, openOrderLabels } from '../../features/orders/api/orderLabelApi';
 
 type StatusFilter = 'ALL' | SellerOrderStatus;
 export default function OrdersPage() {
@@ -75,7 +75,10 @@ export default function OrdersPage() {
   const resetFilters = () => { setSearch(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); };
   const printLabels = async (ids: string[]) => {
     setPrintLoading(true);
-    try { await openOrderLabels('seller', ids); }
+    try {
+      const { skipped } = await openOrderLabels('seller', ids);
+      if (skipped.length) void message.warning(t('labels.skipped', { list: describeSkippedLabels(skipped) }));
+    }
     catch (error) { void message.error(getAuthErrorMessage(error)); }
     finally { setPrintLoading(false); }
   };
@@ -99,8 +102,8 @@ export default function OrdersPage() {
       <DateRangeFilter className={styles.dateRange} value={[dateFrom, dateTo]} startLabel={t('order.startDate')} endLabel={t('order.endDate')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); resetPage(); }} />
       {search || status !== 'ALL' || dateFrom || dateTo ? <Button icon={<RotateCcw size={16} />} onClick={resetFilters}>{t('adminOrders.clear')}</Button> : null}
     </>} />
-    <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? `${selectedRowKeys.length} ta tanlandi` : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>Yorliqlarni chop etish</Button>}>
-      <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? 'Avval posilka yarating' : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+    <TablePanel className={styles.tableCard} title={t('order.list')} caption={selectedRowKeys.length ? t('labels.selectedCount', { count: selectedRowKeys.length }) : t('order.resultCount', { count: ordersQuery.data.total })} action={<Button icon={<Printer size={16} />} disabled={!selectedRowKeys.length} loading={printLoading} onClick={() => void printLabels(selectedRowKeys.map(String))}>{t('labels.printMany')}</Button>}>
+      <DataTable rowKey="id" rowSelection={{ selectedRowKeys, preserveSelectedRowKeys: true, onChange: setSelectedRowKeys, getCheckboxProps: (order) => ({ disabled: !order.elchiShipmentId, title: !order.elchiShipmentId ? t('labels.needShipment') : undefined }) }} columns={columns} dataSource={orders} tableLayout="auto" emptyState={<EmptyState compact title={t('order.empty')} description={t('order.emptyDescription')} />} pagination={ordersQuery.data.total > 20 ? { ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: ordersQuery.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
     </TablePanel>
     <DetailDrawer title={t('order.detailTitle', { id: selectedOrder?.salesOrderId ?? '' })} subtitle={t('order.detailDescription')} width="min(560px, 100vw)" open={Boolean(selectedOrder)} onClose={() => { if (!updateStatusMutation.isPending && !confirmMutation.isPending && !cancelMutation.isPending && !shipmentMutation.isPending) setSelectedOrder(null); }}>
       {selectedOrder ? <>
@@ -109,7 +112,7 @@ export default function OrdersPage() {
           <Popconfirm title={t('order.confirmQuestion')} disabled={!canConfirm} onConfirm={() => confirmMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CONFIRMED' } : current); setNextStatus('CONFIRMED'); void message.success(t('order.confirmed')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}><Button type="primary" icon={<Check size={16} />} disabled={!canConfirm} loading={confirmMutation.isPending}>{t('common.confirm')}</Button></Popconfirm>
           <Popconfirm title={t('order.cancelQuestion')} description={t('order.cancelDescription')} disabled={!canCancel} onConfirm={() => cancelMutation.mutate(selectedOrder.id, { onSuccess: () => { setSelectedOrder((current) => current ? { ...current, status: 'CANCELLED' } : current); setNextStatus('CANCELLED'); void message.success(t('order.cancelled')); }, onError: (error) => void message.error(getAuthErrorMessage(error)) })}><Button danger icon={<Ban size={16} />} disabled={!canCancel} loading={cancelMutation.isPending}>{t('common.cancel')}</Button></Popconfirm>
         </div>
-        <Button block icon={<Printer size={16} />} disabled={!selectedOrder.elchiShipmentId} loading={printLoading} onClick={() => void printLabels([selectedOrder.id])}>Yorliqni chop etish</Button>
+        <Button block icon={<Printer size={16} />} disabled={!selectedOrder.elchiShipmentId} loading={printLoading} onClick={() => void printLabels([selectedOrder.id])}>{t('labels.printOne')}</Button>
         <section className={styles.statusEditor} aria-label={t('order.updateStatus')}>
           <div><strong>{t('order.updateStatus')}</strong><span>{t('order.updateStatusDescription')}</span></div>
           <Select<SellerOrderStatus> virtual={false} placement="topLeft" aria-label={t('order.newStatus')} value={nextStatus ?? selectedOrder.status} options={statusOptions.filter((option): option is { value: SellerOrderStatus; label: string } => option.value !== 'ALL')} disabled={updateStatusMutation.isPending} onChange={setNextStatus} />

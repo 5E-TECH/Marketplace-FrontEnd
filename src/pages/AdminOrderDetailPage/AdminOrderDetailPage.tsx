@@ -15,7 +15,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { AppDetailNotice } from '../AdminOrdersPage/AdminOrdersPage';
 import styles from './AdminOrderDetailPage.module.css';
-import { openOrderLabels } from '../../features/orders/api/orderLabelApi';
+import { describeSkippedLabels, openAdminParcelLabel, openOrderLabels, type OrderLabelResult } from '../../features/orders/api/orderLabelApi';
 
 interface OrderLocationState {
   order?: AdminOrder;
@@ -27,6 +27,7 @@ export default function AdminOrderDetailPage() {
   const { locale, t } = useTranslation();
   const { message } = App.useApp();
   const [printing, setPrinting] = useState(false);
+  const [printingParcelId, setPrintingParcelId] = useState<string | null>(null);
   const query = useAdminOrderQuery(orderId ?? null);
   const routeOrder = (location.state as OrderLocationState | null)?.order;
   const order = query.data?.summary ?? (routeOrder?.id === orderId ? routeOrder : null);
@@ -55,11 +56,23 @@ export default function AdminOrderDetailPage() {
     .filter((value): value is string => Boolean(value))
     .join(', ');
   const status = order?.status;
+  const parcelCount = query.data.sellerOrders.filter((item) => item.elchiShipmentId).length;
+  const runPrint = async (print: () => Promise<OrderLabelResult>) => {
+    try {
+      const { skipped } = await print();
+      if (skipped.length) void message.warning(t('labels.skipped', { list: describeSkippedLabels(skipped) }));
+    } catch (error) { void message.error(getAuthErrorMessage(error)); }
+  };
+  // `orderId` — sales_order: backend buyurtmaning barcha posilkalarini chiqaradi.
   const printLabel = async () => {
     setPrinting(true);
-    try { await openOrderLabels('admin', [orderId]); }
-    catch (error) { void message.error(getAuthErrorMessage(error)); }
-    finally { setPrinting(false); }
+    await runPrint(() => openOrderLabels('admin', [orderId]));
+    setPrinting(false);
+  };
+  const printParcel = async (sellerOrderId: string) => {
+    setPrintingParcelId(sellerOrderId);
+    await runPrint(() => openAdminParcelLabel(orderId, sellerOrderId));
+    setPrintingParcelId(null);
   };
   const sections: DetailPageSection[] = [{
     key: 'summary',
@@ -81,7 +94,7 @@ export default function AdminOrderDetailPage() {
       backFallback="/admin/orders"
       title={`${t('adminOrders.order')} #${order?.orderNumber ?? orderId}`}
       description={t('adminOrders.detailSubtitle')}
-      actions={<Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>Yorliqni chop etish</Button>}
+      actions={<Button icon={<Printer size={16} />} disabled={!parcelCount} title={parcelCount ? undefined : t('labels.needShipment')} loading={printing} onClick={() => void printLabel()}>{parcelCount > 1 ? t('labels.printMany') : t('labels.printOne')}</Button>}
       hero={{
         avatarFallback: (order?.buyerName || orderId).slice(0, 2).toUpperCase(),
         title: order?.buyerName || `${t('adminOrders.order')} #${orderId}`,
@@ -90,7 +103,7 @@ export default function AdminOrderDetailPage() {
       }}
       sections={sections}
     >
-      <AppDetailNotice value={query.data} />
+      <AppDetailNotice value={query.data} onPrintParcel={(id) => void printParcel(id)} printingParcelId={printingParcelId} />
     </DetailPage>
   );
 }
