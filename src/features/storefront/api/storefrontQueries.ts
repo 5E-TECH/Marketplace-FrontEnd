@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getStorefrontProduct, getStorefrontShop } from './storefrontApi';
 import type { StorefrontShopParams } from '../model/storefrontTypes';
 
-export const storefrontKeys = {
+const storefrontKeys = {
   all: ['storefront'] as const,
   shop: (slug: string, params: StorefrontShopParams) =>
     [...storefrontKeys.all, 'shop', slug, params] as const,

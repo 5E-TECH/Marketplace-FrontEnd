@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { collectUnconnectedFormWarnings } from './support/console';
 
 const makeProduct = (index: number) => ({
   id: index === 1 ? '12' : `product-${index}`,
@@ -10,13 +11,13 @@ const makeProduct = (index: number) => ({
   category: 'Elektronika',
   categoryId: '1',
   price: index * 100_000,
-  stock: index,
-  status: index <= 5 ? 'LOW' : 'ACTIVE',
+  status: index <= 5 ? 'LOW' : index <= 10 ? 'ACTIVE' : 'DRAFT',
   imageUrl: index === 1 ? 'https://cdn.example.com/product-1.jpg' : null,
+  images: index === 2 ? ['https://cdn.example.com/product-2.jpg'] : [],
 });
 
 async function mockProductsApi(page: Page) {
-  let products = Array.from({ length: 10 }, (_, index) => makeProduct(index + 1));
+  let products = Array.from({ length: 11 }, (_, index) => makeProduct(index + 1));
 
   await page.route('**/api/v1/products/my**', async (route) => {
     const url = new URL(route.request().url());
@@ -24,7 +25,7 @@ async function mockProductsApi(page: Page) {
     const status = url.searchParams.get('status');
     const categoryId = url.searchParams.get('categoryId');
     const page = Number(url.searchParams.get('page') ?? 1);
-    const limit = Number(url.searchParams.get('limit') ?? 8);
+    const limit = Number(url.searchParams.get('limit') ?? 10);
     const filtered = products.filter((product) =>
       (!search || `${product.name} ${product.slug}`.toLocaleLowerCase('uz').includes(search)) &&
       (!status || product.status === status) &&
@@ -68,10 +69,10 @@ test.beforeEach(async ({ page }) => {
 
 test('TC1: products pagination ishlaydi', async ({ page }) => {
   await expect(page.getByText('Mahsulot 01', { exact: true })).toBeVisible();
-  await expect(page.getByText('Mahsulot 09', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Mahsulot 11', { exact: true })).toHaveCount(0);
 
   await page.getByTitle('2').click();
-  await expect(page.getByText('Mahsulot 09', { exact: true })).toBeVisible();
+  await expect(page.getByText('Mahsulot 11', { exact: true })).toBeVisible();
   await expect(page.getByText('Mahsulot 01', { exact: true })).toHaveCount(0);
 });
 
@@ -83,7 +84,7 @@ test('TC2: products search filtr ishlaydi', async ({ page }) => {
 
   await expect(page.getByText('Noyob Kamera', { exact: true })).toBeVisible();
   await expect(page.getByText('Mahsulot 01', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('Jami 1 ta')).toBeVisible();
+  await expect(page.getByText(/^1 ta natija/)).toBeVisible();
 });
 
 test('status filter serverga status query yuboradi va natijani filtrlaydi', async ({ page }) => {
@@ -102,6 +103,8 @@ test('status filter serverga status query yuboradi va natijani filtrlaydi', asyn
 
 test('jadval backenddan kelgan cover rasmni ko‘rsatadi', async ({ page }) => {
   await expect(page.locator('img[src="https://cdn.example.com/product-1.jpg"]')).toBeVisible();
+  // imageUrl bo'sh, rasm faqat images massivida.
+  await expect(page.locator('img[src="https://cdn.example.com/product-2.jpg"]')).toBeVisible();
 });
 
 test('create alohida to‘liq sahifada ochiladi va kategoriya filteri APIga ulanadi', async ({ page }) => {
@@ -129,7 +132,7 @@ test('TC3: delete tasdiqlangach mahsulot ro‘yxatdan yo‘qoladi', async ({ pag
 
   await expect(page.getByText('Mahsulot o‘chirildi')).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Mahsulot 01', exact: true })).toHaveCount(0);
-  await expect(page.getByText('Jami 9 ta')).toBeVisible();
+  await expect(page.getByText('10 ta natija', { exact: true })).toBeVisible();
 });
 
 test('product PATCH /products/12 orqali Bearer token bilan yangilanadi', async ({ page }) => {
@@ -137,7 +140,7 @@ test('product PATCH /products/12 orqali Bearer token bilan yangilanadi', async (
     id: '12', shopId: '5', ownerUserId: '2', categoryId: '1',
     name: 'Eski nom', slug: 'eski-nom', description: 'Eski tavsif',
     price: 100000, oldPrice: null, imageUrl: null, images: [], attributes: {},
-    hasVariants: false, stock: 4, status: 'DRAFT', isDeleted: false,
+    hasVariants: false, status: 'DRAFT', isDeleted: false,
     createdAt: '', updatedAt: '', variants: [],
   };
   let method = '';
@@ -342,6 +345,7 @@ test('product create yangi API contractiga mos payload yuboradi', async ({ page 
 });
 
 test('variant jadvalida qo‘shish, tahrirlash va o‘chirish UI ishlaydi', async ({ page }) => {
+  const formWarnings = collectUnconnectedFormWarnings(page);
   await page.goto('/products/new');
   await page.getByLabel('Narxi', { exact: true }).fill('120000');
   await expect(page.getByLabel('Standart variant')).toContainText('120 000 so‘m');
@@ -356,6 +360,8 @@ test('variant jadvalida qo‘shish, tahrirlash va o‘chirish UI ishlaydi', asyn
   await expect(page.getByRole('cell', { name: 'Qora / XL', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Qora / XL variantini tahrirlash' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Variantni tahrirlash' });
+  await expect(editDialog.getByLabel('Variant nomi')).toHaveValue('Qora / XL');
+  await expect(editDialog.getByLabel('SKU')).toHaveValue('MAS-001-QORA-XL');
   await editDialog.getByLabel('Variant nomi').fill('Oq / L');
   await editDialog.getByRole('button', { name: 'Saqlash' }).click();
   await expect(page.getByRole('cell', { name: 'Oq / L', exact: true })).toBeVisible();
@@ -363,6 +369,7 @@ test('variant jadvalida qo‘shish, tahrirlash va o‘chirish UI ishlaydi', asyn
   await page.getByRole('button', { name: 'Oq / L variantini o‘chirish' }).click();
   await page.getByRole('button', { name: 'O‘chirish', exact: true }).click();
   await expect(page.getByText('Hali variant qo‘shilmagan')).toBeVisible();
+  expect(formWarnings).toEqual([]);
 });
 
 test('TC1: variant qo‘shish va saqlash backendda persist qilinadi', async ({ page }) => {

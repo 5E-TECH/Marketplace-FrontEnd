@@ -7,7 +7,8 @@ import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
 import { loggedOut, selectAuthUser } from '../../features/auth/model/authSlice';
 import type { UpdateAuthProfilePayload, UserRole } from '../../features/auth/model/authTypes';
 import { useUpdateAuthProfileMutation } from '../../features/auth/api/useUpdateAuthProfileMutation';
-import { getApiFieldErrors, getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiFieldErrors } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
@@ -19,13 +20,12 @@ import styles from './ProfilePage.module.css';
 interface ProfileFormValues {
   name: string;
   phone: string;
-  email?: string;
   password?: string;
   confirmPassword?: string;
 }
 
 const EDITABLE_FIELDS = new Set<keyof ProfileFormValues>([
-  'name', 'phone', 'email', 'password', 'confirmPassword',
+  'name', 'phone', 'password', 'confirmPassword',
 ]);
 
 const roleLabels: Record<UserRole, string> = {
@@ -35,8 +35,6 @@ const roleLabels: Record<UserRole, string> = {
   ADMIN: 'Administrator',
   SUPERADMIN: 'Bosh administrator',
 };
-
-const normalizedOptional = (value?: string | null) => value?.trim() || '';
 
 export default function ProfilePage() {
   const { message } = App.useApp();
@@ -55,7 +53,6 @@ export default function ProfilePage() {
   const initialValues: ProfileFormValues = {
     name: user.name,
     phone: user.phone,
-    email: user.email ?? '',
     password: '',
     confirmPassword: '',
   };
@@ -64,10 +61,8 @@ export default function ProfilePage() {
     const payload: UpdateAuthProfilePayload = {};
     const name = values.name.trim();
     const phone = values.phone.replace(/\s/g, '');
-    const email = normalizedOptional(values.email);
     if (name !== user.name) payload.name = name;
     if (phone !== user.phone) payload.phone = phone;
-    if (email && email !== normalizedOptional(user.email)) payload.email = email;
     if (values.password?.trim()) payload.password = values.password;
     return payload;
   };
@@ -101,7 +96,7 @@ export default function ProfilePage() {
       if (fieldErrors.length) {
         form.setFields(fieldErrors.map(({ name, errors }) => ({ name: [name as keyof ProfileFormValues], errors })));
       } else {
-        void message.error(getAuthErrorMessage(error));
+        void message.error(getApiErrorMessage(error));
       }
     }
   };
@@ -121,7 +116,7 @@ export default function ProfilePage() {
               </Tag>
             </div>
           </div>
-          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => { form.setFieldsValue(initialValues); setOpen(true); }}>
+          <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => setOpen(true)}>
             Tahrirlash
           </Button>
         </header>
@@ -133,15 +128,12 @@ export default function ProfilePage() {
           <div><dt><Camera /> Avatar</dt><dd>{user.avatarUrl || 'Kiritilmagan'}</dd></div>
         </dl>
       </section>
-      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
+      <FormModal<ProfileFormValues> open={open} title="Profilni tahrirlash" form={form} initialValues={initialValues} submitText="Saqlash" loading={updateMutation.isPending} onCancel={() => setOpen(false)} onSubmit={save}>
         <Form.Item label="Ism" name="name" rules={[{ required: true, whitespace: true, message: 'Ismni kiriting' }, { min: 1 }, { max: 255, message: 'Ism 255 belgidan oshmasligi kerak' }]}>
           <TextControl autoComplete="name" maxLength={255} />
         </Form.Item>
         <Form.Item label="Telefon" name="phone" rules={[{ required: true, message: 'Telefon raqamini kiriting' }, { pattern: /^\+998\d{9}$/, message: '+998901234567 formatida kiriting' }]}>
           <TextControl autoComplete="tel" placeholder="+998901234567" />
-        </Form.Item>
-        <Form.Item label="Email" name="email" rules={[{ type: 'email', message: 'Email manzilini to‘g‘ri kiriting' }, { max: 255, message: 'Email 255 belgidan oshmasligi kerak' }]}>
-          <TextControl autoComplete="email" placeholder="ali@example.com" maxLength={255} />
         </Form.Item>
         <div className={styles.passwordHeading}><LockKeyhole /><div><strong>Yangi parol</strong><span>Ixtiyoriy — o‘zgartirmasangiz bo‘sh qoldiring</span></div></div>
         <Form.Item label="Yangi parol" name="password" dependencies={['confirmPassword']} rules={[{ min: 4, message: 'Parol kamida 4 ta belgi bo‘lishi kerak' }]}>

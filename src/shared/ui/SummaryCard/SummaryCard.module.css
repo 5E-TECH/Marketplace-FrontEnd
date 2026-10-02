@@ -71,7 +71,7 @@
   background: var(--color-token-rgb-245-158-11-13);
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .card {
     padding: var(--space-3);
   }

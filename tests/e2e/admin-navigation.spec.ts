@@ -13,6 +13,7 @@ const availableItems = [
   ['Buyurtmalar', '/admin/orders'],
   ['Yetkazib berish', '/admin/delivery'],
   ['Ombor va qoldiqlar', '/admin/inventory'],
+  ['Qaytarishlar', '/admin/returns'],
   ['Mahsulot moderatsiyasi', '/admin/products'],
   ['Kategoriyalar', '/admin/categories'],
   ['Bannerlar', '/admin/banners'],
@@ -42,6 +43,7 @@ async function mockAdminEndpoints(page: Page) {
   await page.route('**/api/v1/admin/dashboard', (route) => route.fulfill({ status: 200, json: { data: { shops: { total: 0, pending: 0, active: 0, suspended: 0, rejected: 0 }, users: { total: 0, sellers: 0, buyers: 0, admins: 0, operators: 0 }, orders: { total: 0, today: 0 }, gmv: 0, revenue: 0 } } }));
   await page.route('**/api/v1/admin/shops**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20 } } }));
   await page.route('**/api/v1/admin/orders**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
+  await page.route('**/api/v1/admin/returns**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 10, totalPages: 1 } } }));
   await page.route('**/api/v1/admin/products**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
   await page.route('**/api/v1/admin/users**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
   await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({ status: 200, json: { data: [] } }));

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { findClippedBlocks } from './support/layout';
 
 async function mockStock(page: Page) {
   const items = [
@@ -97,3 +98,13 @@ test('warehouseId va productId query filterlari yuboriladi', async ({ page }) =>
   await page.getByLabel('Mahsulot ID').fill('12');
   await request;
 });
+
+for (const width of [390, 1024]) {
+  test(`qoldiq sahifasi ${width}px da kontentdan chiqib kesilmaydi`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await mockStock(page);
+    await page.goto('/stock');
+    await expect(page.getByRole('row').filter({ hasText: 'iPhone 16 Pro' })).toBeVisible();
+    expect(await findClippedBlocks(page)).toEqual([]);
+  });
+}

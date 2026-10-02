@@ -4,7 +4,7 @@ import axios from 'axios';
  * Backend beradigan barqaror xato kodlari — API_CONTRACT.md §1.5.
  * Matn o'zgarishi mumkin, kod — yo'q; shuning uchun mantiq shu kodga tayanadi.
  */
-export type ApiErrorCode =
+type ApiErrorCode =
   | 'VALIDATION_ERROR'
   | 'BUSINESS_RULE_VIOLATION'
   | 'UNAUTHENTICATED'
@@ -58,7 +58,7 @@ function readServerMessage(data: unknown): string | null {
 }
 
 /** Javobdagi `errorCode` — tanilmagan kod bo'lsa null. */
-export function getApiErrorCode(error: unknown): ApiErrorCode | null {
+function getApiErrorCode(error: unknown): ApiErrorCode | null {
   const data = getResponseData(error);
   if (typeof data !== 'object' || data === null || !('errorCode' in data)) {
     return null;
@@ -70,24 +70,6 @@ export function getApiErrorCode(error: unknown): ApiErrorCode | null {
     : null;
 }
 
-/**
- * Xatoni log bilan solishtirish uchun server qaytargan kuzatuv ID'si
- * (`X-Request-Id` sarlavhasi yoki javob tanasidagi `requestId`).
- */
-export function getRequestId(error: unknown): string | null {
-  if (!axios.isAxiosError(error)) return null;
-
-  const header: unknown = error.response?.headers?.['x-request-id'];
-  if (typeof header === 'string' && header) return header;
-
-  const data = getResponseData(error);
-  if (typeof data === 'object' && data !== null && 'requestId' in data) {
-    const requestId: unknown = data.requestId;
-    if (typeof requestId === 'string' && requestId) return requestId;
-  }
-
-  return null;
-}
 
 const CODE_MESSAGES: Record<ApiErrorCode, string> = {
   VALIDATION_ERROR: 'Kiritilgan ma’lumotda xato bor. Tekshirib qayta yuboring.',

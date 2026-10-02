@@ -35,7 +35,7 @@ export function CreateShopModal({
       footer={null}
       destroyOnHidden
       closable={!saving}
-      maskClosable={!saving}
+      mask={{ closable: !saving }}
       onCancel={onCancel}
       afterOpenChange={(isOpen) => {
         if (!isOpen) form.resetFields();

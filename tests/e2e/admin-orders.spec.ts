@@ -12,7 +12,7 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
   await page.route('**/api/v1/admin/orders**', async route => {
     const url = new URL(route.request().url());
     expect(route.request().method()).toBe('GET');
-    expect(Object.fromEntries(url.searchParams)).toEqual({ page: '1', limit: '20' });
+    expect(Object.fromEntries(url.searchParams)).toEqual({ page: '1', limit: '10' });
     await route.fulfill({ json: { data: { items: allOrders, total: 3, page: 1, limit: 20, totalPages: 1 } } });
   });
   await page.goto('/admin/orders');
@@ -32,7 +32,7 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
   await expect(page.getByRole('row').filter({ hasText: 'Ali Valiyev' })).toContainText('Tasdiqlangan');
 });
 
-test('chop etish faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ page }) => {
+test('Yorliqlarni chop etish faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async ({ page }) => {
   const labelIds: string[] = [];
   await page.route('**/api/v1/admin/orders**', async route => {
     const path = new URL(route.request().url()).pathname;
@@ -53,7 +53,7 @@ test('chop etish faqat tanlangan buyurtma yorlig‘ini backenddan oladi', async 
   await expect.poll(() => labelIds).toEqual(['91']);
 });
 
-test('chop etish bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi', async ({ page }) => {
+test('Yorliqlarni chop etish bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi', async ({ page }) => {
   let requestBody: unknown;
   await page.route('**/api/v1/admin/orders**', async route => {
     const request = route.request();
@@ -69,46 +69,6 @@ test('chop etish bir nechta tanlangan buyurtmani batch PDF endpointiga yuboradi'
   await page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
   await expect.poll(() => requestBody).toEqual({ orderIds: ['91', '92'] });
-});
-
-test('C1.45: posilkasi yo‘q buyurtmani yorliq uchun belgilab bo‘lmaydi', async ({ page }) => {
-  const items = [{ ...allOrders[0], shipmentsCount: 1 }, { ...allOrders[1], shipmentsCount: 0 }, allOrders[2]];
-  await page.route('**/api/v1/admin/orders**', route => route.fulfill({ json: { data: { items, total: items.length, page: 1, limit: 20, totalPages: 1 } } }));
-  await page.goto('/admin/orders');
-  await expect(page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox')).toBeEnabled();
-  await expect(page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox')).toBeDisabled();
-  // Eski backend `shipmentsCount` bermasa belgilash to‘sib qo‘yilmaydi.
-  await expect(page.getByRole('row', { name: /Vali Aliyev/ }).getByRole('checkbox')).toBeEnabled();
-});
-
-test('C1.45: yorliq 409 bersa backendning aniq sababi ko‘rinadi (Blob xato javobi)', async ({ page }) => {
-  await page.route('**/api/v1/admin/orders**', async route => {
-    if (new URL(route.request().url()).pathname.endsWith('/admin/orders/91/label')) {
-      await route.fulfill({ status: 409, json: { statusCode: 409, message: 'Elchi shipment QR tokeni mavjud emas', errorCode: 'CONFLICT' } });
-      return;
-    }
-    await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
-  });
-  await page.goto('/admin/orders');
-  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
-  await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
-  await expect(page.locator('.ant-message')).toContainText('Elchi shipment QR tokeni mavjud emas');
-});
-
-test('C1.45: partiyada chiqmagan yorliqlar ogohlantirishda sababi bilan ko‘rinadi', async ({ page }) => {
-  const skipped = [{ orderId: '92', reason: 'Elchi shipment QR tokeni mavjud emas' }];
-  await page.route('**/api/v1/admin/orders**', async route => {
-    if (route.request().method() === 'POST') {
-      await route.fulfill({ status: 200, contentType: 'application/pdf', headers: { 'X-Labels-Skipped': encodeURIComponent(JSON.stringify(skipped)) }, body: Buffer.from('%PDF-1.4 batch') });
-      return;
-    }
-    await route.fulfill({ json: { data: { items: allOrders, total: allOrders.length, page: 1, limit: 20, totalPages: 1 } } });
-  });
-  await page.goto('/admin/orders');
-  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
-  await page.getByRole('row', { name: /Aziza Karimova/ }).getByRole('checkbox').check();
-  await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
-  await expect(page.locator('.ant-message')).toContainText('Ba’zi yorliqlar chiqmadi: Elchi shipment QR tokeni mavjud emas: #92');
 });
 
 test('TC2: har bir filtr natijani o‘zgartiradi, birgalikda ishlaydi va tozalanadi', async ({ page }) => {
@@ -203,8 +163,8 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => { throw error; });
   page.on('request', request => {
     if (new URL(request.url()).pathname.startsWith('/api/v1/admin/orders')) {
-      const isBatchLabel = new URL(request.url()).pathname.endsWith('/admin/orders/labels');
-      expect(request.method()).toBe(isBatchLabel ? 'POST' : 'GET');
+      const isPostAction = /\/admin\/orders\/(labels|[^/]+\/(refund|cancel))$/.test(new URL(request.url()).pathname);
+      expect(request.method()).toBe(isPostAction ? 'POST' : 'GET');
     }
   });
   await seedAccessToken(page);
@@ -325,12 +285,12 @@ test('admin orders pagination backendga page va limit yuboradi', async ({ page }
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: orders.slice((pageNumber - 1) * limit, pageNumber * limit), total: orders.length, page: pageNumber, limit, totalPages: 2 } }) });
   });
   await page.goto('/admin/orders');
-  const secondPageRequest = page.waitForRequest(request => {
+  const lastPageRequest = page.waitForRequest(request => {
     const url = new URL(request.url());
-    return url.searchParams.get('page') === '2' && url.searchParams.get('limit') === '20';
+    return url.searchParams.get('page') === '3' && url.searchParams.get('limit') === '10';
   });
-  await page.getByTitle('2').click();
-  await secondPageRequest;
+  await page.getByTitle('3').click();
+  await lastPageRequest;
   await expect(page.getByText('Xaridor 21')).toBeVisible();
   const resetPageRequest = page.waitForRequest(request => {
     const url = new URL(request.url());
@@ -377,12 +337,6 @@ for (const width of [1440, 375]) {
     await expect(detailPage.getByText('To‘lov ma’lumoti mavjud emas')).toHaveCount(0);
     await expect(detailPage.getByText('Holat tarixi mavjud emas')).toBeVisible();
     await expect(detailPage.locator('input, select, textarea')).toHaveCount(0);
-    // C1.45: posilkasi bor do‘kon uchun alohida yorliq, yo‘g‘i uchun tugma o‘chiq.
-    await expect(detailPage.getByRole('button', { name: '#502 posilka yorlig‘ini chop etish' })).toBeDisabled();
-    const parcelLabel = page.waitForRequest(request => new URL(request.url()).pathname.endsWith('/admin/orders/91/sellers/501/label'));
-    await page.route('**/api/v1/admin/orders/91/sellers/501/label', route => route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 parcel') }));
-    await detailPage.getByRole('button', { name: '#501 posilka yorlig‘ini chop etish' }).click();
-    await parcelLabel;
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
@@ -416,7 +370,6 @@ test('TC3: detail loading, xato, qayta urinish va bo‘sh bo‘limlar', async ({
   await expect(detailPage.getByText('Mahsulotlar mavjud emas')).toBeVisible();
   await expect(detailPage.getByText('Jo‘natma mavjud emas')).toBeVisible();
   await expect(detailPage.getByText('Holat tarixi mavjud emas')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Yorliqni chop etish' })).toBeDisabled();
 });
 
 test('admin order detail direct URL va refreshda backenddan ochiladi', async ({ page }) => {
@@ -443,4 +396,145 @@ test('TC4: ro‘yxat loading va empty holatlarini ko‘rsatadi', async ({ page }
   releaseResponse!();
   await expect(page.getByText('Buyurtmalar topilmadi')).toBeVisible();
   await expect(page.getByText('Filterlarni o‘zgartiring yoki yangi buyurtmalarni kuting.')).toBeVisible();
+});
+
+/** Detail GET va refund/cancel POST'ni mock qiladi; muvaffaqiyatli amaldan keyin detail yangi holat bilan qaytadi. */
+async function mockOrderAction(page: import('@playwright/test').Page, order: Record<string, unknown>, action: 'refund' | 'cancel', response: { status: number; json: unknown }) {
+  const state = { order: { ...order }, bodies: [] as unknown[] };
+  await page.route('**/api/v1/admin/orders/**', async route => {
+    const request = route.request();
+    const pathname = new URL(request.url()).pathname;
+    if (request.method() === 'POST' && pathname.endsWith(`/${order.id as string}/${action}`)) {
+      state.bodies.push(request.postDataJSON());
+      if (response.status < 300) state.order = { ...state.order, status: action === 'refund' ? 'REFUNDED' : 'CANCELLED' };
+      await route.fulfill(response);
+      return;
+    }
+    await route.fulfill({ json: { data: { ...state.order, sellerOrders: [] } } });
+  });
+  return state;
+}
+
+test('online to‘langan buyurtmada refund sabab bilan yuboriladi va tugma yashiriladi', async ({ page }) => {
+  const state = await mockOrderAction(page, allOrders[1], 'refund', { status: 201, json: { data: { id: '92', status: 'REFUNDED', idempotent: false } } });
+  await page.goto('/admin/orders/92');
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByRole('button', { name: 'Buyurtmani bekor qilish' })).toHaveCount(0);
+  await detailPage.getByRole('button', { name: 'Pulni qaytarish' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Buyurtma summasi to‘liq qaytariladi: 120 000 so‘m');
+  await dialog.getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await expect(dialog).toContainText('Sababni kiriting');
+  await dialog.getByLabel('Sabab').fill('abc');
+  await dialog.getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await expect(dialog).toContainText('Kamida 5 ta belgi kiriting');
+  expect(state.bodies).toHaveLength(0);
+  await dialog.getByLabel('Sabab').fill('  Mahsulot mavjud emas  ');
+  await dialog.getByRole('button', { name: 'Pulni qaytarish' }).dblclick();
+  await expect(page.getByText('Pul qaytarildi')).toBeVisible();
+  expect(state.bodies).toEqual([{ reason: 'Mahsulot mavjud emas' }]);
+  await expect(dialog).toHaveCount(0);
+  await expect(detailPage).toContainText('Qaytarilgan');
+  await expect(detailPage.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+});
+
+test('takroriy refund idempotent javobida "allaqachon qaytarilgan" chiqadi', async ({ page }) => {
+  await mockOrderAction(page, allOrders[1], 'refund', { status: 201, json: { data: { id: '92', status: 'REFUNDED', idempotent: true } } });
+  await page.goto('/admin/orders/92');
+  await page.getByTestId('detail-page').getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await page.getByRole('dialog').getByLabel('Sabab').fill('Takroriy so‘rov');
+  await page.getByRole('dialog').getByRole('button', { name: 'Pulni qaytarish' }).click();
+  await expect(page.getByText('Bu buyurtma allaqachon qaytarilgan')).toBeVisible();
+  await expect(page.getByText('Pul qaytarildi')).toHaveCount(0);
+});
+
+test('COD buyurtmada refund tugmasi ko‘rinmaydi', async ({ page }) => {
+  await mockOrderAction(page, allOrders[0], 'refund', { status: 201, json: {} });
+  await page.goto('/admin/orders/91');
+  await expect(page.getByTestId('detail-page')).toContainText('Ali Valiyev');
+  await expect(page.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+});
+
+for (const { status, json, text } of [
+  { status: 400, json: { message: 'COD buyurtmani qaytarib bo‘lmaydi' }, text: 'COD buyurtmani qaytarib bo‘lmaydi' },
+  { status: 403, json: { message: 'Forbidden resource' }, text: 'Bu amal uchun ruxsat yo‘q' },
+  { status: 404, json: { message: 'Not Found' }, text: 'Buyurtma topilmadi' },
+]) {
+  test(`refund ${status} xatosida mos xabar chiqadi va oyna ochiq qoladi`, async ({ page }) => {
+    await mockOrderAction(page, allOrders[1], 'refund', { status, json });
+    await page.goto('/admin/orders/92');
+    await page.getByTestId('detail-page').getByRole('button', { name: 'Pulni qaytarish' }).click();
+    await page.getByRole('dialog').getByLabel('Sabab').fill('Mahsulot mavjud emas');
+    await page.getByRole('dialog').getByRole('button', { name: 'Pulni qaytarish' }).click();
+    await expect(page.locator('.ant-message')).toContainText(text);
+    await expect(page.getByRole('dialog')).toBeVisible();
+  });
+}
+
+test('PENDING_PAYMENT buyurtma sabab bilan bekor qilinadi', async ({ page }) => {
+  const state = await mockOrderAction(page, { ...allOrders[1], status: 'PENDING_PAYMENT' }, 'cancel', { status: 201, json: { data: { id: '92', status: 'CANCELLED', idempotent: false } } });
+  await page.goto('/admin/orders/92');
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+  await detailPage.getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await page.getByRole('dialog').getByLabel('Sabab').fill('Xaridor to‘lamadi');
+  await page.getByRole('dialog').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await expect(page.getByText('Buyurtma bekor qilindi')).toBeVisible();
+  expect(state.bodies).toEqual([{ reason: 'Xaridor to‘lamadi' }]);
+  await expect(detailPage.getByRole('button', { name: 'Buyurtmani bekor qilish' })).toHaveCount(0);
+});
+
+test('allaqachon bekor qilingan buyurtmada idempotent xabar chiqadi', async ({ page }) => {
+  await mockOrderAction(page, { ...allOrders[1], status: 'DRAFT' }, 'cancel', { status: 201, json: { data: { id: '92', status: 'CANCELLED', idempotent: true } } });
+  await page.goto('/admin/orders/92');
+  await page.getByTestId('detail-page').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await page.getByRole('dialog').getByLabel('Sabab').fill('Takroriy so‘rov');
+  await page.getByRole('dialog').getByRole('button', { name: 'Buyurtmani bekor qilish' }).click();
+  await expect(page.getByText('Bu buyurtma allaqachon bekor qilingan')).toBeVisible();
+});
+
+test('yorliq xatosida serverning JSON xabari ko‘rsatiladi (blob javob)', async ({ page }) => {
+  await page.route('**/api/v1/admin/orders/91', route => route.fulfill({ json: { data: { ...allOrders[0], sellerOrders: [] } } }));
+  await page.route('**/api/v1/admin/orders/91/label', route => route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ statusCode: 409, message: 'Jo‘natma hali yaratilmagan' }) }));
+  await page.goto('/admin/orders/91');
+  await page.getByRole('button', { name: 'Yorliqni chop etish' }).click();
+  await expect(page.locator('.ant-message')).toContainText('Jo‘natma hali yaratilmagan');
+});
+
+const parcelDetail = {
+  id: '91', buyerName: 'Ali Valiyev', status: 'CONFIRMED', paymentMethod: 'cod', totalAmount: 240000, deliveryFee: 0, deliveryAddress: null,
+  createdAt: '2026-09-03T10:00:00.000Z', updatedAt: '2026-09-03T10:00:00.000Z',
+  sellerOrders: [
+    { id: '501', shopId: '7', shopName: 'Ali Market', subtotal: 140000, status: 'ON_THE_ROAD', elchiShipmentId: 'SH-9', trackingUrl: 'https://elchi.uz/track/SH-9', items: [] },
+    { id: '502', shopId: '8', shopName: 'Aziza Market', subtotal: 100000, status: 'NEW', elchiShipmentId: null, trackingUrl: null, items: [] },
+  ],
+};
+
+test('ko‘p do‘konli buyurtmada har bir posilka yorlig‘i alohida chop etiladi', async ({ page }) => {
+  const parcelLabels: string[] = [];
+  await page.route('**/api/v1/admin/orders/91', route => route.fulfill({ json: { data: parcelDetail } }));
+  await page.route('**/api/v1/admin/orders/91/sellers/*/label', async route => {
+    parcelLabels.push(new URL(route.request().url()).pathname.split('/').at(-2) ?? '');
+    await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 parcel') });
+  });
+  await page.goto('/admin/orders/91');
+  const shipped = page.locator('article').filter({ hasText: '#501' });
+  const notShipped = page.locator('article').filter({ hasText: '#502' });
+  // Posilkasi yo'q do'kon uchun yorliq chiqmaydi.
+  await expect(notShipped.getByRole('button', { name: 'Posilka yorlig‘i' })).toBeDisabled();
+  await shipped.getByRole('button', { name: 'Posilka yorlig‘i' }).click();
+  await expect.poll(() => parcelLabels).toEqual(['501']);
+});
+
+test('buyurtma yorlig‘ida chiqmay qolgan posilka haqida ogohlantiriladi', async ({ page }) => {
+  await page.route('**/api/v1/admin/orders/91', route => route.fulfill({ json: { data: parcelDetail } }));
+  await page.route('**/api/v1/admin/orders/91/label', route => route.fulfill({
+    status: 200,
+    contentType: 'application/pdf',
+    headers: { 'X-Labels-Skipped': encodeURIComponent(JSON.stringify([{ sellerOrderId: '502', reason: 'Posilka yaratilmagan' }])) },
+    body: Buffer.from('%PDF-1.4 order'),
+  }));
+  await page.goto('/admin/orders/91');
+  await page.getByRole('button', { name: 'Yorliqni chop etish' }).click();
+  await expect(page.getByText('1 ta yorliq chiqmadi: #502 — Posilka yaratilmagan')).toBeVisible();
 });

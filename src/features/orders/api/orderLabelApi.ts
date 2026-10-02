@@ -1,97 +1,74 @@
 import axios, { type AxiosResponse } from 'axios';
 import { httpClient } from '../../../shared/api/httpClient';
+import { asRecord, readText } from '../../../shared/api/responseFields';
 
-export type OrderLabelScope = 'seller' | 'admin';
-
-/** Partiyada chiqmay qolgan yorliq — backend `X-Labels-Skipped` headeri (C1.45). */
-export interface SkippedOrderLabel {
-  orderId: string;
-  sellerOrderId?: string;
-  reason: string;
-}
-
-export interface OrderLabelResult {
-  skipped: SkippedOrderLabel[];
-}
-
-type LabelTarget =
-  | { scope: OrderLabelScope; orderIds: string[] }
-  /** Admin: buyurtmaning bitta do‘kon posilkasi. */
-  | { scope: 'admin-parcel'; orderId: string; sellerOrderId: string };
-
-const SKIPPED_HEADER = 'x-labels-skipped';
-
-function sendLabelRequest(target: LabelTarget): Promise<AxiosResponse<Blob>> {
-  const options = { responseType: 'blob' as const };
-  if (target.scope === 'admin-parcel') {
-    return httpClient.get<Blob>(`/admin/orders/${encodeURIComponent(target.orderId)}/sellers/${encodeURIComponent(target.sellerOrderId)}/label`, options);
-  }
-  // Yo‘llar literal: `npm run contract:check` ularni OpenAPI bilan solishtiradi.
-  const { orderIds } = target;
-  if (target.scope === 'admin') {
-    // Admin id’lari — sales_order (ro‘yxat va tafsilot bilan bir xil); backend
-    // har buyurtmaning barcha do‘kon posilkalarini chiqaradi.
-    return orderIds.length === 1
-      ? httpClient.get<Blob>(`/admin/orders/${encodeURIComponent(orderIds[0])}/label`, options)
-      : httpClient.post<Blob>('/admin/orders/labels', { orderIds }, options);
-  }
-  return orderIds.length === 1
-    ? httpClient.get<Blob>(`/seller/orders/${encodeURIComponent(orderIds[0])}/label`, options)
-    : httpClient.post<Blob>('/seller/orders/labels', { orderIds }, options);
-}
+/** Kontrakt: ShippingLabelsBatchDto.orderIds — maxItems 100. */
+const MAX_LABELS_PER_REQUEST = 100;
 
 /**
- * `responseType: 'blob'` da xato javobi (JSON) ham Blob bo‘lib keladi va umumiy
- * xato ishlovchisi undan `message` ni o‘qiy olmaydi — admin "QR tokeni mavjud
- * emas" o‘rniga tushunarsiz umumiy xabarni ko‘rardi. JSON ni o‘sha axios
- * xatosining o‘ziga qaytaramiz: status va boshqa maydonlar saqlanadi.
+ * `responseType: 'blob'` bo'lganda backendning JSON xatosi ham Blob bo'lib keladi —
+ * umumiy xato ishlovchisi uni o'qiy olmaydi va "server bilan bog'lanib bo'lmadi"
+ * deb chiqaradi. Blob'ni JSON'ga qaytaramiz.
  */
-async function withReadableBody(error: unknown): Promise<unknown> {
+async function withReadableErrorBody(error: unknown): Promise<unknown> {
   if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
-    try {
-      error.response.data = JSON.parse(await error.response.data.text()) as unknown;
-    } catch {
-      // JSON emas — umumiy xabar qoladi.
-    }
+    try { error.response.data = JSON.parse(await error.response.data.text()) as unknown; }
+    catch { /* JSON bo'lmasa asl xato qoladi. */ }
   }
   return error;
 }
 
-function isSkipped(value: unknown): value is SkippedOrderLabel {
-  if (typeof value !== 'object' || value === null) return false;
-  const record = value as Record<string, unknown>;
-  return typeof record.orderId === 'string' && typeof record.reason === 'string';
-}
+export type OrderLabelScope = 'seller' | 'admin';
 
-function readSkipped(header: unknown): SkippedOrderLabel[] {
+/** PDF'ga kirmay qolgan yorliq: qaysi buyurtma/posilka va nega. */
+export interface SkippedLabel { id: string | null; reason: string }
+export interface LabelPrintResult { skipped: SkippedLabel[] }
+
+/**
+ * Kontrakt: partiyada yorlig'i chiqmagan buyurtmalar PDF'ni yiqitmaydi — ular
+ * `X-Labels-Skipped` headerida URI-encoded JSON bo'lib, sababi bilan keladi.
+ */
+function parseSkippedLabels(header: unknown): SkippedLabel[] {
   if (typeof header !== 'string' || !header) return [];
   try {
-    const parsed: unknown = JSON.parse(decodeURIComponent(header));
-    return Array.isArray(parsed) ? parsed.filter(isSkipped) : [];
+    const value: unknown = JSON.parse(decodeURIComponent(header));
+    const entries: unknown[] = Array.isArray(value)
+      ? value
+      : value && typeof value === 'object'
+        ? Object.entries(value).map(([id, reason]) => (typeof reason === 'string' ? { id, reason } : { id, ...asRecord(reason) }))
+        : [];
+    return entries.slice(0, MAX_LABELS_PER_REQUEST).map((entry) => {
+      if (typeof entry === 'string') return { id: null, reason: entry };
+      const row = asRecord(entry);
+      return {
+        id: readText(row, 'orderId', 'salesOrderId', 'sellerOrderId', 'id') || null,
+        reason: readText(row, 'reason', 'message', 'error') || 'Sabab ko‘rsatilmagan',
+      };
+    });
   } catch {
     return [];
   }
 }
 
-/** "QR tokeni mavjud emas: #7, #8; …" — sabab bo‘yicha guruhlangan qisqa matn. */
-export function describeSkippedLabels(skipped: SkippedOrderLabel[]): string {
-  const byReason = new Map<string, Set<string>>();
-  for (const item of skipped) {
-    const ids = byReason.get(item.reason) ?? new Set<string>();
-    ids.add(`#${item.orderId}`);
-    byReason.set(item.reason, ids);
+function requestLabel(scope: OrderLabelScope, orderIds: string[]): Promise<AxiosResponse<Blob>> {
+  if (scope === 'admin') {
+    return orderIds.length === 1
+      ? httpClient.get<Blob>(`/admin/orders/${encodeURIComponent(orderIds[0])}/label`, { responseType: 'blob' })
+      : httpClient.post<Blob>('/admin/orders/labels', { orderIds }, { responseType: 'blob' });
   }
-  return [...byReason].map(([reason, ids]) => `${reason}: ${[...ids].join(', ')}`).join('; ');
+  return orderIds.length === 1
+    ? httpClient.get<Blob>(`/seller/orders/${encodeURIComponent(orderIds[0])}/label`, { responseType: 'blob' })
+    : httpClient.post<Blob>('/seller/orders/labels', { orderIds }, { responseType: 'blob' });
 }
 
-async function openLabel(target: LabelTarget, fileName: string): Promise<OrderLabelResult> {
-  // PDF ko‘rish oynasi brauzer tomonidan bloklanmasligi uchun oyna klik paytida ochiladi.
+/** PDF ko‘rish oynasi brauzer tomonidan bloklanmasligi uchun oynani klik paytida ochadi. */
+async function openLabelPdf(request: () => Promise<AxiosResponse<Blob>>, fileName: string): Promise<LabelPrintResult> {
   const preview = window.open('about:blank', '_blank');
   if (preview) preview.opener = null;
   try {
-    const response = await sendLabelRequest(target).catch(async (error: unknown) => { throw await withReadableBody(error); });
+    const response = await request();
+    if (!(response.data instanceof Blob) || response.data.size === 0) throw new Error('Yorliq fayli bo‘sh qaytdi');
     const blob = response.data;
-    if (!(blob instanceof Blob) || blob.size === 0) throw new Error('Yorliq fayli bo‘sh qaytdi');
     const url = URL.createObjectURL(blob.type ? blob : new Blob([blob], { type: 'application/pdf' }));
     if (preview) preview.location.href = url;
     else {
@@ -101,22 +78,32 @@ async function openLabel(target: LabelTarget, fileName: string): Promise<OrderLa
       link.click();
     }
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    return { skipped: readSkipped(response.headers?.[SKIPPED_HEADER]) };
+    return { skipped: parseSkippedLabels(response.headers['x-labels-skipped']) };
   } catch (error) {
     preview?.close();
-    throw error;
+    throw await withReadableErrorBody(error);
   }
 }
 
-export async function openOrderLabels(scope: OrderLabelScope, orderIds: string[]): Promise<OrderLabelResult> {
+export async function openOrderLabels(scope: OrderLabelScope, orderIds: string[]): Promise<LabelPrintResult> {
   if (!orderIds.length) return { skipped: [] };
-  return openLabel(
-    { scope, orderIds },
+  if (orderIds.length > MAX_LABELS_PER_REQUEST) throw new Error(`Bir vaqtda ko‘pi bilan ${MAX_LABELS_PER_REQUEST} ta yorliq chop etiladi. ${orderIds.length} ta tanlangan.`);
+  return openLabelPdf(
+    () => requestLabel(scope, orderIds),
     orderIds.length === 1 ? `buyurtma-${orderIds[0]}-yorliq.pdf` : `buyurtmalar-${orderIds.length}-yorliq.pdf`,
   );
 }
 
-/** Admin: buyurtmaning bitta posilkasi (do‘koni) yorlig‘i. */
-export async function openAdminParcelLabel(orderId: string, sellerOrderId: string): Promise<OrderLabelResult> {
-  return openLabel({ scope: 'admin-parcel', orderId, sellerOrderId }, `buyurtma-${orderId}-${sellerOrderId}-yorliq.pdf`);
+/** Admin: buyurtmaning bitta posilkasi (do‘koni) yorlig‘i — ko‘p do‘konli buyurtmada qayta chop etish uchun. */
+export function openParcelLabel(orderId: string, sellerOrderId: string): Promise<LabelPrintResult> {
+  return openLabelPdf(
+    () => httpClient.get<Blob>(`/admin/orders/${encodeURIComponent(orderId)}/sellers/${encodeURIComponent(sellerOrderId)}/label`, { responseType: 'blob' }),
+    `buyurtma-${orderId}-posilka-${sellerOrderId}-yorliq.pdf`,
+  );
+}
+
+/** Chiqmay qolgan yorliqlar ro'yxati — foydalanuvchiga ko'rsatish uchun qisqa matn. */
+export function formatSkippedLabels(skipped: SkippedLabel[]): string {
+  const shown = skipped.slice(0, 5).map(({ id, reason }) => (id ? `#${id} — ${reason}` : reason)).join('; ');
+  return skipped.length > 5 ? `${shown}; +${skipped.length - 5}` : shown;
 }

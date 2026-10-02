@@ -5,12 +5,17 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: true,
   // ProductEditor testlari og'ir (forma + rasm yuklash). Ko'p worker bilan
-  // parallel ishlaganda ular resurs yetishmasligidan timeout'ga uchraydi —
-  // CI'da worker sonini cheklab, tasodifiy yiqilishga qayta urinish beramiz.
-  // Lokalda retry yo'q: xato darhol ko'rinsin.
+  // parallel ishlaganda ular resurs yetishmasligidan timeout'ga uchraydi
+  // (8 yadro / 7.5 GB RAM'da 3–4 worker 20+ tasodifiy timeout berdi, 2 da
+  // hammasi o'tdi) — shuning uchun lokalda ham 2. Kuchli mashinada:
+  // `npx playwright test --workers=4`.
+  // CI'da tasodifiy yiqilishga qayta urinish beramiz; lokalda retry yo'q:
+  // xato darhol ko'rinsin.
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: 2,
   reporter: 'list',
+  // Testlardan oldin dev server qizdiriladi (Vite sovuq ishga tushishi) — tests/e2e/global-setup.ts.
+  globalSetup: './tests/e2e/global-setup.ts',
   use: {
     baseURL: 'http://127.0.0.1:5273',
     channel: 'chrome',
@@ -30,5 +35,10 @@ export default defineConfig({
     url: 'http://127.0.0.1:5273',
     reuseExistingServer: true,
     timeout: 120_000,
+    // `.env.development` dev proxy'ni production API'ga yo'naltiradi. Testlar to'liq
+    // mock bilan ishlaydi: mock qilinmagan so'rov yopiq portga tushib darhol xato
+    // beradi — production'ga soxta token bilan chiqib, sessiyani yopib yubormaydi.
+    // (Mavjud dev server qayta ishlatilsa bu env qo'llanmaydi — mock'lar baribir shart.)
+    env: { VITE_DEV_API_PROXY: 'http://127.0.0.1:9' },
   },
 });

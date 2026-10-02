@@ -205,7 +205,7 @@
   background: var(--color-token-rgb-45-212-191-14);
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .hero {
     align-items: stretch;
     flex-direction: column;

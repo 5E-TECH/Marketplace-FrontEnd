@@ -10,5 +10,5 @@
 .productLink:focus-visible { border-radius: var(--radius-xs); outline: 2px solid var(--color-accent); outline-offset: 3px; }
 .actions { display: inline-flex; justify-content: center; align-items: center; gap: var(--space-1); }
 .detailButton { display: inline-flex; height: 36px; padding-inline: var(--space-2) !important; align-items: center; gap: var(--space-1); font-weight: 650; }
-@media (max-width: 1200px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filters :global(.ant-btn) { width: max-content; } }
-@media (max-width: 620px) { .filters { grid-template-columns: 1fr; } .filters :global(.ant-btn) { width: 100%; } }
+@container content (max-width: 1199px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filters :global(.ant-btn) { width: max-content; } }
+@container content (max-width: 575px) { .filters { grid-template-columns: 1fr; } .filters :global(.ant-btn) { width: 100%; } }

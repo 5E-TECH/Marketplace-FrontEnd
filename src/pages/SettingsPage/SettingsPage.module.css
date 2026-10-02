@@ -17,15 +17,15 @@
   margin: 0 0 3px !important;
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .profileToolbar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .profileToolbar > :global(.ant-btn),
+  /* Ustun yo'nalishida `flex: 1` tugma balandligini siqadi — kenglik orqali cho'zamiz. */
   .profileToolbar :global(.ant-btn) {
-    flex: 1;
+    width: 100%;
   }
 }
 .settingsCard + .settingsCard { margin-top: var(--space-4); }

@@ -3,8 +3,11 @@ import { Save, ShieldCheck, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateAdminUserMutation } from '../../features/adminUsers/api/adminUserQueries';
 import { ADMIN_USER_ROLE_OPTIONS } from '../../features/adminUsers/model/adminUserOptions';
+import { useAppSelector } from '../../app/store/hooks';
+import { selectAuthUser } from '../../features/auth/model/authSlice';
 import type { AdminUserRole } from '../../features/adminUsers/model/adminUserTypes';
-import { getApiFieldErrors, getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiFieldErrors } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
 import { TextControl, SelectControl } from '../../shared/ui/FormControls/FormControls';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
@@ -31,6 +34,10 @@ export default function AdminUserCreatePage() {
   const navigate = useNavigate();
   const [form] = Form.useForm<AdminUserFormValues>();
   const createMutation = useCreateAdminUserMutation();
+  const isSuperAdmin = useAppSelector(selectAuthUser)?.role === 'SUPERADMIN';
+  // Operator seller tomonidan yaratiladi; admin jamoasiga faqat SUPERADMIN qo'sha oladi.
+  const creatableRoles = ADMIN_USER_ROLE_OPTIONS.filter(({ value }) =>
+    value === 'BUYER' || value === 'SELLER' || (isSuperAdmin && (value === 'ADMIN' || value === 'SUPERADMIN')));
 
   const submit = (values: AdminUserFormValues) => {
     createMutation.mutate(
@@ -53,7 +60,7 @@ export default function AdminUserCreatePage() {
           if (fieldErrors.length) {
             form.setFields(fieldErrors.map(({ name, errors }) => ({ name: [name as keyof AdminUserFormValues], errors })));
           }
-          void message.error(getAuthErrorMessage(error));
+          void message.error(getApiErrorMessage(error));
         },
       },
     );
@@ -123,7 +130,7 @@ export default function AdminUserCreatePage() {
             name="role"
             rules={[{ required: true, message: t('admin.users.roleRequired') }]}
           >
-            <SelectControl options={ADMIN_USER_ROLE_OPTIONS.map(({ value, label }) => ({ value, label: t(label) }))} />
+            <SelectControl options={creatableRoles.map(({ value, label }) => ({ value, label: t(label) }))} />
           </Form.Item>
 
           <div className={styles.sectionHeading}>

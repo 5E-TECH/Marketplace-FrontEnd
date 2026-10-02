@@ -1,5 +1,4 @@
-export const managedUserRoles = ['OPERATOR'] as const;
-export type ManagedUserRole = (typeof managedUserRoles)[number];
+type ManagedUserRole = 'OPERATOR';
 
 export interface ManagedUser {
   id: string;

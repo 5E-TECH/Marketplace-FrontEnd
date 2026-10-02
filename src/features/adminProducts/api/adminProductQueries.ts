@@ -6,7 +6,7 @@ import {
 } from './adminProductApi';
 import type { AdminProductListParams } from '../model/adminProductTypes';
 
-export const adminProductKeys = {
+const adminProductKeys = {
   all: ['admin-products'] as const,
   list: (params: AdminProductListParams) => ['admin-products', 'list', params] as const,
   detail: (productId: string) => ['admin-products', 'detail', productId] as const,

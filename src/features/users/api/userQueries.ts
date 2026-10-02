@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createUser, deleteUser, getUsers, updateUser } from './userApi';
 import type { ManagedUser, UpdateUserPayload, UserListParams, UserPage, UserUpsertPayload } from '../model/userTypes';
 
-export const userKeys = { all: ['seller-operators'] as const };
+const userKeys = { all: ['seller-operators'] as const };
 
 function selectUserPage(users: ManagedUser[], params: UserListParams): UserPage {
   const normalizedSearch = params.search?.trim().toLocaleLowerCase('uz') ?? '';

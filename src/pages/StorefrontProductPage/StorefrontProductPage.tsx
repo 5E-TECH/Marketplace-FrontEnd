@@ -3,6 +3,7 @@ import { ArrowLeft, Image as ImageIcon, ShoppingBag, Star, Store } from 'lucide-
 import { Typography } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useStorefrontProductQuery } from '../../features/storefront/api/storefrontQueries';
+import { getProductCover } from '../../features/products/lib/getProductCover';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
@@ -34,7 +35,7 @@ export default function StorefrontProductPage() {
 
   const { product, shop } = query.data;
   const shopUrl = `/dokon/${encodeURIComponent(shop.slug)}`;
-  const productImage = product.imageUrl || product.images[0] || null;
+  const productImage = getProductCover(product);
 
   return (
     <div className={styles.page}>

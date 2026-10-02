@@ -102,7 +102,6 @@ export default function AdminCategoriesPage() {
 
   const openForm = (category: Category | null, parentId?: string) => {
     setSaveError('');
-    form.resetFields();
     setInitialValues(category
       ? { name: category.name, parentId: category.parentId ?? undefined, iconUrl: category.iconUrl ?? undefined, sortOrder: category.sortOrder, isActive: category.isActive }
       : { name: '', parentId, iconUrl: undefined, sortOrder: 0, isActive: true });
@@ -153,7 +152,7 @@ export default function AdminCategoriesPage() {
       <div className={styles.formIntro}><FolderTree size={22} /><p>{t('admin.categories.formHint')}</p></div>
       {saveError ? <Alert className={styles.alert} type="error" showIcon title={saveError} /> : null}
       <Form.Item name="name" label={t('admin.common.name')} extra={t('admin.categories.slugHint')} rules={[{ required: true, whitespace: true, message: t('admin.categories.nameRequired') }, { max: 255 }]}><Input autoFocus maxLength={255} disabled={saving} /></Form.Item>
-      <Form.Item name="parentId" label={t('admin.categories.parent')}><TreeSelect allowClear showSearch treeDefaultExpandAll treeNodeFilterProp="title" treeData={parentOptions(query.data ?? [], excludedParents)} placeholder={t('admin.categories.rootPlaceholder')} disabled={saving} /></Form.Item>
+      <Form.Item name="parentId" label={t('admin.categories.parent')}><TreeSelect allowClear showSearch={{ treeNodeFilterProp: 'title' }} treeDefaultExpandAll treeData={parentOptions(query.data ?? [], excludedParents)} placeholder={t('admin.categories.rootPlaceholder')} disabled={saving} /></Form.Item>
       <Form.Item name="iconUrl" label={t('admin.categories.iconUrl')} rules={[{ type: 'url' }, { max: 500 }]}><Input prefix={<Image size={16} />} placeholder="https://…" disabled={saving} /></Form.Item>
       <div className={styles.formBottom}>
         <div className={styles.iconPreview}><Avatar shape="square" size={48} src={iconUrl || undefined} icon={<FolderTree size={24} />} /><span>{t('admin.categories.iconPreview')}</span></div>

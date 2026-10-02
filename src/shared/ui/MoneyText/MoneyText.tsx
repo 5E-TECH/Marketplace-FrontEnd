@@ -11,10 +11,11 @@ interface MoneyTextProps
 export function MoneyText({
   value,
   currency = 'so‘m',
+  style,
   ...textProps
 }: MoneyTextProps) {
   return (
-    <Typography.Text {...textProps}>
+    <Typography.Text {...textProps} style={{ whiteSpace: 'nowrap', ...style }}>
       {formatMoney(value)}
       {currency ? ` ${currency}` : null}
     </Typography.Text>

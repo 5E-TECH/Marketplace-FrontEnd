@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getAdminAuditLogs } from './adminAuditApi';
 import type { AdminAuditListParams } from '../model/adminAuditTypes';
 
-export const adminAuditKeys = {
+const adminAuditKeys = {
   all: ['admin-audit'] as const,
   list: (params: AdminAuditListParams) => [...adminAuditKeys.all, 'list', params] as const,
 };

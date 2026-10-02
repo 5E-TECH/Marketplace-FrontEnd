@@ -290,6 +290,15 @@ a {
   transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease !important;
 }
 
+/*
+ * Grid/flex bolalari sukut bo'yicha `min-width: auto` — uzun matn yoki keng
+ * jadval ota konteynerni kontentdan kengaytirib, sahifani kesib yuboradi.
+ * :where — nol specificity: antd yoki CSS module'dagi har qanday aniq qoida ustun.
+ */
+:where(.ant-layout-content) :where(main, section, article, header, footer, aside, form, div, ul, ol, li, dl) {
+  min-width: 0;
+}
+
 .ant-table-wrapper { width: 100%; }
 
 .ant-table-content { scrollbar-width: thin; scrollbar-color: var(--color-scrollbar) transparent; }

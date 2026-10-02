@@ -5,6 +5,7 @@ export interface SellerOrder {
   salesOrderId: string;
   buyerName: string | null;
   subtotal: number;
+  deliveryFee: number;
   codAmount: number;
   status: SellerOrderStatus;
   elchiShipmentId: string | null;
@@ -36,10 +37,7 @@ export interface UpdateSellerOrderStatusPayload {
 }
 
 export interface CreateShipmentPayload { id: string; customerPhone: string }
-export interface SellerOrderHistory { id: string; status: SellerOrderStatus; createdAt: string }
-export interface SellerOrderItem { id: string; name: string; quantity: number; price: number }
 
-export type PaymentMethod = 'COD' | 'PAYME' | 'CLICK';
 export type AdminOrderStatus = 'DRAFT' | 'PENDING_PAYMENT' | 'PAID' | 'CONFIRMED' | 'PARTIALLY_FULFILLED' | 'FULFILLED' | 'CANCELLED' | 'REFUNDED';
 export type AdminPaymentMethod = 'online' | 'cod';
 export interface AdminOrderListParams {
@@ -61,24 +59,27 @@ export interface AdminOrder {
   shopId: string | null;
   shopName: string | null;
   sellersCount: number;
-  /** Elchi posilkasi yaratilgan sub-buyurtmalar; backend bermasa null (C1.45). */
-  shipmentsCount: number | null;
   createdAt: string;
 }
 export interface AdminOrdersPage { items: AdminOrder[]; total: number; page: number; limit: number; totalPages: number }
+export interface AdminOrderActionPayload { id: string; reason: string }
+/** `idempotent: true` — buyurtma allaqachon shu holatda edi, yangi yon ta’sir bo‘lmadi. */
+export interface AdminOrderActionResult { idempotent: boolean }
 
 export interface AdminSubOrder {
   id: string;
   shopId: string | null;
   shopName: string | null;
-  elchiShipmentId: string | null;
   status: string;
   amount: number | null;
   createdAt: string | null;
+  elchiShipmentId: string | null;
 }
 
 export interface AdminOrderItemDetail {
   id: string;
+  /** Mahsulotlar reytingi shu bo'yicha guruhlanadi (nom o'zgarsa ham bitta mahsulot). */
+  productId: string | null;
   name: string;
   sku: string | null;
   quantity: number | null;

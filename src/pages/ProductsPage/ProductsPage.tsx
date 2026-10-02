@@ -12,12 +12,13 @@ import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { Product } from '../../features/products/model/productTypes';
+import { getProductCover } from '../../features/products/lib/getProductCover';
 import { useDeleteProductMutation, useMyProductsQuery } from '../../features/products/api/productQueries';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import { MoneyText } from '../../shared/ui/MoneyText/MoneyText';
 import styles from './ProductsPage.module.css';
 import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
@@ -30,6 +31,7 @@ import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { usePublicCategoriesQuery } from '../../features/categories/api/categoryQueries';
 import { createCategoryOptions } from '../../features/categories/lib/categoryOptions';
+import type { Category } from '../../features/categories/model/categoryTypes';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 
 type ProductStatusFilter = 'ALL' | Product['status'];
@@ -56,12 +58,19 @@ export default function ProductsPage() {
   const deferredQuery = useDebouncedValue(query.trim());
   const productsQuery = useMyProductsQuery({
     page,
-    limit: 8,
+    limit: TABLE_PAGE_SIZE,
     ...(deferredQuery ? { search: deferredQuery } : {}),
     ...(status !== 'ALL' && ['DRAFT', 'ACTIVE', 'ARCHIVED', 'OUT_OF_STOCK'].includes(status) ? { status: status as 'DRAFT' | 'ACTIVE' | 'ARCHIVED' | 'OUT_OF_STOCK' } : {}),
     ...(categoryId !== 'ALL' ? { categoryId } : {}),
   });
   const categoriesQuery = usePublicCategoriesQuery();
+  // `/products/my` faqat `categoryId` qaytaradi — jadvalda ID emas, nom ko'rinishi uchun.
+  const categoryNames = useMemo(() => {
+    const names = new Map<string, string>();
+    const walk = (list: Category[]) => list.forEach((item) => { names.set(item.id, item.name); walk(item.children); });
+    walk(categoriesQuery.data ?? []);
+    return names;
+  }, [categoriesQuery.data]);
   const categoryOptions = useMemo(
     () => [{ value: 'ALL', label: t('product.allCategories') }, ...createCategoryOptions(categoriesQuery.data ?? [])],
     [categoriesQuery.data, t],
@@ -89,7 +98,7 @@ export default function ProductsPage() {
         if (products.length === 1 && page > 1) setPage((current) => current - 1);
         void message.success(t('product.deleted'));
       },
-      onError: (error) => void message.error(getAuthErrorMessage(error)),
+      onError: (error) => void message.error(getApiErrorMessage(error)),
     });
   };
 
@@ -112,7 +121,7 @@ export default function ProductsPage() {
         <ContentState
           state="error"
           title={t('product.loadError')}
-          description={getAuthErrorMessage(productsQuery.error)}
+          description={getApiErrorMessage(productsQuery.error)}
           onAction={() => void productsQuery.refetch()}
         />
       </main>
@@ -123,15 +132,17 @@ export default function ProductsPage() {
     {
       title: '',
       width: 64,
-      render: (_, product) => product.imageUrl
-        ? <img className={styles.productImage} src={product.imageUrl} alt="" loading="lazy" />
-        : <span className={styles.imagePlaceholder}><PictureOutlined /></span>,
+      render: (_, product) => {
+        const cover = getProductCover(product);
+        return cover
+          ? <img className={styles.productImage} src={cover} alt="" loading="lazy" />
+          : <span className={styles.imagePlaceholder}><PictureOutlined /></span>;
+      },
     },
     { title: t('product.product'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name), render: (name: string, product) => <span className={styles.productInfo}><Typography.Text strong>{name}</Typography.Text><small>ID: {product.id}</small></span> },
     { title: 'Slug', dataIndex: 'slug', width: 170, responsive: ['xl'], render: (slug: string) => <code className={styles.sku}>{slug || '—'}</code> },
-    { title: t('product.category'), dataIndex: 'category', width: 150, responsive: ['lg'], ellipsis: true, render: (category: string) => category || <span className={styles.muted}>{t('product.noCategory')}</span> },
+    { title: t('product.category'), dataIndex: 'category', width: 150, responsive: ['lg'], ellipsis: true, render: (category: string, product) => categoryNames.get(product.categoryId) ?? (category || <span className={styles.muted}>{t('product.noCategory')}</span>) },
     { title: t('product.price'), dataIndex: 'price', width: 130, render: (price: number) => <MoneyText value={price} />, sorter: (a, b) => a.price - b.price },
-    { title: t('product.stock'), dataIndex: 'stock', width: 90, responsive: ['md'], sorter: (a, b) => a.stock - b.stock },
     { title: t('product.rating'), dataIndex: 'rating', width: 90, responsive: ['xl'], render: (rating: number) => rating > 0 ? rating.toFixed(1) : '—' },
     { title: t('common.status'), width: 120, responsive: ['sm'], render: (_, product) => <StatusTag status={product.isBlocked ? 'BLOCKED' : product.status} /> },
     {
@@ -184,7 +195,6 @@ export default function ProductsPage() {
             loading={categoriesQuery.isPending}
             showSearch
             virtual={false}
-            optionFilterProp="label"
             title={t('product.filterCategory')}
             aria-label={t('product.filterCategory')}
             onChange={(value) => { setCategoryId(value); setPage(1); }}
@@ -212,8 +222,7 @@ export default function ProductsPage() {
           columns={columns}
           dataSource={products}
           tableLayout="auto"
-          pagination={{ ...createTablePagination(8, (total) => t('pagination.total', { total })), current: page, total: productsQuery.data?.total ?? 0 }}
-          onChange={(pagination) => setPage(pagination.current ?? 1)}
+          pagination={{ current: page, total: productsQuery.data?.total ?? 0, onChange: setPage }}
         />
       </TablePanel>
       <ConfirmDialog

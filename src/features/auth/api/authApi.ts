@@ -6,7 +6,6 @@ import type {
   LoginCredentials,
   LoginResponse,
   UpdateAuthProfilePayload,
-  UpdateProfilePayload,
   UserRole,
   AuthDeviceSession,
 } from '../model/authTypes';
@@ -60,8 +59,17 @@ function parseAuthUser(value: unknown): AuthUser {
   };
 }
 
+/**
+ * Token tanada kelmasa (`AUTH_TOKENS_IN_BODY=false`) sessiya HttpOnly
+ * cookie'da — `accessToken: null`. Cookie haqiqatan o'rnatilganini keyingi
+ * `/auth/me` tasdiqlaydi; o'rnatilmagan bo'lsa login 401 bilan to'xtaydi.
+ */
 function parseLoginResponse(value: unknown): LoginResponse {
-  const data = unwrapApiData(value) as LoginApiResponse;
+  const unwrapped = unwrapApiData(value);
+  const data = (typeof unwrapped === 'object' && unwrapped !== null ? unwrapped : {}) as LoginApiResponse;
+  if (data.accessToken === undefined || data.accessToken === null) {
+    return { accessToken: null };
+  }
   if (
     typeof data.accessToken !== 'string' ||
     data.accessToken.length === 0 ||
@@ -76,7 +84,7 @@ function parseLoginResponse(value: unknown): LoginResponse {
   };
 }
 
-export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
+async function login(credentials: LoginCredentials): Promise<LoginResponse> {
   const { data } = await httpClient.post<unknown>('/auth/login', credentials);
 
   return parseLoginResponse(data);
@@ -103,7 +111,7 @@ export async function authenticate(
   credentials: LoginCredentials,
 ): Promise<AuthSession> {
   const authSession = await login(credentials);
-  const user = await getCurrentUser(authSession.accessToken);
+  const user = await getCurrentUser(authSession.accessToken ?? undefined);
 
   return { ...authSession, user };
 }
@@ -116,8 +124,6 @@ export async function updateAuthProfile(
   const candidate = value && typeof value === 'object' && 'user' in value ? value.user : value;
   return parseAuthUser(candidate);
 }
-
-export const updateProfile = (payload: UpdateProfilePayload) => updateAuthProfile(payload);
 
 export async function logout(): Promise<void> {
   await httpClient.post('/auth/logout');

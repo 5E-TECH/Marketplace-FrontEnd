@@ -14,7 +14,6 @@ import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
@@ -198,7 +197,7 @@ function BroadcastHistory() {
   if (query.isPending) return <ContentState state="loading" />;
   if (query.isError) return <ContentState state="error" title={t('adminNotify.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} />;
   return <TablePanel title={t('adminNotify.history')} caption={t('pagination.total', { total: query.data.total })}>
-    <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminNotify.emptyHistory')} />} pagination={query.data.total > 10 ? { ...createTablePagination(10, (total) => t('pagination.total', { total })), current: page, total: query.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
+    <DataTable rowKey="id" columns={columns} dataSource={query.data.items} tableLayout="auto" scroll={{ x: 'max-content' }} emptyState={<EmptyState compact title={t('adminNotify.emptyHistory')} />} pagination={query.data.total > 10 ? { pageSize: 10, current: page, total: query.data.total } : false} onChange={(pagination) => setPage(pagination.current ?? 1)} />
   </TablePanel>;
 }
 

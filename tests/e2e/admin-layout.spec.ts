@@ -45,10 +45,10 @@ test('TC2: ADMIN login admin sidebarni ko‘radi', async ({ page }) => {
 
   await expect(page.getByTestId('admin-layout')).toBeVisible();
   const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
-  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Yetkazib berish', 'Ombor va qoldiqlar', 'Mahsulot moderatsiyasi', 'Kategoriyalar', 'Bannerlar', 'Xabarlar', 'Audit loglar', 'Tizim holati']) {
+  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Yetkazib berish', 'Ombor va qoldiqlar', 'Qaytarishlar', 'Mahsulot moderatsiyasi', 'Kategoriyalar', 'Bannerlar', 'Xabarlar', 'Audit loglar', 'Tizim holati']) {
     await expect(sidebar.getByRole('menuitem', { name: item })).toBeVisible();
   }
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(12);
+  await expect(sidebar.getByRole('menuitem')).toHaveCount(13);
   await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toHaveCount(0);
   await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
 
@@ -75,7 +75,7 @@ test('TC3: SUPERADMIN ishlaydigan barcha bo‘limlarni, jumladan moliyani ko‘r
 
   const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
   await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toBeVisible();
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(13);
+  await expect(sidebar.getByRole('menuitem')).toHaveCount(14);
   await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
 });
 

@@ -4,11 +4,13 @@ import { BackButton } from '../BackButton/BackButton';
 import { PageHeader } from '../PageHeader/PageHeader';
 import styles from './DetailPage.module.css';
 
-export interface DetailPageField {
+interface DetailPageField {
   key: string;
   icon: ReactNode;
   label: string;
   value: ReactNode;
+  /** Uzun qiymat (masalan, tavsif) butun qatorni egallaydi. */
+  wide?: boolean;
 }
 
 export interface DetailPageSection {
@@ -55,7 +57,7 @@ export function DetailPage({
       />
       <div className={styles.content}>
         <section className={styles.hero}>
-          <Avatar className={styles.avatar} shape={hero.avatarShape} size={76} src={hero.avatarUrl}>
+          <Avatar className={styles.avatar} shape={hero.avatarShape} size={64} src={hero.avatarUrl}>
             {hero.avatarFallback}
           </Avatar>
           <div className={styles.identity}>
@@ -76,7 +78,7 @@ export function DetailPage({
             </div>
             <dl className={styles.detailGrid}>
               {section.fields.map((field) => (
-                <div className={styles.detailItem} key={field.key}>
+                <div className={field.wide ? `${styles.detailItem} ${styles.detailItemWide}` : styles.detailItem} key={field.key}>
                   <span className={styles.detailIcon}>{field.icon}</span>
                   <div><dt>{field.label}</dt><dd>{field.value}</dd></div>
                 </div>

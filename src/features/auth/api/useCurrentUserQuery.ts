@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '../../../app/store/hooks';
-import { currentUserLoaded, selectAccessToken } from '../model/authSlice';
+import { currentUserLoaded, selectIsAuthenticated } from '../model/authSlice';
 import { getCurrentUser } from './authApi';
 
 export function useCurrentUserQuery() {
   const dispatch = useAppDispatch();
-  const accessToken = useAppSelector(selectAccessToken);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   return useQuery({
     queryKey: ['auth', 'me'],
@@ -15,7 +15,7 @@ export function useCurrentUserQuery() {
       dispatch(currentUserLoaded(user));
       return user;
     },
-    enabled: Boolean(accessToken),
+    enabled: isAuthenticated,
     staleTime: 5 * 60_000,
   });
 }

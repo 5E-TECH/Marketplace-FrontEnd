@@ -7,7 +7,7 @@ import {
   type UpdateSellerShopPayload,
 } from './sellerShopApi';
 
-export const sellerShopQueryKey = ['seller', 'shop', 'me'] as const;
+const sellerShopQueryKey = ['seller', 'shop', 'me'] as const;
 
 export function useSellerShopQuery(enabled = true) {
   return useQuery({

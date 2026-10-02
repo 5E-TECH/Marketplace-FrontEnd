@@ -57,14 +57,14 @@
 .iconPreview :global(.ant-avatar) { flex-shrink: 0; background: var(--color-surface-subtle); color: var(--color-accent); }
 .formBottom :global(.ant-input-number) { width: 100%; }
 
-@media (max-width: 900px) {
+@container content (max-width: 767px) {
   .overview { flex-wrap: wrap; }
   .stats { width: 100%; margin-left: 68px; gap: 32px; }
   .treeViewport { padding-inline: 12px; }
   .graph { padding-inline: 14px; }
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .overview { padding: 16px; gap: 12px; }
   .overviewCopy { flex: 1; }
   .stats { margin-left: 0; justify-content: space-between; gap: 12px; }
@@ -74,6 +74,10 @@
   .graph { padding: 10px 18px 14px; }
   .rootNode { min-width: 210px; }
   .treeGroup { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Kategoriya modali portal orqali body'da — viewport bo'yicha. */
+@media (max-width: 575px) {
   .formBottom { grid-template-columns: 1fr 1fr; gap: 16px; }
   .iconPreview { grid-column: 1 / -1; }
 }

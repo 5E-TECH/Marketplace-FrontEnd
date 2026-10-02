@@ -102,3 +102,14 @@ test('jo‘natma bo‘lmasa bo‘sh holat ko‘rsatiladi', async ({ page }) => {
   await page.goto('/delivery');
   await expect(page.getByText('Jo‘natmalar topilmadi')).toBeVisible();
 });
+
+test('backenddan xavfli sxemali kuzatuv havolasi kelsa link chiqmaydi', async ({ page }) => {
+  await page.route('**/api/v1/seller/shipments**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ data: { items: [{ ...shipment(1), trackingUrl: 'javascript:alert(document.cookie)' }], total: 1, page: 1, limit: 20, totalPages: 1 } }),
+  }));
+  await page.goto('/delivery');
+  await expect(page.getByText('SO-101')).toBeVisible();
+  await expect(page.getByRole('link', { name: /Kuzatish/ })).toHaveCount(0);
+});

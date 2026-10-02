@@ -38,7 +38,7 @@
   color: var(--color-text-muted);
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .fields {
     grid-template-columns: 1fr;
   }

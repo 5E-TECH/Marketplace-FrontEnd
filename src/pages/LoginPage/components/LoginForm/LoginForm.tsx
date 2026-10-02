@@ -2,6 +2,7 @@ import { Button, Form, Input } from 'antd';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import styles from './LoginForm.module.css';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
+import { getUzLocalPhone } from '../../../../shared/lib/phone';
 
 export interface LoginFormValues {
   phone: string;
@@ -33,7 +34,7 @@ export function LoginForm({
         className={styles.field}
         label={t('auth.phone').toLocaleUpperCase()}
         name="phone"
-        normalize={(value?: string) => (value ?? '').replace(/\D/g, '').slice(0, 9)}
+        normalize={(value?: string) => getUzLocalPhone(value ?? '')}
         rules={[
           { required: true, message: t('auth.phoneRequired') },
           {
@@ -47,7 +48,7 @@ export function LoginForm({
           variant="borderless"
           prefix={<span className={styles.phonePrefix}>+998</span>}
           inputMode="numeric"
-          maxLength={9}
+          // maxLength yo'q: u joylangan "+998 90 …" ni normalize'dan oldin kesib qo'yadi; 9 raqam chegarasini normalize ta'minlaydi.
           autoComplete="off"
           spellCheck={false}
           placeholder="90 123 45 67"

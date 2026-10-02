@@ -36,7 +36,7 @@ export function ConfirmDialog({
       cancelText={cancelText ?? t('common.cancel')}
       okButtonProps={{ danger, loading }}
       closable={!loading}
-      maskClosable={!loading}
+      mask={{ closable: !loading }}
       keyboard={!loading}
       onOk={() => void onConfirm()}
       onCancel={onCancel}

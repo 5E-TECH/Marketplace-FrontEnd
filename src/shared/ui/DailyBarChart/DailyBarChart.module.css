@@ -1,0 +1,15 @@
+.chart { margin: 0; min-width: 0; }
+.plot { position: relative; height: clamp(190px, 24vh, 240px); padding-left: 72px; }
+.yAxis { position: absolute; inset: 0 auto 0 0; width: 64px; display: flex; flex-direction: column; justify-content: space-between; color: var(--color-text-faint); font-size: 11px; text-align: right; }
+.bars { height: 100%; display: flex; align-items: flex-end; gap: 2px; border-bottom: 1px solid var(--color-token-27314a); background-image: linear-gradient(var(--color-token-27314a) 1px, transparent 1px); background-size: 100% 50%; }
+.slot { flex: 1 1 0; min-width: 2px; height: 100%; display: flex; align-items: flex-end; border-radius: 4px 4px 0 0; cursor: default; }
+.slot:hover { background: var(--color-token-rgb-45-212-191-14); }
+.bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--color-accent-bright); }
+.filled { min-height: 2px; }
+.xAxis { display: flex; justify-content: space-between; padding: 6px 0 0 72px; color: var(--color-text-faint); font-size: 11px; }
+
+@container content (max-width: 575px) {
+  .plot { height: 180px; padding-left: 58px; }
+  .yAxis { width: 52px; font-size: 10px; }
+  .xAxis { padding-left: 58px; font-size: 10px; }
+}

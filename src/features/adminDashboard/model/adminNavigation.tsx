@@ -1,9 +1,9 @@
-import { Banknote, Boxes, ChartNoAxesCombined, ClipboardList, GalleryHorizontalEnd, ListTree, Megaphone, PackageSearch, ScrollText, ServerCog, Store, Truck, UserRoundCog } from 'lucide-react';
+import { Banknote, Boxes, ChartNoAxesCombined, ClipboardList, GalleryHorizontalEnd, ListTree, Megaphone, PackageSearch, ScrollText, ServerCog, Store, Truck, Undo2, UserRoundCog } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../../shared/i18n/translations';
 import type { UserRole } from '../../auth/model/authTypes';
 
-export interface AdminNavItem {
+interface AdminNavItem {
   path: string;
   label: TranslationKey;
   icon?: ReactNode;
@@ -21,6 +21,7 @@ export const adminNavigation: AdminNavGroup[] = [
   { key: 'orders', label: 'adminNav.orders', icon: <ClipboardList />, items: [{ path: '/admin/orders', label: 'adminNav.orders', roles: ADMIN_ROLES }] },
   { key: 'delivery', label: 'adminNav.delivery', icon: <Truck />, items: [{ path: '/admin/delivery', label: 'adminNav.delivery', roles: ADMIN_ROLES }] },
   { key: 'inventory', label: 'adminNav.inventory', icon: <Boxes />, items: [{ path: '/admin/inventory', label: 'adminNav.inventory', roles: ADMIN_ROLES }] },
+  { key: 'returns', label: 'adminNav.returns', icon: <Undo2 />, items: [{ path: '/admin/returns', label: 'adminNav.returns', roles: ADMIN_ROLES }] },
   { key: 'products', label: 'adminNav.productModeration', icon: <PackageSearch />, items: [{ path: '/admin/products', label: 'adminNav.productModeration', roles: ADMIN_ROLES }] },
   { key: 'categories', label: 'adminNav.categories', icon: <ListTree />, items: [{ path: '/admin/categories', label: 'adminNav.categories', roles: ADMIN_ROLES }] },
   { key: 'banners', label: 'adminNav.banners', icon: <GalleryHorizontalEnd />, items: [{ path: '/admin/banners', label: 'adminNav.banners', roles: ADMIN_ROLES }] },
@@ -30,8 +31,5 @@ export const adminNavigation: AdminNavGroup[] = [
   { key: 'system', label: 'adminNav.systemHealth', icon: <ServerCog />, items: [{ path: '/admin/system-settings', label: 'adminNav.systemHealth', roles: ADMIN_ROLES }] },
 ];
 
-export const adminLeafRoutes = adminNavigation.flatMap(({ items }) => items);
 export const getAdminNavigation = (role: UserRole | undefined): AdminNavGroup[] =>
   adminNavigation.filter(({ items }) => role && items.some((item) => item.roles.includes(role)));
-export const adminRouteTitle = (pathname: string): TranslationKey =>
-  adminLeafRoutes.find(({ path }) => pathname === path)?.label ?? 'adminNav.management';

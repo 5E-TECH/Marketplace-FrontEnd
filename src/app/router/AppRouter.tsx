@@ -26,6 +26,8 @@ const ProfilePage = lazy(routeImports.profile);
 const WarehousesPage = lazy(routeImports.warehouses);
 const StockPage = lazy(routeImports.stock);
 const OrdersPage = lazy(routeImports.orders);
+const ReturnsPage = lazy(routeImports.returns);
+const FinancePage = lazy(routeImports.finance);
 const DeliveryPage = lazy(routeImports.delivery);
 const SettingsPage = lazy(routeImports.settings);
 const SupportPage = lazy(routeImports.support);
@@ -34,6 +36,7 @@ const UserEditorPage = lazy(routeImports.userEditor);
 const AdminShopsPage = lazy(routeImports.adminShops);
 const AdminOrdersPage = lazy(routeImports.adminOrders);
 const AdminOrderDetailPage = lazy(routeImports.adminOrderDetail);
+const AdminReturnsPage = lazy(routeImports.adminReturns);
 const AdminProductsPage = lazy(routeImports.adminProducts);
 const AdminProductDetailPage = lazy(routeImports.adminProductDetail);
 const AdminUsersPage = lazy(routeImports.adminUsers);
@@ -82,6 +85,7 @@ export function AppRouter() {
                 <Route path="admin/orders/:orderId" element={<AdminOrderDetailPage />} />
                 <Route path="admin/delivery" element={<AdminDeliveryPage />} />
                 <Route path="admin/inventory" element={<AdminInventoryPage />} />
+                <Route path="admin/returns" element={<AdminReturnsPage />} />
                 <Route path="admin/products" element={<AdminProductsPage />} />
                 <Route path="admin/products/:productId" element={<AdminProductDetailPage />} />
                 <Route path="admin/users" element={<AdminUsersPage />} />
@@ -110,9 +114,11 @@ export function AppRouter() {
                 <Route path="warehouses" element={<WarehousesPage />} />
                 <Route path="stock" element={<StockPage />} />
                 <Route path="orders" element={<OrdersPage />} />
+                <Route path="returns" element={<ReturnsPage />} />
                 <Route path="delivery" element={<DeliveryPage />} />
                 <Route element={<SellerOnlyRoute />}>
                   <Route path="users" element={<UsersPage />} />
+                  <Route path="finance" element={<FinancePage />} />
                   <Route path="users/new" element={<UserEditorPage />} />
                 </Route>
                 <Route path="shop" element={<ShopPage />} />

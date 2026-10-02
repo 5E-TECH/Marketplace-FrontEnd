@@ -4,5 +4,5 @@
 .metric { display: grid; gap: var(--space-2); padding: var(--space-4); background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .metric span { color: var(--color-text-secondary); text-transform: capitalize; }
 .metric strong { color: var(--color-text); font-size: 1.25rem; overflow-wrap: anywhere; }
-@media (max-width: 900px) { .toolbar { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .toolbar { grid-template-columns: 1fr; } .toolbar :global(.ant-select), .toolbar :global(.ant-btn) { width: 100%; } }
+@container content (max-width: 767px) { .toolbar { grid-template-columns: 1fr 1fr; } }
+@container content (max-width: 575px) { .toolbar { grid-template-columns: 1fr; } .toolbar :global(.ant-select), .toolbar :global(.ant-btn) { width: 100%; } }

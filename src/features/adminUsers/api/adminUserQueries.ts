@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAdminUser, getAdminUser, getAdminUsers, setAdminUserBlocked } from './adminUserApi';
+import { changeAdminUserRole, createAdminUser, getAdminUser, getAdminUsers, impersonateAdminUser, setAdminUserBlocked } from './adminUserApi';
 import type { AdminUserListParams, CreateAdminUserPayload } from '../model/adminUserTypes';
 
-export const adminUserKeys = {
+const adminUserKeys = {
   all: ['admin-users'] as const,
   list: (params: AdminUserListParams) => [...adminUserKeys.all, 'list', params] as const,
   detail: (id: string) => [...adminUserKeys.all, 'detail', id] as const,
@@ -22,3 +22,10 @@ export function useCreateAdminUserMutation() {
     onSuccess: () => client.invalidateQueries({ queryKey: adminUserKeys.all }),
   });
 }
+
+export function useChangeAdminUserRoleMutation() {
+  const client = useQueryClient();
+  return useMutation({ mutationFn: changeAdminUserRole, onSuccess: () => client.invalidateQueries({ queryKey: adminUserKeys.all }) });
+}
+
+export const useImpersonateAdminUserMutation = () => useMutation({ mutationFn: impersonateAdminUser });

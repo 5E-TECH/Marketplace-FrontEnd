@@ -67,7 +67,6 @@ export function parseProduct(value: unknown): Product {
     : typeof categoryValue === 'object' && categoryValue !== null && 'name' in categoryValue && typeof categoryValue.name === 'string'
       ? categoryValue.name
       : '';
-  const stock = toNumber('stock' in candidate ? candidate.stock : 0, 'qoldiq');
   const rawStatus = 'status' in candidate ? String(candidate.status).toUpperCase() : '';
   const status = productStatuses.includes(rawStatus as ProductStatus)
     ? rawStatus as ProductStatus
@@ -94,7 +93,6 @@ export function parseProduct(value: unknown): Product {
     images,
     attributes: parseAttributes('attributes' in candidate ? candidate.attributes : {}),
     hasVariants: 'hasVariants' in candidate && candidate.hasVariants === true,
-    stock,
     status,
     isBlocked: 'isBlocked' in candidate && candidate.isBlocked === true,
     rating: toNumber('rating' in candidate ? candidate.rating : 0, 'reyting'),

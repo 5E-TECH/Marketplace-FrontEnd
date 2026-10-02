@@ -20,9 +20,11 @@
 import type { components } from '../../generated/api-types';
 import type { Category } from '../../features/categories/model/categoryTypes';
 import type { Product, ProductVariant } from '../../features/products/model/productTypes';
-import type { AuthUser } from '../../features/auth/model/authTypes';
+import type { AuthUser, UpdateAuthProfilePayload } from '../../features/auth/model/authTypes';
 import type { StockItem } from '../../features/stock/model/stockTypes';
 import type { Warehouse } from '../../features/warehouses/model/warehouseTypes';
+import type { ReturnHistoryEntry, ReturnItem, ReturnRequest, ReturnRequestDetail } from '../../features/returns/model/returnTypes';
+import type { SellerOrder } from '../../features/orders/model/orderTypes';
 
 type Schemas = components['schemas'];
 
@@ -54,12 +56,13 @@ type Check<T extends true> = T;
  *
  * - `sku`      — `ProductDto` da yo'q; `sku` bo'lmasa `slug` ishlatiladi.
  * - `category` — DTO faqat `categoryId` beradi; nomi ro'yxatdan qo'shiladi.
- * - `stock`    — DTO da umuman yo'q, zaxira qiymat `0`. DIQQAT: qoldiq
- *                inventory-service'da, alohida so'rov bilan olinadi.
  * - `isDeleted`, `variants` — jonli API ularni QAYTARADI, lekin Nest surati
  *                ularni `ProductDto` ga kiritmagan (sxema haqiqatdan kambag'al).
+ *
+ * `stock` bu yerda yo'q: `ProductDto` uni bermaydi, soxta `0` ko'rsatmaslik
+ * uchun maydon olib tashlangan (qoldiq `/stock` sahifasida).
  */
-type ProductDerived = 'sku' | 'category' | 'stock' | 'isDeleted' | 'variants';
+type ProductDerived = 'sku' | 'category' | 'isDeleted' | 'variants';
 
 /**
  * `AuthUser.isBlocked` — `AuthUserDto` da yo'q. Foydalanuvchi jadvalida
@@ -80,6 +83,19 @@ type _AuthUser  = Check<ExpectNoDrift<AuthUser,       Schemas['AuthUserDto'], Au
 type _StockItem = Check<ExpectNoDrift<StockItem,      Schemas['StockItemDto']>>;
 // prettier-ignore
 type _Warehouse = Check<ExpectNoDrift<Warehouse,      Schemas['WarehouseDto']>>;
+// prettier-ignore
+type _Return        = Check<ExpectNoDrift<ReturnRequest,       Schemas['ReturnRequestDto']>>;
+// prettier-ignore
+type _ReturnDetail  = Check<ExpectNoDrift<ReturnRequestDetail, Schemas['ReturnRequestDetailsDto']>>;
+// prettier-ignore
+type _ReturnItem    = Check<ExpectNoDrift<ReturnItem,          Schemas['ReturnRequestItemDto']>>;
+// prettier-ignore
+type _ReturnHistory = Check<ExpectNoDrift<ReturnHistoryEntry,  Schemas['ReturnRequestHistoryDto']>>;
+// prettier-ignore
+type _SellerOrder   = Check<ExpectNoDrift<SellerOrder,         Schemas['SellerOrderItemDto']>>;
+// So'rov tanasi: `UpdateProfileDto` da yo'q maydon (masalan `email`) yuborilmasin.
+// prettier-ignore
+type _UpdateProfile = Check<ExpectNoDrift<UpdateAuthProfilePayload, Schemas['UpdateProfileDto']>>;
 
 /**
  * Faqat tipdan iborat fayl modul bo'lib qolishi va yuqoridagi tekshiruvlar
@@ -93,4 +109,10 @@ export type ContractGuarded = [
   _AuthUser,
   _StockItem,
   _Warehouse,
+  _Return,
+  _ReturnDetail,
+  _ReturnItem,
+  _ReturnHistory,
+  _SellerOrder,
+  _UpdateProfile,
 ];

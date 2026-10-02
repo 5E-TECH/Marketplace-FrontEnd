@@ -7,16 +7,6 @@ export interface ProductImageUploadPayload {
   isCover?: boolean;
 }
 
-export interface ProductImageUploadResult {
-  url: string;
-  objectName: string;
-  bucket: string;
-  mimeType: string;
-  size: number;
-  productId: string;
-  isCover: boolean;
-}
-
 function parseUploadedFileUrl(value: unknown): string {
   const result = unwrapApiData(value);
   if (typeof result === 'string' && result.trim()) return result;

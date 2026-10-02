@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { Banknote, ClipboardList, ExternalLink, Eye, Store, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AdminSalesAnalytics } from '../../features/adminAnalytics/ui/AdminSalesAnalytics';
 import { useAdminShopsQuery } from '../../features/adminShops/api/adminShopQueries';
 import type { AdminShop } from '../../features/adminShops/model/adminShopTypes';
 import { useAdminDashboardQuery } from '../../features/dashboard/api/dashboardQueries';
@@ -63,7 +64,7 @@ export default function AdminOverviewPage() {
   const columns: ColumnsType<AdminShop> = [
     { title: t('adminShops.market'), dataIndex: 'name', render: (name: string) => <strong>{name}</strong> },
     { title: t('adminShops.ownerId'), dataIndex: 'ownerUserId', width: 130, responsive: ['sm'], render: (id: string) => `#${id}` },
-    { title: t('users.phone'), dataIndex: 'phone', responsive: ['md'] },
+    { title: t('users.phone'), dataIndex: 'phone', responsive: ['md'], render: (phone: string | null) => phone || '—' },
     { title: t('users.status'), dataIndex: 'status', width: 120, render: () => <Tag color="warning">PENDING</Tag> },
     { title: t('users.actions'), width: 100, align: 'center', render: (_, shop) => <Button type="text" icon={<Eye size={16} />} onClick={() => void navigate(`/admin/shops?shopId=${encodeURIComponent(shop.id)}`)}>Ko‘rish</Button> },
   ];
@@ -74,6 +75,7 @@ export default function AdminOverviewPage() {
       <section className={styles.metricGrid} aria-label={t('admin.overview.statistics')}>
         {metrics.map((metric) => <SummaryCard key={metric.title} {...metric} />)}
       </section>
+      <AdminSalesAnalytics />
       <div className={styles.pendingSection}>
         <TablePanel title={t('admin.overview.pendingShops')} caption={t('admin.overview.pendingShopsDescription')} action={
           <Button type="link" icon={<ExternalLink size={16} />} onClick={() => void navigate('/admin/shops')}>{t('admin.overview.viewAll')}</Button>

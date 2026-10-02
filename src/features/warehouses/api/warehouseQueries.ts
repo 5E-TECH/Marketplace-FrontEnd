@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createWarehouse, deleteWarehouse, getWarehouse, getWarehouses, setDefaultWarehouse, updateWarehouse } from './warehouseApi';
 import type { Warehouse, WarehousePayload } from '../model/warehouseTypes';
 
-export const warehouseKey = ['inventory', 'warehouses'] as const;
-export const warehouseDetailKey = (id: string) => [...warehouseKey, id] as const;
+const warehouseKey = ['inventory', 'warehouses'] as const;
+const warehouseDetailKey = (id: string) => [...warehouseKey, id] as const;
 
 export function useWarehousesQuery() {
   return useQuery({ queryKey: warehouseKey, queryFn: ({ signal }) => getWarehouses(signal) });

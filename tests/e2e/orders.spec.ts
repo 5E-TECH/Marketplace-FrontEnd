@@ -91,9 +91,9 @@ test('TC2.1: seller order pagination page query orqali backendga yuboriladi', as
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: manyOrders.slice((pageNumber - 1) * limit, pageNumber * limit), total: manyOrders.length, page: pageNumber, limit, totalPages: 2 } }) });
   });
   await page.reload();
-  const secondPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '2');
-  await page.getByTitle('2').click();
-  await secondPageRequest;
+  const lastPageRequest = page.waitForRequest(request => new URL(request.url()).searchParams.get('page') === '3');
+  await page.getByTitle('3').click();
+  await lastPageRequest;
   await expect(page.getByText('Xaridor 21')).toBeVisible();
   await expect(page.getByText('Xaridor 1', { exact: true })).toHaveCount(0);
 });
@@ -164,4 +164,75 @@ test('TC6: RECEIVED holati filtr va timeline’da ko‘rinadi', async ({ page })
   await expect(page.getByText('Elchi qabul qildi')).toBeVisible();
   await page.getByRole('button', { name: '#12 buyurtmani ko‘rish' }).click();
   await expect(page.getByLabel('Elchi status timeline')).toContainText('Posilka skaner orqali Elchi hisobiga o‘tdi');
+});
+
+test('posilka yaratilgach yorliq panelni yopmasdan darhol chop etiladi', async ({ page }) => {
+  const confirmed = { ...orders[1], id: '34', salesOrderId: '15', buyerName: 'Jasur Aliyev', status: 'CONFIRMED', elchiShipmentId: null as string | null, trackingUrl: null as string | null };
+  let shipmentBody: unknown;
+  const labelIds: string[] = [];
+  await page.route('**/api/v1/seller/orders**', async (route) => {
+    const url = new URL(route.request().url());
+    if (route.request().method() === 'POST' && url.pathname.endsWith('/seller/orders/34/shipment')) {
+      shipmentBody = route.request().postDataJSON();
+      Object.assign(confirmed, { status: 'SHIPMENT_CREATED', elchiShipmentId: '995', trackingUrl: 'https://elchi.uz/track/995' });
+      await route.fulfill({ status: 201, contentType: 'application/json', body: '{"data":{}}' });
+      return;
+    }
+    if (url.pathname.endsWith('/seller/orders/34/label')) {
+      labelIds.push('34');
+      await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 yangi') });
+      return;
+    }
+    if (route.request().method() === 'GET' && url.pathname.endsWith('/seller/orders')) {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [confirmed], total: 1, page: 1, limit: 20, totalPages: 1 } }) });
+      return;
+    }
+    await route.fallback();
+  });
+  await page.reload();
+
+  await page.getByRole('button', { name: '#15 buyurtmani ko‘rish' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Buyurtma #15' });
+  const printButton = drawer.getByRole('button', { name: 'Yorliqni chop etish' });
+  await expect(printButton).toBeDisabled();
+  await drawer.getByLabel('Xaridor telefoni').fill('+998901112233');
+  await drawer.getByRole('button', { name: 'Elchi jo‘natmasini yaratish' }).click();
+  await expect(page.locator('.ant-message')).toContainText('Elchi jo‘natmasi yaratildi');
+  expect(shipmentBody).toEqual({ customerPhone: '+998901112233' });
+
+  // Panel yopilmaydi — yangi posilka uchun yorliq darhol chop etiladi.
+  await expect(printButton).toBeEnabled();
+  await printButton.click();
+  await expect.poll(() => labelIds).toEqual(['34']);
+});
+
+test('partiyada chiqmay qolgan yorliqlar sababi bilan ko‘rsatiladi', async ({ page }) => {
+  await page.route('**/api/v1/seller/orders/labels', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/pdf',
+    headers: { 'X-Labels-Skipped': encodeURIComponent(JSON.stringify([{ orderId: '33', reason: 'QR token yo‘q' }, { orderId: '999', reason: 'Topilmadi' }])) },
+    body: Buffer.from('%PDF-1.4 batch'),
+  }));
+  await page.reload();
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await page.getByRole('row', { name: /Noma’lum xaridor/ }).getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Yorliqlarni chop etish' }).click();
+  // Ichki id 33 jadvaldagi #14 buyurtma sifatida ko'rsatiladi; noma'lum id o'zgarmaydi.
+  await expect(page.getByText('2 ta yorliq chiqmadi: #14 — QR token yo‘q; #999 — Topilmadi')).toBeVisible();
+});
+
+test('yorliq tugmalari va tanlov soni tanlangan tilda chiqadi', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('markethub_language', 'ru'));
+  await page.reload();
+  const batchButton = page.getByRole('button', { name: 'Печать ярлыков' });
+  await expect(batchButton).toBeDisabled();
+  await page.getByRole('row', { name: /Ali Valiyev/ }).getByRole('checkbox').check();
+  await expect(page.getByText('Выбрано: 1')).toBeVisible();
+  await expect(batchButton).toBeEnabled();
+
+  await page.getByRole('button', { name: 'Открыть заказ #12' }).click();
+  const drawer = page.getByRole('dialog');
+  await expect(drawer.getByRole('button', { name: 'Печать ярлыка' })).toBeEnabled();
+  await expect(drawer.getByLabel('Телефон покупателя')).toBeVisible();
+  await expect(page.getByText(/chop etish|ta tanlandi/)).toHaveCount(0);
 });

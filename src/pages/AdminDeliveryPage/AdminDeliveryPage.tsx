@@ -12,7 +12,6 @@ import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterField } from '../../shared/ui/FilterPanel/FilterField';
@@ -137,7 +136,7 @@ function ShipmentsTab() {
             tableLayout="auto"
             scroll={{ x: 'max-content' }}
             emptyState={<EmptyState compact title={shipmentState === 'missing' ? t('adminOps.delivery.emptyMissing') : t('adminOps.delivery.emptyShipments')} />}
-            pagination={{ ...createTablePagination(PAGE_SIZE, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
+            pagination={{ pageSize: PAGE_SIZE, current: page, total: query.data.total }}
             onChange={(pagination) => setPage(pagination.current ?? 1)}
           />
         </TablePanel>
@@ -211,7 +210,7 @@ function WebhooksTab() {
             tableLayout="auto"
             scroll={{ x: 'max-content' }}
             emptyState={<EmptyState compact title={t('adminOps.delivery.emptyWebhooks')} />}
-            pagination={{ ...createTablePagination(PAGE_SIZE, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
+            pagination={{ pageSize: PAGE_SIZE, current: page, total: query.data.total }}
             onChange={(pagination) => setPage(pagination.current ?? 1)}
           />
         </TablePanel>

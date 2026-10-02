@@ -12,7 +12,6 @@ import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterField } from '../../shared/ui/FilterPanel/FilterField';
@@ -132,7 +131,7 @@ function StockTab() {
               tableLayout="auto"
               scroll={{ x: 'max-content' }}
               emptyState={<EmptyState compact title={t('adminOps.inventory.emptyStock')} description={t('adminOps.inventory.emptyDescription')} />}
-              pagination={{ ...createTablePagination(PAGE_SIZE, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
+              pagination={{ pageSize: PAGE_SIZE, current: page, total: query.data.total }}
               onChange={(pagination) => setPage(pagination.current ?? 1)}
             />
           </TablePanel>
@@ -205,7 +204,7 @@ function MovementsTab() {
               tableLayout="auto"
               scroll={{ x: 'max-content' }}
               emptyState={<EmptyState compact title={t('adminOps.inventory.emptyMovements')} description={t('adminOps.inventory.emptyDescription')} />}
-              pagination={{ ...createTablePagination(PAGE_SIZE, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
+              pagination={{ pageSize: PAGE_SIZE, current: page, total: query.data.total }}
               onChange={(pagination) => setPage(pagination.current ?? 1)}
             />
           </TablePanel>

@@ -81,7 +81,7 @@
   place-items: center;
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .chart {
     height: 190px;
     margin-top: 20px;

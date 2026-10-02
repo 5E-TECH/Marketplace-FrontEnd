@@ -7,6 +7,8 @@ export const routeImports = {
   warehouses: () => import('../../pages/WarehousesPage/WarehousesPage'),
   stock: () => import('../../pages/StockPage/StockPage'),
   orders: () => import('../../pages/OrdersPage/OrdersPage'),
+  returns: () => import('../../pages/ReturnsPage/ReturnsPage'),
+  finance: () => import('../../pages/FinancePage/FinancePage'),
   delivery: () => import('../../pages/DeliveryPage/DeliveryPage'),
   settings: () => import('../../pages/SettingsPage/SettingsPage'),
   support: () => import('../../pages/SupportPage/SupportPage'),
@@ -17,6 +19,7 @@ export const routeImports = {
   adminShops: () => import('../../pages/AdminShopsPage/AdminShopsPage'),
   adminOrders: () => import('../../pages/AdminOrdersPage/AdminOrdersPage'),
   adminOrderDetail: () => import('../../pages/AdminOrderDetailPage/AdminOrderDetailPage'),
+  adminReturns: () => import('../../pages/AdminReturnsPage/AdminReturnsPage'),
   adminProducts: () => import('../../pages/AdminProductsPage/AdminProductsPage'),
   adminProductDetail: () => import('../../pages/AdminProductDetailPage/AdminProductDetailPage'),
   adminUsers: () => import('../../pages/AdminUsersPage/AdminUsersPage'),
@@ -31,7 +34,7 @@ export const routeImports = {
   adminNotifications: () => import('../../pages/AdminNotificationsPage/AdminNotificationsPage'),
 };
 
-export const routePreloaders: Array<[
+const routePreloaders: Array<[
   prefix: string,
   preload: () => Promise<unknown>,
 ]> = [
@@ -44,6 +47,8 @@ export const routePreloaders: Array<[
   ['/warehouses', routeImports.warehouses],
   ['/stock', routeImports.stock],
   ['/orders', routeImports.orders],
+  ['/returns', routeImports.returns],
+  ['/finance', routeImports.finance],
   ['/delivery', routeImports.delivery],
   ['/profile', routeImports.profile],
   ['/settings', routeImports.settings],
@@ -54,6 +59,7 @@ export const routePreloaders: Array<[
   ['/admin/overview', routeImports.adminOverview],
   ['/admin/orders/', routeImports.adminOrderDetail],
   ['/admin/orders', routeImports.adminOrders],
+  ['/admin/returns', routeImports.adminReturns],
   ['/admin/products/', routeImports.adminProductDetail],
   ['/admin/products', routeImports.adminProducts],
   ['/admin/users/new', routeImports.adminUserCreate],

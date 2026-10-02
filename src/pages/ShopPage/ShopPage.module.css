@@ -19,4 +19,4 @@
 .steps { display: flex; margin-bottom: 30px; color: var(--color-token-a8b4ca); flex-wrap: wrap; justify-content: center; gap: 10px 20px; }
 .steps span { display: flex; align-items: center; gap: 7px; }
 .steps svg { width: 16px; color: var(--color-teal); }
-@media (max-width: 700px) { .emptyShop { min-height: 470px; padding-inline: 18px; } }
+@container content (max-width: 575px) { .emptyShop { min-height: 470px; padding-inline: 18px; } }

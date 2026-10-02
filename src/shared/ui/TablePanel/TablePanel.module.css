@@ -40,7 +40,7 @@
   flex: none;
 }
 
-@media (max-width: 575px) {
+@container content (max-width: 575px) {
   .header {
     align-items: flex-start;
     flex-direction: column;

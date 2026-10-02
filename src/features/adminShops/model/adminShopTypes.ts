@@ -9,7 +9,7 @@ export interface AdminShop {
   logoUrl: string | null;
   bannerUrl: string | null;
   status: AdminShopStatus;
-  phone: string;
+  phone: string | null;
   regionId: string | null;
   districtId: string | null;
   address: string | null;

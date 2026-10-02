@@ -10,7 +10,7 @@ function optionalString(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
 }
 
-export function parseShop(value: unknown): SellerShop {
+function parseShop(value: unknown): SellerShop {
   if (!value || typeof value !== 'object') {
     throw new Error('Do‘kon ma’lumoti noto‘g‘ri formatda keldi');
   }

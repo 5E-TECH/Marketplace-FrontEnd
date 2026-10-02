@@ -2,3 +2,7 @@
   width: 100%;
   min-width: 0;
 }
+
+.actionForm {
+  margin-top: 16px;
+}

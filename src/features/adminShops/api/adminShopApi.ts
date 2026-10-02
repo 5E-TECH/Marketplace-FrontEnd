@@ -16,7 +16,7 @@ function parseShop(value: unknown): AdminShop {
   if (
     (typeof shop.id !== 'string' && typeof shop.id !== 'number') ||
     (typeof shop.ownerUserId !== 'string' && typeof shop.ownerUserId !== 'number') ||
-    typeof shop.name !== 'string' || typeof shop.phone !== 'string' ||
+    typeof shop.name !== 'string' ||
     !statuses.includes(rawStatus as AdminShopStatus)
   ) throw new Error('Marketning majburiy maydonlari mavjud emas');
   const nullableText = (key: string) => typeof shop[key] === 'string' ? shop[key] : null;
@@ -29,7 +29,8 @@ function parseShop(value: unknown): AdminShop {
     logoUrl: nullableText('logoUrl'),
     bannerUrl: nullableText('bannerUrl'),
     status: rawStatus as AdminShopStatus,
-    phone: shop.phone,
+    // Kontraktda telefon nullable — bitta telefonsiz do'kon butun ro'yxatni yiqitmasin.
+    phone: nullableText('phone'),
     regionId: nullableText('regionId'),
     districtId: nullableText('districtId'),
     address: nullableText('address'),

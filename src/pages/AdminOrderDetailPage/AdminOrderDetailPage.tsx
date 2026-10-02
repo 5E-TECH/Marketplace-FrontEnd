@@ -1,10 +1,11 @@
-import { CalendarClock, CreditCard, Hash, Printer, Store, UserRound } from 'lucide-react';
-import { App, Button } from 'antd';
-import { useLocation, useParams } from 'react-router-dom';
-import { useState } from 'react';
-import { useAdminOrderQuery } from '../../features/orders/api/orderQueries';
-import type { AdminOrder } from '../../features/orders/model/orderTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { Ban, CalendarClock, CreditCard, Hash, PackageOpen, Printer, Store, Undo2, UserRound } from 'lucide-react';
+import { Alert, App, Button, Form, Input, Modal, Space } from 'antd';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { useAdminOrderQuery, useCancelAdminOrderMutation, useRefundAdminOrderMutation } from '../../features/orders/api/orderQueries';
+import type { AdminOrder, AdminOrderStatus } from '../../features/orders/model/orderTypes';
+import { getAdminOrderActionErrorMessage } from '../../features/orders/lib/getAdminOrderActionErrorMessage';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { BackButton } from '../../shared/ui/BackButton/BackButton';
@@ -15,19 +16,33 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
 import { AppDetailNotice } from '../AdminOrdersPage/AdminOrdersPage';
 import styles from './AdminOrderDetailPage.module.css';
-import { describeSkippedLabels, openAdminParcelLabel, openOrderLabels, type OrderLabelResult } from '../../features/orders/api/orderLabelApi';
+import { formatSkippedLabels, openOrderLabels, openParcelLabel, type LabelPrintResult } from '../../features/orders/api/orderLabelApi';
 
 interface OrderLocationState {
   order?: AdminOrder;
 }
 
+type OrderAction = 'refund' | 'cancel';
+
+/** Backend faqat to‘langan online buyurtmani to‘liq qaytaradi; COD rad etiladi. */
+const REFUNDABLE_STATUSES: readonly AdminOrderStatus[] = ['PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED'];
+/** Backend majburiy bekor qilishga faqat shu holatlarda ruxsat beradi. */
+const CANCELLABLE_STATUSES: readonly AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT'];
+
 export default function AdminOrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
+  const navigate = useNavigate();
   const location = useLocation();
   const { locale, t } = useTranslation();
   const { message } = App.useApp();
   const [printing, setPrinting] = useState(false);
   const [printingParcelId, setPrintingParcelId] = useState<string | null>(null);
+  const [action, setAction] = useState<OrderAction | null>(null);
+  const [actionForm] = Form.useForm<{ reason: string }>();
+  // Form validatsiyasi asinxron: isPending yoqilguncha ikkinchi bosish ham onFinish'ga yetadi.
+  const submittingRef = useRef(false);
+  const refund = useRefundAdminOrderMutation();
+  const cancel = useCancelAdminOrderMutation();
   const query = useAdminOrderQuery(orderId ?? null);
   const routeOrder = (location.state as OrderLocationState | null)?.order;
   const order = query.data?.summary ?? (routeOrder?.id === orderId ? routeOrder : null);
@@ -43,7 +58,7 @@ export default function AdminOrderDetailPage() {
         {!orderId ? (
           <ContentState state="error" description={t('adminOrders.detailFormat')} />
         ) : query.isError ? (
-          <ContentState state="error" title={t('adminOrders.loadError')} description={getAuthErrorMessage(query.error)} onAction={() => void query.refetch()} />
+          <ContentState state="error" title={t('adminOrders.loadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} />
         ) : (
           <ContentState state="loading" />
         )}
@@ -56,23 +71,39 @@ export default function AdminOrderDetailPage() {
     .filter((value): value is string => Boolean(value))
     .join(', ');
   const status = order?.status;
-  const parcelCount = query.data.sellerOrders.filter((item) => item.elchiShipmentId).length;
-  const runPrint = async (print: () => Promise<OrderLabelResult>) => {
-    try {
-      const { skipped } = await print();
-      if (skipped.length) void message.warning(t('labels.skipped', { list: describeSkippedLabels(skipped) }));
-    } catch (error) { void message.error(getAuthErrorMessage(error)); }
+  const warnSkipped = ({ skipped }: LabelPrintResult) => {
+    if (skipped.length) void message.warning(t('order.labelsSkipped', { count: skipped.length, list: formatSkippedLabels(skipped) }));
   };
-  // `orderId` — sales_order: backend buyurtmaning barcha posilkalarini chiqaradi.
   const printLabel = async () => {
     setPrinting(true);
-    await runPrint(() => openOrderLabels('admin', [orderId]));
-    setPrinting(false);
+    try { warnSkipped(await openOrderLabels('admin', [orderId])); }
+    catch (error) { void message.error(getApiErrorMessage(error)); }
+    finally { setPrinting(false); }
   };
   const printParcel = async (sellerOrderId: string) => {
+    if (printingParcelId) return;
     setPrintingParcelId(sellerOrderId);
-    await runPrint(() => openAdminParcelLabel(orderId, sellerOrderId));
-    setPrintingParcelId(null);
+    try { warnSkipped(await openParcelLabel(orderId, sellerOrderId)); }
+    catch (error) { void message.error(getApiErrorMessage(error)); }
+    finally { setPrintingParcelId(null); }
+  };
+  const canRefund = order?.paymentMethod === 'online' && Boolean(status && REFUNDABLE_STATUSES.includes(status));
+  const canCancel = Boolean(status && CANCELLABLE_STATUSES.includes(status));
+  const actionPending = refund.isPending || cancel.isPending;
+  const closeAction = () => setAction(null);
+  const submitAction = ({ reason }: { reason: string }) => {
+    if (!action || submittingRef.current) return;
+    submittingRef.current = true;
+    const current = action;
+    (current === 'refund' ? refund : cancel).mutate({ id: orderId, reason: reason.trim() }, {
+      onSuccess: ({ idempotent }) => {
+        closeAction();
+        if (idempotent) void message.info(t(current === 'refund' ? 'adminOrders.refundIdempotent' : 'adminOrders.cancelIdempotent'));
+        else void message.success(t(current === 'refund' ? 'adminOrders.refundSuccess' : 'adminOrders.cancelSuccess'));
+      },
+      onError: (error) => void message.error(getAdminOrderActionErrorMessage(error, t)),
+      onSettled: () => { submittingRef.current = false; },
+    });
   };
   const sections: DetailPageSection[] = [{
     key: 'summary',
@@ -90,20 +121,54 @@ export default function AdminOrderDetailPage() {
   }];
 
   return (
-    <DetailPage
-      backFallback="/admin/orders"
-      title={`${t('adminOrders.order')} #${order?.orderNumber ?? orderId}`}
-      description={t('adminOrders.detailSubtitle')}
-      actions={<Button icon={<Printer size={16} />} disabled={!parcelCount} title={parcelCount ? undefined : t('labels.needShipment')} loading={printing} onClick={() => void printLabel()}>{parcelCount > 1 ? t('labels.printMany') : t('labels.printOne')}</Button>}
-      hero={{
-        avatarFallback: (order?.buyerName || orderId).slice(0, 2).toUpperCase(),
-        title: order?.buyerName || `${t('adminOrders.order')} #${orderId}`,
-        subtitle: order?.buyerPhone || `#${orderId}`,
-        badges: status ? <StatusTag status={status === 'FULFILLED' ? 'SHIPMENT_CREATED' : status} /> : undefined,
-      }}
-      sections={sections}
-    >
-      <AppDetailNotice value={query.data} onPrintParcel={(id) => void printParcel(id)} printingParcelId={printingParcelId} />
-    </DetailPage>
+    <>
+      <DetailPage
+        backFallback="/admin/orders"
+        title={`${t('adminOrders.order')} #${order?.orderNumber ?? orderId}`}
+        description={t('adminOrders.detailSubtitle')}
+        actions={
+          <Space wrap>
+            {canCancel ? <Button icon={<Ban size={16} />} disabled={actionPending} onClick={() => setAction('cancel')}>{t('adminOrders.cancel')}</Button> : null}
+            {canRefund ? <Button danger icon={<Undo2 size={16} />} disabled={actionPending} onClick={() => setAction('refund')}>{t('adminOrders.refund')}</Button> : null}
+            <Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>{t('order.printLabel')}</Button>
+            <Button icon={<PackageOpen size={16} />} onClick={() => void navigate(`/admin/returns?orderId=${encodeURIComponent(orderId)}`)}>{t('returns.orderReturns')}</Button>
+          </Space>
+        }
+        hero={{
+          avatarFallback: (order?.buyerName || orderId).slice(0, 2).toUpperCase(),
+          title: order?.buyerName || `${t('adminOrders.order')} #${orderId}`,
+          subtitle: order?.buyerPhone || `#${orderId}`,
+          badges: status ? <StatusTag status={status === 'FULFILLED' ? 'SHIPMENT_CREATED' : status} /> : undefined,
+        }}
+        sections={sections}
+      >
+        <AppDetailNotice value={query.data} onPrintParcel={(sellerOrderId) => void printParcel(sellerOrderId)} printingParcelId={printingParcelId} />
+      </DetailPage>
+      <Modal
+        open={Boolean(action)}
+        title={t(action === 'cancel' ? 'adminOrders.cancel' : 'adminOrders.refund')}
+        okText={t(action === 'cancel' ? 'adminOrders.cancel' : 'adminOrders.refund')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ danger: true, loading: actionPending }}
+        cancelButtonProps={{ disabled: actionPending }}
+        closable={!actionPending}
+        mask={{ closable: !actionPending }}
+        keyboard={!actionPending}
+        onCancel={closeAction}
+        onOk={() => actionForm.submit()}
+        destroyOnHidden
+      >
+        <Alert
+          type="warning"
+          showIcon
+          title={action === 'cancel' ? t('adminOrders.cancelWarning') : t('adminOrders.refundWarning', { amount: formatMoney(order?.totalAmount ?? 0) })}
+        />
+        <Form<{ reason: string }> form={actionForm} layout="vertical" onFinish={submitAction} className={styles.actionForm}>
+          <Form.Item name="reason" label={t('adminOrders.reason')} rules={[{ required: true, whitespace: true, message: t('adminOrders.reasonRequired') }, { min: 5, message: t('adminOrders.reasonMin') }, { max: 500 }]}>
+            <Input.TextArea rows={4} maxLength={500} showCount />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   );
 }

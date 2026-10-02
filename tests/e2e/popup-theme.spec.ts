@@ -22,18 +22,20 @@ test('shared confirm dialog asosiy dark surface rangidan foydalanadi', async ({ 
 
 test('shared form modal va select popup dark surface bilan bir xil', async ({ page }) => {
   await page.goto('/__test__/shared-ui');
+  // Pagination jadval tagida chegarali footer: tashqi margin yo'q, ichki padding bor.
   const paginationSpacing = await page.locator('.ant-table-pagination').evaluate(element => {
     const styles = getComputedStyle(element);
     const rootStyles = getComputedStyle(document.documentElement);
     return {
       marginTop: styles.marginTop,
       marginBottom: styles.marginBottom,
-      expectedTop: rootStyles.getPropertyValue('--space-6').trim(),
-      expectedBottom: rootStyles.getPropertyValue('--space-4').trim(),
+      paddingTop: styles.paddingTop,
+      expectedPadding: rootStyles.getPropertyValue('--space-3').trim(),
     };
   });
-  expect(paginationSpacing.marginTop).toBe(paginationSpacing.expectedTop);
-  expect(paginationSpacing.marginBottom).toBe(paginationSpacing.expectedBottom);
+  expect(paginationSpacing.marginTop).toBe('0px');
+  expect(paginationSpacing.marginBottom).toBe('0px');
+  expect(paginationSpacing.paddingTop).toBe(paginationSpacing.expectedPadding);
 
   await page.getByRole('button', { name: 'Formani ochish' }).click();
   await expect(page.getByRole('dialog', { name: 'Test formasi' })).toBeVisible();

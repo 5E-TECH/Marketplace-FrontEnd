@@ -1,6 +1,6 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type { AdminOrder, AdminOrderDetail, AdminOrderHistoryEntry, AdminOrderItemDetail, AdminOrderListParams, AdminOrderPaymentDetail, AdminOrderShipmentDetail, AdminOrderStatus, AdminOrdersPage, AdminSubOrder, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
+import type { AdminOrder, AdminOrderActionPayload, AdminOrderActionResult, AdminOrderDetail, AdminOrderHistoryEntry, AdminOrderItemDetail, AdminOrderListParams, AdminOrderPaymentDetail, AdminOrderShipmentDetail, AdminOrderStatus, AdminOrdersPage, AdminSubOrder, CreateShipmentPayload, SellerOrder, SellerOrderListParams, SellerOrdersPage, SellerOrderStatus, UpdateSellerOrderStatusPayload } from '../model/orderTypes';
 
 const statuses: SellerOrderStatus[] = ['NEW', 'CONFIRMED', 'PENDING', 'SHIPMENT_CREATED', 'RECEIVED', 'ON_THE_ROAD', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 const adminStatuses: AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED', 'CANCELLED', 'REFUNDED'];
@@ -15,6 +15,14 @@ function nullableString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value : null;
 }
 
+/** Tashqi havola sifatida faqat http(s) — `javascript:`/`data:` kabi sxemalar `href` ga tushmaydi. */
+function safeHttpUrl(value: unknown): string | null {
+  const text = nullableString(value);
+  if (!text) return null;
+  try { return ['http:', 'https:'].includes(new URL(text).protocol) ? text : null; }
+  catch { return null; }
+}
+
 function parseOrder(value: unknown): SellerOrder {
   if (typeof value !== 'object' || value === null) throw new Error('Buyurtma noto‘g‘ri formatda keldi');
   const order = value as Record<string, unknown>;
@@ -25,10 +33,12 @@ function parseOrder(value: unknown): SellerOrder {
     salesOrderId: order.salesOrderId,
     buyerName: nullableString(order.buyerName),
     subtotal: numberField(order, 'subtotal'),
+    // Kontraktda majburiy; yo'q bo'lsa (eski javob) buyurtma ro'yxati yiqilmasin — 0.
+    deliveryFee: typeof order.deliveryFee === 'number' && Number.isFinite(order.deliveryFee) ? order.deliveryFee : 0,
     codAmount: numberField(order, 'codAmount'),
     status: order.status as SellerOrderStatus,
     elchiShipmentId: nullableString(order.elchiShipmentId),
-    trackingUrl: nullableString(order.trackingUrl),
+    trackingUrl: safeHttpUrl(order.trackingUrl),
     itemsCount: numberField(order, 'itemsCount'),
     createdAt: order.createdAt,
   };
@@ -77,8 +87,6 @@ export async function getSellerOrderHistory(id: string, signal?: AbortSignal): P
 export async function confirmSellerOrder(id: string): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/confirm`); }
 export async function cancelSellerOrder(id: string): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/cancel`); }
 export async function createSellerShipment({ id, customerPhone }: CreateShipmentPayload): Promise<void> { await httpClient.post(`/seller/orders/${encodeURIComponent(id)}/shipment`, { customerPhone }); }
-export async function getSellerShipment(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/seller/shipments/${encodeURIComponent(id)}`, { signal }); return unwrapApiData(data); }
-export async function getSellerShipmentTracking(id: string, signal?: AbortSignal): Promise<unknown> { const { data } = await httpClient.get<unknown>(`/seller/shipments/${encodeURIComponent(id)}/tracking`, { signal }); return unwrapApiData(data); }
 
 const optionalNumber = (record: Record<string, unknown>, keys: string[]) => { for (const key of keys) if (typeof record[key] === 'number') return record[key]; return 0; };
 const optionalText = (record: Record<string, unknown>, keys: string[]) => { for (const key of keys) if (typeof record[key] === 'string') return record[key]; return null; };
@@ -87,7 +95,7 @@ function parseAdminOrder(value: unknown): AdminOrder {
   const order = value as Record<string, unknown>; const id = optionalText(order, ['id']); const status = optionalText(order, ['status']);
   if (!id || !status || !adminStatuses.includes(status as AdminOrderStatus)) throw new Error('Admin buyurtmasining majburiy maydonlari mavjud emas');
   const payment = optionalText(order, ['paymentMethod']);
-  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), buyerPhone: optionalText(order, ['buyerPhone', 'customerPhone', 'phone']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), shipmentsCount: typeof order.shipmentsCount === 'number' ? order.shipmentsCount : null, createdAt: optionalText(order, ['createdAt']) ?? '' };
+  return { id, orderNumber: optionalText(order, ['orderNumber', 'salesOrderId', 'number']) ?? id, buyerName: optionalText(order, ['buyerName', 'customerName']), buyerPhone: optionalText(order, ['buyerPhone', 'customerPhone', 'phone']), totalAmount: optionalNumber(order, ['totalAmount', 'total', 'subtotal']), paymentMethod: payment === 'online' || payment === 'cod' ? payment : null, status: status as AdminOrderStatus, shopId: optionalText(order, ['shopId']), shopName: optionalText(order, ['shopName', 'storeName']), sellersCount: optionalNumber(order, ['sellersCount']), createdAt: optionalText(order, ['createdAt']) ?? '' };
 }
 export async function getAdminOrders(params: AdminOrderListParams, signal?: AbortSignal): Promise<AdminOrdersPage> {
   const { data } = await httpClient.get<unknown>('/admin/orders', { signal, params }); const value = unwrapApiData(data);
@@ -109,12 +117,14 @@ const nullableNumber = (record: Record<string, unknown>, keys: string[]) => {
 const identify = (record: Record<string, unknown>, fallback: string) => optionalText(record, ['id', 'orderId', 'sellerOrderId', 'itemId', 'shipmentId', 'eventId']) ?? fallback;
 
 function parseSubOrder(record: Record<string, unknown>, index: number): AdminSubOrder {
-  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), elchiShipmentId: optionalText(record, ['elchiShipmentId']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']) };
+  return { id: identify(record, String(index + 1)), shopId: optionalText(record, ['shopId', 'storeId']), shopName: optionalText(record, ['shopName', 'storeName']), status: optionalText(record, ['status']) ?? '—', amount: nullableNumber(record, ['subtotal', 'totalAmount', 'total', 'amount']), createdAt: optionalText(record, ['createdAt']),
+    // Yorliq faqat Elchi posilkasi bor do'kon uchun chiqadi.
+    elchiShipmentId: optionalText(record, ['elchiShipmentId']) ?? optionalText(asRecord(record.shipment) ?? {}, ['id', 'shipmentId']) };
 }
 function parseAdminItem(record: Record<string, unknown>, index: number): AdminOrderItemDetail {
   const quantity = nullableNumber(record, ['quantity', 'qty']);
   const unitPrice = nullableNumber(record, ['unitPrice', 'price']);
-  return { id: identify(record, String(index + 1)), name: optionalText(record, ['name', 'productName', 'title']) ?? `#${identify(record, String(index + 1))}`, sku: optionalText(record, ['sku', 'variantSku']), quantity, unitPrice, totalPrice: nullableNumber(record, ['lineTotal', 'totalPrice', 'total', 'subtotal']) ?? (quantity !== null && unitPrice !== null ? quantity * unitPrice : null) };
+  return { id: identify(record, String(index + 1)), productId: optionalText(record, ['productId']), name: optionalText(record, ['name', 'productName', 'title']) ?? `#${identify(record, String(index + 1))}`, sku: optionalText(record, ['sku', 'variantSku']), quantity, unitPrice, totalPrice: nullableNumber(record, ['lineTotal', 'totalPrice', 'total', 'subtotal']) ?? (quantity !== null && unitPrice !== null ? quantity * unitPrice : null) };
 }
 function parseShipment(record: Record<string, unknown>, index: number): AdminOrderShipmentDetail {
   return { id: identify(record, String(index + 1)), provider: optionalText(record, ['provider', 'carrier', 'service']), status: optionalText(record, ['status']), trackingUrl: optionalText(record, ['trackingUrl', 'trackingLink']), createdAt: optionalText(record, ['createdAt']) };
@@ -171,3 +181,14 @@ function parseAdminOrderDetail(value: unknown): AdminOrderDetail {
   };
 }
 export async function getAdminOrder(id: string, signal?: AbortSignal): Promise<AdminOrderDetail> { const { data } = await httpClient.get<unknown>(`/admin/orders/${encodeURIComponent(id)}`, { signal }); return parseAdminOrderDetail(unwrapApiData(data)); }
+
+/** Refund/cancel javobi: `{ status, idempotent }`. Amal bajarilgan bo‘lishi mumkin, shuning uchun javob shakli qat’iy tekshirilmaydi. */
+function parseAdminOrderActionResult(data: unknown): AdminOrderActionResult {
+  return { idempotent: asRecord(unwrapApiData(data))?.idempotent === true };
+}
+export async function refundAdminOrder({ id, reason }: AdminOrderActionPayload): Promise<AdminOrderActionResult> {
+  const { data } = await httpClient.post<unknown>(`/admin/orders/${encodeURIComponent(id)}/refund`, { reason }); return parseAdminOrderActionResult(data);
+}
+export async function cancelAdminOrder({ id, reason }: AdminOrderActionPayload): Promise<AdminOrderActionResult> {
+  const { data } = await httpClient.post<unknown>(`/admin/orders/${encodeURIComponent(id)}/cancel`, { reason }); return parseAdminOrderActionResult(data);
+}

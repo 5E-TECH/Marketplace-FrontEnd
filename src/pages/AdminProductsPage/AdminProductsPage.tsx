@@ -1,6 +1,6 @@
 import { App, Button, Form, Input, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowRight, Image as ImageIcon, RotateCcw } from 'lucide-react';
+import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -8,14 +8,18 @@ import {
   useSetAdminProductHiddenMutation,
 } from '../../features/adminProducts/api/adminProductQueries';
 import type { AdminProduct } from '../../features/adminProducts/model/adminProductTypes';
+import { useAdminShopNames } from '../../features/adminShops/api/adminShopQueries';
+import { useAdminCategoryNames } from '../../features/categories/api/categoryQueries';
 import { getAdminProductModerationConfig } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import type { ProductStatus } from '../../features/products/model/productTypes';
-import { getAuthErrorMessage } from '../../features/auth/lib/getAuthErrorMessage';
+import { getProductCover } from '../../features/products/lib/getProductCover';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
-import { createTablePagination } from '../../shared/ui/DataTable/tablePagination';
+import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
+import { ResetFiltersButton } from '../../shared/ui/ResetFiltersButton/ResetFiltersButton';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionButton';
@@ -46,12 +50,14 @@ export default function AdminProductsPage() {
   const deferredShopId = useDebouncedValue(shopId.trim());
   const query = useAdminProductsQuery({
     page,
-    limit: 20,
+    limit: TABLE_PAGE_SIZE,
     ...(deferredSearch ? { search: deferredSearch } : {}),
     ...(deferredShopId ? { shopId: deferredShopId } : {}),
     ...(status !== 'ALL' ? { status } : {}),
     ...(moderation !== 'ALL' ? { blocked: moderation === 'BLOCKED' } : {}),
   });
+  const shopNames = useAdminShopNames(query.data?.items.map(({ shopId }) => shopId) ?? []);
+  const categoryNames = useAdminCategoryNames();
   const moderationMutation = useSetAdminProductHiddenMutation();
   const [moderationForm] = Form.useForm<{ reason: string }>();
 
@@ -59,11 +65,14 @@ export default function AdminProductsPage() {
     {
       title: '',
       width: 72,
-      render: (_, product) => product.imageUrl ? (
-        <img className={styles.thumbnail} src={product.imageUrl} alt="" loading="lazy" />
-      ) : (
-        <span className={styles.thumbnailFallback}><ImageIcon aria-hidden /></span>
-      ),
+      render: (_, product) => {
+        const cover = getProductCover(product);
+        return cover ? (
+          <img className={styles.thumbnail} src={cover} alt="" loading="lazy" />
+        ) : (
+          <span className={styles.thumbnailFallback}><ImageIcon aria-hidden /></span>
+        );
+      },
     },
     {
       title: t('adminProducts.product'),
@@ -82,16 +91,18 @@ export default function AdminProductsPage() {
     {
       title: t('adminProducts.shop'),
       dataIndex: 'shopId',
-      width: 110,
+      width: 160,
+      ellipsis: true,
       responsive: ['md'],
-      render: (value: string) => value ? `#${value}` : '—',
+      render: (value: string) => value ? shopNames.get(value) ?? `#${value}` : '—',
     },
     {
       title: t('adminProducts.category'),
       dataIndex: 'categoryId',
-      width: 120,
+      width: 160,
+      ellipsis: true,
       responsive: ['lg'],
-      render: (value: string) => value ? `#${value}` : '—',
+      render: (value: string) => value ? categoryNames.get(value) ?? `#${value}` : '—',
     },
     {
       title: t('adminProducts.price'),
@@ -109,7 +120,7 @@ export default function AdminProductsPage() {
     {
       title: t('common.status'),
       width: 125,
-      render: (_, product) => <StatusTag status={product.isBlocked ? 'BLOCKED' : product.status} />,
+      render: (_, product) => <StatusTag status={product.isBlocked ? 'HIDDEN' : product.status} />,
     },
     {
       title: t('common.actions'),
@@ -136,14 +147,14 @@ export default function AdminProductsPage() {
         );
       },
     },
-  ], [navigate, t, setPendingAction]);
+  ], [navigate, t, setPendingAction, shopNames, categoryNames]);
 
   if (query.isPending) return <ContentState state="loading" />;
   if (query.isError) return (
     <ContentState
       state="error"
       title={t('adminProducts.loadError')}
-      description={getAuthErrorMessage(query.error)}
+      description={getApiErrorMessage(query.error)}
       onAction={() => void query.refetch()}
     />
   );
@@ -189,12 +200,11 @@ export default function AdminProductsPage() {
           options={[
             { value: 'ALL', label: t('adminProducts.allModerationStatuses') },
             { value: 'ACTIVE', label: t('adminProducts.available') },
-            { value: 'BLOCKED', label: t('status.blocked') },
+            { value: 'BLOCKED', label: t('status.hidden') },
           ]}
           onChange={(value) => { setModeration(value); setPage(1); }}
         />
-        <Button
-          icon={<RotateCcw size={16} />}
+        <ResetFiltersButton
           disabled={!hasFilters}
           onClick={() => {
             setSearch('');
@@ -203,9 +213,7 @@ export default function AdminProductsPage() {
             setModeration('ALL');
             setPage(1);
           }}
-        >
-          {t('adminOrders.clear')}
-        </Button>
+        />
       </FilterPanel>
 
       <TablePanel title={t('adminProducts.list')} caption={t('adminProducts.resultCount', { count: query.data.total })}>
@@ -213,10 +221,8 @@ export default function AdminProductsPage() {
           rowKey="id"
           columns={columns}
           dataSource={query.data.items}
-          scroll={{ x: 980 }}
           emptyState={<EmptyState compact title={t('adminProducts.empty')} description={t('adminProducts.emptyDescription')} />}
-          pagination={{ ...createTablePagination(20, (total) => t('pagination.total', { total })), current: page, total: query.data.total }}
-          onChange={(pagination) => setPage(pagination.current ?? 1)}
+          pagination={{ current: page, total: query.data.total, onChange: setPage }}
         />
       </TablePanel>
 
@@ -237,7 +243,7 @@ export default function AdminProductsPage() {
               setPendingAction(null);
               moderationForm.resetFields();
             },
-            onError: (error) => void message.error(getAuthErrorMessage(error)),
+            onError: (error) => void message.error(getApiErrorMessage(error)),
           });
         }}>
           {!pendingAction?.isBlocked ? <Form.Item name="reason" label="Yashirish sababi" rules={[{ required: true, whitespace: true, message: 'Sotuvchiga yuboriladigan sababni kiriting' }, { min: 5, message: 'Kamida 5 ta belgi kiriting' }, { max: 500 }]}><Input.TextArea rows={4} maxLength={500} showCount placeholder="Masalan: mahsulot marketplace qoidalariga mos emas" /></Form.Item> : null}

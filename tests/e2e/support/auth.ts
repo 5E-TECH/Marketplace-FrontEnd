@@ -22,6 +22,12 @@ export async function seedAccessToken(
     ({ key, token }) => sessionStorage.setItem(key, token),
     { key: ACCESS_TOKEN_KEY, token: accessToken },
   );
+  // Header har sahifada bildirishnomalarni so'raydi. Mock bo'lmasa so'rov dev proxy
+  // orqali haqiqiy API'ga ketadi, soxta tokenga 401 qaytadi va sessiya yopiladi.
+  await mockNotifications(page);
+  // Admin Dashboard'dagi savdo analitikasi buyurtmalar ro'yxatini so'raydi — o'z mock'i bo'lmagan
+  // testlarda bo'sh ro'yxat. Testdagi keyingi `page.route` buni ustidan yozadi.
+  await mockEmptyAdminOrders(page);
 }
 
 export const operatorUser = {
@@ -79,7 +85,7 @@ export async function mockDashboard(page: Page): Promise<void> {
 }
 
 /** Do'kon profili — kabinetning ko'p sahifasi shu ma'lumotga tayanadi. */
-export const authenticatedShop = {
+const authenticatedShop = {
   id: '15',
   ownerUserId: 'seller-e2e',
   name: 'MarketHub Store',
@@ -125,7 +131,7 @@ export async function mockProducts(page: Page): Promise<void> {
  * Ichma-ich tugun ataylab bor: `createCategoryOptions` chuqurlikni "— " bilan
  * ko'rsatadi, tekis ro'yxatda bu xatti-harakat umuman sinalmay qolardi.
  */
-export const publicCategoryTree = [
+const publicCategoryTree = [
   {
     id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null,
     iconUrl: null, sortOrder: 1, isActive: true,
@@ -142,7 +148,7 @@ export const publicCategoryTree = [
   },
 ] as const;
 
-export async function mockPublicCategories(page: Page): Promise<void> {
+async function mockPublicCategories(page: Page): Promise<void> {
   await page.route('**/api/v1/categories', async (route) => {
     await route.fulfill({
       status: 200,
@@ -150,6 +156,23 @@ export async function mockPublicCategories(page: Page): Promise<void> {
       body: JSON.stringify({ statusCode: 200, message: 'OK', data: publicCategoryTree }),
     });
   });
+}
+
+/** Header bildirishnomalari: standart holatda bo'sh ro'yxat (test o'zinikini qo'shsa, u ustun). */
+export async function mockNotifications(page: Page): Promise<void> {
+  await page.route('**/api/v1/notifications**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ statusCode: 200, message: 'OK', data: { items: [], total: 0, unreadCount: 0, page: 1, limit: 20 } }),
+  }));
+}
+
+async function mockEmptyAdminOrders(page: Page): Promise<void> {
+  await page.route((url) => url.pathname === '/api/v1/admin/orders', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ statusCode: 200, message: 'OK', data: { items: [], total: 0, page: 1, limit: 100, totalPages: 1 } }),
+  }));
 }
 
 export async function installAuthenticatedSession(
