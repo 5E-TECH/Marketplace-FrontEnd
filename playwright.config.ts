@@ -14,6 +14,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 2,
   reporter: 'list',
+  // Testlardan oldin dev server qizdiriladi (Vite sovuq ishga tushishi) — tests/e2e/global-setup.ts.
+  globalSetup: './tests/e2e/global-setup.ts',
   use: {
     baseURL: 'http://127.0.0.1:5273',
     channel: 'chrome',

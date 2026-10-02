@@ -25,6 +25,9 @@ export async function seedAccessToken(
   // Header har sahifada bildirishnomalarni so'raydi. Mock bo'lmasa so'rov dev proxy
   // orqali haqiqiy API'ga ketadi, soxta tokenga 401 qaytadi va sessiya yopiladi.
   await mockNotifications(page);
+  // Admin Dashboard'dagi savdo analitikasi buyurtmalar ro'yxatini so'raydi — o'z mock'i bo'lmagan
+  // testlarda bo'sh ro'yxat. Testdagi keyingi `page.route` buni ustidan yozadi.
+  await mockEmptyAdminOrders(page);
 }
 
 export const operatorUser = {
@@ -161,6 +164,14 @@ export async function mockNotifications(page: Page): Promise<void> {
     status: 200,
     contentType: 'application/json',
     body: JSON.stringify({ statusCode: 200, message: 'OK', data: { items: [], total: 0, unreadCount: 0, page: 1, limit: 20 } }),
+  }));
+}
+
+async function mockEmptyAdminOrders(page: Page): Promise<void> {
+  await page.route((url) => url.pathname === '/api/v1/admin/orders', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ statusCode: 200, message: 'OK', data: { items: [], total: 0, page: 1, limit: 100, totalPages: 1 } }),
   }));
 }
 

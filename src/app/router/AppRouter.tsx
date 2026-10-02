@@ -27,6 +27,7 @@ const WarehousesPage = lazy(routeImports.warehouses);
 const StockPage = lazy(routeImports.stock);
 const OrdersPage = lazy(routeImports.orders);
 const ReturnsPage = lazy(routeImports.returns);
+const FinancePage = lazy(routeImports.finance);
 const DeliveryPage = lazy(routeImports.delivery);
 const SettingsPage = lazy(routeImports.settings);
 const SupportPage = lazy(routeImports.support);
@@ -111,6 +112,7 @@ export function AppRouter() {
                 <Route path="delivery" element={<DeliveryPage />} />
                 <Route element={<SellerOnlyRoute />}>
                   <Route path="users" element={<UsersPage />} />
+                  <Route path="finance" element={<FinancePage />} />
                   <Route path="users/new" element={<UserEditorPage />} />
                 </Route>
                 <Route path="shop" element={<ShopPage />} />

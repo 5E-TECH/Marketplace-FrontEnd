@@ -33,6 +33,8 @@ function parseOrder(value: unknown): SellerOrder {
     salesOrderId: order.salesOrderId,
     buyerName: nullableString(order.buyerName),
     subtotal: numberField(order, 'subtotal'),
+    // Kontraktda majburiy; yo'q bo'lsa (eski javob) buyurtma ro'yxati yiqilmasin — 0.
+    deliveryFee: typeof order.deliveryFee === 'number' && Number.isFinite(order.deliveryFee) ? order.deliveryFee : 0,
     codAmount: numberField(order, 'codAmount'),
     status: order.status as SellerOrderStatus,
     elchiShipmentId: nullableString(order.elchiShipmentId),
@@ -122,7 +124,7 @@ function parseSubOrder(record: Record<string, unknown>, index: number): AdminSub
 function parseAdminItem(record: Record<string, unknown>, index: number): AdminOrderItemDetail {
   const quantity = nullableNumber(record, ['quantity', 'qty']);
   const unitPrice = nullableNumber(record, ['unitPrice', 'price']);
-  return { id: identify(record, String(index + 1)), name: optionalText(record, ['name', 'productName', 'title']) ?? `#${identify(record, String(index + 1))}`, sku: optionalText(record, ['sku', 'variantSku']), quantity, unitPrice, totalPrice: nullableNumber(record, ['lineTotal', 'totalPrice', 'total', 'subtotal']) ?? (quantity !== null && unitPrice !== null ? quantity * unitPrice : null) };
+  return { id: identify(record, String(index + 1)), productId: optionalText(record, ['productId']), name: optionalText(record, ['name', 'productName', 'title']) ?? `#${identify(record, String(index + 1))}`, sku: optionalText(record, ['sku', 'variantSku']), quantity, unitPrice, totalPrice: nullableNumber(record, ['lineTotal', 'totalPrice', 'total', 'subtotal']) ?? (quantity !== null && unitPrice !== null ? quantity * unitPrice : null) };
 }
 function parseShipment(record: Record<string, unknown>, index: number): AdminOrderShipmentDetail {
   return { id: identify(record, String(index + 1)), provider: optionalText(record, ['provider', 'carrier', 'service']), status: optionalText(record, ['status']), trackingUrl: optionalText(record, ['trackingUrl', 'trackingLink']), createdAt: optionalText(record, ['createdAt']) };

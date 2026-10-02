@@ -143,7 +143,6 @@ export default function ProductsPage() {
     { title: 'Slug', dataIndex: 'slug', width: 170, responsive: ['xl'], render: (slug: string) => <code className={styles.sku}>{slug || '—'}</code> },
     { title: t('product.category'), dataIndex: 'category', width: 150, responsive: ['lg'], ellipsis: true, render: (category: string, product) => categoryNames.get(product.categoryId) ?? (category || <span className={styles.muted}>{t('product.noCategory')}</span>) },
     { title: t('product.price'), dataIndex: 'price', width: 130, render: (price: number) => <MoneyText value={price} />, sorter: (a, b) => a.price - b.price },
-    { title: t('product.stock'), dataIndex: 'stock', width: 90, responsive: ['md'], sorter: (a, b) => a.stock - b.stock },
     { title: t('product.rating'), dataIndex: 'rating', width: 90, responsive: ['xl'], render: (rating: number) => rating > 0 ? rating.toFixed(1) : '—' },
     { title: t('common.status'), width: 120, responsive: ['sm'], render: (_, product) => <StatusTag status={product.isBlocked ? 'BLOCKED' : product.status} /> },
     {
