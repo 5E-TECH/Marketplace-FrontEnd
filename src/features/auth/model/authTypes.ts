@@ -29,7 +29,6 @@ export interface AuthUser {
 export interface UpdateAuthProfilePayload {
   name?: string;
   phone?: string;
-  email?: string;
   avatarUrl?: string;
   password?: string;
 }

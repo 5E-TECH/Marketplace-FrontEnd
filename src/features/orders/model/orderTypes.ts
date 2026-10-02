@@ -5,6 +5,7 @@ export interface SellerOrder {
   salesOrderId: string;
   buyerName: string | null;
   subtotal: number;
+  deliveryFee: number;
   codAmount: number;
   status: SellerOrderStatus;
   elchiShipmentId: string | null;
@@ -77,6 +78,8 @@ export interface AdminSubOrder {
 
 export interface AdminOrderItemDetail {
   id: string;
+  /** Mahsulotlar reytingi shu bo'yicha guruhlanadi (nom o'zgarsa ham bitta mahsulot). */
+  productId: string | null;
   name: string;
   sku: string | null;
   quantity: number | null;

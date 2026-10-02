@@ -1,0 +1,21 @@
+.section { margin-top: var(--space-6); min-width: 0; }
+.header h2 { margin: 0; color: var(--color-text); font-size: 1.25rem; font-weight: 700; }
+.header p { margin: var(--space-1) 0 var(--space-4); color: var(--color-text-muted); }
+.filterPanel { display: grid; grid-template-columns: minmax(320px, 1fr) auto; gap: var(--space-3); align-items: end; }
+.dateRange { min-width: 0; }
+.filterAction :global(.ant-btn) { min-height: 42px; }
+.notice { margin-top: var(--space-4); }
+.metricGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.panel { margin-top: var(--space-4); }
+.chart { padding: var(--space-4) var(--space-5) var(--space-5); }
+.topGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.amount { white-space: nowrap; }
+.empty { margin-top: var(--space-4); }
+
+@container content (max-width: 1023px) { .topGrid { grid-template-columns: 1fr; } }
+@container content (max-width: 767px) { .metricGrid { grid-template-columns: 1fr; } }
+@container content (max-width: 575px) {
+  .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); }
+  .filterAction, .filterAction :global(.ant-btn) { width: 100%; }
+  .chart { padding: var(--space-3); }
+}

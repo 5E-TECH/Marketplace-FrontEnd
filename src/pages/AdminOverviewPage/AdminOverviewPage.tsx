@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { Banknote, ClipboardList, ExternalLink, Eye, Store, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AdminSalesAnalytics } from '../../features/adminAnalytics/ui/AdminSalesAnalytics';
 import { useAdminShopsQuery } from '../../features/adminShops/api/adminShopQueries';
 import type { AdminShop } from '../../features/adminShops/model/adminShopTypes';
 import { useAdminDashboardQuery } from '../../features/dashboard/api/dashboardQueries';
@@ -74,6 +75,7 @@ export default function AdminOverviewPage() {
       <section className={styles.metricGrid} aria-label={t('admin.overview.statistics')}>
         {metrics.map((metric) => <SummaryCard key={metric.title} {...metric} />)}
       </section>
+      <AdminSalesAnalytics />
       <div className={styles.pendingSection}>
         <TablePanel title={t('admin.overview.pendingShops')} caption={t('admin.overview.pendingShopsDescription')} action={
           <Button type="link" icon={<ExternalLink size={16} />} onClick={() => void navigate('/admin/shops')}>{t('admin.overview.viewAll')}</Button>

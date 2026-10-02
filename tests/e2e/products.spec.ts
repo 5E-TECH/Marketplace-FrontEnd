@@ -11,7 +11,6 @@ const makeProduct = (index: number) => ({
   category: 'Elektronika',
   categoryId: '1',
   price: index * 100_000,
-  stock: index,
   status: index <= 5 ? 'LOW' : index <= 10 ? 'ACTIVE' : 'DRAFT',
   imageUrl: index === 1 ? 'https://cdn.example.com/product-1.jpg' : null,
   images: index === 2 ? ['https://cdn.example.com/product-2.jpg'] : [],
@@ -141,7 +140,7 @@ test('product PATCH /products/12 orqali Bearer token bilan yangilanadi', async (
     id: '12', shopId: '5', ownerUserId: '2', categoryId: '1',
     name: 'Eski nom', slug: 'eski-nom', description: 'Eski tavsif',
     price: 100000, oldPrice: null, imageUrl: null, images: [], attributes: {},
-    hasVariants: false, stock: 4, status: 'DRAFT', isDeleted: false,
+    hasVariants: false, status: 'DRAFT', isDeleted: false,
     createdAt: '', updatedAt: '', variants: [],
   };
   let method = '';

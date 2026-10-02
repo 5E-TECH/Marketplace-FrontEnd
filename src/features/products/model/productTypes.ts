@@ -18,7 +18,6 @@ export interface Product {
   images: string[];
   attributes: Record<string, string>;
   hasVariants: boolean;
-  stock: number;
   status: ProductStatus;
   isBlocked: boolean;
   rating: number;

@@ -19,7 +19,7 @@ export default function SettingsPage() {
       <div className={styles.profileToolbar}>
         <div>
           <Typography.Title level={4}>Profil ma’lumotlari</Typography.Title>
-          <Typography.Text type="secondary">Ism, telefon, email, avatar va parol Profil sahifasida boshqariladi.</Typography.Text>
+          <Typography.Text type="secondary">Ism, telefon, avatar va parol Profil sahifasida boshqariladi.</Typography.Text>
         </div>
         <Button type="primary" icon={<UserRound />} onClick={() => void navigate('/profile')}>Profilni tahrirlash</Button>
       </div>

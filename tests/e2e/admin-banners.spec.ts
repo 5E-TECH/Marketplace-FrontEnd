@@ -132,7 +132,14 @@ test('noto‘g‘ri turdagi yoki 5 MB dan katta fayl serverga yuborilmaydi', asy
   const dialog = await openCreate(page);
   await uploadImage(page, { name: 'hujjat.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4') });
   await expect(dialog.getByText('Faqat JPEG, PNG yoki WEBP rasm yuklash mumkin')).toBeVisible();
-  await uploadImage(page, { name: 'katta.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(5 * 1024 * 1024 + 1) });
+  // 5 MB faylni Playwright protokoli orqali (base64) uzatish yuklangan mashinada o'nlab soniya oladi —
+  // fayl brauzerning o'zida yaratiladi, komponent uni oddiy tanlangan fayldek oladi.
+  await page.getByRole('dialog').locator('input[type=file]').evaluate((input: HTMLInputElement, size) => {
+    const files = new DataTransfer();
+    files.items.add(new File([new Uint8Array(size)], 'katta.jpg', { type: 'image/jpeg' }));
+    input.files = files.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, 5 * 1024 * 1024 + 1);
   await expect(dialog.getByText('Fayl 5 MB dan katta')).toBeVisible();
   expect(requests.filter(item => item.path.endsWith('/image'))).toHaveLength(0);
 });

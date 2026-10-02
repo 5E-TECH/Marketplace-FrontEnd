@@ -11,6 +11,7 @@ import {
   UserRoundCog,
   ShieldCheck,
   Undo2,
+  Wallet,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -43,6 +44,8 @@ export const appRouteConfig: AppRouteMeta[] = [
   { path: '/stock', label: 'nav.stock', icon: <Boxes />, section: 'main', roles: SELLER_ONLY },
   { path: '/orders', label: 'nav.orders', icon: <ProfileOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
   { path: '/returns', label: 'nav.returns', icon: <Undo2 />, section: 'main', roles: SELLER_AND_OPERATOR },
+  // Moliya faqat do'kon egasiga: operator buyurtma bilan ishlaydi, pul ma'lumotini ko'rmaydi.
+  { path: '/finance', label: 'nav.finance', icon: <Wallet />, section: 'main', roles: SELLER_ONLY },
   { path: '/delivery', label: 'nav.delivery', icon: <TruckOutlined />, section: 'main', roles: SELLER_AND_OPERATOR },
   { path: '/profile', label: 'nav.profile', icon: <ShopOutlined />, section: 'main', showInSidebar: false, roles: SELLER_AND_OPERATOR },
   { path: '/settings', label: 'nav.settings', icon: <SettingOutlined />, section: 'utility', showInSidebar: false, roles: SELLER_AND_OPERATOR },

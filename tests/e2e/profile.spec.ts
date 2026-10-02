@@ -41,12 +41,13 @@ test('profil ma’lumotlarini PATCH /auth/profile orqali yangilaydi', async ({ p
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
   const dialog = page.getByRole('dialog', { name: 'Profilni tahrirlash' });
   await expect(dialog.getByLabel('Ism')).toHaveValue(authenticatedUser.name);
+  // `UpdateProfileDto` da email yo'q — backend qo'shmaguncha tahrirlanmaydi, faqat ko'rsatiladi.
+  await expect(dialog.getByLabel('Email')).toHaveCount(0);
   await dialog.getByLabel('Ism').fill('Ali Valiyev');
-  await dialog.getByLabel('Email').fill('ali@example.com');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
 
   await expect(page.getByText('Profil muvaffaqiyatli yangilandi')).toBeVisible();
-  expect(api.body()).toEqual({ name: 'Ali Valiyev', email: 'ali@example.com' });
+  expect(api.body()).toEqual({ name: 'Ali Valiyev' });
   expect(api.authorization()).toBe(`Bearer ${TEST_ACCESS_TOKEN}`);
   await expect(page.getByRole('heading', { name: 'Ali Valiyev' })).toBeVisible();
   expect(formWarnings).toEqual([]);
@@ -116,15 +117,15 @@ test('backend field xatosini mos formada ko‘rsatadi', async ({ page }) => {
     status: 400,
     contentType: 'application/json',
     body: JSON.stringify({
-      message: ['email must be an email'],
+      message: ['phone already exists'],
       errorCode: 'VALIDATION_ERROR',
-      details: [{ field: 'email', error: 'Bu email allaqachon ishlatilgan' }],
+      details: [{ field: 'phone', error: 'Bu telefon raqami allaqachon ishlatilgan' }],
     }),
   }));
   await page.goto('/profile');
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
   const dialog = page.getByRole('dialog', { name: 'Profilni tahrirlash' });
-  await dialog.getByLabel('Email').fill('taken@example.com');
+  await dialog.getByLabel('Telefon').fill('+998991234567');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
-  await expect(dialog.getByText('Bu email allaqachon ishlatilgan')).toBeVisible();
+  await expect(dialog.getByText('Bu telefon raqami allaqachon ishlatilgan')).toBeVisible();
 });
