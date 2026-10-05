@@ -1478,7 +1478,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Savatdagi har bir posilka uchun dostavka narxi */
+        /**
+         * Savatdagi har bir posilka uchun dostavka narxi
+         * @description `cartItemIds` berilsa faqat shu qatorlar hisoblanadi — `POST /checkout` ga aynan shu tanlov yuboriladi.
+         */
         post: operations["CheckoutController_preview"];
         delete?: never;
         options?: never;
@@ -1495,7 +1498,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Savatni do‘konlar bo‘yicha ajratib buyurtma yaratish */
+        /**
+         * Savatni do‘konlar bo‘yicha ajratib buyurtma yaratish
+         * @description `cartItemIds` berilsa faqat shu savat qatorlari buyurtmaga o‘tadi va savatdan o‘chadi, qolganlari savatda qoladi. Berilmasa — butun savat. Savatda yo‘q id → 404. Idempotency-Key bitta tanlovga tegishli: tanlov o‘zgarsa yangi kalit yuboring.
+         */
         post: operations["CheckoutController_create"];
         delete?: never;
         options?: never;
@@ -3998,6 +4004,16 @@ export interface components {
             unitPriceSnapshot: number;
             /** @example 250000 */
             lineTotal: number;
+            /**
+             * @description Savatga qo‘shilgan paytdagi nom (narx kabi surat) — buyurtmaga ham shu nom o‘tadi
+             * @example Smartfon X 128GB
+             */
+            productName: string;
+            /**
+             * @description Variant rasmi, u bo‘lmasa mahsulotning asosiy rasmi. Katalogdan jonli olinadi
+             * @example https://api.elchimarket.uz/media/products/35/main.webp
+             */
+            imageUrl: string | null;
         };
         CartDto: {
             /** @example 5 */
@@ -4047,11 +4063,27 @@ export interface components {
         };
         DeliveryPreviewDto: {
             address: components["schemas"]["CheckoutAddressDto"];
+            /**
+             * @description Faqat shu savat qatorlari (`GET /cart` → `items[].id`). Berilmasa — butun savat. Buyurtmadan keyin tanlangan qatorlar savatdan o‘chadi, qolganlari savatda qoladi.
+             * @example [
+             *       "10",
+             *       "12"
+             *     ]
+             */
+            cartItemIds?: string[];
         };
         CreateCheckoutDto: {
+            address: components["schemas"]["CheckoutAddressDto"];
+            /**
+             * @description Faqat shu savat qatorlari (`GET /cart` → `items[].id`). Berilmasa — butun savat. Buyurtmadan keyin tanlangan qatorlar savatdan o‘chadi, qolganlari savatda qoladi.
+             * @example [
+             *       "10",
+             *       "12"
+             *     ]
+             */
+            cartItemIds?: string[];
             /** @enum {string} */
             paymentMethod: "online" | "cod";
-            address: components["schemas"]["CheckoutAddressDto"];
         };
         CreatePaymentDto: {
             /** @example 42 */
