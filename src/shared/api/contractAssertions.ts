@@ -25,6 +25,7 @@ import type { StockItem } from '../../features/stock/model/stockTypes';
 import type { Warehouse } from '../../features/warehouses/model/warehouseTypes';
 import type { ReturnHistoryEntry, ReturnItem, ReturnRequest, ReturnRequestDetail } from '../../features/returns/model/returnTypes';
 import type { SellerOrder } from '../../features/orders/model/orderTypes';
+import type { CodReconciliation, LedgerEntry, PayoutSchedule, SellerFinanceSummary, SellerPayout } from '../../features/sellerFinance/model/sellerFinanceTypes';
 
 type Schemas = components['schemas'];
 
@@ -93,6 +94,16 @@ type _ReturnItem    = Check<ExpectNoDrift<ReturnItem,          Schemas['ReturnRe
 type _ReturnHistory = Check<ExpectNoDrift<ReturnHistoryEntry,  Schemas['ReturnRequestHistoryDto']>>;
 // prettier-ignore
 type _SellerOrder   = Check<ExpectNoDrift<SellerOrder,         Schemas['SellerOrderItemDto']>>;
+// prettier-ignore
+type _LedgerEntry   = Check<ExpectNoDrift<LedgerEntry,          Schemas['FinanceLedgerEntryDto']>>;
+// prettier-ignore
+type _SellerPayout  = Check<ExpectNoDrift<SellerPayout,         Schemas['FinancePayoutDto']>>;
+// prettier-ignore
+type _CodReport     = Check<ExpectNoDrift<CodReconciliation,    Schemas['FinanceReconciliationReportDto']>>;
+// prettier-ignore
+type _FinanceSummary = Check<ExpectNoDrift<SellerFinanceSummary, Schemas['SellerFinanceSummaryDto']>>;
+// prettier-ignore
+type _PayoutSchedule = Check<ExpectNoDrift<PayoutSchedule,      Schemas['PayoutScheduleDto']>>;
 // So'rov tanasi: `UpdateProfileDto` da yo'q maydon (masalan `email`) yuborilmasin.
 // prettier-ignore
 type _UpdateProfile = Check<ExpectNoDrift<UpdateAuthProfilePayload, Schemas['UpdateProfileDto']>>;
@@ -115,4 +126,9 @@ export type ContractGuarded = [
   _ReturnHistory,
   _SellerOrder,
   _UpdateProfile,
+  _LedgerEntry,
+  _SellerPayout,
+  _CodReport,
+  _FinanceSummary,
+  _PayoutSchedule,
 ];

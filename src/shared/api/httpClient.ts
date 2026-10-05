@@ -32,5 +32,9 @@ export const httpClient = axios.create({
   withCredentials: true,
   headers: {
     Accept: 'application/json',
+    // CSRF: backend cookie bilan kelgan POST/PUT/PATCH/DELETE ni shu sarlavhasiz
+    // 403 bilan rad etadi (`AUTH_TOKENS_IN_BODY=false`). Boshqa sayt oddiy
+    // `<form>` bilan maxsus sarlavha yubora olmaydi — qiymati muhim emas.
+    'X-Requested-With': 'XMLHttpRequest',
   },
 });

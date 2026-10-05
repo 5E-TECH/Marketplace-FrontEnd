@@ -68,6 +68,24 @@ test('cookie sessiyada 401 bo‘lsa refresh qilinadi va so‘rov tokensiz qayta 
   expect(await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY)).toBeNull();
 });
 
+test('cookie sessiyada o‘zgartiruvchi so‘rovlar CSRF sarlavhasi bilan ketadi', async ({ page }) => {
+  await mockCabinet(page);
+  await page.addInitScript((key) => sessionStorage.setItem(key, '1'), COOKIE_SESSION_KEY);
+  await page.route('**/api/v1/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: authenticatedUser }) }));
+  // Backend cookie bilan kelgan POST/PATCH/DELETE ni `X-Requested-With`siz 403 bilan rad etadi.
+  const logoutHeaders: Array<string | undefined> = [];
+  await page.route('**/api/v1/auth/logout', (route) => {
+    logoutHeaders.push(route.request().headers()['x-requested-with']);
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ statusCode: 200, data: {} }) });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+  await page.getByRole('button', { name: 'Tizimdan chiqish' }).click();
+  await expect(page).toHaveURL(/\/login/);
+  expect(logoutHeaders).toEqual(['XMLHttpRequest']);
+});
+
 test('cookie sessiya tugagan bo‘lsa login sahifasiga qaytaradi va belgini tozalaydi', async ({ page }) => {
   await mockCabinet(page);
   await page.addInitScript((key) => { if (!sessionStorage.getItem('e2e-seeded')) { sessionStorage.setItem(key, '1'); sessionStorage.setItem('e2e-seeded', '1'); } }, COOKIE_SESSION_KEY);

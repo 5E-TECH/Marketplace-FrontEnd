@@ -3,11 +3,24 @@
 .dateRange { min-width: 0; }
 .filterAction :global(.ant-btn) { min-height: 42px; }
 .notice { margin-top: var(--space-4); }
-.metricGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
-.tablePanel { margin-top: var(--space-4); }
-.idCell { display: grid; gap: 2px; justify-items: start; }
-.idCell small { color: var(--color-text-muted); font-size: 12px; }
+.metricGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); align-items: start; }
+.panel { min-width: 0; }
+.schedule { display: grid; gap: var(--space-2); padding: var(--space-4); }
+.scheduleControls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; }
+.muted { color: var(--color-text-muted); font-size: 12px; }
+.tabs { margin-top: var(--space-4); }
+.statusFilter { min-width: 180px; }
 .amount { white-space: nowrap; }
+.income { color: var(--color-success); }
+.expense { color: var(--color-error); }
 
-@container content (max-width: 767px) { .metricGrid { grid-template-columns: 1fr; } }
-@container content (max-width: 575px) { .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); } .filterAction, .filterAction :global(.ant-btn) { width: 100%; } }
+@container content (max-width: 1199px) { .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container content (max-width: 991px) { .panels { grid-template-columns: 1fr; } }
+@container content (max-width: 575px) {
+  .metricGrid { grid-template-columns: 1fr; }
+  .filterPanel { grid-template-columns: 1fr; padding: var(--space-3); }
+  .filterAction, .filterAction :global(.ant-btn) { width: 100%; }
+  .scheduleControls { grid-template-columns: 1fr; }
+  .statusFilter { width: 100%; min-width: 0; }
+}
