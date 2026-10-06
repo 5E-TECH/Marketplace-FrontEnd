@@ -6,3 +6,4 @@
 .actionForm {
   margin-top: 16px;
 }
+.actionHint { color: var(--color-text-muted); font-size: 12px; }

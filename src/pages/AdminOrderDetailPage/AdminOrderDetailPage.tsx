@@ -1,10 +1,14 @@
 import { Ban, CalendarClock, CreditCard, Hash, PackageOpen, Printer, Store, Undo2, UserRound } from 'lucide-react';
-import { Alert, App, Button, Form, Input, Modal, Space } from 'antd';
+import { Alert, App, Button, Form, Input, Modal, Space, Tooltip } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { useAdminOrderQuery, useCancelAdminOrderMutation, useRefundAdminOrderMutation } from '../../features/orders/api/orderQueries';
 import type { AdminOrder, AdminOrderStatus } from '../../features/orders/model/orderTypes';
 import { getAdminOrderActionErrorMessage } from '../../features/orders/lib/getAdminOrderActionErrorMessage';
+import { getAdminPaymentState } from '../../features/orders/lib/adminPaymentState';
+import { AdminPaymentStatus } from '../../features/orders/ui/AdminPaymentStatus/AdminPaymentStatus';
+import { useAppSelector } from '../../app/store/hooks';
+import { selectAuthUser } from '../../features/auth/model/authSlice';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -24,7 +28,10 @@ interface OrderLocationState {
 
 type OrderAction = 'refund' | 'cancel';
 
-/** Backend faqat to‘langan online buyurtmani to‘liq qaytaradi; COD rad etiladi. */
+/**
+ * Backend faqat to‘langan online buyurtmani to‘liq qaytaradi; COD rad etiladi. Refund — faqat SUPERADMIN
+ * (`POST /admin/orders/:id/refund` @Roles(SUPERADMIN)); ADMIN'ga tugma o‘chiq ko‘rinadi, 403 olib qolmasin.
+ */
 const REFUNDABLE_STATUSES: readonly AdminOrderStatus[] = ['PAID', 'CONFIRMED', 'PARTIALLY_FULFILLED', 'FULFILLED'];
 /** Backend majburiy bekor qilishga faqat shu holatlarda ruxsat beradi. */
 const CANCELLABLE_STATUSES: readonly AdminOrderStatus[] = ['DRAFT', 'PENDING_PAYMENT'];
@@ -44,6 +51,7 @@ export default function AdminOrderDetailPage() {
   const refund = useRefundAdminOrderMutation();
   const cancel = useCancelAdminOrderMutation();
   const query = useAdminOrderQuery(orderId ?? null);
+  const role = useAppSelector(selectAuthUser)?.role;
   const routeOrder = (location.state as OrderLocationState | null)?.order;
   const order = query.data?.summary ?? (routeOrder?.id === orderId ? routeOrder : null);
 
@@ -87,7 +95,8 @@ export default function AdminOrderDetailPage() {
     catch (error) { void message.error(getApiErrorMessage(error)); }
     finally { setPrintingParcelId(null); }
   };
-  const canRefund = order?.paymentMethod === 'online' && Boolean(status && REFUNDABLE_STATUSES.includes(status));
+  const refundable = Boolean(order && status && REFUNDABLE_STATUSES.includes(status) && getAdminPaymentState(order) === 'PAID');
+  const canRefund = refundable && role === 'SUPERADMIN';
   const canCancel = Boolean(status && CANCELLABLE_STATUSES.includes(status));
   const actionPending = refund.isPending || cancel.isPending;
   const closeAction = () => setAction(null);
@@ -115,7 +124,7 @@ export default function AdminOrderDetailPage() {
       { key: 'phone', icon: <UserRound />, label: t('users.phone'), value: order?.buyerPhone || '—' },
       { key: 'shop', icon: <Store />, label: t('adminOrders.shopId'), value: order?.shopName || (order?.shopId ? `#${order.shopId}` : shops || '—') },
       { key: 'amount', icon: <CreditCard />, label: t('adminOrders.amount'), value: order ? `${formatMoney(order.totalAmount)} UZS` : '—' },
-      { key: 'payment', icon: <CreditCard />, label: t('adminOrders.payment'), value: order?.paymentMethod?.toUpperCase() || '—' },
+      { key: 'payment', icon: <CreditCard />, label: t('adminOrders.payment'), value: order ? <AdminPaymentStatus order={order} /> : '—' },
       { key: 'created', icon: <CalendarClock />, label: t('users.createdAt'), value: order?.createdAt ? formatDateTime(order.createdAt, locale) : '—' },
     ],
   }];
@@ -129,7 +138,9 @@ export default function AdminOrderDetailPage() {
         actions={
           <Space wrap>
             {canCancel ? <Button icon={<Ban size={16} />} disabled={actionPending} onClick={() => setAction('cancel')}>{t('adminOrders.cancel')}</Button> : null}
-            {canRefund ? <Button danger icon={<Undo2 size={16} />} disabled={actionPending} onClick={() => setAction('refund')}>{t('adminOrders.refund')}</Button> : null}
+            {canRefund ? <Button danger icon={<Undo2 size={16} />} disabled={actionPending} onClick={() => setAction('refund')}>{t('adminOrders.refund')}</Button>
+              : refundable ? <Tooltip title={t('adminOrders.refundSuperadminOnly')}><Button danger icon={<Undo2 size={16} />} disabled aria-describedby="refund-superadmin-only">{t('adminOrders.refund')}</Button></Tooltip> : null}
+            {refundable && !canRefund ? <span id="refund-superadmin-only" className={styles.actionHint}>{t('adminOrders.refundSuperadminOnly')}</span> : null}
             <Button icon={<Printer size={16} />} loading={printing} onClick={() => void printLabel()}>{t('order.printLabel')}</Button>
             <Button icon={<PackageOpen size={16} />} onClick={() => void navigate(`/admin/returns?orderId=${encodeURIComponent(orderId)}`)}>{t('returns.orderReturns')}</Button>
           </Space>

@@ -123,6 +123,11 @@ function parseSchedule(data: unknown): PayoutSchedule {
   };
 }
 
+/** Admin ham aynan shu DTO'larni oladi (`/admin/finance/ledger|payouts|reports`) — parserlar umumiy. */
+export const parseLedgerPage = (data: unknown): FinancePage<LedgerEntry> => parsePage(data, parseLedgerEntry, 'Hisob yozuvlari');
+export const parsePayoutPage = (data: unknown): FinancePage<SellerPayout> => parsePage(data, parsePayout, 'To‘lovlar ro‘yxati');
+export const parseCodReport = (data: unknown): CodReconciliation => parseCodReconciliation(unwrapApiData(data));
+
 export async function getSellerFinanceSummary(range: SellerFinanceRange, signal?: AbortSignal): Promise<SellerFinanceSummary> {
   const { data } = await httpClient.get<unknown>('/seller/finance/summary', { params: range, signal });
   return parseSummary(data);
@@ -130,12 +135,12 @@ export async function getSellerFinanceSummary(range: SellerFinanceRange, signal?
 
 export async function getSellerLedger(params: SellerLedgerParams, signal?: AbortSignal): Promise<FinancePage<LedgerEntry>> {
   const { data } = await httpClient.get<unknown>('/seller/finance/ledger', { params, signal });
-  return parsePage(data, parseLedgerEntry, 'Hisob yozuvlari');
+  return parseLedgerPage(data);
 }
 
 export async function getSellerPayouts(params: SellerPayoutParams, signal?: AbortSignal): Promise<FinancePage<SellerPayout>> {
   const { data } = await httpClient.get<unknown>('/seller/finance/payouts', { params, signal });
-  return parsePage(data, parsePayout, 'To‘lovlar ro‘yxati');
+  return parsePayoutPage(data);
 }
 
 export async function getPayoutSchedule(signal?: AbortSignal): Promise<PayoutSchedule> {

@@ -20,7 +20,8 @@ test('TC1: barcha sotuvchilar buyurtmalari va jadval ustunlari ko‘rinadi', asy
     const row = page.getByRole('row').filter({ hasText: order.buyerName });
     await expect(row).toContainText(order.shopName);
     await expect(row).toContainText(order.buyerName);
-    await expect(row).toContainText(order.paymentMethod.toUpperCase());
+    // To'lov usuli va holati: online — buyurtma holatidan (backend admin javobida paymentStatus yo'q), COD — yetkazilganda.
+    await expect(row).toContainText(order.paymentMethod === 'cod' ? 'Yetkazilganda (naqd)' : 'OnlineTo‘langan');
     await expect(row).toContainText('UZS');
     await expect(row).toContainText('2026');
     await expect(row.getByRole('button', { name: 'Buyurtma tafsilotlari' })).toBeVisible();
@@ -253,7 +254,7 @@ test('TC3: filtrlangan buyurtmaning sub-order, item, shipment va tarixi read-onl
   await expect(row).toContainText('Ali Market');
   await expect(row).toContainText('Ali Valiyev');
   await expect(row).toContainText('250 000 UZS');
-  await expect(row).toContainText('COD');
+  await expect(row).toContainText('Yetkazilganda (naqd)');
 
   await page.getByRole('button', { name: 'Buyurtma tafsilotlari' }).click();
   await expect(page).toHaveURL(/\/admin\/orders\/91$/);
@@ -436,6 +437,35 @@ test('online to‘langan buyurtmada refund sabab bilan yuboriladi va tugma yashi
   await expect(dialog).toHaveCount(0);
   await expect(detailPage).toContainText('Qaytarilgan');
   await expect(detailPage.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+});
+
+test('TC2: online buyurtma to‘lov holati admin sahifasida ko‘rinadi (kutilmoqda → to‘langan → qaytarilgan)', async ({ page }) => {
+  const order = { ...allOrders[1], status: 'PENDING_PAYMENT' };
+  const state = { order };
+  await page.route('**/api/v1/admin/orders/**', route => route.fulfill({ json: { data: { ...state.order, sellerOrders: [] } } }));
+  await page.goto('/admin/orders/92');
+  const payment = page.getByTestId('detail-page').locator('dd, [class*="field"]').filter({ hasText: /^Online/ }).first();
+  await expect(payment).toContainText('To‘lov kutilmoqda');
+  await expect(page.getByRole('button', { name: 'Pulni qaytarish' })).toHaveCount(0);
+  // Payme/Click tasdiqlagach backend buyurtmani CONFIRMED qiladi — admin “To‘langan” ko‘radi.
+  state.order = { ...order, status: 'CONFIRMED' };
+  await page.reload();
+  await expect(payment).toContainText('To‘langan');
+  await expect(page.getByRole('button', { name: 'Pulni qaytarish' })).toBeEnabled();
+  // Backend paymentStatus qaytarsa, u buyurtma holatidan ustun.
+  state.order = { ...order, status: 'CONFIRMED', paymentStatus: 'REFUNDED' } as typeof order;
+  await page.reload();
+  await expect(payment).toContainText('Qaytarilgan');
+});
+
+test('TC6: oddiy ADMIN pul qaytara olmaydi — tugma o‘chiq va sababi yozilgan (backend faqat SUPERADMIN)', async ({ page }) => {
+  await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: { data: { id: 'admin-2', role: 'ADMIN', name: 'Admin', phone: '+998901234560', isActive: true, isDeleted: false } } }));
+  const state = await mockOrderAction(page, { ...allOrders[1], status: 'CONFIRMED' }, 'refund', { status: 403, json: { message: 'Forbidden resource' } });
+  await page.goto('/admin/orders/92');
+  const detailPage = page.getByTestId('detail-page');
+  await expect(detailPage.getByRole('button', { name: 'Pulni qaytarish' })).toBeDisabled();
+  await expect(detailPage).toContainText('Pulni faqat superadmin qaytaradi');
+  expect(state.bodies).toEqual([]);
 });
 
 test('takroriy refund idempotent javobida "allaqachon qaytarilgan" chiqadi', async ({ page }) => {

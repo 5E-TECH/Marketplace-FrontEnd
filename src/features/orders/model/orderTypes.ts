@@ -55,6 +55,8 @@ export interface AdminOrder {
   buyerPhone: string | null;
   totalAmount: number;
   paymentMethod: AdminPaymentMethod | null;
+  /** Backend admin javobida hozircha yo'q — kelsa ustun turadi (`getAdminPaymentState`). */
+  paymentStatus: string | null;
   status: AdminOrderStatus;
   shopId: string | null;
   shopName: string | null;

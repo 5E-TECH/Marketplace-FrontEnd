@@ -28,6 +28,7 @@ import type { TranslationKey } from '../../shared/i18n/translations';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { formatSkippedLabels, openOrderLabels } from '../../features/orders/api/orderLabelApi';
+import { AdminPaymentStatus } from '../../features/orders/ui/AdminPaymentStatus/AdminPaymentStatus';
 
 type PaymentFilter = 'ALL' | AdminPaymentMethod;
 
@@ -65,7 +66,7 @@ export default function AdminOrdersPage() {
     { title: t('adminOrders.buyer'), dataIndex: 'buyerName', responsive: ['md'], render: (value: string | null) => value || '—' },
     { title: t('adminOrders.shopId'), dataIndex: 'shopId', responsive: ['lg'], render: (value: string | null, order) => order.shopName || (value ? `#${value}` : order.sellersCount ? t('adminOrders.shopCount', { count: order.sellersCount }) : '—') },
     { title: t('adminOrders.amount'), dataIndex: 'totalAmount', responsive: ['sm'], render: (value: number) => <span className={styles.amount}>{formatMoney(value)} UZS</span> },
-    { title: t('adminOrders.payment'), dataIndex: 'paymentMethod', width: 100, render: (value: AdminPaymentMethod | null) => value ? value.toUpperCase() : '—' },
+    { title: t('adminOrders.payment'), width: 190, render: (_, order) => <AdminPaymentStatus order={order} /> },
     { title: t('users.status'), dataIndex: 'status', width: 170, render: (value: AdminOrderStatus) => value === 'FULFILLED' ? <StatusTag status="SHIPMENT_CREATED" /> : <StatusTag status={value} /> },
     { title: t('users.createdAt'), dataIndex: 'createdAt', responsive: ['xl'], render: (value: string) => value ? formatDateTime(value, locale) : '—' },
     { title: t('users.actions'), width: 80, align: 'center', render: (_, order) => <span className={styles.rowActions}><Button type="text" icon={<Eye size={17}/>} aria-label={t('adminOrders.detail')} onClick={() => void navigate(`/admin/orders/${encodeURIComponent(order.id)}`, { state: { order } })} /></span> },
@@ -125,7 +126,7 @@ export function AppDetailNotice({ value, onPrintParcel, printingParcelId = null 
 
     <section className={styles.detailSection}>
       <header><h3>{t('adminOrders.paymentDetail')}</h3></header>
-      {value.payment ? <DetailList items={[{ label: t('adminOrders.payment'), value: showStatus(value.payment.method) }, { label: t('users.status'), value: showStatus(value.payment.status) }, { label: t('adminOrders.amount'), value: value.payment.amount === null ? '—' : `${formatMoney(value.payment.amount)} UZS` }, { label: t('adminOrders.transaction'), value: value.payment.transactionId || '—' }]} /> : <EmptyState compact title={t('adminOrders.noPayment')} />}
+      {value.payment ? <DetailList items={[{ label: t('adminOrders.payment'), value: showStatus(value.payment.method) }, { label: t('users.status'), value: value.payment.status ? showStatus(value.payment.status) : value.summary ? <AdminPaymentStatus order={value.summary} /> : '—' }, { label: t('adminOrders.amount'), value: value.payment.amount === null ? '—' : `${formatMoney(value.payment.amount)} UZS` }, { label: t('adminOrders.transaction'), value: value.payment.transactionId || '—' }]} /> : <EmptyState compact title={t('adminOrders.noPayment')} />}
     </section>
 
     <section className={styles.detailSection}>

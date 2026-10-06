@@ -1,12 +1,14 @@
-import { App, Button, Space, Tabs } from 'antd';
+import { App, Button, Space, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { Check, CirclePause } from 'lucide-react';
 import { useState } from 'react';
-import { useAdminPayoutsQuery, useFinanceReportQuery, usePayoutActionMutation } from '../../features/adminFinance/api/adminFinanceQueries';
+import { useAdminLedgerQuery, useAdminPayoutsQuery, useFinanceReconciliationQuery, usePayoutActionMutation } from '../../features/adminFinance/api/adminFinanceQueries';
 import type { AdminPayout, PayoutAction, PayoutStatus, ReportParams } from '../../features/adminFinance/model/adminFinanceTypes';
+import { useAdminShopNames } from '../../features/adminShops/api/adminShopQueries';
+import { ENTRY_LABELS, PAYOUT_STATUSES, PAYOUT_STATUS_LABELS, REFERENCE_LABELS } from '../../features/sellerFinance/lib/financeLabels';
+import type { CodReconciliation, LedgerEntry, LedgerEntryType } from '../../features/sellerFinance/model/sellerFinanceTypes';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
-import { flattenPrimitiveEntries } from '../../shared/lib/primitiveEntries';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { DataTable } from '../../shared/ui/DataTable/DataTable';
@@ -23,31 +25,47 @@ import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
 import styles from './AdminFinancePage.module.css';
 
-type FinanceTab = 'payouts' | 'reports' | 'reconciliation';
+type FinanceTab = 'payouts' | 'ledger' | 'reconciliation';
 type StatusFilter = 'ALL' | PayoutStatus;
-const payoutStatuses: PayoutStatus[] = ['PENDING', 'APPROVED', 'HELD', 'PAID'];
 
 export default function AdminFinancePage() {
-  const { message } = App.useApp(); const { locale, t } = useTranslation(); const [tab, setTab] = useState<FinanceTab>('payouts'); const [shopId, setShopId] = useState(''); const [status, setStatus] = useState<StatusFilter>('ALL'); const [page, setPage] = useState(1); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState('');
+  const { message } = App.useApp(); const { locale, t } = useTranslation(); const [tab, setTab] = useState<FinanceTab>('payouts'); const [shopId, setShopId] = useState(''); const [status, setStatus] = useState<StatusFilter>('ALL'); const [page, setPage] = useState(1); const [ledgerPage, setLedgerPage] = useState(1); const [dateFrom, setDateFrom] = useState(''); const [dateTo, setDateTo] = useState('');
   const reportParams: ReportParams = { ...(shopId ? { shopId } : {}), ...(dateFrom ? { dateFrom } : {}), ...(dateTo ? { dateTo } : {}) };
   const payouts = useAdminPayoutsQuery({ page, limit: TABLE_PAGE_SIZE, ...(shopId ? { shopId } : {}), ...(status !== 'ALL' ? { status } : {}) }, tab === 'payouts');
-  const reports = useFinanceReportQuery('reports', reportParams, tab === 'reports'); const reconciliation = useFinanceReportQuery('reconciliation', reportParams, tab === 'reconciliation'); const mutation = usePayoutActionMutation();
+  const ledger = useAdminLedgerQuery({ page: ledgerPage, limit: TABLE_PAGE_SIZE, ...reportParams }, tab === 'ledger'); const reconciliation = useFinanceReconciliationQuery(reportParams, tab === 'reconciliation'); const mutation = usePayoutActionMutation();
+  // DTO'da do'kon nomi yo'q — nomlar do'kon tafsilotidan (5 daqiqa keshlanadi), topilmasa `#id`.
+  const shopNames = useAdminShopNames([...(payouts.data?.items ?? []), ...(ledger.data?.items ?? [])].map(row => row.shopId));
+  const shopLabel = (id: string) => shopNames.get(id) ?? `#${id}`;
+  const money = (value: number) => `${formatMoney(value)} UZS`;
   const runAction = (row: AdminPayout, action: PayoutAction) => mutation.mutate({ id: row.id, action }, { onSuccess: () => void message.success(t('admin.finance.updated')), onError: error => void message.error(getApiErrorMessage(error)) });
   const columns: ColumnsType<AdminPayout> = [
-    { title: t('admin.finance.payout'), render: (_, row) => `#${row.id}` }, { title: t('admin.common.shop'), render: (_, row) => row.shopName || (row.shopId ? `#${row.shopId}` : '—') }, { title: t('admin.common.amount'), dataIndex: 'amount', render: (value: number) => `${formatMoney(value)} UZS` }, { title: t('common.status'), dataIndex: 'status', width: 120, render: (value: PayoutStatus) => <StatusTag status={value} /> }, { title: t('common.createdAt'), dataIndex: 'createdAt', responsive: ['lg'], render: (value: string) => value ? formatDateTime(value, locale) : '—' },
+    { title: t('admin.finance.payout'), render: (_, row) => `#${row.id}` }, { title: t('admin.common.shop'), render: (_, row) => shopLabel(row.shopId) }, { title: t('sellerFinance.parcel'), dataIndex: 'referenceId', responsive: ['xl'], render: (value: string) => `#${value}` }, { title: t('admin.common.amount'), dataIndex: 'amount', render: (value: number) => money(value) }, { title: t('common.status'), dataIndex: 'status', width: 120, render: (value: PayoutStatus) => <StatusTag status={value} /> }, { title: t('common.createdAt'), dataIndex: 'createdAt', responsive: ['lg'], render: (value: string) => value ? formatDateTime(value, locale) : '—' }, { title: t('sellerFinance.paidAt'), dataIndex: 'paidAt', responsive: ['xl'], render: (value: string | null) => value ? formatDateTime(value, locale) : '—' },
     { title: t('common.actions'), width: 180, render: (_, row) => <Space wrap>{row.status === 'PENDING' ? <Button size="small" type="primary" icon={<Check size={15} />} loading={mutation.isPending} onClick={() => runAction(row, 'approve')}>{t('admin.finance.approve')}</Button> : null}{row.status !== 'HELD' && row.status !== 'PAID' ? <Button size="small" icon={<CirclePause size={15} />} loading={mutation.isPending} onClick={() => runAction(row, 'hold')}>{t('admin.finance.hold')}</Button> : null}{row.status === 'HELD' ? <Button size="small" type="primary" icon={<Check size={15} />} loading={mutation.isPending} onClick={() => runAction(row, 'release')}>{t('admin.finance.release')}</Button> : null}</Space> },
   ];
-  const activeReport = tab === 'reports' ? reports : reconciliation;
-  return <main><PageHeader title={t('admin.finance.title')} description={t('admin.finance.description')} /><Tabs activeKey={tab} onChange={value => setTab(value as FinanceTab)} items={[{ key: 'payouts', label: t('admin.finance.payouts') }, { key: 'reports', label: t('admin.finance.report') }, { key: 'reconciliation', label: t('admin.finance.reconciliation') }]} />
-    <FilterPanel className={styles.toolbar} aria-label={t('admin.common.filters')}><SearchInput value={shopId} inputMode="numeric" placeholder={t('admin.finance.shopId')} aria-label={t('admin.finance.shopId')} onValueChange={value => { setShopId(value.replace(/\D/g, '')); setPage(1); }} />{tab === 'payouts' ? <FilterSelect<StatusFilter> value={status} aria-label={t('admin.finance.payoutStatus')} options={[{ value: 'ALL', label: t('admin.finance.allStatuses') }, ...payoutStatuses.map(value => ({ value, label: value }))]} onChange={value => { setStatus(value); setPage(1); }} /> : <DateRangeFilter value={[dateFrom, dateTo]} startLabel={t('admin.finance.dateFrom')} endLabel={t('admin.finance.dateTo')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); }} />}<ResetFiltersButton disabled={!shopId && status === 'ALL' && !dateFrom && !dateTo} onClick={() => { setShopId(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); }} /></FilterPanel>
-    {tab === 'payouts' ? payouts.isPending ? <ContentState state="loading" /> : payouts.isError ? <ContentState state="error" description={getApiErrorMessage(payouts.error)} onAction={() => void payouts.refetch()} /> : <TablePanel title={t('admin.finance.payouts')} caption={t('pagination.total', { total: payouts.data.total })}><DataTable rowKey="id" columns={columns} dataSource={payouts.data.items} emptyState={<EmptyState compact title={t('admin.finance.empty')} description={t('admin.finance.emptyDescription')} />} pagination={{ current: page, total: payouts.data.total, onChange: setPage }} /></TablePanel> : activeReport.isPending ? <ContentState state="loading" /> : activeReport.isError ? <ContentState state="error" description={getApiErrorMessage(activeReport.error)} onAction={() => void activeReport.refetch()} /> : <ReportView value={activeReport.data} />}
+  const ledgerColumns: ColumnsType<LedgerEntry> = [
+    { title: t('sellerFinance.date'), dataIndex: 'createdAt', render: (value: string) => formatDateTime(value, locale) }, { title: t('admin.common.shop'), render: (_, row) => shopLabel(row.shopId) }, { title: t('sellerFinance.entryType'), dataIndex: 'entryType', render: (value: LedgerEntryType) => <Tag>{t(ENTRY_LABELS[value])}</Tag> },
+    { title: t('sellerFinance.reference'), responsive: ['lg'], render: (_, row) => { const label = REFERENCE_LABELS[row.referenceType]; return `${label ? t(label) : row.referenceType} #${row.referenceId}`; } },
+    { title: t('admin.common.amount'), dataIndex: 'amount', align: 'right', render: (value: number) => <strong className={value < 0 ? styles.expense : styles.income}>{`${value > 0 ? '+' : ''}${money(value)}`}</strong> }, { title: t('sellerFinance.balanceAfter'), dataIndex: 'balanceAfter', align: 'right', responsive: ['md'], render: (value: number) => money(value) },
+  ];
+  const resetFilters = () => { setShopId(''); setStatus('ALL'); setDateFrom(''); setDateTo(''); setPage(1); setLedgerPage(1); };
+  return <main><PageHeader title={t('admin.finance.title')} description={t('admin.finance.description')} /><Tabs activeKey={tab} onChange={value => setTab(value as FinanceTab)} items={[{ key: 'payouts', label: t('admin.finance.payouts') }, { key: 'ledger', label: t('admin.finance.ledger') }, { key: 'reconciliation', label: t('admin.finance.reconciliation') }]} />
+    <FilterPanel className={styles.toolbar} aria-label={t('admin.common.filters')}><SearchInput value={shopId} inputMode="numeric" placeholder={t('admin.finance.shopId')} aria-label={t('admin.finance.shopId')} onValueChange={value => { setShopId(value.replace(/\D/g, '')); setPage(1); setLedgerPage(1); }} />{tab === 'payouts' ? <FilterSelect<StatusFilter> value={status} aria-label={t('admin.finance.payoutStatus')} options={[{ value: 'ALL', label: t('admin.finance.allStatuses') }, ...PAYOUT_STATUSES.map(value => ({ value, label: t(PAYOUT_STATUS_LABELS[value]) }))]} onChange={value => { setStatus(value); setPage(1); }} /> : <DateRangeFilter value={[dateFrom, dateTo]} startLabel={t('admin.finance.dateFrom')} endLabel={t('admin.finance.dateTo')} onChange={([from, to]) => { setDateFrom(from); setDateTo(to); setLedgerPage(1); }} />}<ResetFiltersButton disabled={!shopId && status === 'ALL' && !dateFrom && !dateTo} onClick={resetFilters} /></FilterPanel>
+    {tab === 'payouts' ? payouts.isPending ? <ContentState state="loading" /> : payouts.isError ? <ContentState state="error" description={getApiErrorMessage(payouts.error)} onAction={() => void payouts.refetch()} /> : <TablePanel title={t('admin.finance.payouts')} caption={t('pagination.total', { total: payouts.data.total })}><DataTable rowKey="id" columns={columns} dataSource={payouts.data.items} emptyState={<EmptyState compact title={t('admin.finance.empty')} description={t('admin.finance.emptyDescription')} />} pagination={{ current: page, total: payouts.data.total, onChange: setPage }} /></TablePanel>
+      : tab === 'ledger' ? ledger.isPending ? <ContentState state="loading" /> : ledger.isError ? <ContentState state="error" description={getApiErrorMessage(ledger.error)} onAction={() => void ledger.refetch()} /> : <TablePanel title={t('admin.finance.ledger')} caption={t('pagination.total', { total: ledger.data.total })}><DataTable rowKey="id" loading={ledger.isFetching} columns={ledgerColumns} dataSource={ledger.data.items} emptyState={<EmptyState compact title={t('admin.finance.ledgerEmpty')} description={t('admin.finance.ledgerEmptyDescription')} />} pagination={{ current: ledgerPage, total: ledger.data.total, onChange: setLedgerPage }} /></TablePanel>
+      : reconciliation.isPending ? <ContentState state="loading" /> : reconciliation.isError ? <ContentState state="error" description={getApiErrorMessage(reconciliation.error)} onAction={() => void reconciliation.refetch()} /> : <ReconciliationView report={reconciliation.data} money={money} />}
   </main>;
 }
 
-function ReportView({ value }: { value: unknown }) {
+function ReconciliationView({ report, money }: { report: CodReconciliation; money: (value: number) => string }) {
   const { t } = useTranslation();
-  if (!value || typeof value !== 'object') return <EmptyState compact title={t('admin.finance.emptyReport')} description={t('admin.finance.emptyReportDescription')} />;
-  const rows = flattenPrimitiveEntries(value);
-  if (!rows.length) return <EmptyState compact title={t('admin.finance.emptyReport')} description={t('admin.finance.emptyReportDescription')} />;
-  return <section className={styles.report}>{rows.map(([label, content]) => <article className={styles.metric} key={label}><span>{label}</span><strong>{typeof content === 'number' ? formatMoney(content) : String(content)}</strong></article>)}</section>;
+  const metrics: Array<[string, string, string?]> = [
+    [t('sellerFinance.codSettlements'), String(report.settlementsCount)],
+    [t('sellerFinance.codExpected'), money(report.expectedCodAmount)],
+    [t('sellerFinance.codCollected'), money(report.collectedCodAmount)],
+    [t('sellerFinance.codDifference'), money(report.difference), report.difference < 0 ? styles.expense : undefined],
+    [t('sellerFinance.codCommission'), money(report.expectedCommission)],
+    [t('sellerFinance.codNetted'), money(report.nettedCommission)],
+    [t('sellerFinance.codOutstanding'), money(report.outstandingCommission), report.outstandingCommission > 0 ? styles.expense : undefined],
+  ];
+  return <section className={styles.report} aria-label={t('admin.finance.reconciliation')}>{metrics.map(([label, value, tone]) => <article className={styles.metric} key={label}><span>{label}</span><strong className={tone}>{value}</strong></article>)}</section>;
 }
