@@ -1,10 +1,11 @@
 import { Alert, App, Button, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { Check, CircleCheckBig, CirclePause, Clock, Wallet } from 'lucide-react';
+import { Banknote, Check, CircleCheckBig, CirclePause, Clock, HandCoins, Percent, Undo2, Wallet } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { usePayoutScheduleQuery, useSellerFinanceSummaryQuery, useSellerLedgerQuery, useSellerPayoutsQuery, useUpdatePayoutScheduleMutation } from '../../features/sellerFinance/api/sellerFinanceQueries';
+import { usePayoutScheduleQuery, useSellerFinanceSummaryQuery, useSellerLedgerQuery, useSellerPayoutsQuery, useSellerSettlementQuery, useUpdatePayoutScheduleMutation } from '../../features/sellerFinance/api/sellerFinanceQueries';
+import type { OrderSettlement } from '../../features/sellerFinance/lib/summarizeLedger';
 import type { CodReconciliation, LedgerEntry, LedgerEntryType, PayoutFrequency, SellerPayout, SellerPayoutStatus } from '../../features/sellerFinance/model/sellerFinanceTypes';
 import { ENTRY_LABELS, PAYOUT_STATUSES, PAYOUT_STATUS_LABELS, REFERENCE_LABELS } from '../../features/sellerFinance/lib/financeLabels';
 import { getApiErrorMessage } from '../../shared/api/apiError';
@@ -38,7 +39,7 @@ const defaultRange = (): [string, string] => [dayjs().startOf('month').format(DA
  */
 const formatDay = (value: string, locale: string) => !isDate(value) ? value : locale.startsWith('uz') ? dayjs(value).format('DD.MM.YYYY') : formatDate(`${value}T00:00:00`, locale);
 
-type FinanceTab = 'ledger' | 'payouts';
+type FinanceTab = 'orders' | 'ledger' | 'payouts';
 type PayoutStatusFilter = 'ALL' | SellerPayoutStatus;
 const FREQUENCIES: PayoutFrequency[] = ['DAILY', 'WEEKLY', 'MONTHLY'];
 const FREQUENCY_LABELS: Record<PayoutFrequency, [TranslationKey, TranslationKey]> = {
@@ -58,12 +59,13 @@ export default function FinancePage() {
   const [initialFrom, initialTo] = defaultRange();
   const from = searchParams.has('from') ? (isDate(searchParams.get('from')) ? searchParams.get('from')! : '') : initialFrom;
   const to = searchParams.has('to') ? (isDate(searchParams.get('to')) ? searchParams.get('to')! : '') : initialTo;
-  const [tab, setTab] = useState<FinanceTab>('ledger');
+  const [tab, setTab] = useState<FinanceTab>('orders');
   const [ledgerPage, setLedgerPage] = useState(1);
   const [payoutPage, setPayoutPage] = useState(1);
   const [payoutStatus, setPayoutStatus] = useState<PayoutStatusFilter>('ALL');
   const range = { ...(from ? { dateFrom: from } : {}), ...(to ? { dateTo: to } : {}) };
   const summaryQuery = useSellerFinanceSummaryQuery(range);
+  const settlementQuery = useSellerSettlementQuery(range);
   const ledgerQuery = useSellerLedgerQuery({ page: ledgerPage, limit: TABLE_PAGE_SIZE, ...range }, tab === 'ledger');
   const payoutsQuery = useSellerPayoutsQuery({ page: payoutPage, limit: TABLE_PAGE_SIZE, ...(payoutStatus !== 'ALL' ? { status: payoutStatus } : {}) }, tab === 'payouts');
   const money = (value: number) => `${formatMoney(value)} ${t('product.currency')}`;
@@ -80,6 +82,14 @@ export default function FinancePage() {
     setSearchParams((current) => { const next = new URLSearchParams(current); next.delete('from'); next.delete('to'); return next; }, { replace: true });
   };
 
+  const settlement = settlementQuery.data;
+  const totals = settlement?.totals;
+  const periodCards = totals ? [
+    { title: t('sellerFinance.gross'), value: money(totals.gross), caption: t('sellerFinance.grossCaption', { count: totals.ordersCount }), icon: <Banknote />, tone: 'info' as const },
+    { title: t('sellerFinance.commission'), value: money(totals.commission), caption: t('sellerFinance.commissionCaption', { percent: totals.gross > 0 ? Math.round((totals.commission / totals.gross) * 1000) / 10 : 0 }), icon: <Percent />, tone: 'warning' as const },
+    { title: t('sellerFinance.refunds'), value: money(totals.refunds), caption: t('sellerFinance.refundsCaption'), icon: <Undo2 />, tone: 'warning' as const },
+    { title: t('sellerFinance.net'), value: money(totals.net), caption: t('sellerFinance.netCaption'), icon: <HandCoins />, tone: 'success' as const },
+  ] : [];
   const summary = summaryQuery.data;
   const cards = summary ? [
     { title: t('sellerFinance.balance'), value: money(summary.balance), caption: t(summary.balance < 0 ? 'sellerFinance.balanceDebt' : 'sellerFinance.balanceCaption'), icon: <Wallet />, tone: summary.balance < 0 ? 'warning' as const : 'success' as const },
@@ -87,6 +97,16 @@ export default function FinancePage() {
     { title: t('sellerFinance.heldPayouts'), value: money(summary.heldPayoutAmount), caption: t('sellerFinance.heldCaption'), icon: <CirclePause />, tone: 'warning' as const },
     { title: t('sellerFinance.paidPayouts'), value: money(summary.paidPayoutAmount), caption: t('sellerFinance.paidCaption'), icon: <CircleCheckBig />, tone: 'success' as const },
   ] : [];
+
+  const settlementColumns: ColumnsType<OrderSettlement> = [
+    { title: t('sellerFinance.order'), render: (_, row) => <span className={styles.idCell}><strong>{t(row.kind === 'order' ? 'sellerFinance.parcelRow' : 'sellerFinance.returnRow', { id: row.referenceId })}</strong><small>{formatDateTime(row.date, locale)}</small></span> },
+    { title: t('sellerFinance.paymentMethod'), dataIndex: 'paymentMethod', responsive: ['md'], render: (value: OrderSettlement['paymentMethod']) => value === 'cod' ? t('sellerFinance.codShort') : value === 'online' ? t('sellerFinance.online') : '—' },
+    { title: t('sellerFinance.gross'), dataIndex: 'gross', align: 'right', responsive: ['sm'], render: (value: number) => <span className={styles.amount}>{money(value)}</span> },
+    { title: t('sellerFinance.commission'), dataIndex: 'commission', align: 'right', responsive: ['lg'], render: (value: number) => value ? <span className={`${styles.amount} ${styles.expense}`}>−{money(value)}</span> : '—' },
+    { title: t('sellerFinance.refunds'), dataIndex: 'refunds', align: 'right', responsive: ['lg'], render: (value: number) => value ? <span className={`${styles.amount} ${styles.expense}`}>−{money(value)}</span> : '—' },
+    { title: t('sellerFinance.net'), dataIndex: 'net', align: 'right', render: (value: number) => <strong className={`${styles.amount} ${value < 0 ? styles.expense : ''}`}>{money(value)}</strong> },
+    { title: t('sellerFinance.moneyStatus'), responsive: ['md'], render: (_, row) => row.kind !== 'order' ? '—' : row.payout ? <StatusTag status={row.payout.status} /> : row.paymentMethod === 'cod' ? t('sellerFinance.codCash') : <span className={styles.muted}>{t('sellerFinance.awaitingPayout')}</span> },
+  ];
 
   const ledgerColumns: ColumnsType<LedgerEntry> = [
     { title: t('sellerFinance.date'), dataIndex: 'createdAt', render: (value: string) => formatDateTime(value, locale) },
@@ -112,6 +132,14 @@ export default function FinancePage() {
       <div className={styles.filterAction}><ResetFiltersButton disabled={isDefault} onClick={resetRange} /></div>
     </FilterPanel>
     <Alert className={styles.notice} type="info" showIcon title={t('sellerFinance.notice')} />
+    <h2 className={styles.sectionTitle}>{t('sellerFinance.periodTotals')}</h2>
+    {settlementQuery.isError && !settlement ? <ContentState state="error" title={t('sellerFinance.settlementError')} description={getApiErrorMessage(settlementQuery.error)} onAction={() => void settlementQuery.refetch()} />
+      : !settlement ? <ContentState state="loading" />
+      : <section className={styles.metricGrid} aria-label={t('sellerFinance.periodTotals')} aria-busy={settlementQuery.isFetching}>
+        {periodCards.map((card) => <SummaryCard key={card.title} {...card} />)}
+      </section>}
+    {settlement?.truncated ? <Alert className={styles.notice} type="warning" showIcon title={t('sellerFinance.settlementTruncated')} /> : null}
+    <h2 className={styles.sectionTitle}>{t('sellerFinance.currentState')}</h2>
     {summaryQuery.isError && !summary ? <ContentState state="error" title={t('sellerFinance.summaryError')} description={getApiErrorMessage(summaryQuery.error)} onAction={() => void summaryQuery.refetch()} />
       : !summary ? <ContentState state="loading" />
       : <>
@@ -123,8 +151,14 @@ export default function FinancePage() {
           <CodPanel cod={summary.cod} money={money} />
         </div>
       </>}
-    <Tabs className={styles.tabs} activeKey={tab} onChange={(value) => setTab(value as FinanceTab)} items={[{ key: 'ledger', label: t('sellerFinance.ledger') }, { key: 'payouts', label: t('sellerFinance.payouts') }]} />
-    {tab === 'ledger'
+    <Tabs className={styles.tabs} activeKey={tab} onChange={(value) => setTab(value as FinanceTab)} items={[{ key: 'orders', label: t('sellerFinance.settlement') }, { key: 'ledger', label: t('sellerFinance.ledger') }, { key: 'payouts', label: t('sellerFinance.payouts') }]} />
+    {tab === 'orders'
+      ? settlementQuery.isError ? <ContentState state="error" title={t('sellerFinance.settlementError')} description={getApiErrorMessage(settlementQuery.error)} onAction={() => void settlementQuery.refetch()} />
+        : !settlement ? <ContentState state="loading" />
+        : <TablePanel title={t('sellerFinance.settlement')} caption={t('pagination.total', { total: settlement.orders.length })}>
+          <DataTable<OrderSettlement> loading={settlementQuery.isFetching} rowKey="key" columns={settlementColumns} dataSource={settlement.orders} tableLayout="auto" emptyState={<EmptyState compact title={t('sellerFinance.settlementEmpty')} description={t('sellerFinance.settlementEmptyDescription')} />} />
+        </TablePanel>
+    : tab === 'ledger'
       ? ledgerQuery.isError ? <ContentState state="error" title={t('sellerFinance.ledgerError')} description={getApiErrorMessage(ledgerQuery.error)} onAction={() => void ledgerQuery.refetch()} />
         : !ledgerQuery.data ? <ContentState state="loading" />
         : <TablePanel title={t('sellerFinance.ledger')} caption={t('pagination.total', { total: ledgerQuery.data.total })}>
