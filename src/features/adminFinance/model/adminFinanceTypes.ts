@@ -1,6 +1,10 @@
-export type PayoutStatus = 'PENDING' | 'APPROVED' | 'HELD' | 'PAID';
+import type { FinancePage, SellerPayout, SellerPayoutStatus } from '../../sellerFinance/model/sellerFinanceTypes';
+
+/** Admin va sotuvchi bir xil DTO'ni oladi (`FinancePayoutDto`); admin barcha do'konlarni ko'radi. */
+export type PayoutStatus = SellerPayoutStatus;
 export type PayoutAction = 'approve' | 'hold' | 'release';
 export interface PayoutListParams { shopId?: string; status?: PayoutStatus; page: number; limit: number }
 export interface ReportParams { shopId?: string; dateFrom?: string; dateTo?: string }
-export interface AdminPayout { id: string; shopId: string; shopName: string; amount: number; status: PayoutStatus; createdAt: string }
-export interface AdminPayoutsPage { items: AdminPayout[]; total: number; page: number; limit: number; totalPages: number }
+export interface LedgerListParams extends ReportParams { page: number; limit: number }
+export type AdminPayout = SellerPayout;
+export type AdminPayoutsPage = FinancePage<SellerPayout>;

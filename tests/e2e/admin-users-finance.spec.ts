@@ -169,25 +169,44 @@ test('TC4: bloklangan user holati jadvalda ko‘rinadi', async ({ page }) => {
   await expect(row.getByRole('button', { name: 'Blokdan chiqarish' })).toBeVisible();
 });
 
-test('admin payout action va report endpointlari ishlaydi', async ({ page }) => {
-  const payout = { id: '8', shopId: '7', shopName: 'Ali Market', amount: 500000, status: 'PENDING', createdAt: '2026-09-04T08:00:00.000Z' };
-  let approved = false; let reports = 0; let reconciliation = 0;
+test('admin moliya: payout amali, do‘kon nomi, ledger va COD solishtirish backend DTO bilan', async ({ page }) => {
+  // Kontrakt: FinancePayoutDto / FinanceLedgerEntryDto / FinanceReconciliationReportDto — do'kon nomi DTO'da yo'q.
+  const payout = { id: '8', shopId: '7', amount: 500000, status: 'PENDING', method: null, referenceId: '1203', paidAt: null, createdAt: '2026-09-04T08:00:00.000Z', updatedAt: '2026-09-04T08:00:00.000Z' };
+  const entries = [
+    { id: '501', shopId: '7', entryType: 'SALE', amount: 250000, balanceAfter: 1180000, referenceType: 'seller_order', referenceId: '1203', createdAt: '2026-09-28T10:15:00.000Z' },
+    { id: '502', shopId: '7', entryType: 'COMMISSION', amount: -25000, balanceAfter: 1155000, referenceType: 'seller_order', referenceId: '1203', createdAt: '2026-09-28T10:16:00.000Z' },
+  ];
+  const report = { settlementsCount: 14, expectedCodAmount: 3400000, collectedCodAmount: 3350000, difference: -50000, expectedCommission: 340000, nettedCommission: 200000, outstandingCommission: 140000 };
+  let approved = false; const ledgerQueries: Array<Record<string, string>> = []; const reconciliationQueries: Array<Record<string, string>> = [];
+  await page.route('**/api/v1/admin/shops/7', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { id: '7', name: 'Ali Market', slug: 'ali', status: 'ACTIVE', ownerUserId: '1', phone: '+998901234567', createdAt: '2026-09-01T00:00:00.000Z' } }) }));
   await page.route('**/api/v1/admin/finance/**', async route => {
-    const url = route.request().url();
-    if (url.endsWith('/payouts/8/approve')) { approved = true; await route.fulfill({ status: 201, contentType: 'application/json', body: '{}' }); return; }
-    if (url.includes('/reports/reconciliation')) { reconciliation += 1; await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { netAmount: 450000 } }) }); return; }
-    if (url.includes('/reports')) { reports += 1; await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { grossAmount: 500000 } }) }); return; }
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { items: [payout], total: 1, page: 1, limit: 20, totalPages: 1 } }) });
+    const url = new URL(route.request().url());
+    const page_ = (items: unknown[]) => JSON.stringify({ data: { items, total: items.length, page: 1, limit: 10, totalPages: 1 } });
+    if (url.pathname.endsWith('/payouts/8/approve')) { approved = true; await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ data: { ...payout, status: 'APPROVED' } }) }); return; }
+    if (url.pathname.endsWith('/ledger')) { ledgerQueries.push(Object.fromEntries(url.searchParams)); await route.fulfill({ status: 200, contentType: 'application/json', body: page_(entries) }); return; }
+    if (url.pathname.endsWith('/reports/reconciliation')) { reconciliationQueries.push(Object.fromEntries(url.searchParams)); await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: report }) }); return; }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: page_([payout]) });
   });
   await page.goto('/admin/finance');
-  await page.getByRole('button', { name: 'Tasdiqlash' }).click();
+  const payoutRow = page.getByRole('row').filter({ hasText: '#8' });
+  await expect(payoutRow).toContainText('Ali Market');
+  await expect(payoutRow).toContainText('500 000 UZS');
+  await payoutRow.getByRole('button', { name: 'Tasdiqlash' }).click();
   await expect.poll(() => approved).toBe(true);
-  await page.getByRole('tab', { name: 'Hisobot' }).click();
-  await expect.poll(() => reports).toBeGreaterThan(0);
-  await expect(page.getByText('500 000')).toBeVisible();
+
+  await page.getByRole('tab', { name: 'Hisob yozuvlari' }).click();
+  await expect(page.getByRole('row').filter({ hasText: 'Sotuv' })).toContainText('+250 000 UZS');
+  await expect(page.getByRole('row').filter({ hasText: 'Komissiya' })).toContainText('-25 000 UZS');
+  await expect(page.getByRole('row').filter({ hasText: 'Sotuv' })).toContainText('Ali Market');
+  await page.getByLabel('Do‘kon ID').fill('7');
+  await expect.poll(() => ledgerQueries.at(-1)).toEqual({ page: '1', limit: '10', shopId: '7' });
+
   await page.getByRole('tab', { name: 'Solishtirish' }).click();
-  await expect.poll(() => reconciliation).toBeGreaterThan(0);
-  await expect(page.getByText('450 000')).toBeVisible();
+  const reconciliation = page.getByRole('region', { name: 'Solishtirish' });
+  await expect(reconciliation).toContainText('Hisob-kitob qilingan posilkalar14');
+  await expect(reconciliation).toContainText('-50 000 UZS');
+  await expect(reconciliation).toContainText('140 000 UZS');
+  expect(reconciliationQueries.at(-1)).toEqual({ shopId: '7' });
 });
 
 test('SUPERADMIN administratorni /admin/team orqali qo‘shadi, operator varianti yo‘q', async ({ page }) => {

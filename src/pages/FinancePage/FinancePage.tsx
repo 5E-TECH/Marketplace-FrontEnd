@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { usePayoutScheduleQuery, useSellerFinanceSummaryQuery, useSellerLedgerQuery, useSellerPayoutsQuery, useUpdatePayoutScheduleMutation } from '../../features/sellerFinance/api/sellerFinanceQueries';
 import type { CodReconciliation, LedgerEntry, LedgerEntryType, PayoutFrequency, SellerPayout, SellerPayoutStatus } from '../../features/sellerFinance/model/sellerFinanceTypes';
+import { ENTRY_LABELS, PAYOUT_STATUSES, PAYOUT_STATUS_LABELS, REFERENCE_LABELS } from '../../features/sellerFinance/lib/financeLabels';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { TABLE_PAGE_SIZE } from '../../shared/config/pagination';
 import type { TranslationKey } from '../../shared/i18n/translations';
@@ -40,16 +41,6 @@ const formatDay = (value: string, locale: string) => !isDate(value) ? value : lo
 type FinanceTab = 'ledger' | 'payouts';
 type PayoutStatusFilter = 'ALL' | SellerPayoutStatus;
 const FREQUENCIES: PayoutFrequency[] = ['DAILY', 'WEEKLY', 'MONTHLY'];
-const PAYOUT_STATUSES: SellerPayoutStatus[] = ['PENDING', 'APPROVED', 'HELD', 'PAID'];
-const PAYOUT_STATUS_LABELS: Record<SellerPayoutStatus, TranslationKey> = { PENDING: 'status.pending', APPROVED: 'status.approved', HELD: 'status.held', PAID: 'status.paid' };
-const ENTRY_LABELS: Record<LedgerEntryType, TranslationKey> = {
-  SALE: 'sellerFinance.entry.SALE', COD_SALE: 'sellerFinance.entry.COD_SALE', COD_SETTLEMENT: 'sellerFinance.entry.COD_SETTLEMENT',
-  COMMISSION: 'sellerFinance.entry.COMMISSION', PAYOUT: 'sellerFinance.entry.PAYOUT', REFUND: 'sellerFinance.entry.REFUND', ADJUST: 'sellerFinance.entry.ADJUST',
-};
-const REFERENCE_LABELS: Partial<Record<string, TranslationKey>> = {
-  seller_order: 'sellerFinance.ref.seller_order', cod_seller_order: 'sellerFinance.ref.cod_seller_order',
-  seller_order_refund: 'sellerFinance.ref.seller_order_refund', return_request: 'sellerFinance.ref.return_request', payout: 'sellerFinance.ref.payout',
-};
 const FREQUENCY_LABELS: Record<PayoutFrequency, [TranslationKey, TranslationKey]> = {
   DAILY: ['sellerFinance.frequency.DAILY', 'sellerFinance.frequency.DAILY.hint'],
   WEEKLY: ['sellerFinance.frequency.WEEKLY', 'sellerFinance.frequency.WEEKLY.hint'],
