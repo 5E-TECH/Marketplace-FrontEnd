@@ -6,7 +6,8 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['dist', 'test-results', 'playwright-report', 'blob-report'] },
+  // public/mockServiceWorker.js — MSW yaratadi (`npx msw init`), qo'lda tahrirlanmaydi.
+  { ignores: ['dist', 'test-results', 'playwright-report', 'blob-report', 'public/mockServiceWorker.js'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked],
     files: ['**/*.{ts,tsx}'],

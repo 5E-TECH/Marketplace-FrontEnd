@@ -2377,6 +2377,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/regions/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Viloyatlar va tumanlar bitta ro‘yxatda (SOATO bo‘yicha)
+         * @description JS o‘chiq formadagi guruhlangan «Tuman yoki shahar» ro‘yxati uchun (BE-38, ega javobi 2026-11-16). Elchi bormaydigan tumanlar ro‘yxatda yo‘q.
+         */
+        get: operations["RegionsController_getRegionTree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/regions/{regionId}/districts": {
         parameters: {
             query?: never;
@@ -2806,6 +2826,468 @@ export interface paths {
         get: operations["SellerFinanceController_getPayoutSchedule"];
         /** Payout chastotasini tanlash (DAILY | WEEKLY | MONTHLY) */
         put: operations["SellerFinanceController_updatePayoutSchedule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/landing/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sotuvchi sahifasi ma’lumoti (kod bo‘yicha)
+         * @description Mahsulot, kreativlar, ko‘rinadigan narx va yetkazish, shablon, piksel va sahifa holati. Bazaviy narx, sotuvchi haqi va optovik ma’lumoti qaytmaydi (BE-11).
+         */
+        get: operations["PublicLeadsController_getLandingPage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/clicks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sotuvchi sahifasiga o‘tish (klik)
+         * @description Sotuvchi sahifasi serveri yuboradi; mijozning IP va user agenti so‘rov sarlavhasidan olinadi (BE-11).
+         */
+        post: operations["PublicLeadsController_createClick"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sotuvchi sahifasi formasidan ariza (lid)
+         * @description Ism, telefon, viloyat, tuman, ko‘cha/uy va yetkazish turi majburiy. Javob bazaga yozilgandan keyin (LID-3). Yashirin maydon to‘ldirilsa lid yozilmaydi, javob baribir 201 (BE-12).
+         */
+        post: operations["PublicLeadsController_createLead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sotuvchi o‘z saytidan lid yuboradi (API kalit bilan)
+         * @description X-Api-Key — sotuvchi kabinetidagi kalit. Idempotency-Key — takror so‘rov o‘sha lidni qaytaradi. Kalit bo‘yicha daqiqasiga 60 so‘rov (SOT-6). Lid kalit egasiga bog‘lanadi va operator navbatiga tushadi; variant yo‘q (BE-43).
+         */
+        post: operations["PublicLeadsController_createPartnerLead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Offerlar: mahsulot, narx, haq, EPC, tasdiq va sotilish foizi */
+        get: operations["AffiliateStreamsController_listOffers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/streams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** «Mening sahifalarim» */
+        get: operations["AffiliateStreamsController_listStreams"];
+        put?: never;
+        /**
+         * Sotuvchi sahifasini yaratish (bitta tugma)
+         * @description Faqat offer ID: standart shablon, tasdiqlangan narx va unikal kod bilan tayyor havola. Qoldiq 0 bo‘lsa rad (BE-11).
+         */
+        post: operations["AffiliateStreamsController_createStream"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/streams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Sotuvchi sahifasi sozlamalari
+         * @description Shablon, narx (tasdiqlangan narxdan +10% gacha), sub1–sub5, piksellar. Sir va token faqat yoziladi.
+         */
+        patch: operations["AffiliateStreamsController_updateStream"];
+        trace?: never;
+    };
+    "/api/v1/affiliate/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sotuvchi statistikasi: kun, sahifa yoki sub bo‘yicha
+         * @description Kliklar, lidlar, yaroqli, tasdiq, yetkazildi, rad, daromad. Variant, manzil va telefon yo‘q (BE-28).
+         */
+        get: operations["AffiliateStreamsController_stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sotuvchining lidlari: CSV manbasi
+         * @description Har lid: keldi, sahifa, sub, raqam ****4567, lid va buyurtma holati, haq. Ism, manzil, to‘liq raqam va variant yo‘q. CSV ni frontend umumiy yuklab olish bilan yig‘adi (BE-28 TC2, FE-06 TC2).
+         */
+        get: operations["AffiliateStreamsController_listLeads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/postbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Yuborilganlar jurnali: postback hodisalari va javob kodlari (BE-14) */
+        get: operations["AffiliateStreamsController_postbacks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lid API kalitlarim (BE-43, SOT-6) */
+        get: operations["AffiliateStreamsController_listApiKeys"];
+        put?: never;
+        /**
+         * Yangi lid API kaliti
+         * @description To‘liq kalit faqat shu javobda ko‘rsatiladi; bazada faqat xeshi saqlanadi.
+         */
+        post: operations["AffiliateStreamsController_createApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/api-keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Kalitni bekor qilish — darhol ishlamaydi */
+        delete: operations["AffiliateStreamsController_revokeApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Keyingi lidni olish va bron qilish (10 daqiqa)
+         * @description Vaqti kelgan qayta qo‘ng‘iroqlar, keyin eng yangi lidlar. 5 tadan ortiq bron yoki tanaffus holatida rad (OPR-1, BE-13).
+         */
+        post: operations["OperatorLeadsController_takeNext"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mening bronlarim va rejalashtirilgan qo‘ng‘iroqlar */
+        get: operations["OperatorLeadsController_listMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lid kartasi
+         * @description Mahsulot, narx, suhbat skripti, «formadan» manzil, urinishlar, tarix va shu telefondagi oldingi lidlar (OPR-2, BE-42).
+         */
+        get: operations["OperatorLeadsController_getCard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qo‘ng‘iroq natijasi
+         * @description CONFIRMED faqat manzil tasdiqlangan lidga, aks holda 400 va lead.confirmed ketmaydi. REJECTED da sabab majburiy (OPR-3, BE-13).
+         */
+        post: operations["OperatorLeadsController_submitResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads/{id}/address": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mijoz manzilini tasdiqlash yoki tuzatish
+         * @description Saqlash — tasdiq. Tuzatilsa eski va yangi qiymat lid tarixiga yoziladi; yetkazish turini ham o‘zgartiradi (OPR-4, BE-38).
+         */
+        patch: operations["OperatorLeadsController_updateAddress"];
+        trace?: never;
+    };
+    "/api/v1/operator/leads/{id}/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Summani oldindan hisoblash: miqdor va yetkazish turi bo‘yicha
+         * @description Lid o‘zgarmaydi. Tovar, ko‘rinadigan yetkazish va jami — operator mijozga aytadigan summa (FE-09, OPR-4; yetkazish BE-09).
+         */
+        post: operations["OperatorLeadsController_quote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Operator holati: ishda, tanaffus, chiqdi */
+        put: operations["OperatorLeadsController_setState"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/queue-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Navbat xulosasi (nazoratchi)
+         * @description Navbat hajmi va operatorlar holati (BE-13).
+         */
+        get: operations["OperatorLeadsController_queueSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mening statistikam (OPR-7) */
+        get: operations["OperatorLeadsController_stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lidlar ro‘yxati: holat, sotuvchi, mahsulot, operator, sana
+         * @description Telefon niqoblangan (BE-42).
+         */
+        get: operations["AdminLeadsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/leads/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lid kartasi (admin va nazoratchi) */
+        get: operations["AdminLeadsController_getCard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/offer-content/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Offer matnlari (bo‘sh bo‘lsa bo‘sh ro‘yxatlar) */
+        get: operations["AdminOfferContentController_get"];
+        /**
+         * Offer matnlarini saqlash
+         * @description Suhbat skripti operator lid kartasida, afzalliklar va «qutida» sotuvchi sahifasida ko‘rinadi. Bo‘sh qatorlar tashlanadi.
+         */
+        put: operations["AdminOfferContentController_update"];
         post?: never;
         delete?: never;
         options?: never;
@@ -4738,6 +5220,19 @@ export interface components {
              */
             satoCode: string;
         };
+        LeadDistrictOptionDto: {
+            /** @example 1726266 */
+            satoCode: string;
+            /** @example Yunusobod tumani */
+            name: string;
+        };
+        LeadRegionGroupDto: {
+            /** @example 1726 */
+            satoCode: string;
+            /** @example Toshkent shahri */
+            name: string;
+            districts: components["schemas"]["LeadDistrictOptionDto"][];
+        };
         DistrictDto: {
             /**
              * @description Tuman IDsi (Elchi)
@@ -5295,6 +5790,1046 @@ export interface components {
              * @enum {string}
              */
             frequency: "DAILY" | "WEEKLY" | "MONTHLY";
+        };
+        LandingPageCreativeDto: {
+            /** @example 9001 */
+            id: string;
+            /**
+             * @example VIDEO
+             * @enum {string}
+             */
+            type: "IMAGE" | "VIDEO";
+            /** @example https://cdn.example.uz/creatives/9001.mp4 */
+            url: string;
+        };
+        LandingPageSpecDto: {
+            /** @example Og‘irlik */
+            name: string;
+            /** @example 0.3 kg */
+            value: string;
+        };
+        LandingPageProductDto: {
+            /** @example 501 */
+            id: string;
+            /** @example Simsiz quloqchinlar */
+            name: string;
+            /** @example Bluetooth, quvvatlovchi g‘ilof bilan */
+            subtitle: string | null;
+            /**
+             * @example [
+             *       "https://cdn.example.uz/p/501/1.jpg"
+             *     ]
+             */
+            images: string[];
+            /**
+             * @description Mahsulot videosi; bo‘lmasa admin kreativlaridagi birinchi video (Video shabloni)
+             * @example null
+             */
+            videoUrl: string | null;
+            /** @description Admin yuklagan kreativlar: rasm va video (BE-08, SOT-9) */
+            creatives: components["schemas"]["LandingPageCreativeDto"][];
+            /**
+             * @description Mahsulot tavsifi (katalogdagi `description`; SF-02)
+             * @example Telefonga Bluetooth orqali ulanadi. Ixcham g‘ilofda saqlanadi.
+             */
+            description: string | null;
+            /**
+             * @description Afzalliklar — «… haqida» bloki (holat-matnlari.md standart-1, standart-8). Qayerda kiritilishi [taklif]: offer sozlamasi (BE-11), ega tasdig‘i kerak
+             * @example [
+             *       "Telefonga Bluetooth orqali ulanadi",
+             *       "Ixcham g‘ilofda saqlanadi va quvvatlanadi"
+             *     ]
+             */
+            highlights: string[];
+            /**
+             * @description «Qutida» bloki (holat-matnlari.md standart-1, standart-8). Qayerda kiritilishi [taklif]: offer sozlamasi (BE-11)
+             * @example [
+             *       "Quloqchinlar (juft)",
+             *       "Quvvatlovchi g‘ilof",
+             *       "Quvvat kabeli"
+             *     ]
+             */
+            boxContents: string[];
+            /**
+             * @description «Xususiyatlar»: mahsulot atributlari, og‘irlik va kategoriya [taklif] (holat-matnlari.md standart-1)
+             * @example [
+             *       {
+             *         "name": "Aloqa",
+             *         "value": "Bluetooth"
+             *       },
+             *       {
+             *         "name": "Og‘irlik",
+             *         "value": "0.3 kg"
+             *       },
+             *       {
+             *         "name": "Kategoriya",
+             *         "value": "Elektronika"
+             *       }
+             *     ]
+             */
+            specs: components["schemas"]["LandingPageSpecDto"][];
+            /**
+             * @description «Dori vositasi emas» belgisi (BE-07)
+             * @example false
+             */
+            isBad: boolean;
+        };
+        LandingPagePriceDto: {
+            /**
+             * @description Tovar narxi, so‘m
+             * @example 262000
+             */
+            salePrice: number;
+            /**
+             * @description Markazgacha yetkazish, so‘m; 0 — bepul (BE-09)
+             * @example 30000
+             */
+            centerDeliveryFee: number;
+            /**
+             * @description Eshikkacha yetkazish, so‘m (BE-09)
+             * @example 50000
+             */
+            addressDeliveryFee: number;
+        };
+        LandingPageDto: {
+            /** @example k7Qm2x */
+            code: string;
+            /**
+             * @example OPEN
+             * @enum {string}
+             */
+            state: "OPEN" | "OUT_OF_STOCK" | "NOT_ACCEPTED" | "WITHDRAWN";
+            /**
+             * @example STANDART
+             * @enum {string}
+             */
+            template: "STANDART" | "VIDEO";
+            product: components["schemas"]["LandingPageProductDto"];
+            price: components["schemas"]["LandingPagePriceDto"];
+            /** @example 1234567890 */
+            metaPixelId: string | null;
+            /** @example null */
+            tiktokPixelId: string | null;
+        };
+        CreateLandingClickDto: {
+            /**
+             * @example s1
+             * @enum {string}
+             */
+            variant?: "s1" | "s3";
+            /** @example kampaniya-1 */
+            sub1?: string;
+            sub2?: string;
+            sub3?: string;
+            sub4?: string;
+            sub5?: string;
+            /** @example facebook */
+            utmSource?: string;
+            utmMedium?: string;
+            utmCampaign?: string;
+            utmContent?: string;
+            utmTerm?: string;
+            fbclid?: string;
+            /**
+             * @description Sotuvchi sahifasi kodi
+             * @example k7Qm2x
+             */
+            code: string;
+            /** @description Meta `_fbp` cookie */
+            fbp?: string;
+            /** @description Meta `_fbc` cookie */
+            fbc?: string;
+        };
+        LandingClickCreatedDto: {
+            /** @example 90311 */
+            clickId: string;
+        };
+        CreateLeadDto: {
+            /**
+             * @example s1
+             * @enum {string}
+             */
+            variant?: "s1" | "s3";
+            /** @example kampaniya-1 */
+            sub1?: string;
+            sub2?: string;
+            sub3?: string;
+            sub4?: string;
+            sub5?: string;
+            /** @example facebook */
+            utmSource?: string;
+            utmMedium?: string;
+            utmCampaign?: string;
+            utmContent?: string;
+            utmTerm?: string;
+            fbclid?: string;
+            /**
+             * @description Sotuvchi sahifasi kodi
+             * @example k7Qm2x
+             */
+            code: string;
+            /** @example Aziza */
+            name: string;
+            /**
+             * @description Operator kodi tekshiruvi BE-12 da
+             * @example +998901234567
+             */
+            phone: string;
+            /**
+             * @description Viloyat SOATO kodi
+             * @example 1726
+             */
+            regionSoato: string;
+            /**
+             * @description Tuman yoki shahar SOATO kodi
+             * @example 1726266
+             */
+            districtSoato: string;
+            /**
+             * @description Ko‘cha, uy; faqat bo‘shliq — bo‘sh hisoblanadi
+             * @example Turkiston ko‘chasi, 27-uy
+             */
+            addressLine: string;
+            /**
+             * @description CENTER — markazgacha, ADDRESS — eshikkacha (P-1)
+             * @example CENTER
+             * @enum {string}
+             */
+            whereDeliver: "ADDRESS" | "CENTER";
+            /**
+             * @description Mijoz rozi bo‘lgan oferta va maxfiylik matni versiyasi (SF-07)
+             * @example 2026-11-16
+             */
+            consentVersion: string;
+            /**
+             * @description POST /clicks javobi
+             * @example 90311
+             */
+            clickId?: string;
+            /** @description Yashirin maydon (bot himoyasi): bo‘sh bo‘lishi kerak; to‘ldirilsa lid yozilmaydi, javob baribir 201. Har qanday qiymat qabul qilinadi — tekshiruv 400 bilan maydonni oshkor qilmaydi (BE-12) */
+            website?: string;
+        };
+        LeadCreatedDto: {
+            /**
+             * @description Piksel eventID sifatida ham
+             * @example 7001
+             */
+            leadId: string;
+            /**
+             * @description Shu raqam va mahsulotga avval ariza bo‘lgan: lid birinchi arizaga bog‘landi (9-qoida)
+             * @example false
+             */
+            duplicate: boolean;
+        };
+        PartnerLeadDto: {
+            /**
+             * @description Kalit egasining sotuvchi sahifasi kodi
+             * @example k7Qm2x
+             */
+            code: string;
+            /** @example Aziza */
+            name: string;
+            /** @example +998901234567 */
+            phone: string;
+            /** @example 1726 */
+            regionSoato?: string;
+            /** @example 1726266 */
+            districtSoato?: string;
+            /** @example Turkiston ko‘chasi, 27-uy */
+            addressLine?: string;
+            /** @enum {string} */
+            whereDeliver?: "ADDRESS" | "CENTER";
+            sub1?: string;
+            sub2?: string;
+            sub3?: string;
+            sub4?: string;
+            sub5?: string;
+        };
+        AffiliateCreativeDto: {
+            /** @example 9001 */
+            id: string;
+            /**
+             * @example VIDEO
+             * @enum {string}
+             */
+            type: "IMAGE" | "VIDEO";
+            /** @example https://cdn.example.uz/creatives/9001.mp4 */
+            url: string;
+        };
+        AffiliateOfferDto: {
+            /** @example 501 */
+            productId: string;
+            /** @example Simsiz quloqchinlar */
+            name: string;
+            /** @example null */
+            imageUrl: string | null;
+            /**
+             * @description Tasdiqlangan narx, so‘m
+             * @example 251000
+             */
+            approvedPrice: number;
+            /**
+             * @description Sahifadagi eng katta narx: tasdiqlangan narx + 10% (NRX-4)
+             * @example 276000
+             */
+            maxSalePrice: number;
+            /**
+             * @description Sotuvchi haqi, so‘m
+             * @example 65000
+             */
+            affiliateFee: number;
+            /**
+             * @description EPC, so‘m: daromad / klik. Bo‘sh — statistika yo‘q (daromad BE-22, BE-28 dan keyin)
+             * @example null
+             */
+            epc: number | null;
+            /**
+             * @description Tasdiq foizi: tasdiqlangan / yaroqli lidlar (hamma sotuvchilar). Bo‘sh — lid yo‘q
+             * @example 41
+             */
+            approveRate: number | null;
+            /**
+             * @description Sotilish foizi: mijoz olgan / jo‘natilgan buyurtmalar (TZ 1-bo‘lim «Sotilish foizi (jo‘natilgandan)»). Bo‘sh — statistika yo‘q (BE-21, BE-28 dan keyin)
+             * @example null
+             */
+            saleRate: number | null;
+            /** @example 120 */
+            stock: number;
+            /** @example true */
+            hasVideo: boolean;
+            /** @description Admin yuklagan kreativlar: rasm va video (SOT-9, FE-12); sotuvchi yuklab oladi */
+            creatives: components["schemas"]["AffiliateCreativeDto"][];
+        };
+        AffiliateOffersPageDto: {
+            items: components["schemas"]["AffiliateOfferDto"][];
+            /** @example 42 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 3 */
+            totalPages: number;
+        };
+        CreateAffiliateStreamDto: {
+            /** @example 501 */
+            productId: string;
+        };
+        AffiliateStreamDto: {
+            /** @example 3301 */
+            id: string;
+            /** @example k7Qm2x */
+            code: string;
+            /**
+             * @description Tayyor havola; domen EQ-05 da
+             * @example https://[sotuvchi-sahifasi-domeni]/k7Qm2x
+             */
+            link: string;
+            /** @example 501 */
+            productId: string;
+            /** @example Simsiz quloqchinlar */
+            productName: string;
+            /**
+             * @example STANDART
+             * @enum {string}
+             */
+            template: "STANDART" | "VIDEO";
+            /** @example 262000 */
+            salePrice: number;
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status: "ACTIVE" | "STOPPED";
+            /** @example null */
+            sub1: string | null;
+            /** @example null */
+            sub2: string | null;
+            /** @example null */
+            sub3: string | null;
+            /** @example null */
+            sub4: string | null;
+            /** @example null */
+            sub5: string | null;
+            /** @example 1234567890 */
+            metaPixelId: string | null;
+            /** @example null */
+            tiktokPixelId: string | null;
+            /** @example null */
+            postbackUrl: string | null;
+            /**
+             * @description Postback siri saqlanganmi
+             * @example false
+             */
+            hasPostbackSecret: boolean;
+            /**
+             * @description CAPI tokeni saqlanganmi
+             * @example false
+             */
+            hasCapiToken: boolean;
+            /** @example 1240 */
+            clicks: number;
+            /** @example 37 */
+            leads: number;
+            /**
+             * @description Yetkazilgan buyurtmalar; bo‘sh — statistika hali yo‘q (BE-28)
+             * @example null
+             */
+            sales: number | null;
+            /**
+             * Format: date-time
+             * @example 2026-11-18T09:12:00.000Z
+             */
+            createdAt: string;
+        };
+        AffiliateStreamsPageDto: {
+            items: components["schemas"]["AffiliateStreamDto"][];
+            /** @example 2 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        UpdateAffiliateStreamDto: {
+            /** @enum {string} */
+            template?: "STANDART" | "VIDEO";
+            /**
+             * @description Tasdiqlangan narxdan +10% gacha, kam emas
+             * @example 276000
+             */
+            salePrice?: number;
+            sub1?: string;
+            sub2?: string;
+            sub3?: string;
+            sub4?: string;
+            sub5?: string;
+            /**
+             * @description Faqat raqamlar; bo‘sh satr — o‘chirish
+             * @example 1234567890
+             */
+            metaPixelId?: string;
+            /** @description Lotin harflari va raqamlar; bo‘sh satr — o‘chirish */
+            tiktokPixelId?: string;
+            /** @description Postback URL (BE-14). Makrolar: {status} (lead, confirmed, rejected, delivered), {lead_id}, {click_id}, {product_id}, {sub1}…{sub5} [taklif]. Ichki tarmoq manzili rad etiladi (SSRF). Siri berilsa so‘rov X-Elchi-Timestamp va X-Elchi-Signature (sha256 HMAC) bilan imzolanadi */
+            postbackUrl?: string;
+            /** @description Faqat yoziladi, javobda qaytmaydi */
+            postbackSecret?: string;
+            /** @description Meta CAPI tokeni: faqat yoziladi (yuborish BE-31 da) */
+            capiToken?: string;
+        };
+        AffiliateStatsRowDto: {
+            /**
+             * @description Guruh kaliti: sana, sahifa kodi yoki sub1 qiymati
+             * @example 2026-12-01
+             */
+            key: string;
+            /** @example 410 */
+            clicks: number;
+            /** @example 14 */
+            leads: number;
+            /** @example 12 */
+            validLeads: number;
+            /** @example 6 */
+            confirmed: number;
+            /** @example 4 */
+            delivered: number;
+            /** @example 1 */
+            refused: number;
+            /**
+             * @description HOLD daromad, so‘m
+             * @example 130000
+             */
+            incomeHold: number;
+            /**
+             * @description AVAILABLE daromad, so‘m
+             * @example 65000
+             */
+            incomeAvailable: number;
+        };
+        AffiliateStatsDto: {
+            rows: components["schemas"]["AffiliateStatsRowDto"][];
+            totals: components["schemas"]["AffiliateStatsRowDto"];
+        };
+        AffiliateLeadRowDto: {
+            /** @example 7001 */
+            id: string;
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:32:00.000Z
+             */
+            createdAt: string;
+            /**
+             * @description Sotuvchi sahifasi kodi
+             * @example k7Qm2x
+             */
+            streamCode: string;
+            /** @example kampaniya-1 */
+            sub1: string | null;
+            /** @example null */
+            sub2: string | null;
+            /** @example null */
+            sub3: string | null;
+            /** @example null */
+            sub4: string | null;
+            /** @example null */
+            sub5: string | null;
+            /**
+             * @description Faqat oxirgi 4 raqam (SOT-4)
+             * @example ****4567
+             */
+            phoneLast4: string;
+            /**
+             * @example CONFIRMED
+             * @enum {string}
+             */
+            status: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /**
+             * @description Buyurtma holati; buyurtma bo‘lmasa bo‘sh
+             * @example null
+             */
+            orderStatus: string | null;
+            /**
+             * @description Sotuvchi haqi, so‘m; haq yo‘q bo‘lsa bo‘sh
+             * @example 65000
+             */
+            commission: number | null;
+            /**
+             * @description Bo‘sh — lid hali ishlanmoqda, haq haqida gap yo‘q (CSV da bo‘sh katak); NONE — «Yozilmaydi»
+             * @example HOLD
+             * @enum {string|null}
+             */
+            commissionState: "PENDING" | "HOLD" | "AVAILABLE" | "REVERSED" | "NONE" | null;
+        };
+        AffiliateLeadsPageDto: {
+            items: components["schemas"]["AffiliateLeadRowDto"][];
+            /** @example 60 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 3 */
+            totalPages: number;
+        };
+        AffiliatePostbackDto: {
+            /** @example 501 */
+            id: string;
+            /** @example 7001 */
+            leadId: string;
+            /** @example k7Qm2x */
+            streamCode: string;
+            /**
+             * @example confirmed
+             * @enum {string}
+             */
+            event: "lead" | "confirmed" | "rejected" | "delivered";
+            /**
+             * @example SENT
+             * @enum {string}
+             */
+            status: "PENDING" | "SENT" | "FAILED";
+            /** @example 1 */
+            attempts: number;
+            /** @example 200 */
+            responseCode: number | null;
+            /** @example 2027-01-14T09:40:00.000Z */
+            deliveredAt: string | null;
+            /** @example null */
+            nextAttemptAt: string | null;
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:39:58.000Z
+             */
+            createdAt: string;
+        };
+        AffiliatePostbacksPageDto: {
+            items: components["schemas"]["AffiliatePostbackDto"][];
+            /** @example 12 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        AffiliateApiKeyDto: {
+            /** @example 12 */
+            id: string;
+            /**
+             * @description Kalit boshi — tanish uchun
+             * @example elk_7Qm2
+             */
+            prefix: string;
+            /**
+             * @description Daqiqasiga so‘rovlar (SOT-6)
+             * @example 60
+             */
+            rateLimitPerMinute: number;
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:00:00.000Z
+             */
+            createdAt: string;
+            /** @example null */
+            lastUsedAt: string | null;
+            /** @example null */
+            revokedAt: string | null;
+        };
+        AffiliateApiKeyCreatedDto: {
+            /** @example 12 */
+            id: string;
+            /**
+             * @description Kalit boshi — tanish uchun
+             * @example elk_7Qm2
+             */
+            prefix: string;
+            /**
+             * @description Daqiqasiga so‘rovlar (SOT-6)
+             * @example 60
+             */
+            rateLimitPerMinute: number;
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:00:00.000Z
+             */
+            createdAt: string;
+            /** @example null */
+            lastUsedAt: string | null;
+            /** @example null */
+            revokedAt: string | null;
+            /**
+             * @description To‘liq kalit — faqat shu javobda; bazada faqat xeshi saqlanadi
+             * @example elk_7Qm2xK9pL3vN8rT1wY6zB4cD0fG5hJ2s
+             */
+            key: string;
+        };
+        LeadProductRefDto: {
+            /** @example 501 */
+            id: string;
+            /** @example Simsiz quloqchinlar */
+            name: string;
+            /**
+             * @description Sahifadagi narx, so‘m
+             * @example 262000
+             */
+            salePrice: number;
+        };
+        LeadAddressDto: {
+            /** @example 1726 */
+            regionSoato: string;
+            /** @example Toshkent shahri */
+            regionName: string;
+            /** @example 1726266 */
+            districtSoato: string;
+            /** @example Yunusobod tumani */
+            districtName: string;
+            /** @example Turkiston ko‘chasi, 27-uy */
+            addressLine: string;
+            /**
+             * @example CENTER
+             * @enum {string}
+             */
+            whereDeliver: "ADDRESS" | "CENTER";
+            /**
+             * @description Operator tasdiqlagan vaqt; bo‘sh — hali «formadan»
+             * @example null
+             */
+            confirmedAt: string | null;
+            /**
+             * @description Operator mijoz yozgan manzilni tuzatgan (eskisi lid tarixida)
+             * @example false
+             */
+            editedByOperator: boolean;
+        };
+        LeadPriceDto: {
+            /**
+             * @description Bitta tovar narxi, so‘m
+             * @example 262000
+             */
+            unitPrice: number;
+            /** @example 1 */
+            quantity: number;
+            /**
+             * @description Tovarlar, so‘m
+             * @example 262000
+             */
+            subtotal: number;
+            /**
+             * @example CENTER
+             * @enum {string}
+             */
+            whereDeliver: "ADDRESS" | "CENTER";
+            /**
+             * @description Ko‘rinadigan yetkazish, so‘m; rejim va og‘irlikka qarab, 0 — bepul (BE-09)
+             * @example 30000
+             */
+            deliveryFee: number;
+            /**
+             * @description Jami, so‘m
+             * @example 292000
+             */
+            totalAmount: number;
+        };
+        LeadAttemptDto: {
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:36:00.000Z
+             */
+            at: string;
+            /** @example Dilnoza R. */
+            operatorName: string;
+            /**
+             * @example NO_ANSWER
+             * @enum {string}
+             */
+            outcome: "CONFIRMED" | "NO_ANSWER" | "BUSY" | "PHONE_OFF" | "CALL_LATER" | "THINKING" | "REJECTED" | "INVALID" | "DUPLICATE";
+            /** @example null */
+            comment: string | null;
+        };
+        LeadHistoryEntryDto: {
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:32:00.000Z
+             */
+            at: string;
+            /**
+             * @example null
+             * @enum {string|null}
+             */
+            fromStatus: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT" | null;
+            /**
+             * @example NEW
+             * @enum {string}
+             */
+            toStatus: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /**
+             * @description Kim o‘zgartirdi: operator ismi yoki «Tizim»
+             * @example Tizim
+             */
+            actor: string;
+            /**
+             * @description Izoh, masalan manzil tuzatilgani
+             * @example null
+             */
+            note: string | null;
+        };
+        LeadPreviousDto: {
+            /** @example 6550 */
+            id: string;
+            /**
+             * Format: date-time
+             * @example 2027-01-05T11:04:00.000Z
+             */
+            createdAt: string;
+            /** @example Elektr choynak */
+            productName: string;
+            /**
+             * @example REJECTED
+             * @enum {string}
+             */
+            status: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /** @example null */
+            orderId: string | null;
+            /** @example null */
+            orderStatus: string | null;
+            /**
+             * @description Rad sababi (OPR-2: «Rad etildi — «Qimmat»»)
+             * @example TOO_EXPENSIVE
+             * @enum {string|null}
+             */
+            rejectReason: "TOO_EXPENSIVE" | "NOT_NEEDED" | "BOUGHT_ELSEWHERE" | "OTHER" | null;
+        };
+        LeadCardDto: {
+            /** @example 7001 */
+            id: string;
+            /**
+             * @example BOOKED
+             * @enum {string}
+             */
+            status: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /**
+             * @example LANDING
+             * @enum {string}
+             */
+            source: "LANDING" | "SITE" | "API";
+            /** @example Aziza */
+            customerName: string;
+            /**
+             * @description Operatorga to‘liq raqam ko‘rsatilishi EQ-02 qaroriga bog‘liq
+             * @example +998 90 *** ** 67
+             */
+            phoneMasked: string;
+            product: components["schemas"]["LeadProductRefDto"];
+            /**
+             * @description Miqdor (OPR-4)
+             * @example 1
+             */
+            quantity: number;
+            /** @description Sotuvchi sahifasi va sayt lidida doim bor. Bo‘sh faqat API lidida bo‘lishi mumkin (BE-43, EQ-04) */
+            address: components["schemas"]["LeadAddressDto"] | null;
+            /** @description Joriy miqdor va yetkazish turi bo‘yicha server hisobi (FE-09). Bo‘sh — yetkazish turi hali yo‘q (faqat manzilsiz API lidi): avval PATCH leads/:id/address yoki POST leads/:id/quote */
+            price: components["schemas"]["LeadPriceDto"] | null;
+            /**
+             * @description Shu lid rad etilgan bo‘lsa sababi
+             * @example null
+             * @enum {string|null}
+             */
+            rejectReason: "TOO_EXPENSIVE" | "NOT_NEEDED" | "BOUGHT_ELSEWHERE" | "OTHER" | null;
+            /**
+             * @description Offerdagi suhbat skripti (OPR-2, BE-11)
+             * @example null
+             */
+            callScript: string | null;
+            /**
+             * @description Buyurtma yaratilmadi: qoldiq yo‘q (order.create-failed)
+             * @example false
+             */
+            stockShortage: boolean;
+            /** @example 0 */
+            attemptsCount: number;
+            /** @example null */
+            bookedUntil: string | null;
+            /** @example null */
+            nextAttemptAt: string | null;
+            /** @example null */
+            orderId: string | null;
+            attempts: components["schemas"]["LeadAttemptDto"][];
+            history: components["schemas"]["LeadHistoryEntryDto"][];
+            previousLeads: components["schemas"]["LeadPreviousDto"][];
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:32:00.000Z
+             */
+            createdAt: string;
+        };
+        OperatorLeadListItemDto: {
+            /** @example 7001 */
+            id: string;
+            /**
+             * @example BOOKED
+             * @enum {string}
+             */
+            status: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /** @example Aziza */
+            customerName: string;
+            /** @example Simsiz quloqchinlar */
+            productName: string;
+            /** @example null */
+            bookedUntil: string | null;
+            /**
+             * @description Rejalashtirilgan qo‘ng‘iroq vaqti
+             * @example null
+             */
+            callbackAt: string | null;
+            /**
+             * @description Qo‘ng‘iroqqa 5 daqiqadan kam qoldi (8-qoida)
+             * @example false
+             */
+            reminderDue: boolean;
+        };
+        SubmitLeadResultDto: {
+            /**
+             * @example CONFIRMED
+             * @enum {string}
+             */
+            outcome: "CONFIRMED" | "NO_ANSWER" | "BUSY" | "PHONE_OFF" | "CALL_LATER" | "THINKING" | "REJECTED" | "INVALID" | "DUPLICATE";
+            /**
+             * @description REJECTED da majburiy
+             * @enum {string}
+             */
+            rejectReason?: "TOO_EXPENSIVE" | "NOT_NEEDED" | "BOUGHT_ELSEWHERE" | "OTHER";
+            /**
+             * @description CALL_LATER da majburiy, THINKING da ixtiyoriy
+             * @example 2027-01-15T10:00:00.000Z
+             */
+            callbackAt?: string;
+            /** @example Ertaga ishdan keyin qo‘ng‘iroq qilish */
+            comment?: string;
+            /**
+             * @description DUPLICATE: avvalgi lid ID si
+             * @example 6550
+             */
+            duplicateOfLeadId?: string;
+            /**
+             * @description Miqdor (OPR-4)
+             * @example 1
+             */
+            quantity?: number;
+        };
+        LeadResultAcceptedDto: {
+            /** @example 7001 */
+            leadId: string;
+            /**
+             * @example CONFIRMED
+             * @enum {string}
+             */
+            status: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /** @example null */
+            nextAttemptAt: string | null;
+        };
+        UpdateLeadAddressDto: {
+            /** @example 1726 */
+            regionSoato: string;
+            /** @example 1726266 */
+            districtSoato: string;
+            /** @example Turkiston ko‘chasi, 27-uy */
+            addressLine: string;
+            /**
+             * @example CENTER
+             * @enum {string}
+             */
+            whereDeliver: "ADDRESS" | "CENTER";
+        };
+        LeadPriceQuoteDto: {
+            /** @example 2 */
+            quantity: number;
+            /**
+             * @example ADDRESS
+             * @enum {string}
+             */
+            whereDeliver: "ADDRESS" | "CENTER";
+        };
+        UpdateOperatorStateDto: {
+            /**
+             * @example ONLINE
+             * @enum {string}
+             */
+            state: "ONLINE" | "BREAK" | "OFFLINE";
+        };
+        OperatorStateDto: {
+            /**
+             * @example ONLINE
+             * @enum {string}
+             */
+            state: "ONLINE" | "BREAK" | "OFFLINE";
+            /** @example 2 */
+            activeBookings: number;
+            /**
+             * @description 6-qoida
+             * @example 5
+             */
+            maxBookings: number;
+        };
+        OperatorQueueOperatorDto: {
+            /** @example 41 */
+            operatorId: string;
+            /** @example Dilnoza R. */
+            name: string;
+            /**
+             * @example ONLINE
+             * @enum {string}
+             */
+            state: "ONLINE" | "BREAK" | "OFFLINE";
+            /** @example 2 */
+            activeBookings: number;
+        };
+        OperatorQueueSummaryDto: {
+            /** @example 37 */
+            newLeads: number;
+            /** @example 5 */
+            dueCallbacks: number;
+            /** @example 8 */
+            booked: number;
+            operators: components["schemas"]["OperatorQueueOperatorDto"][];
+        };
+        OperatorStatsDto: {
+            /** @example 38 */
+            attempts: number;
+            /** @example 9 */
+            confirmed: number;
+            /**
+             * @description Tasdiq foizi: tasdiqlagan lidlar / shu davrda ishlagan yaroqli lidlar; maxraj 0 bo‘lsa bo‘sh
+             * @example 41
+             */
+            approveRate: number | null;
+            /**
+             * @description Sotilish foizi: shu davrda tasdiqlaganlaridan yetkazilgan / (yetkazilgan + rad); maxraj 0 bo‘lsa bo‘sh
+             * @example 78
+             */
+            saleRate: number | null;
+            /**
+             * @description Birinchi qo‘ng‘iroqqacha median, daqiqa
+             * @example 4
+             */
+            firstCallMedianMinutes: number | null;
+        };
+        AdminLeadListItemDto: {
+            /** @example 7001 */
+            id: string;
+            /**
+             * Format: date-time
+             * @example 2027-01-14T09:32:00.000Z
+             */
+            createdAt: string;
+            /**
+             * @example NEW
+             * @enum {string}
+             */
+            status: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            /**
+             * @example LANDING
+             * @enum {string}
+             */
+            source: "LANDING" | "SITE" | "API";
+            /** @example Aziza */
+            customerName: string;
+            /** @example +998 90 *** ** 67 */
+            phoneMasked: string;
+            /** @example Simsiz quloqchinlar */
+            productName: string;
+            /** @example Jasur T. */
+            affiliateName: string | null;
+            /** @example null */
+            operatorName: string | null;
+            /** @example null */
+            orderId: string | null;
+        };
+        AdminLeadsPageDto: {
+            items: components["schemas"]["AdminLeadListItemDto"][];
+            /** @example 42 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 3 */
+            totalPages: number;
+        };
+        OfferContentDto: {
+            /** @example 501 */
+            productId: string;
+            /**
+             * @description Suhbat skripti — operator lid kartasida ko‘radi (OPR-2)
+             * @example Assalomu alaykum! Simsiz quloqchin buyurtmangiz bo‘yicha qo‘ng‘iroq qilyapman…
+             */
+            callScript: string | null;
+            /**
+             * @description Afzalliklar — sotuvchi sahifasidagi «… haqida» bloki
+             * @example [
+             *       "Telefonga Bluetooth orqali ulanadi"
+             *     ]
+             */
+            highlights: string[];
+            /**
+             * @description Qutida — sotuvchi sahifasidagi «Qutida» bloki
+             * @example [
+             *       "Quloqchinlar (juft)",
+             *       "Quvvatlovchi g‘ilof",
+             *       "Quvvat kabeli"
+             *     ]
+             */
+            boxContents: string[];
+            /** @example null */
+            updatedAt: string | null;
+        };
+        UpdateOfferContentDto: {
+            callScript?: string | null;
+            highlights: string[];
+            boxContents: string[];
         };
     };
     responses: never;
@@ -9973,6 +11508,25 @@ export interface operations {
             };
         };
     };
+    RegionsController_getRegionTree: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadRegionGroupDto"][];
+                };
+            };
+        };
+    };
     RegionsController_getDistricts: {
         parameters: {
             query?: never;
@@ -10757,6 +12311,805 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    PublicLeadsController_getLandingPage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandingPageDto"];
+                };
+            };
+            /** @description Bunday sotuvchi sahifasi yo‘q */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PublicLeadsController_createClick: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Mijoz brauzerining user agenti — sotuvchi sahifasi serveri uzatadi */
+                "user-agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLandingClickDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandingClickCreatedDto"];
+                };
+            };
+            /** @description Maydonlar noto‘g‘ri */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PublicLeadsController_createLead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Mijoz brauzerining user agenti — sotuvchi sahifasi serveri uzatadi */
+                "user-agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLeadDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCreatedDto"];
+                };
+            };
+            /** @description Telefon yoki manzil noto‘g‘ri; javobda maydon nomlari */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bunday sotuvchi sahifasi yo‘q */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description errorCode LANDING_NOT_OPEN — sahifa hozir ariza qabul qilmaydi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PublicLeadsController_createPartnerLead: {
+        parameters: {
+            query?: never;
+            header: {
+                "user-agent": string;
+                /** @description Takror yuborishda bir xil qiymat — ikkinchi lid yaratilmaydi */
+                "idempotency-key"?: string;
+                /** @description Sotuvchining lid API kaliti */
+                "x-api-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartnerLeadDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCreatedDto"];
+                };
+            };
+            /** @description Telefon yoki manzil noto‘g‘ri; javobda maydon nomlari */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Kalit yo‘q, noto‘g‘ri yoki bekor qilingan */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sahifa bu kalit egasiniki emas */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description errorCode LANDING_NOT_OPEN — sahifa hozir ariza qabul qilmaydi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Kalit bo‘yicha daqiqasiga 60 tadan ortiq so‘rov */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AffiliateStreamsController_listOffers: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                search?: string;
+                categoryId?: string;
+                /** @description Tasdiq foizi kamida shuncha (FE-05 TC5 «tasdiq ≥ 50%») */
+                minApproveRate?: number;
+                sort?: "NEWEST" | "FEE" | "EPC" | "APPROVE_RATE";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateOffersPageDto"];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_listStreams: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateStreamsPageDto"];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_createStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAffiliateStreamDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateStreamDto"];
+                };
+            };
+            /** @description Offer topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Qoldiq yo‘q yoki offer yopiq */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AffiliateStreamsController_updateStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAffiliateStreamDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateStreamDto"];
+                };
+            };
+            /** @description Narx chegaradan tashqarida */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sahifa bu sotuvchiniki emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Offer narxi tasdiqlanmagan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AffiliateStreamsController_stats: {
+        parameters: {
+            query: {
+                /** @description Toshkent sanasi */
+                from: string;
+                /** @description Toshkent sanasi */
+                to: string;
+                groupBy?: "DAY" | "STREAM" | "SUB1";
+                streamId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateStatsDto"];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_listLeads: {
+        parameters: {
+            query: {
+                page?: number;
+                limit?: number;
+                /** @description Toshkent sanasi */
+                from: string;
+                /** @description Toshkent sanasi */
+                to: string;
+                streamId?: string;
+                status?: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateLeadsPageDto"];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_postbacks: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                streamId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliatePostbacksPageDto"];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_listApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateApiKeyDto"][];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_createApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateApiKeyCreatedDto"];
+                };
+            };
+        };
+    };
+    AffiliateStreamsController_revokeApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateApiKeyDto"];
+                };
+            };
+            /** @description Kalit topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_takeNext: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCardDto"];
+                };
+            };
+            /** @description Navbat bo‘sh: errorCode LEAD_QUEUE_EMPTY */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description errorCode OPERATOR_ON_BREAK — operator tanaffusda; OPERATOR_OFFLINE — «ishda» holati tanlanmagan; BOOKING_LIMIT_REACHED — 5 ta bron to‘lgan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_listMine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorLeadListItemDto"][];
+                };
+            };
+        };
+    };
+    OperatorLeadsController_getCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCardDto"];
+                };
+            };
+            /** @description Lid topilmadi yoki bu operatorda emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_submitResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitLeadResultDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadResultAcceptedDto"];
+                };
+            };
+            /** @description errorCode ADDRESS_NOT_CONFIRMED — manzil tasdiqlanmagan; VALIDATION_ERROR — sabab yoki vaqt yo‘q */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Lid topilmadi, bu operatorda emas yoki bron muddati tugagan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_updateAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLeadAddressDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCardDto"];
+                };
+            };
+            /** @description Tuman tanlangan viloyatga tegishli emas yoki maydon bo‘sh */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_quote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadPriceQuoteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadPriceDto"];
+                };
+            };
+            /** @description Lid topilmadi yoki bu operatorda emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_setState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOperatorStateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorStateDto"];
+                };
+            };
+        };
+    };
+    OperatorLeadsController_queueSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorQueueSummaryDto"];
+                };
+            };
+        };
+    };
+    OperatorLeadsController_stats: {
+        parameters: {
+            query: {
+                /** @description Toshkent sanasi */
+                from: string;
+                /** @description Toshkent sanasi */
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorStatsDto"];
+                };
+            };
+        };
+    };
+    AdminLeadsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                status?: "NEW" | "BOOKED" | "CALLBACK" | "CONFIRMED" | "REJECTED" | "INVALID" | "MERGED" | "NO_CONTACT";
+                /** @description Sotuvchi ID si */
+                affiliateId?: string;
+                productId?: string;
+                operatorId?: string;
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLeadsPageDto"];
+                };
+            };
+        };
+    };
+    AdminLeadsController_getCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCardDto"];
+                };
+            };
+            /** @description Lid topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminOfferContentController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferContentDto"];
+                };
+            };
+        };
+    };
+    AdminOfferContentController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOfferContentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferContentDto"];
+                };
             };
         };
     };

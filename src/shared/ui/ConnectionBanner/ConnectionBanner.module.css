@@ -1,0 +1,74 @@
+/* umumiy-aloqa-uzildi: banner yuqori qator ostida, to'liq kenglik (komponentlar-E §28). */
+.warning,
+.success {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.warning {
+  background: var(--color-warning-soft);
+}
+
+.success {
+  background: var(--color-success-soft);
+}
+
+.warning > svg,
+.success > svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.warning > svg {
+  color: var(--color-warning);
+}
+
+.success > svg {
+  color: var(--color-success);
+}
+
+.warning p,
+.success p {
+  flex: 1 1 320px;
+  min-width: 0;
+  margin: 0;
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.stamp[data-live='true']::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-success);
+}
+
+@media (max-width: 767.98px) {
+  .warning,
+  .success {
+    padding: 10px 16px;
+  }
+}

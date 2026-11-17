@@ -46,6 +46,10 @@ jobs:
       - name: Kontrakt tekshiruvi (generatsiya qilingan tiplar)
         run: npm run api:check
 
+      # Unit va komponent testlari (Vitest + RTL); API so'rovlari src/mocks (MSW) orqali.
+      - name: Unit testlar (Vitest)
+        run: npm run test:unit
+
       - name: Ops script sintaksisi
         run: |
           node --check scripts/check-contract.mjs

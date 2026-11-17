@@ -8,8 +8,11 @@ import { useCurrentUserQuery } from '../../features/auth/api/useCurrentUserQuery
 import { useLogoutMutation } from '../../features/auth/api/useLogoutMutation';
 import { ROLE_LABEL_KEYS } from '../../features/auth/lib/roleLabels';
 import { UnknownRoleError } from '../../features/auth/lib/unknownRoleError';
-import { selectAuthUser } from '../../features/auth/model/authSlice';
+import { selectAuthUser, selectSessionExpired } from '../../features/auth/model/authSlice';
+import { SessionExpiredDialog } from '../../features/auth/ui/SessionExpiredDialog/SessionExpiredDialog';
 import { NotificationBell } from '../../features/notifications/ui/NotificationBell/NotificationBell';
+import { OperatorBookingsClock, OperatorStateSwitch } from '../../features/operator/ui/OperatorStatusBar';
+import { ConnectionBanner } from '../../shared/ui/ConnectionBanner/ConnectionBanner';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { PageTitleContext } from '../../shared/ui/PageHeader/pageTitle';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
@@ -50,6 +53,7 @@ export default function AppShell() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const user = useAppSelector(selectAuthUser);
+  const sessionExpired = useAppSelector(selectSessionExpired);
   const currentUserQuery = useCurrentUserQuery();
   const logoutMutation = useLogoutMutation();
   const shell = user ? getRoleShell(user.role) : null;
@@ -113,6 +117,8 @@ export default function AppShell() {
           title={title}
           back={back}
           onMenuOpen={usesDrawer ? () => setDrawerPath(pathname) : undefined}
+          afterTitle={user.role === 'OPERATOR_LEAD' ? <OperatorStateSwitch /> : undefined}
+          beforeTools={user.role === 'OPERATOR_LEAD' ? <OperatorBookingsClock /> : undefined}
           bell={
             <NotificationBell
               role={user.role}
@@ -131,6 +137,8 @@ export default function AppShell() {
             />
           }
         />
+        <ConnectionBanner />
+        {sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>
             {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}

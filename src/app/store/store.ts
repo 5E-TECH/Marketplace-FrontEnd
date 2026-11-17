@@ -1,5 +1,6 @@
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
 import { authStorage } from '../../features/auth/lib/authStorage';
+import { broadcastLogout, sessionHint } from '../../features/auth/lib/sessionSync';
 import {
   accessTokenRefreshed,
   authenticated,
@@ -7,23 +8,30 @@ import {
   impersonationEnded,
   impersonationStarted,
   loggedOut,
+  sessionExpired,
+  sessionRestored,
 } from '../../features/auth/model/authSlice';
 import { preferencesReducer } from '../../features/preferences/model/preferencesSlice';
 import { queryClient } from '../../shared/api/queryClient';
 
 const authPersistence = createListenerMiddleware();
 
-authPersistence.startListening({
-  actionCreator: authenticated,
-  effect: ({ payload }, { dispatch }) => {
-    try {
-      if (payload.accessToken) authStorage.setAccessToken(payload.accessToken);
-      else authStorage.setCookieSession();
-    } catch {
-      dispatch(loggedOut());
-    }
-  },
-});
+// Login va oynada qayta kirish: token shu tabning sessionStorage'ida; boshqa tablar uni
+// BroadcastChannel orqali so'raydi (sessionSync).
+for (const actionCreator of [authenticated, sessionRestored]) {
+  authPersistence.startListening({
+    actionCreator,
+    effect: ({ payload }, { dispatch }) => {
+      try {
+        if (payload.accessToken) authStorage.setAccessToken(payload.accessToken);
+        else authStorage.setCookieSession();
+        sessionHint.set();
+      } catch {
+        dispatch(loggedOut());
+      }
+    },
+  });
+}
 
 authPersistence.startListening({
   actionCreator: accessTokenRefreshed,
@@ -61,8 +69,20 @@ authPersistence.startListening({
 
 authPersistence.startListening({
   actionCreator: loggedOut,
+  effect: ({ payload }) => {
+    authStorage.clear();
+    sessionHint.clear();
+    // Qo'lda chiqish — qolgan tablar ham chiqadi (ularning tokeni hali amal qilsa ham).
+    if (payload?.manual && !payload.remote) broadcastLogout();
+  },
+});
+
+// Sessiya tugadi: token tozalanadi, sahifa va kesh joyida (qayta kirish oynasi).
+authPersistence.startListening({
+  actionCreator: sessionExpired,
   effect: () => {
     authStorage.clear();
+    sessionHint.clear();
   },
 });
 

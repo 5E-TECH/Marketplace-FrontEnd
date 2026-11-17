@@ -5,17 +5,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../app/store/hooks';
 import { languageChanged, type Language } from '../../features/preferences/model/preferencesSlice';
 import { useTranslation } from '../../shared/i18n/useTranslation';
+import { initials } from '../../shared/lib/initials';
 import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 import { LANGUAGE_OPTIONS } from '../../shared/ui/LanguageSwitcher/languageOptions';
 import styles from './AppShell.module.css';
 
 export type ShellLayout = 'desktop' | 'tablet' | 'phone' | 'rail';
-
-/** «Jasur Toshmatov» → «JT». */
-function initials(name: string): string {
-  const letters = name.trim().split(/\s+/).slice(0, 2).map((part) => part[0] ?? '');
-  return letters.join('').toLocaleUpperCase() || '—';
-}
 
 interface UserMenuProps {
   name: string;
@@ -120,6 +115,10 @@ interface TopBarProps {
   leading?: ReactNode;
   bell?: ReactNode;
   user: ReactNode;
+  /** Rol elementlari `h1` dan keyin (operator: «Holat»). Telefonda chiqmaydi. */
+  afterTitle?: ReactNode;
+  /** Rol elementlari o'ngda, til va qo'ng'iroqchadan oldin (operator: bronlar, soat). */
+  beforeTools?: ReactNode;
 }
 
 /**
@@ -127,7 +126,7 @@ interface TopBarProps {
  * qo'ng'iroqcha | foydalanuvchi. Planshet va telefon: menyu, `h1`, qo'ng'iroqcha, avatar;
  * til — chap panel pastida va foydalanuvchi menyusida.
  */
-export function TopBar({ layout, title, back, onMenuOpen, leading, bell, user }: TopBarProps) {
+export function TopBar({ layout, title, back, onMenuOpen, leading, bell, user, afterTitle, beforeTools }: TopBarProps) {
   const { t } = useTranslation();
   const touch = layout !== 'desktop';
   const phoneBack = layout === 'phone' && back;
@@ -157,15 +156,19 @@ export function TopBar({ layout, title, back, onMenuOpen, leading, bell, user }:
           </Link>
         ) : null}
         <h1 className={styles.title}>{title}</h1>
+        {layout === 'phone' ? null : afterTitle}
       </div>
       <div className={styles.topBarEnd}>
         {touch ? (
           <>
+            {layout === 'phone' ? null : beforeTools}
             {bell}
             {user}
           </>
         ) : (
           <>
+            {beforeTools}
+            {beforeTools ? <span className={styles.divider} aria-hidden /> : null}
             <div className={styles.topBarTools}>
               <LanguageSwitcher />
               {bell}

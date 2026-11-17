@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../../../../app/store/hooks';
-import { selectImpersonationEnd, selectIsAuthenticated, selectManualLogout } from '../../model/authSlice';
+import { selectImpersonationEnd, selectIsAuthenticated, selectManualLogout, selectSessionExpired } from '../../model/authSlice';
 import { useCurrentUserQuery } from '../../api/useCurrentUserQuery';
 import { PageLoader } from '../../../../shared/ui/PageLoader/PageLoader';
 import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
@@ -15,11 +15,13 @@ export function ProtectedRoute() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const impersonationEnd = useAppSelector(selectImpersonationEnd);
   const manualLogout = useAppSelector(selectManualLogout);
+  // Sessiya tugagan: sahifa joyida, ustida qayta kirish oynasi (AppShell) — login'ga otilmaydi.
+  const sessionExpired = useAppSelector(selectSessionExpired);
   const location = useLocation();
   const currentUserQuery = useCurrentUserQuery();
   const logoutMutation = useLogoutMutation();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !sessionExpired) {
     // Qo'lda chiqishda qaytish manzili saqlanmaydi (keyingi kirgan boshqa odam bo'lishi mumkin).
     return <Navigate to="/login" replace state={manualLogout ? null : { from: location }} />;
   }

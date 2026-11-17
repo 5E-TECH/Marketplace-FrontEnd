@@ -100,7 +100,7 @@ const profile = () => import('../../pages/ProfilePage/ProfilePage');
 
 export const appRoutes: readonly AppRoute[] = [
   // ── Sotuvchi (karkas-E 2.1) ────────────────────────────────────────────────
-  { path: '/affiliate', load: pending, roles: ['AFFILIATE'], label: 'nav.home', navIcon: <House /> },
+  { path: '/affiliate', load: () => import('../../pages/AffiliateHomePage/AffiliateHomePage'), roles: ['AFFILIATE'], label: 'nav.home', navIcon: <House /> },
   { path: '/affiliate/offers', load: pending, roles: ['AFFILIATE'], label: 'nav.offers', navIcon: <Tag /> },
   { path: '/affiliate/pages', load: pending, roles: ['AFFILIATE'], label: 'nav.myPages', navIcon: <Link /> },
   { path: '/affiliate/stats', load: pending, roles: ['AFFILIATE'], label: 'nav.statistics', navIcon: <ChartColumn /> },
@@ -110,7 +110,7 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/profile', load: profile, roles: USER_ROLES, label: 'nav.profileShort', navIcon: <UserRound />, navRoles: ['AFFILIATE'] },
 
   // ── Operator (2.2) ─────────────────────────────────────────────────────────
-  { path: '/operator', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.operatorWorkspace', navIcon: <Headset /> },
+  { path: '/operator', load: () => import('../../pages/OperatorHomePage/OperatorHomePage'), roles: ['OPERATOR_LEAD'], label: 'nav.operatorWorkspace', navIcon: <Headset /> },
   { path: '/operator/callbacks', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.scheduledCalls', navIcon: <CalendarClock /> },
   { path: '/operator/calls', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myCalls', navIcon: <AudioLines /> },
   { path: '/operator/orders', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myOrders', navIcon: <ShoppingBag /> },

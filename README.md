@@ -19,33 +19,55 @@ Talab: **Node 22.13+** (ESLint 10 va Vite 8 talabi).
 
 ```bash
 npm install
-npm run dev            # http://localhost:5273
+npm run dev            # http://localhost:5273 — backendsiz, mock API bilan
+npm run dev:api        # haqiqiy backend bilan (Vite proxy)
 ```
 
 Loyihadagi `.npmrc` paketlarni rasmiy `registry.npmjs.org` dan o'rnatadi —
 global mirror (masalan npmmirror) sozlangan bo'lsa ham `package-lock.json`
 dagi manzillar aralashib ketmaydi.
 
-Dev'da API bir xil origin orqali ishlaydi: Vite `/api` ni
-`http://localhost:3000` ga proxy qiladi (`.env.development`). Shu sababli
-CORS ham, cross-site cookie muammosi ham chiqmaydi — refresh token to'g'ri
-ishlaydi. Backend boshqa manzilda bo'lsa:
+### Mock API (MSW) — `npm run dev`
+
+`npm run dev` backendsiz ishlaydi: so'rovlarni brauzerdagi MSW service worker
+ushlaydi (`src/mocks`, `.env.development` → `VITE_API_MOCKS=true`). Faqat
+ishga tushishga (M1) kiradigan endpointlar mock qilingan; qolganiga aniq 501
+va konsolda ogohlantirish. Kirish: telefon `900000001` … `900000008` (sotuvchi,
+optovik, operator, nazoratchi, omborchi, moliya, admin, superadmin), parol —
+istalgan (`xato` — noto'g'ri parol); `900000009` — tanilmagan eski rol.
+
+Mock javoblar generatsiya qilingan DTO tiplari bilan yozilgan — backend
+sxemasi o'zgarsa `tsc` yiqiladi. Shu handler'lar Vitest (`msw/node`) va
+Playwright (`tests/e2e/support/mockApi.ts`) da ham ishlatiladi. Mock kodi
+production build'ga kirmaydi.
+
+### Haqiqiy backend — `npm run dev:api`
+
+API bir xil origin orqali ishlaydi: Vite `/api` ni `.env.api` dagi
+`VITE_DEV_API_PROXY` ga proxy qiladi (sukut — production API, ehtiyot bo'ling).
+Shu sababli CORS ham, cross-site cookie muammosi ham chiqmaydi — refresh
+token to'g'ri ishlaydi. Lokal backend uchun:
 
 ```bash
-echo 'VITE_DEV_API_PROXY=http://192.168.1.10:3000' >> .env.local
+echo 'VITE_DEV_API_PROXY=http://localhost:3000' >> .env.api.local
 ```
 
 ### Buyruqlar
 
 | Buyruq                   | Vazifa                                            |
 | ------------------------ | ------------------------------------------------- |
-| `npm run dev`            | Dev server (HMR)                                  |
+| `npm run dev`            | Dev server (HMR), mock API bilan                  |
+| `npm run dev:api`        | Dev server, haqiqiy backend bilan                 |
 | `npm run build`          | Production build (`tsc -b && vite build`)         |
 | `npm run preview`        | Build natijasini lokal ko'rish                    |
 | `npm run lint`           | ESLint                                            |
 | `npm run typecheck`      | TypeScript tekshiruvi                             |
 | `npm run contract:check` | Backend kontraktiga moslikni tekshirish           |
+| `npm run api:sync`       | Backend sxemasini olish (`BACKEND_REPO=…` yoki `../Elchi-Marketplace`) |
+| `npm run api:generate`   | `contract/openapi.json` dan tiplar                |
+| `npm run test:unit`      | Vitest + React Testing Library (jsdom, MSW)       |
 | `npm run test:e2e`       | Playwright e2e testlar (2 worker)                 |
+| `npm test`               | Unit, so'ng e2e                                   |
 
 ## Tuzilma (Feature-Sliced Design)
 
@@ -85,21 +107,21 @@ src/
   o'chadi). JS refresh cookie'ni o'qiy olmaydi.
 - Access token muddati tuganda (odatiy 1 soat) 401 javob ushlanadi,
   `POST /auth/refresh` orqali yangi token olinadi va so'rov bir marta
-  qaytariladi. Refresh ham ishlamasa — sessiya yopiladi.
+  qaytariladi. Refresh ham ishlamasa — sahifa yopilmaydi: ustida «Sessiya
+  tugadi» oynasi chiqadi, parol bilan shu yerda qayta kiriladi va kiritilgan
+  ish joyida qoladi (umumiy-sessiya).
+- **Bir nechta tab** (`features/auth/lib/sessionSync.ts`): yangi tab sessiyani
+  avval ochiq tabdan oladi (BroadcastChannel), bo'lmasa refresh cookie bilan
+  jim tiklaydi. Backend refresh token'ni har safar almashtiradi, shuning uchun
+  refresh tablar bo'ylab navbat bilan (`navigator.locks`). Bir tabda «Chiqish»
+  — hamma tab chiqadi.
 
 ### Rollar
 
-Frontend backenddagi `@Roles` chegarasini takrorlaydi:
-
-| Rol                  | Ochiq bo'limlar                                    |
-| -------------------- | -------------------------------------------------- |
-| `SELLER`             | Barcha bo'limlar                                   |
-| `OPERATOR`           | Buyurtmalar va Yetkazib berish                     |
-| `ADMIN` | Alohida admin kabineti: dashboard, accountlar, do‘konlar, buyurtmalar va kategoriyalar |
-| `SUPERADMIN` | Admin kabineti hamda qo‘shimcha moliya va jamoa bo‘limlari |
-
-Rolga yopiq bo'lim menyuda ko'rinmaydi va yo'lga to'g'ridan-to'g'ri kirilsa
-"ruxsat yo'q" holati chiqadi.
+8 rol (BE-05): sotuvchi (`AFFILIATE`), optovik, operator (`OPERATOR_LEAD`),
+nazoratchi, omborchi, moliya, admin, superadmin. Kim qaysi sahifani ochishi
+`src/app/router/routeManifest.tsx` da (`roles`); boshqa rolning sahifasi —
+403, menyuda faqat o'z bandlari (`docs/admin-navigation.md`).
 
 ## Kontrakt nazorati
 

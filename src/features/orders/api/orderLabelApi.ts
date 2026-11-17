@@ -1,22 +1,10 @@
-import axios, { type AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import { saveBlob, withReadableErrorBody } from '../../../shared/api/download';
 import { httpClient } from '../../../shared/api/httpClient';
 import { asRecord, readText } from '../../../shared/api/responseFields';
 
 /** Kontrakt: ShippingLabelsBatchDto.orderIds — maxItems 100. */
 const MAX_LABELS_PER_REQUEST = 100;
-
-/**
- * `responseType: 'blob'` bo'lganda backendning JSON xatosi ham Blob bo'lib keladi —
- * umumiy xato ishlovchisi uni o'qiy olmaydi va "server bilan bog'lanib bo'lmadi"
- * deb chiqaradi. Blob'ni JSON'ga qaytaramiz.
- */
-async function withReadableErrorBody(error: unknown): Promise<unknown> {
-  if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
-    try { error.response.data = JSON.parse(await error.response.data.text()) as unknown; }
-    catch { /* JSON bo'lmasa asl xato qoladi. */ }
-  }
-  return error;
-}
 
 export type OrderLabelScope = 'seller' | 'admin';
 
@@ -69,15 +57,14 @@ async function openLabelPdf(request: () => Promise<AxiosResponse<Blob>>, fileNam
     const response = await request();
     if (!(response.data instanceof Blob) || response.data.size === 0) throw new Error('Yorliq fayli bo‘sh qaytdi');
     const blob = response.data;
-    const url = URL.createObjectURL(blob.type ? blob : new Blob([blob], { type: 'application/pdf' }));
-    if (preview) preview.location.href = url;
-    else {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      link.click();
+    const pdf = blob.type ? blob : new Blob([blob], { type: 'application/pdf' });
+    if (preview) {
+      const url = URL.createObjectURL(pdf);
+      preview.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } else {
+      saveBlob(pdf, fileName);
     }
-    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     return { skipped: parseSkippedLabels(response.headers['x-labels-skipped']) };
   } catch (error) {
     preview?.close();

@@ -1,5 +1,25 @@
-import { defineConfig, loadEnv } from 'vite';
+import { rmSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+
+/**
+ * `public/mockServiceWorker.js` (MSW) faqat dev rejimi uchun — production build'ga
+ * kirmasin: u yerda uni hech kim ro'yxatdan o'tkazmaydi, ortiqcha fayl qolmasin.
+ */
+function dropMockWorker(): Plugin {
+  let outDir = 'dist';
+  return {
+    name: 'drop-mock-service-worker',
+    apply: 'build',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    closeBundle() {
+      rmSync(resolve(outDir, 'mockServiceWorker.js'), { force: true });
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -8,7 +28,7 @@ export default defineConfig(({ mode }) => {
   const devApiTarget = env.VITE_DEV_API_PROXY || 'http://localhost:3000';
 
   return {
-    plugins: [react()],
+    plugins: [react(), dropMockWorker()],
     build: {
       rolldownOptions: {
         output: {
