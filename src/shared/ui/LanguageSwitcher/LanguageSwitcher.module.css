@@ -1,0 +1,45 @@
+.short,
+.full {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.short {
+  height: 40px;
+  padding: 0 8px 0 10px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.short:hover {
+  background: var(--color-sunken);
+}
+
+/* Navy panel ichida (4.3): oq matn, 44 px. */
+.full {
+  height: 44px;
+  padding: 0 10px 0 12px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.full:hover {
+  background: var(--color-nav-hover);
+}
+
+.short svg,
+.full svg {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+}

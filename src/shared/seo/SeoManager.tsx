@@ -1,25 +1,23 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { BRAND } from '../config/brand';
 
 interface PublicSeoConfig {
   title: string;
   description: string;
 }
 
-const BRAND = 'MarketHub';
 const DEFAULT_DESCRIPTION =
-  'Marketplace sotuvchilari uchun mahsulot, buyurtma, ombor va savdoni boshqarish platformasi.';
+  `${BRAND.name} boshqaruv paneli: sotuvchilar, operatorlar, ombor va moliya jamoasi uchun.`;
 
 const PUBLIC_ROUTES: Record<string, PublicSeoConfig> = {
   '/login': {
-    title: 'MarketHub Seller — sotuvchi kabinetiga kirish',
-    description:
-      'MarketHub seller kabinetiga kiring va mahsulotlar, buyurtmalar, omborlar hamda savdo ko‘rsatkichlarini bir joydan boshqaring.',
+    title: `${BRAND.name} — panelga kirish`,
+    description: `${BRAND.name} boshqaruv paneliga kiring va o‘z bo‘limingizda ishlang.`,
   },
   '/register': {
-    title: 'MarketHub’da sotuvchi sifatida ro‘yxatdan o‘tish',
-    description:
-      'MarketHub marketplace platformasida do‘kon oching, mahsulotlaringizni joylang va onlayn savdoni boshlang.',
+    title: `${BRAND.name} — sotuvchi sifatida ro‘yxatdan o‘tish`,
+    description: `${BRAND.name}da sotuvchi bo‘ling: offerni tanlang, sahifa yarating va har sotuv uchun haq oling.`,
   },
 };
 
@@ -73,7 +71,7 @@ function setStructuredData(origin: string, enabled: boolean): void {
   script.textContent = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'MarketHub Seller',
+    name: BRAND.name,
     url: `${origin}/login`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
@@ -81,7 +79,7 @@ function setStructuredData(origin: string, enabled: boolean): void {
     description: DEFAULT_DESCRIPTION,
     publisher: {
       '@type': 'Organization',
-      name: BRAND,
+      name: BRAND.name,
       logo: `${origin}/favicon.svg`,
     },
   }).replace(/</g, '\\u003c');
@@ -96,7 +94,7 @@ export function SeoManager() {
     // Admin subdomenidagi login/register ham kabinetning bir qismi: butun host noindex.
     const indexable = false;
     const origin = getSiteOrigin();
-    const title = publicConfig?.title ?? `${BRAND} Seller — boshqaruv kabineti`;
+    const title = publicConfig?.title ?? `${BRAND.name} — boshqaruv paneli`;
     const description = publicConfig?.description ?? DEFAULT_DESCRIPTION;
     const canonical = indexable ? `${origin}${pathname}` : null;
     const image = `${origin}/og-markethub.jpg`;

@@ -1,0 +1,670 @@
+/*
+ * Panel karkasi — docs/dizayn/karkas-E.md (DZ-01, FE-01).
+ * Desktop: 260 px navy menyu + 64 px oq yuqori qator; planshet: 64 px qator +
+ * chap panel; telefon: 56 px qator + chap panel; omborchi 768–1279: 96 px relsi.
+ */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  min-width: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.column {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+}
+
+/* ── Menyu (1.2–1.4) ───────────────────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: 0 0 260px;
+  width: 260px;
+  height: 100vh;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--color-nav);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-nav-active) transparent;
+}
+
+.brand {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  height: 64px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-nav-line);
+}
+
+.brandIcon {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+
+.brandName {
+  color: var(--color-nav-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.groupLabel {
+  margin: 0;
+  padding: 16px 12px 6px;
+  color: var(--color-nav-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.groupLabel:first-child {
+  padding-top: 6px;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--color-nav-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.item svg {
+  display: block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.item:hover {
+  color: #fff;
+  background: var(--color-nav-hover);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--color-nav-accent);
+  outline-offset: -2px;
+}
+
+.item[aria-current='page'] {
+  color: #fff;
+  background: var(--color-nav-active);
+  font-weight: 600;
+}
+
+/* ── Omborchi relsi (5.5) ──────────────────────────────────────────────────── */
+.rail {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: 0 0 96px;
+  width: 96px;
+  height: 100vh;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--color-nav);
+}
+
+.railBrand {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  border-bottom: 1px solid var(--color-nav-line);
+}
+
+.railItems {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 12px 8px;
+  list-style: none;
+}
+
+.railItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 64px;
+  padding: 0 4px;
+  border-radius: 12px;
+  color: var(--color-nav-text);
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.railItem svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+.railItem:hover {
+  color: #fff;
+  background: var(--color-nav-hover);
+}
+
+.railItem[aria-current='page'] {
+  color: #fff;
+  background: var(--color-nav-active);
+}
+
+/* ── Yuqori qator (1.6, 4.2, 5.2) ──────────────────────────────────────────── */
+.topBar {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+  row-gap: 8px;
+  min-height: 64px;
+  padding: 8px 24px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topBarStart {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 8px 0 2px;
+  border-radius: 12px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.backLink:hover {
+  color: var(--color-text);
+}
+
+.topBarEnd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  margin-left: auto;
+}
+
+.topBarTools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.divider {
+  display: block;
+  flex: 0 0 1px;
+  width: 1px;
+  height: 28px;
+  background: var(--color-border);
+}
+
+.iconButton {
+  display: inline-flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--color-sunken);
+}
+
+.iconButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.menuButton {
+  color: var(--color-text);
+}
+
+.menuButton svg {
+  width: 24px;
+  height: 24px;
+}
+
+.userButton:hover,
+.userButton[aria-expanded='true'] {
+  background: var(--color-sunken);
+}
+
+.userButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  margin: 0;
+  padding: 0 8px 0 4px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--color-text);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.avatar {
+  display: inline-flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--color-nav);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.userText {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.userRole {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.chevron {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+}
+
+/* Bildirishnoma: 40 px tugma, qizil son belgisi (1.7). */
+.bellButton {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  color: var(--color-text-muted) !important;
+}
+
+.bellButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bellBadge :global(.ant-badge-count) {
+  border: 2px solid #fff;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+/* Planshet (5.2): 64 px, tugmalar 44, til va ism panelda. */
+.tablet .topBar,
+.phone .topBar {
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 0 12px 0 10px;
+}
+
+.tablet .iconButton,
+.phone .iconButton,
+.tablet .bellButton,
+.phone .bellButton {
+  flex-basis: 44px;
+  width: 44px !important;
+  height: 44px !important;
+}
+
+.tablet .topBarStart,
+.phone .topBarStart {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  column-gap: 4px;
+}
+
+.tablet .title,
+.phone .title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tablet .topBarEnd,
+.phone .topBarEnd {
+  flex-wrap: nowrap;
+  column-gap: 0;
+  margin-left: 0;
+}
+
+/* Telefon (4.2): 56 px, sarlavha 20/28. */
+.phone .topBar {
+  min-height: 56px;
+  padding: 0 8px 0 6px;
+  gap: 4px;
+}
+
+.phone .title {
+  margin-left: 4px;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+/* ── Mazmun (1.8) ──────────────────────────────────────────────────────────── */
+.main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding: 24px;
+  container: content / inline-size;
+}
+
+.phone .main {
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Sahifa ildizi (`div`): o'z klassi bo'lmasa bloklar orasi 20 px. `:where` — sahifa klassi ustun. */
+:where(.main > div) {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ── Chap panel: planshet va telefon (4.3) ─────────────────────────────────── */
+.drawerNav {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: var(--color-nav);
+}
+
+.drawerNav .brand {
+  padding: 0 6px 0 20px;
+}
+
+.drawerClose {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--color-nav-text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.drawerClose svg {
+  width: 22px;
+  height: 22px;
+}
+
+.drawerLanguage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto 12px 0;
+  padding: 8px 0 12px 12px;
+  border-top: 1px solid var(--color-nav-line);
+}
+
+.drawerLanguageLabel {
+  color: var(--color-nav-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.drawerRoot :global(.ant-drawer-body) {
+  padding: 0;
+  background: var(--color-nav);
+}
+
+/* ── Foydalanuvchi menyusi (1.10) ──────────────────────────────────────────── */
+.userMenu {
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-floating);
+}
+
+.userMenuHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  padding: 8px 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.userMenuHead .avatar {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.userMenuName {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userMenu :global(.ant-dropdown-menu) {
+  padding: 0;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.userMenu :global(.ant-dropdown-menu-item),
+.userMenu :global(.ant-dropdown-menu-submenu-title) {
+  min-height: 36px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.touch .userMenu :global(.ant-dropdown-menu-item),
+.touch .userMenu :global(.ant-dropdown-menu-submenu-title) {
+  min-height: 44px;
+}
+
+.userMenuValue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.userMenuValue > span,
+.userMenuValue > svg {
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+
+.userMenuValue > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-action);
+}
+
+.userMenu :global(.ant-dropdown-menu-item-icon) {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+}
+
+/* ── Noma'lum rol (umumiy-403 §2) ──────────────────────────────────────────── */
+.noMenu {
+  margin: 0;
+  padding: 20px 24px;
+  color: var(--color-nav-text);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.leadingBrand {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.copyButton {
+  margin-top: 14px;
+}
+
+/* Telefon: «Chiqish» va «Qayta tekshirish» pastki panelda. */
+.bottomBar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.bottomBar > :last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ── Operator: telefonda ish joyi yo'q (4.7) ───────────────────────────────── */
+.desktopOnly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.desktopOnly h2 {
+  margin: 4px 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+}
+
+.desktopOnly p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 23px;
+}
+
+.desktopOnlyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  background: var(--color-sunken);
+}

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getApiErrorMessage } from '../../../shared/api/apiError';
 
-const INVALID_CREDENTIALS_MESSAGE = 'Telefon yoki parol noto‘g‘ri';
-const ACCESS_DENIED_MESSAGE = 'Bu akkaunt orqali seller kabinetiga kirish mumkin emas.';
+const INVALID_CREDENTIALS_MESSAGE = 'Telefon raqami yoki parol noto‘g‘ri. Tekshirib, qayta kiriting.';
+const ACCESS_DENIED_MESSAGE = 'Bu amal sizning rolingiz uchun yopiq.';
 
 /**
  * FAQAT login/registratsiya formalari uchun — ma'lumot sahifalarida

@@ -220,7 +220,7 @@ export default function AdminInventoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tab: InventoryTab = searchParams.get('tab') === 'movements' ? 'movements' : 'stock';
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <PageHeader title={t('adminOps.inventory.title')} description={t('adminOps.inventory.description')} />
       <Tabs
         activeKey={tab}
@@ -231,6 +231,6 @@ export default function AdminInventoryPage() {
           { key: 'movements', label: t('adminOps.inventory.movementsTab'), children: <MovementsTab /> },
         ]}
       />
-    </main>
+    </div>
   );
 }

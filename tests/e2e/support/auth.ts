@@ -3,9 +3,10 @@ import type { Page } from '@playwright/test';
 export const ACCESS_TOKEN_KEY = 'elchi_access_token';
 export const TEST_ACCESS_TOKEN = 'e2e.access.token';
 
+/** Standart sessiya — sotuvchi (AFFILIATE), lid-sotuv modelidagi asosiy rol. */
 export const authenticatedUser = {
   id: 'seller-e2e',
-  role: 'SELLER',
+  role: 'AFFILIATE',
   name: 'E2E Sotuvchi',
   phone: '+998901234567',
   email: 'seller@example.com',
@@ -33,8 +34,20 @@ export async function seedAccessToken(
 export const operatorUser = {
   ...authenticatedUser,
   id: 'operator-e2e',
-  role: 'OPERATOR',
+  role: 'OPERATOR_LEAD',
   name: 'E2E Operator',
+} as const;
+
+/** 8 rolning har biri uchun sessiya foydalanuvchisi (FE-01). */
+export const roleUsers = {
+  AFFILIATE: authenticatedUser,
+  WHOLESALER: { ...authenticatedUser, id: 'wholesaler-e2e', role: 'WHOLESALER', name: 'E2E Optovik' },
+  OPERATOR_LEAD: operatorUser,
+  SUPERVISOR: { ...authenticatedUser, id: 'supervisor-e2e', role: 'SUPERVISOR', name: 'E2E Nazoratchi' },
+  WAREHOUSE: { ...authenticatedUser, id: 'warehouse-e2e', role: 'WAREHOUSE', name: 'E2E Omborchi' },
+  FINANCE: { ...authenticatedUser, id: 'finance-e2e', role: 'FINANCE', name: 'E2E Moliya' },
+  ADMIN: { ...authenticatedUser, id: 'admin-e2e', role: 'ADMIN', name: 'E2E Admin' },
+  SUPERADMIN: { ...authenticatedUser, id: 'superadmin-e2e', role: 'SUPERADMIN', name: 'E2E Superadmin' },
 } as const;
 
 export async function mockCurrentUser(

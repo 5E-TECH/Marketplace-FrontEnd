@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
 import { loggedOut, selectAuthUser } from '../../features/auth/model/authSlice';
-import type { UpdateAuthProfilePayload, UserRole } from '../../features/auth/model/authTypes';
+import type { UpdateAuthProfilePayload } from '../../features/auth/model/authTypes';
+import { ROLE_LABEL_KEYS } from '../../features/auth/lib/roleLabels';
+import { useTranslation } from '../../shared/i18n/useTranslation';
 import { useUpdateAuthProfileMutation } from '../../features/auth/api/useUpdateAuthProfileMutation';
 import { getApiFieldErrors } from '../../features/auth/lib/getAuthErrorMessage';
 import { getApiErrorMessage } from '../../shared/api/apiError';
@@ -28,16 +30,9 @@ const EDITABLE_FIELDS = new Set<keyof ProfileFormValues>([
   'name', 'phone', 'password', 'confirmPassword',
 ]);
 
-const roleLabels: Record<UserRole, string> = {
-  SELLER: 'Sotuvchi',
-  OPERATOR: 'Operator',
-  BUYER: 'Xaridor',
-  ADMIN: 'Administrator',
-  SUPERADMIN: 'Bosh administrator',
-};
-
 export default function ProfilePage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -102,7 +97,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <PageHeader title="Mening profilim" description="Shaxsiy ma’lumotlar va akkaunt xavfsizligini boshqaring" />
       <section className={styles.profile}>
         <header className={styles.identity}>
@@ -110,7 +105,7 @@ export default function ProfilePage() {
           <div className={styles.identityContent}>
             <Typography.Title level={2}>{user.name}</Typography.Title>
             <div className={styles.tags}>
-              <Tag color="gold" title={roleLabels[user.role]}>{user.role}</Tag>
+              <Tag color="gold" title={t(ROLE_LABEL_KEYS[user.role])}>{user.role}</Tag>
               <Tag color={user.isActive && !user.isBlocked ? 'success' : 'warning'}>
                 {user.isBlocked ? 'Bloklangan' : user.isActive ? 'Faol' : 'Faolsizlantirilgan'}
               </Tag>
@@ -143,6 +138,6 @@ export default function ProfilePage() {
           <PasswordInput autoComplete="new-password" />
         </Form.Item>
       </FormModal>
-    </main>
+    </div>
   );
 }

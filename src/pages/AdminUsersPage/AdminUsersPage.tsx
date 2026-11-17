@@ -141,7 +141,7 @@ export default function AdminUsersPage() {
   const hasFilters = Boolean(search) || role !== 'ALL' || block !== 'ALL';
 
   return (
-    <main>
+    <div>
       <PageHeader
         title={t('admin.users.title')}
         description={t('admin.users.description')}
@@ -243,6 +243,6 @@ export default function AdminUsersPage() {
           );
         }}
       />
-    </main>
+    </div>
   );
 }

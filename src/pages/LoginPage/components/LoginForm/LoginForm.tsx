@@ -1,90 +1,97 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, type FormInstance } from 'antd';
+import { CircleAlert, TriangleAlert } from 'lucide-react';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
-import styles from './LoginForm.module.css';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
 import { getUzLocalPhone } from '../../../../shared/lib/phone';
+import styles from './LoginForm.module.css';
 
 export interface LoginFormValues {
   phone: string;
   password: string;
 }
 
+/** Forma ostidagi holat bloki: 429 — ogohlantirish, server/tarmoq — xato. */
+export interface LoginNotice {
+  tone: 'warning' | 'danger';
+  title: string;
+  text: string;
+}
+
 interface LoginFormProps {
+  form: FormInstance<LoginFormValues>;
   isSubmitting: boolean;
+  notice: LoginNotice | null;
   onSubmit: (values: LoginFormValues) => void;
+  onChange: () => void;
 }
 
 const PHONE_NUMBER_PATTERN = /^\d{9}$/;
 
-export function LoginForm({
-  isSubmitting,
-  onSubmit,
-}: LoginFormProps) {
+/** Platforma xodimi: telefon raqami va parol (umumiy-kirish §3). */
+export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange }: LoginFormProps) {
   const { t } = useTranslation();
   return (
     <Form<LoginFormValues>
+      form={form}
+      className={styles.form}
       layout="vertical"
-      requiredMark
-      disabled={isSubmitting}
+      requiredMark={false}
       onFinish={onSubmit}
-      autoComplete="off"
+      onValuesChange={onChange}
       size="large"
+      aria-labelledby="login-title"
     >
+      <h1 id="login-title" className={styles.title}>{t('login.title')}</h1>
+
       <Form.Item
         className={styles.field}
-        label={t('auth.phone').toLocaleUpperCase()}
+        label={t('auth.phone')}
         name="phone"
         normalize={(value?: string) => getUzLocalPhone(value ?? '')}
         rules={[
           { required: true, message: t('auth.phoneRequired') },
-          {
-            pattern: PHONE_NUMBER_PATTERN,
-            message: t('auth.phoneNineDigits'),
-          },
+          { pattern: PHONE_NUMBER_PATTERN, message: t('auth.phoneNineDigits') },
         ]}
       >
         <Input
-          className={styles.input}
-          variant="borderless"
+          className={styles.phone}
           prefix={<span className={styles.phonePrefix}>+998</span>}
+          type="tel"
           inputMode="numeric"
           // maxLength yo'q: u joylangan "+998 90 …" ni normalize'dan oldin kesib qo'yadi; 9 raqam chegarasini normalize ta'minlaydi.
-          autoComplete="off"
+          autoComplete="tel-national"
           spellCheck={false}
           placeholder="90 123 45 67"
-          aria-label={t('auth.phone')}
         />
       </Form.Item>
 
       <Form.Item
         className={styles.field}
-        label={t('auth.password').toLocaleUpperCase()}
+        label={t('auth.password')}
         name="password"
         rules={[
           { required: true, message: t('auth.passwordRequired') },
           { max: 128, message: t('auth.passwordMax') },
         ]}
       >
-        <PasswordInput
-          className={styles.input}
-          variant="borderless"
-          autoComplete="new-password"
-          maxLength={128}
-          spellCheck={false}
-          placeholder={t('auth.passwordPlaceholder')}
-          aria-label={t('auth.password')}
-        />
+        <PasswordInput className={styles.password} autoComplete="current-password" maxLength={128} spellCheck={false} />
       </Form.Item>
 
-      <Button
-        className={styles.submitButton}
-        type="primary"
-        htmlType="submit"
-        loading={isSubmitting}
-      >
-        {t('auth.signIn').toLocaleUpperCase()}
+      {notice ? (
+        <div className={notice.tone === 'warning' ? styles.warning : styles.danger} role="alert">
+          {notice.tone === 'warning' ? <TriangleAlert aria-hidden /> : <CircleAlert aria-hidden />}
+          <div>
+            <p className={styles.noticeTitle}>{notice.title}</p>
+            <p className={styles.noticeText}>{notice.text}</p>
+          </div>
+        </div>
+      ) : null}
+
+      <Button className={styles.submit} type="primary" htmlType="submit" loading={isSubmitting} block>
+        {t('auth.login')}
       </Button>
 
+      <p className={styles.hint}>{t('login.staffHint')}</p>
     </Form>
   );
 }

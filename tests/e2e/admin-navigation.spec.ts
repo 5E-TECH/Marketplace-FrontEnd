@@ -1,87 +1,71 @@
 import { expect, test, type Page } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { mainNav, pageTitle } from './support/shell';
 
 const superadmin = {
   id: 'navigation-superadmin', role: 'SUPERADMIN', name: 'Navigation Admin',
   phone: '+998901234567', isActive: true, isDeleted: false,
 } as const;
 
-const availableItems = [
-  ['Dashboard', '/admin/overview'],
-  ['Accountlar', '/admin/users'],
-  ['Do‘konlar', '/admin/shops'],
-  ['Buyurtmalar', '/admin/orders'],
-  ['Yetkazib berish', '/admin/delivery'],
-  ['Ombor va qoldiqlar', '/admin/inventory'],
-  ['Qaytarishlar', '/admin/returns'],
-  ['Mahsulot moderatsiyasi', '/admin/products'],
-  ['Kategoriyalar', '/admin/categories'],
-  ['Bannerlar', '/admin/banners'],
-  ['Xabarlar', '/admin/notifications'],
-  ['Audit loglar', '/admin/audit-logs'],
-  ['Moliya', '/admin/finance'],
-  ['Tizim holati', '/admin/system-settings'],
-] as const;
+/** karkas-E 2.4–2.5: M1 admin menyusi, guruhlar bilan. */
+const ADMIN_GROUPS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string]>]> = [
+  ['Ish', [['Moderatsiya', '/admin/moderation'], ['Lidlar', '/admin/leads'], ['Buyurtmalar', '/admin/orders']]],
+  ['Katalog', [['Mahsulotlar', '/admin/products'], ['Kategoriyalar', '/admin/categories'], ['Qoldiq', '/admin/inventory']]],
+  ['Hamkorlar', [['Sotuvchilar', '/admin/sellers'], ['Optoviklar', '/admin/wholesalers']]],
+  ['Nazorat', [['Qo‘ng‘iroq yozuvlari', '/admin/recordings'], ['Audit jurnali', '/admin/audit-logs']]],
+  ['Tizim', [['Foydalanuvchilar', '/admin/users'], ['Integratsiyalar', '/admin/integrations'], ['Sozlamalar', '/admin/settings']]],
+];
+const ADMIN_ITEMS = ADMIN_GROUPS.flatMap(([, items]) => items);
 
-const unavailableItems = [
-  ['Sotuvchilar', '/admin/sellers'],
-  ['Komissiya tarixi', '/admin/payout-history'],
-  ['Brendlar', '/admin/brands'],
-  ['Atributlar', '/admin/attributes'],
-  ['Tranzaksiyalar', '/admin/transactions'],
-  ['Omborlar', '/admin/warehouses'],
-  ['Qoldiq monitoringi', '/admin/stock'],
-  ['Transfer so‘rovlari', '/admin/transfers'],
-  ['Promokodlar', '/admin/promocodes'],
-  ['Flash sale va kolleksiyalar', '/admin/collections'],
-  ['Sharh moderatsiyasi', '/admin/reviews'],
-  ['Reyting va shikoyatlar', '/admin/disputes'],
-  ['Jamoa', '/admin/team'],
-] as const;
+/** Sahifa o'z aniqroq nomini bersa, `h1` — o'sha nom (masalan Qoldiq → «Platforma qoldig‘i»). */
+const PAGE_TITLES: Record<string, string> = { Qoldiq: 'Platforma qoldig‘i' };
+
+/** M2 va «?» bandlari M1 build'da chiqmaydi (karkas-E 1.9). */
+const HIDDEN_ITEMS = ['Boshqaruv paneli', 'Hisobotlar', 'Sayt kontenti', 'Firibgarlik markazi', 'Murojaatlar', 'Moliya', 'Dashboard'];
 
 async function mockAdminEndpoints(page: Page) {
-  await page.route('**/api/v1/admin/dashboard', (route) => route.fulfill({ status: 200, json: { data: { shops: { total: 0, pending: 0, active: 0, suspended: 0, rejected: 0 }, users: { total: 0, sellers: 0, buyers: 0, admins: 0, operators: 0 }, orders: { total: 0, today: 0 }, gmv: 0, revenue: 0 } } }));
-  await page.route('**/api/v1/admin/shops**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20 } } }));
-  await page.route('**/api/v1/admin/orders**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
-  await page.route('**/api/v1/admin/returns**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 10, totalPages: 1 } } }));
-  await page.route('**/api/v1/admin/products**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
   await page.route('**/api/v1/admin/users**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
   await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
-  await page.route('**/api/v1/admin/content/banners**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
   await page.route('**/api/v1/admin/audit**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
   await page.route('**/api/v1/admin/inventory/**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0, warnings: [], searchTruncated: false } } }));
-  await page.route('**/api/v1/admin/integration/**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 } } }));
-  await page.route('**/api/v1/admin/notifications/templates**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
-  await page.route('**/api/v1/admin/broadcasts**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 10, totalPages: 0 } } }));
-  await page.route('**/api/v1/admin/finance/**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
-  await page.route('**/health**', (route) => route.fulfill({ status: 200, json: { status: 'ok' } }));
 }
 
-test('SUPERADMIN menyusida faqat sahifasi mavjud bo‘lgan bo‘limlar turadi va ishlaydi', async ({ page }) => {
+test('SUPERADMIN menyusi: guruhlar va M1 bandlari, har biri ochiladi va faol bo‘ladi', async ({ page }) => {
+  test.setTimeout(60_000);
   await installAuthenticatedSession(page, superadmin);
   await mockAdminEndpoints(page);
-  await page.goto('/admin/overview');
+  await page.goto('/admin/moderation');
 
-  const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(availableItems.length);
-  for (const [label] of unavailableItems) {
-    await expect(sidebar.getByRole('menuitem', { name: label })).toHaveCount(0);
+  const nav = mainNav(page);
+  await expect(nav.locator('p')).toHaveText(ADMIN_GROUPS.map(([group]) => group));
+  await expect(nav.getByRole('link')).toHaveText(ADMIN_ITEMS.map(([label]) => label));
+  for (const label of HIDDEN_ITEMS) {
+    await expect(nav.getByRole('link', { name: label, exact: true })).toHaveCount(0);
   }
 
-  for (const [label, path] of availableItems) {
-    await sidebar.getByRole('menuitem', { name: label }).click();
+  for (const [label, path] of ADMIN_ITEMS) {
+    await nav.getByRole('link', { name: label, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${path.replaceAll('/', '\\/')}$`));
-    await expect(page.getByText('Bu bo‘lim hali mavjud emas')).toHaveCount(0);
-    await expect(page.getByText('Sahifa topilmadi')).toHaveCount(0);
+    await expect(pageTitle(page)).toHaveText(PAGE_TITLES[label] ?? label);
+    await expect(nav.locator('[aria-current="page"]')).toHaveText(label);
+    await expect(page.getByTestId('not-found-page')).toHaveCount(0);
+    await expect(page.getByTestId('forbidden-page')).toHaveCount(0);
   }
 });
 
-for (const [label, path] of unavailableItems) {
-  test(`${label} yashirin URL placeholder emas, 404 sahifaga tushadi`, async ({ page }) => {
-    await installAuthenticatedSession(page, superadmin);
+test('sahifasi qurilmagan bandlar «Bo‘lim tayyorlanmoqda» holatini ko‘rsatadi', async ({ page }) => {
+  await installAuthenticatedSession(page, superadmin);
+  await page.goto('/admin/leads');
+  await expect(page.getByTestId('placeholder-page')).toContainText('Bo‘lim tayyorlanmoqda');
+});
+
+test('yashirin va eski admin URL’lari 404 ga tushadi', async ({ page }) => {
+  test.setTimeout(60_000);
+  await installAuthenticatedSession(page, superadmin);
+  for (const path of ['/admin/payout-history', '/admin/brands', '/admin/attributes', '/admin/transactions', '/admin/warehouses', '/admin/stock', '/admin/promocodes', '/admin/reviews', '/admin/team']) {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`${path.replaceAll('/', '\\/')}$`));
-    await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
-    await expect(page.getByText('Bu bo‘lim hali mavjud emas')).toHaveCount(0);
-  });
-}
+    await expect(page.getByTestId('not-found-page')).toBeVisible();
+    await expect(mainNav(page).locator('[aria-current="page"]')).toHaveCount(0);
+  }
+});

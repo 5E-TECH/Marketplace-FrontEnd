@@ -1,7 +1,7 @@
 import { unwrapApiData } from '../../../shared/api/apiResponse';
 import { httpClient } from '../../../shared/api/httpClient';
 import { asRecord, readItems, readPagination, readText } from '../../../shared/api/responseFields';
-import type { ImpersonationGrant } from '../../auth/model/authTypes';
+import { isUserRole, type ImpersonationGrant } from '../../auth/model/authTypes';
 import type { AdminUser, AdminUserListParams, AdminUserRole, AdminUsersPage, AssignableUserRole, CreateAdminUserPayload } from '../model/adminUserTypes';
 
 const roles: AdminUserRole[] = ['SELLER', 'OPERATOR', 'BUYER', 'ADMIN', 'SUPERADMIN'];
@@ -71,11 +71,12 @@ export async function impersonateAdminUser(id: string): Promise<ImpersonationGra
     : typeof row.expiresIn === 'number' && row.expiresIn > 0 ? new Date(Date.now() + row.expiresIn * 1000).toISOString() : null;
   if (
     typeof token !== 'string' || !token || token.length > 16_384 || /\s/.test(token) ||
-    !expiresAt || (typeof user.id !== 'string' && typeof user.id !== 'number') || !roles.includes(role as AdminUserRole)
+    // Nomidan kirilgan foydalanuvchi panelga kiradi — rol panel rollaridan bo'lishi shart.
+    !expiresAt || (typeof user.id !== 'string' && typeof user.id !== 'number') || !isUserRole(role)
   ) {
     throw new Error('Serverdan kutilmagan javob olindi');
   }
-  return { token, expiresAt, user: { id: String(user.id), name: readText(user, 'name') || '—', role: role as AdminUserRole } };
+  return { token, expiresAt, user: { id: String(user.id), name: readText(user, 'name') || '—', role } };
 }
 
 function readErrorMessage(value: unknown): string {

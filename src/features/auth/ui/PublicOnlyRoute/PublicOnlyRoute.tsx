@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { getDefaultRoute } from '../../../../app/router/appRouteConfig';
+import { getRoleHome } from '../../../../app/router/routeAccess';
 import { useAppSelector } from '../../../../app/store/hooks';
 import { selectAuthUser, selectIsAuthenticated } from '../../model/authSlice';
 
@@ -33,9 +33,8 @@ export function PublicOnlyRoute() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectAuthUser);
   const location = useLocation();
-  // Operatorda bosh sahifa (sotuvchi dashboardi) yopiq — uni o'ziga
-  // ochiq birinchi bo'limga yuboramiz.
-  const fallback = user ? getDefaultRoute(user.role) : '/';
+  // Profil hali yuklanmagan bo'lsa `/` — u yerdan rol bosh sahifasiga yo'naltiriladi.
+  const fallback = user ? getRoleHome(user.role) : '/';
 
   return isAuthenticated ? (
     <Navigate to={getRedirectPath(location.state, fallback)} replace />

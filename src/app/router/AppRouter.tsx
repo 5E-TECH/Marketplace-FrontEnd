@@ -3,62 +3,27 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import { ProtectedRoute } from '../../features/auth/ui/ProtectedRoute/ProtectedRoute';
 import { PublicOnlyRoute } from '../../features/auth/ui/PublicOnlyRoute/PublicOnlyRoute';
-import { routeImports } from './routePreload';
 import { SeoManager } from '../../shared/seo/SeoManager';
-import { SellerAccessGuard } from '../../features/auth/ui/SellerAccessGuard/SellerAccessGuard';
-import { SellerOnlyRoute } from '../../features/auth/ui/SellerOnlyRoute/SellerOnlyRoute';
-import { AdminOnlyRoute } from '../../features/auth/ui/AdminOnlyRoute/AdminOnlyRoute';
-import { SuperAdminOnlyRoute } from '../../features/auth/ui/SuperAdminOnlyRoute/SuperAdminOnlyRoute';
 import { useAppSelector } from '../store/hooks';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
+import { appRoutes } from './routeManifest';
+import { getRoleHome } from './routeAccess';
+import { RequireRole } from './RequireRole';
 
-const MainLayout = lazy(() => import('../../layouts/MainLayout/MainLayout'));
-const AdminLayout = lazy(() => import('../../layouts/AdminLayout/AdminLayout'));
-const HomePage = lazy(routeImports.home);
+const AppShell = lazy(() => import('../../layouts/AppShell/AppShell'));
 const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
 const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'));
-const StorefrontShopPage = lazy(routeImports.storefrontShop);
-const StorefrontProductPage = lazy(routeImports.storefrontProduct);
-const ProductsPage = lazy(routeImports.products);
-const ProductEditorPage = lazy(routeImports.productEditor);
-const ShopPage = lazy(routeImports.shop);
-const ProfilePage = lazy(routeImports.profile);
-const WarehousesPage = lazy(routeImports.warehouses);
-const StockPage = lazy(routeImports.stock);
-const OrdersPage = lazy(routeImports.orders);
-const ReturnsPage = lazy(routeImports.returns);
-const FinancePage = lazy(routeImports.finance);
-const DeliveryPage = lazy(routeImports.delivery);
-const SettingsPage = lazy(routeImports.settings);
-const SupportPage = lazy(routeImports.support);
-const UsersPage = lazy(routeImports.users);
-const UserEditorPage = lazy(routeImports.userEditor);
-const AdminShopsPage = lazy(routeImports.adminShops);
-const AdminOrdersPage = lazy(routeImports.adminOrders);
-const AdminOrderDetailPage = lazy(routeImports.adminOrderDetail);
-const AdminReturnsPage = lazy(routeImports.adminReturns);
-const AdminProductsPage = lazy(routeImports.adminProducts);
-const AdminProductDetailPage = lazy(routeImports.adminProductDetail);
-const AdminUsersPage = lazy(routeImports.adminUsers);
-const AdminUserCreatePage = lazy(routeImports.adminUserCreate);
-const AdminUserDetailPage = lazy(routeImports.adminUserDetail);
-const AdminFinancePage = lazy(routeImports.adminFinance);
-const AdminAuditPage = lazy(routeImports.adminAudit);
-const AdminSystemHealthPage = lazy(routeImports.adminSystemHealth);
-const AdminOverviewPage = lazy(routeImports.adminOverview);
-const AdminInventoryPage = lazy(routeImports.adminInventory);
-const AdminDeliveryPage = lazy(routeImports.adminDelivery);
-const AdminNotificationsPage = lazy(routeImports.adminNotifications);
-const AdminCategoriesPage = lazy(() => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'));
-const AdminBannersPage = lazy(() => import('../../pages/AdminBannersPage/AdminBannersPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
   : null;
 
-function RoleHomeRoute() {
+// Har sahifa uchun bitta lazy komponent: preload (`prefetchRoute`) bilan bir xil import.
+const pages = new Map(appRoutes.map((route) => [route.path, lazy(route.load)]));
+
+/** `/` — rolning o'z bosh sahifasi. */
+function RoleHomeRedirect() {
   const role = useAppSelector(selectAuthUser)?.role;
-  if (role === 'ADMIN' || role === 'SUPERADMIN') return <Navigate to="/admin/overview" replace />;
-  return <SellerAccessGuard><HomePage /></SellerAccessGuard>;
+  return <Navigate to={role ? getRoleHome(role) : '/login'} replace />;
 }
 
 export function AppRouter() {
@@ -70,63 +35,27 @@ export function AppRouter() {
           {SharedUiTestPage ? (
             <Route path="__test__/shared-ui" element={<SharedUiTestPage />} />
           ) : null}
-          <Route path="dokon/:shopSlug" element={<StorefrontShopPage />} />
-          <Route path="mahsulot/:productId" element={<StorefrontProductPage />} />
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
           </Route>
 
+          {/* Kirmagan foydalanuvchi har qanday manzildan login'ga; kirgani — panel ichida 404. */}
           <Route element={<ProtectedRoute />}>
-            <Route element={<AdminOnlyRoute />}>
-              <Route element={<AdminLayout />}>
-                <Route path="admin/overview" element={<AdminOverviewPage />} />
-                <Route path="admin/shops" element={<AdminShopsPage />} />
-                <Route path="admin/orders" element={<AdminOrdersPage />} />
-                <Route path="admin/orders/:orderId" element={<AdminOrderDetailPage />} />
-                <Route path="admin/delivery" element={<AdminDeliveryPage />} />
-                <Route path="admin/inventory" element={<AdminInventoryPage />} />
-                <Route path="admin/returns" element={<AdminReturnsPage />} />
-                <Route path="admin/products" element={<AdminProductsPage />} />
-                <Route path="admin/products/:productId" element={<AdminProductDetailPage />} />
-                <Route path="admin/users" element={<AdminUsersPage />} />
-                <Route path="admin/users/new" element={<AdminUserCreatePage />} />
-                <Route path="admin/users/:userId" element={<AdminUserDetailPage />} />
-                <Route path="admin/audit-logs" element={<AdminAuditPage />} />
-                <Route element={<SuperAdminOnlyRoute />}>
-                  <Route path="admin/finance" element={<AdminFinancePage />} />
-                </Route>
-                <Route path="admin/system-settings" element={<AdminSystemHealthPage />} />
-                <Route path="admin/categories" element={<AdminCategoriesPage />} />
-                <Route path="admin/banners" element={<AdminBannersPage />} />
-                <Route path="admin/notifications" element={<AdminNotificationsPage />} />
-                <Route path="admin/profile" element={<ProfilePage />} />
-              </Route>
-            </Route>
-            <Route element={<MainLayout />}>
-              <Route index element={<RoleHomeRoute />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route element={<SellerAccessGuard />}>
-                <Route path="support" element={<SupportPage />} />
-                <Route path="products" element={<ProductsPage />} />
-                <Route path="products/new" element={<ProductEditorPage />} />
-                <Route path="products/:productId/edit" element={<ProductEditorPage />} />
-                <Route path="warehouses" element={<WarehousesPage />} />
-                <Route path="stock" element={<StockPage />} />
-                <Route path="orders" element={<OrdersPage />} />
-                <Route path="returns" element={<ReturnsPage />} />
-                <Route path="delivery" element={<DeliveryPage />} />
-                <Route element={<SellerOnlyRoute />}>
-                  <Route path="users" element={<UsersPage />} />
-                  <Route path="finance" element={<FinancePage />} />
-                  <Route path="users/new" element={<UserEditorPage />} />
-                </Route>
-                <Route path="shop" element={<ShopPage />} />
-              </Route>
+            <Route element={<AppShell />}>
+              <Route index element={<RoleHomeRedirect />} />
+              {appRoutes.map((route) => {
+                const Page = pages.get(route.path);
+                return Page ? (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={<RequireRole route={route}><Page /></RequireRole>}
+                  />
+                ) : null;
+              })}
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>
-
-          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

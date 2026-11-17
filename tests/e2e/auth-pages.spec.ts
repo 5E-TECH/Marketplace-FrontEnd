@@ -3,19 +3,39 @@ import {
   ACCESS_TOKEN_KEY,
   TEST_ACCESS_TOKEN,
   authenticatedUser,
+  installAuthenticatedSession,
   mockNotifications,
 } from './support/auth';
 
-test('login sahifasida faqat telefon va parol orqali kirish mavjud', async ({ page }) => {
+test('login sahifasi (umumiy-kirish): xodim formasi va «Kirish usuli rolingizga bog‘liq»', async ({ page }) => {
   await page.goto('/login');
 
+  await expect(page.getByRole('heading', { level: 1, name: 'Tizimga kirish' })).toBeVisible();
   await expect(page.getByLabel('Telefon raqami')).toBeVisible();
+  await expect(page.getByText('+998', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Parol')).toBeVisible();
-  await expect(page.getByRole('link', { name: /parolni unutdingizmi/i })).toHaveCount(0);
+  await expect(page.getByText('Hisob va parolni admin ochib beradi. Admin, superadmin va moliya keyingi qadamda ilovadagi kodni kiritadi.')).toBeVisible();
+  // Sotuvchi SMS kodi va ro'yxatdan o'tish — FE-04; hozir yo'q.
   await expect(page.getByRole('link', { name: /ro‘yxatdan o‘tish/i })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Kod olish' })).toHaveCount(0);
+
+  const methods = page.getByRole('complementary', { name: 'Kirish usuli rolingizga bog‘liq' });
+  await expect(methods.locator('dt')).toHaveText(['Sotuvchi, optovik', 'Operator, nazoratchi, omborchi', 'Admin, superadmin, moliya']);
+  // Xodim formasi ochiq — 2- va 3-qator faol.
+  await expect(methods.locator('[aria-current="true"] dt')).toHaveText(['Operator, nazoratchi, omborchi', 'Admin, superadmin, moliya']);
+  expect((await page.getByRole('button', { name: 'Kirish', exact: true }).boundingBox())?.height).toBe(52);
 });
 
-test('TC1: BUYER login qilganda kabinetga kirishi taqiqlanadi', async ({ page }) => {
+test('login telefonda: navy sarlavha, forma, ostida usullar, gorizontal scroll yo‘q', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.goto('/login');
+  await expect(page.getByRole('button', { name: 'Til: o‘zbekcha' })).toHaveText('UZ');
+  await expect(page.getByRole('complementary', { name: 'Kirish usuli rolingizga bog‘liq' })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('FE-01 TC3: noma’lum rol (eski BUYER) bilan login → menyusiz karkas va sabab, oq ekran emas', async ({ page }) => {
+  await mockNotifications(page);
   await page.route('**/api/v1/auth/login', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -30,34 +50,31 @@ test('TC1: BUYER login qilganda kabinetga kirishi taqiqlanadi', async ({ page })
   await page.goto('/login');
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
-  await page.getByRole('button', { name: 'PLATFORMAGA KIRISH' }).click();
+  await page.getByRole('button', { name: 'Kirish', exact: true }).click();
 
-  await expect(page.getByText('Seller akkaunti talab qilinadi')).toBeVisible();
-  await expect(page.getByRole('complementary')).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toHaveCount(0);
+  await expect(page.getByTestId('unknown-role')).toContainText('Akkauntingizga ish joyi biriktirilmagan');
+  await expect(page.getByRole('heading', { level: 1, name: 'Ish joyi topilmadi' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Asosiy menyu' }).getByRole('link')).toHaveCount(0);
+  // Parol to'g'ri — sessiya ochiq, admin rolni to'g'rilagach «Qayta tekshirish» yetarli.
+  expect(await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY)).toBe(TEST_ACCESS_TOKEN);
 });
 
 for (const path of ['/register', '/register/account', '/forgot-password', '/reset-password', '/verify-phone']) {
-  test(`${path} kabinetda mavjud emas`, async ({ page }) => {
+  test(`${path} kabinetda mavjud emas: kirmagan login’ga, kirgan 404 ga tushadi`, async ({ page }) => {
     await page.goto(path);
-    await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Tizimga kirish' })).toBeVisible();
+
+    await installAuthenticatedSession(page);
+    await page.goto(path);
+    await expect(page.getByTestId('not-found-page')).toBeVisible();
   });
 }
 
-test('SELLER login token oladi, saqlaydi va dashboardga yo‘naltiradi', async ({
+test('sotuvchi (AFFILIATE) login token oladi, saqlaydi va o‘z bosh sahifasiga yo‘naltiradi', async ({
   page,
 }) => {
   await mockNotifications(page);
-  await page.route('**/api/v1/seller/dashboard', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ data: {
-        ordersTotal: 0, revenue: 0, pendingShipments: 0, delivered: 0,
-        lowStockCount: 0, topProducts: [], salesByDay: [],
-      } }),
-    });
-  });
   await page.route('**/api/v1/auth/login', async (route) => {
     await route.fulfill({
       status: 200,
@@ -92,11 +109,11 @@ test('SELLER login token oladi, saqlaydi va dashboardga yo‘naltiradi', async (
   await expect(passwordInput).toHaveAttribute('type', 'text');
   await page.locator('[title="Parolni yashirish"]').click();
   await expect(passwordInput).toHaveAttribute('type', 'password');
-  await page.getByRole('button', { name: 'PLATFORMAGA KIRISH' }).click();
+  await page.getByRole('button', { name: 'Kirish', exact: true }).click();
 
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL(/\/affiliate$/);
   await expect(
-    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+    page.getByRole('heading', { level: 1, name: 'Bosh sahifa' }),
   ).toBeVisible();
   expect(
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
@@ -117,9 +134,10 @@ test('noto‘g‘ri parol server xatosini ko‘rsatadi va token saqlamaydi', asy
   await page.goto('/login');
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Wrong123');
-  await page.getByRole('button', { name: 'PLATFORMAGA KIRISH' }).click();
+  await page.getByRole('button', { name: 'Kirish', exact: true }).click();
 
-  await expect(page.getByText('Telefon yoki parol noto‘g‘ri')).toBeVisible();
+  await expect(page.getByText('Telefon raqami yoki parol noto‘g‘ri. Tekshirib, qayta kiriting.')).toBeVisible();
+  await expect(page.getByLabel('Parol')).toHaveAttribute('aria-invalid', 'true');
   await expect(page).toHaveURL(/\/login$/);
   expect(
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
@@ -132,7 +150,7 @@ test('login formasi bo‘sh va noto‘g‘ri qiymatlarni serverga yubormaydi', a
   await page.goto('/login');
   const phone = page.getByLabel('Telefon raqami');
   const password = page.getByLabel('Parol');
-  const submit = page.getByRole('button', { name: /platformaga kirish/i });
+  const submit = page.getByRole('button', { name: 'Kirish', exact: true });
 
   await submit.click();
   await expect(page.getByText('Telefon raqamini kiriting')).toBeVisible();
@@ -156,3 +174,19 @@ test('login formasi bo‘sh va noto‘g‘ri qiymatlarni serverga yubormaydi', a
   await expect(page.getByText('9 xonali telefon raqamini kiriting')).toBeVisible();
   expect(loginRequests).toBe(0);
 });
+
+for (const [status, title] of [[429, 'Urinishlar juda ko‘p'], [500, 'Tizim javob bermadi']] as const) {
+  test(`login ${status} → «${title}» bloki, raqam saqlanadi`, async ({ page }) => {
+    await page.route('**/api/v1/auth/login', (route) => route.fulfill({ status, json: { statusCode: status, message: 'x' } }));
+    await page.goto('/login');
+    await page.getByLabel('Telefon raqami').fill('901234567');
+    await page.getByLabel('Parol').fill('Secure123');
+    await page.getByRole('button', { name: 'Kirish', exact: true }).click();
+
+    await expect(page.getByRole('alert')).toContainText(title);
+    await expect(page.getByLabel('Telefon raqami')).toHaveValue('901234567');
+    // Maydon o'zgarsa blok yo'qoladi.
+    await page.getByLabel('Parol').fill('Secure1234');
+    await expect(page.getByRole('alert')).toHaveCount(0);
+  });
+}

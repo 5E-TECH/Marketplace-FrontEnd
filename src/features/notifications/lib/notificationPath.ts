@@ -1,17 +1,14 @@
-import { asRecord, readText } from '../../../shared/api/responseFields';
 import type { UserRole } from '../../auth/model/authTypes';
 import type { AppNotification } from '../model/notificationTypes';
 
 /**
- * Bildirishnoma bosilganda ochiladigan sahifa. Qaytarish (C4.2): `return_*` turlari,
- * `data.returnId` — sotuvchi/operator o'z ro'yxatida, admin admin ro'yxatida ochadi.
- * Sahifasi yo'q turlar faqat o'qilgan qilinadi.
+ * Bildirishnoma bosilganda ochiladigan sahifa. Lid-sotuv modelida bildirishnoma
+ * turlari sahifalari hali qurilmagan (eski `return_*` → `/admin/returns` sahifasi
+ * FE-01 da uzildi), shuning uchun bosilgan xabar faqat o'qilgan qilinadi.
+ * Tur sahifasi qurilganda shu yerda `notification.type` va `role` bo'yicha yo'l qaytariladi.
  */
 export function getNotificationPath(notification: AppNotification, role: UserRole | undefined): string | null {
-  if (!notification.type.startsWith('return_')) return null;
-  const returnId = readText(asRecord(notification.data), 'returnId');
-  if (!returnId) return null;
-  if (role === 'ADMIN' || role === 'SUPERADMIN') return `/admin/returns?id=${encodeURIComponent(returnId)}`;
-  if (role === 'SELLER' || role === 'OPERATOR') return `/returns?id=${encodeURIComponent(returnId)}`;
+  void notification;
+  void role;
   return null;
 }

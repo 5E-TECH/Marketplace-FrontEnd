@@ -2,9 +2,10 @@ import { expect, test, type Page } from '@playwright/test';
 import { authenticatedUser, mockDashboard, mockLogout, mockProducts, mockSellerShop, seedAccessToken } from './support/auth';
 
 /**
- * QA ro'yxati (C6.5, C6.6, C1.46): admin uchala imkoniyatdan panel orqali
- * foydalana oladi — curl kerak emas. Har bir TC boshidan oxirigacha: amal,
- * backendga ketgan so'rov, muvaffaqiyat xabari va ekrandagi yangi holat.
+ * QA ro'yxati (C6.5): admin foydalanuvchi rolini o'zgartiradi va nomidan kiradi —
+ * curl kerak emas (mahsulot yashirish va do'kon tariflari sahifalari FE-01 da uzildi).
+ * Har bir TC boshidan oxirigacha: amal, backendga ketgan so'rov, muvaffaqiyat
+ * xabari va ekrandagi yangi holat.
  * Kompyuter va telefon kengligida tekshiriladi.
  */
 const ADMIN_TOKEN = 'admin.token';
@@ -23,7 +24,8 @@ async function mockAdmin(page: Page, role: 'ADMIN' | 'SUPERADMIN') {
   await mockLogout(page);
   await page.route('**/api/v1/auth/me', (route) => {
     const authorization = route.request().headers().authorization ?? '';
-    if (authorization === `Bearer ${IMPERSONATION_TOKEN}`) return route.fulfill(json({ ...authenticatedUser, id: '42', name: 'Ali Valiyev', role: 'SELLER' }));
+    // Admin foydalanuvchilar bo'limi hali eski rollarda (FE-15); nomidan kirilgan sessiya yangi rol bilan (BE-05).
+    if (authorization === `Bearer ${IMPERSONATION_TOKEN}`) return route.fulfill(json({ ...authenticatedUser, id: '42', name: 'Ali Valiyev', role: 'AFFILIATE' }));
     if (authorization === `Bearer ${ADMIN_TOKEN}`) return route.fulfill(json(admin(role)));
     return route.fulfill(json({ message: 'Token muddati tugagan' }, 401));
   });
@@ -78,7 +80,7 @@ for (const width of [1440, 390]) {
         impersonateCalls += 1;
         return route.fulfill(json({
           impersonationToken: IMPERSONATION_TOKEN, expiresIn: 900, expiresAt: new Date(Date.now() + 900_000).toISOString(),
-          user: { id: '42', name: 'Ali Valiyev', role: 'SELLER', shopId: '15' },
+          user: { id: '42', name: 'Ali Valiyev', role: 'AFFILIATE' },
         }));
       });
       await page.goto('/admin/users/42');
@@ -86,8 +88,8 @@ for (const width of [1440, 390]) {
       await page.getByRole('button', { name: 'Nomidan kirish' }).click();
       await page.getByRole('dialog', { name: 'Ali Valiyev nomidan kirilsinmi?' }).getByRole('button', { name: 'Nomidan kirish' }).click();
 
-      await expect(page).toHaveURL('/');
-      await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+      await expect(page).toHaveURL('/affiliate');
+      await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
       const banner = page.getByTestId('impersonation-banner');
       await expect(banner).toBeVisible();
       await expect(banner).toContainText('Siz Ali Valiyev nomidan ko‘ryapsiz');
@@ -112,114 +114,6 @@ for (const width of [1440, 390]) {
         await expect(page.getByRole('button', { name: 'Nomidan kirish' })).toHaveCount(0);
       }
     });
-
-    test('TC4: mahsulot sabab bilan yashiriladi va qaytariladi', async ({ page }) => {
-      await mockAdmin(page, 'ADMIN');
-      const state = { blocked: false, hideBodies: [] as unknown[], reactivateBodies: [] as (string | null)[] };
-      const product = () => ({
-        id: '12', shopId: '5', ownerUserId: '42', categoryId: '1', name: 'iPhone 16 Pro', slug: 'iphone-16-pro', description: 'Titanium, 256 GB',
-        price: 14_999_000, oldPrice: null, imageUrl: null, images: [], attributes: {}, hasVariants: false, status: 'ACTIVE', rating: 0,
-        createdAt: '2026-08-14T10:00:00.000Z', updatedAt: '2026-09-01T11:30:00.000Z', variants: [], isBlocked: state.blocked,
-      });
-      await page.route(/\/api\/v1\/admin\/shops\/5$/, (route) => route.fulfill(json({ id: '5', ownerUserId: '42', name: 'Texno Market', status: 'ACTIVE', stats: {} })));
-      await page.route('**/api/v1/admin/categories', (route) => route.fulfill(json([{ id: '1', name: 'Smartfonlar', children: [] }])));
-      await page.route('**/api/v1/admin/products/12**', (route) => {
-        const url = route.request().url();
-        if (url.endsWith('/hide')) { state.hideBodies.push(route.request().postDataJSON()); state.blocked = true; return route.fulfill(json({})); }
-        if (url.endsWith('/reactivate')) { state.reactivateBodies.push(route.request().postData()); state.blocked = false; return route.fulfill(json({})); }
-        return route.fulfill(json(product()));
-      });
-      await page.goto('/admin/products/12');
-      const detail = page.getByTestId('detail-page');
-      await expect(detail.getByRole('heading', { name: 'iPhone 16 Pro' })).toBeVisible();
-
-      await page.getByRole('button', { name: 'Yashirish' }).click();
-      const hideDialog = page.getByRole('dialog', { name: 'Mahsulot yashirilsinmi?' });
-      // Sababsiz yashirib bo'lmaydi.
-      await hideDialog.getByRole('button', { name: 'Yashirish' }).click();
-      await expect(hideDialog.getByText('Sotuvchiga yuboriladigan sababni kiriting')).toBeVisible();
-      expect(state.hideBodies).toEqual([]);
-      await hideDialog.getByLabel('Yashirish sababi').fill('Marketplace qoidalariga mos emas');
-      await hideDialog.getByRole('button', { name: 'Yashirish' }).click();
-
-      await expect(page.getByText('Mahsulot yashirildi')).toBeVisible();
-      expect(state.hideBodies).toEqual([{ reason: 'Marketplace qoidalariga mos emas' }]);
-      await expect(detail.getByText('Yashirilgan', { exact: true })).toBeVisible();
-
-      await page.getByRole('button', { name: 'Ko‘rsatish' }).click();
-      await page.getByRole('dialog', { name: 'Mahsulot ko‘rsatilsinmi?' }).getByRole('button', { name: 'Ko‘rsatish' }).click();
-      await expect(page.getByText('Mahsulot yana ko‘rsatiladi')).toBeVisible();
-      expect(state.reactivateBodies).toEqual([null]);
-      await expect(page.getByRole('button', { name: 'Yashirish' })).toBeVisible();
-      await expect(detail.getByText('Yashirilgan', { exact: true })).toHaveCount(0);
-    });
-
-    test('TC5: do‘konga tavsiya belgisi qo‘yiladi va olinadi', async ({ page }) => {
-      await mockAdmin(page, 'ADMIN');
-      const { featureBodies } = await mockShop(page);
-      await page.goto('/admin/shops');
-      await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
-      const drawer = page.getByRole('dialog', { name: /Ali Market/ });
-
-      await drawer.getByRole('button', { name: 'Tavsiya etish' }).click();
-      await expect(page.getByText('Do‘kon bosh sahifaga chiqarildi')).toBeVisible();
-      await expect(drawer.getByRole('button', { name: 'Tavsiyadan olish' })).toBeVisible();
-
-      await drawer.getByRole('button', { name: 'Tavsiyadan olish' }).click();
-      await expect(page.getByText('Do‘kon tavsiyalardan olib tashlandi')).toBeVisible();
-      await expect(drawer.getByRole('button', { name: 'Tavsiya etish' })).toBeVisible();
-      expect(featureBodies).toEqual([{ featured: true }, { featured: false }]);
-    });
-
-    test('TC6: do‘kon tarifi paneldan ko‘riladi va o‘zgartiriladi', async ({ page }) => {
-      await mockAdmin(page, 'ADMIN');
-      const { tariffBodies } = await mockShop(page);
-      await page.goto('/admin/shops');
-      await page.getByRole('button', { name: 'Ali Market tafsilotlarini ko‘rish' }).click();
-      const drawer = page.getByRole('dialog', { name: /Ali Market/ });
-      // Ko'rish: joriy tariflar drawer'da.
-      await expect(drawer).toContainText('25 000 so‘m');
-      await expect(drawer).toContainText('15 000 so‘m');
-
-      await drawer.getByRole('button', { name: 'Tariflar' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Ali Market tariflari' });
-      await expect(dialog.getByLabel('Uyga yetkazish tarifi')).toHaveValue('25000');
-      await expect(dialog.getByLabel('Elchi markazigacha yetkazish tarifi')).toHaveValue('15000');
-      await dialog.getByLabel('Uyga yetkazish tarifi').fill('30000');
-      await dialog.getByLabel('Elchi markazigacha yetkazish tarifi').fill('18000');
-      await dialog.getByRole('button', { name: 'Saqlash' }).click();
-
-      await expect(page.getByText('Yetkazib berish tariflari saqlandi')).toBeVisible();
-      await expect(dialog).toBeHidden();
-      expect(tariffBodies).toEqual([{ tariffHome: 30000, tariffCenter: 18000 }]);
-      // Saqlangach drawer backenddan qayta o'qiladi.
-      await expect(drawer).toContainText('30 000 so‘m');
-      await expect(drawer).toContainText('18 000 so‘m');
-    });
   });
 }
 
-async function mockShop(page: Page) {
-  const state = { featured: false, tariffHome: 25000, tariffCenter: 15000, featureBodies: [] as unknown[], tariffBodies: [] as unknown[] };
-  const shop = () => ({
-    id: '15', ownerUserId: '42', name: 'Ali Market', slug: 'ali-market', description: null, logoUrl: null, bannerUrl: null, status: 'ACTIVE',
-    phone: '+998901234567', regionId: '1', districtId: '2', address: 'Toshkent', rating: 0, ordersCount: 0, elchiMarketId: null, isDeleted: false,
-    isFeatured: state.featured, tariffHome: state.tariffHome, tariffCenter: state.tariffCenter, createdAt: '2026-09-01T10:00:00Z', updatedAt: '2026-09-01T10:00:00Z',
-  });
-  await page.route('**/api/v1/admin/shops?**', (route) => route.fulfill(json({ items: [shop()], total: 1, page: 1, limit: 20 })));
-  await page.route('**/api/v1/admin/shops/15', (route) => route.fulfill(json({ ...shop(), stats: { products: 12, orders: 28, warehouses: 2 } })));
-  await page.route('**/api/v1/admin/shops/15/feature', (route) => {
-    const body = route.request().postDataJSON() as { featured: boolean };
-    state.featureBodies.push(body);
-    state.featured = body.featured;
-    return route.fulfill(json({}, 201));
-  });
-  await page.route('**/api/v1/admin/shops/15/tariffs', (route) => {
-    const body = route.request().postDataJSON() as { tariffHome: number; tariffCenter: number };
-    state.tariffBodies.push(body);
-    state.tariffHome = body.tariffHome;
-    state.tariffCenter = body.tariffCenter;
-    return route.fulfill(json({}));
-  });
-  return state;
-}

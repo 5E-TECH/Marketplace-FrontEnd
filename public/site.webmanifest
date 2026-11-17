@@ -1,18 +1,18 @@
 {
-  "name": "MarketHub Seller",
-  "short_name": "MarketHub",
-  "description": "Marketplace sotuvchilari uchun mahsulot, buyurtma, ombor va savdoni boshqarish platformasi.",
+  "name": "Elchi Market",
+  "short_name": "Elchi",
+  "description": "Elchi Market boshqaruv paneli: sotuvchilar, operatorlar, ombor va moliya jamoasi uchun.",
   "lang": "uz-Latn",
   "start_url": "/login",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#080c16",
-  "theme_color": "#080c16",
+  "background_color": "#f4f6fb",
+  "theme_color": "#1f2853",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/brand/elchi-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     }
   ]

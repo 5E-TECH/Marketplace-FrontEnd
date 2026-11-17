@@ -1,7 +1,8 @@
-# Marketplace — sotuvchi kabineti (frontend)
+# Elchi Market — lid-sotuv paneli (frontend)
 
-Elchi Marketplace'ning sotuvchi kabineti: mahsulot va variantlar, ko'p omborli
-sklad, qoldiq, buyurtmalar va Elchi orqali yetkazib berish.
+Elchi Marketplace'ning lid-sotuv modelidagi paneli: 8 rol (sotuvchi, optovik,
+operator, nazoratchi, omborchi, moliya, admin, superadmin) uchun yagona karkas.
+Dizayn — «E» tizimi (`docs/dizayn` backend repoda): och mavzu, navy menyu, Manrope.
 
 Backend alohida repoda: [`Elchi-Marketplace`](https://github.com/5E-TECH/Elchi-Marketplace) —
 NestJS mikroservis monorepo. Bu ilova u bilan faqat HTTP kontrakt orqali
@@ -50,23 +51,28 @@ echo 'VITE_DEV_API_PROXY=http://192.168.1.10:3000' >> .env.local
 
 ```
 src/
-  app/        providers, router (rol bo'yicha kirish), Redux store
+  app/        providers, Redux store, router: yagona marshrut manifesti
+              (router/routeManifest.tsx — yo'l, rollar, menyu) va RequireRole
   features/   auth, products, orders, stock, warehouses, shop, dashboard
               (har birida: api / model / ui / lib)
   pages/      marshrutga bog'langan sahifalar
-  layouts/    MainLayout — sidebar, header, breadcrumb
+  layouts/    AppShell — barcha rollar uchun yagona karkas (karkas-E): navy menyu,
+              yuqori qator (h1, til, bildirishnoma, foydalanuvchi menyusi),
+              planshet/telefonda chap panel, omborchi relsi, noma'lum rol holati
   shared/     httpClient, xato ishlovchisi, umumiy UI komponentlar
 ```
 
 ## Responsive qoidalar
 
-- Layout kontenti `content` nomli CSS container. Sahifa va uning komponentlari
-  ekran emas, **kontent kengligiga** qarab moslashadi:
-  `@container content (max-width: …)`. Sidebar ochiq/yopiq holati shu tufayli
-  avtomatik hisobga olinadi.
+- Karkas ko'rinishi (karkas-E 4–5): telefon < 768, planshet 768–1023, desktop
+  ≥ 1024; operator ish joyi va omborchi uchun desktop ≥ 1280 (omborchi
+  768–1279 da 96 px relsi). Ko'rinish `data-layout` atributida.
+- Karkas kontenti (`main[data-app-main]`) `content` nomli CSS container. Sahifa
+  va uning komponentlari ekran emas, **kontent kengligiga** qarab moslashadi:
+  `@container content (max-width: …)`.
 - Faqat 4 ta breakpoint: **575** (telefon), **767** (tor), **991** (o'rta),
   **1199** (keng).
-- Portal orqali `body` ga chiqadigan modal/drawer, header, login va storefront
+- Portal orqali `body` ga chiqadigan modal/drawer, yuqori qator va login
   sahifalari layout kontentidan tashqarida — ularda oddiy `@media` ishlatiladi.
 - Jadvallar `DataTable` orqali: sig'masa ustunlar siqilmaydi, panel ichida
   gorizontal scroll bo'ladi (`scroll.x = 'max-content'`).

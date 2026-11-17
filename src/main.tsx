@@ -13,6 +13,8 @@ import {
 import { queryClient } from './shared/api/queryClient';
 import { setupHttpInterceptors } from './shared/api/setupHttpInterceptors';
 import { ErrorBoundary } from './shared/ui/ErrorBoundary/ErrorBoundary';
+// E dizayn shrifti o'zimizda: CSP `font-src 'self'` tashqi shriftga ruxsat bermaydi.
+import '@fontsource-variable/manrope';
 import './styles/global.css';
 
 const ejectHttpInterceptors = setupHttpInterceptors({

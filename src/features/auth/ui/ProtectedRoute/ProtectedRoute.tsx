@@ -5,7 +5,8 @@ import { useCurrentUserQuery } from '../../api/useCurrentUserQuery';
 import { PageLoader } from '../../../../shared/ui/PageLoader/PageLoader';
 import { ContentState } from '../../../../shared/ui/ContentState/ContentState';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
-import { canAccessCabinet } from '../../lib/sellerAccess';
+import { canAccessCabinet } from '../../lib/cabinetAccess';
+import { UnknownRoleError } from '../../lib/unknownRoleError';
 import { useLogoutMutation } from '../../api/useLogoutMutation';
 import { ImpersonationBanner } from '../ImpersonationBanner/ImpersonationBanner';
 
@@ -30,6 +31,12 @@ export function ProtectedRoute() {
     return <>{banner}<PageLoader /></>;
   }
 
+  // Backend bilmagan rol (masalan, eski SELLER): karkas o'zi menyusiz «Noma’lum rol»
+  // holatini, sabab va chiqish yo'lini ko'rsatadi (umumiy-403, FE-01 TC3).
+  if (currentUserQuery.error instanceof UnknownRoleError) {
+    return <>{banner}<Outlet /></>;
+  }
+
   if (currentUserQuery.isError) {
     return <>{banner}
       <ContentState
@@ -44,9 +51,9 @@ export function ProtectedRoute() {
     return <>{banner}
       <ContentState
         state="forbidden"
-        title={t('auth.sellerRequired')}
-        description={t('auth.roleDenied', { role: currentUserQuery.data.role })}
-        actionLabel={t('auth.loginAsSeller')}
+        title={t('auth.accountUnavailableTitle')}
+        description={t('auth.accountUnavailableDescription')}
+        actionLabel={t('auth.switchAccount')}
         onAction={() => logoutMutation.mutate()}
       />
     </>;
