@@ -11,6 +11,7 @@ import { notificationTranslations } from './notificationTranslations';
 import { sellerFinanceTranslations } from './sellerFinanceTranslations';
 import { adminAnalyticsTranslations } from './adminAnalyticsTranslations';
 import { shellTranslations } from './shellTranslations';
+import { foundationTranslations } from './foundationTranslations';
 
 export const translations = {
   uz: {
@@ -87,6 +88,7 @@ export const translations = {
     ...sellerFinanceTranslations.uz,
     ...adminAnalyticsTranslations.uz,
     ...shellTranslations.uz,
+    ...foundationTranslations.uz,
   },
   ru: {
     'common.search': 'Поиск...', 'common.save': 'Сохранить', 'common.cancel': 'Отмена',
@@ -162,6 +164,7 @@ export const translations = {
     ...sellerFinanceTranslations.ru,
     ...adminAnalyticsTranslations.ru,
     ...shellTranslations.ru,
+    ...foundationTranslations.ru,
   },
   en: {
     'common.search': 'Search...', 'common.save': 'Save', 'common.cancel': 'Cancel',
@@ -237,6 +240,7 @@ export const translations = {
     ...sellerFinanceTranslations.en,
     ...adminAnalyticsTranslations.en,
     ...shellTranslations.en,
+    ...foundationTranslations.en,
   },
 } as const satisfies Record<Language, Record<string, string>>;
 

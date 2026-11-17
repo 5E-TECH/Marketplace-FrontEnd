@@ -21,6 +21,9 @@ export default defineConfig({
     channel: 'chrome',
     headless: true,
     trace: 'retain-on-failure',
+    // Dev serverda MSW (mock) yoqilgan bo'lsa ham testlar o'z `page.route` mock'lari bilan
+    // ishlasin: service worker ushlagan so'rovni Playwright ko'rmaydi (FE-02).
+    serviceWorkers: 'block',
   },
   // DIQQAT — port ataylab 5273, Vite'ning standart 5173 si EMAS.
   // `reuseExistingServer: true` portda nima turgan bo'lsa o'shani ishlatadi:
@@ -39,6 +42,6 @@ export default defineConfig({
     // mock bilan ishlaydi: mock qilinmagan so'rov yopiq portga tushib darhol xato
     // beradi — production'ga soxta token bilan chiqib, sessiyani yopib yubormaydi.
     // (Mavjud dev server qayta ishlatilsa bu env qo'llanmaydi — mock'lar baribir shart.)
-    env: { VITE_DEV_API_PROXY: 'http://127.0.0.1:9' },
+    env: { VITE_DEV_API_PROXY: 'http://127.0.0.1:9', VITE_API_MOCKS: 'false' },
   },
 });

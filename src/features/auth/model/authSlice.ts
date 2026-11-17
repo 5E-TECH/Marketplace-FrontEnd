@@ -18,6 +18,11 @@ interface AuthState {
    * Sessiya muddati tugaganda `false`: o'sha foydalanuvchi o'z sahifasiga qaytadi.
    */
   manualLogout: boolean;
+  /**
+   * Sessiya tugadi (refresh ham 401), lekin foydalanuvchi ma'lum: sahifa yopilmaydi,
+   * ustida qayta kirish oynasi chiqadi — kiritilgan ish yo'qolmaydi (umumiy-sessiya §1–2).
+   */
+  sessionExpired: boolean;
 }
 
 const persistedAccessToken = authStorage.getAccessToken();
@@ -34,6 +39,7 @@ const initialState: AuthState = {
     : null,
   impersonationEnd: null,
   manualLogout: false,
+  sessionExpired: false,
 };
 
 const authSlice = createSlice({
@@ -47,6 +53,7 @@ const authSlice = createSlice({
       state.user = null;
       state.impersonationEnd = null;
       state.manualLogout = false;
+      state.sessionExpired = false;
     },
     /**
      * Token yangilandi (refresh cookie orqali). Bu login emas — yuklangan
@@ -63,14 +70,32 @@ const authSlice = createSlice({
     currentUserLoaded(state, action: PayloadAction<AuthUser>) {
       state.user = action.payload;
     },
-    loggedOut(state, action: PayloadAction<{ manual?: boolean } | undefined>) {
+    /** `remote` — boshqa tabda chiqildi; bu tab xabarni qayta tarqatmaydi. */
+    loggedOut(state, action: PayloadAction<{ manual?: boolean; remote?: boolean } | undefined>) {
       state.manualLogout = action.payload?.manual === true;
+      state.sessionExpired = false;
       state.sessionVersion += 1;
       state.accessToken = null;
       state.cookieSession = false;
       state.user = null;
       state.impersonation = null;
       state.impersonationEnd = null;
+    },
+    /** Refresh ham rad etildi: tokenlar o'chadi, foydalanuvchi va sahifa joyida qoladi. */
+    sessionExpired(state) {
+      if (!state.user) return;
+      state.sessionVersion += 1;
+      state.accessToken = null;
+      state.cookieSession = false;
+      state.sessionExpired = true;
+    },
+    /** Oynada o'sha foydalanuvchi qayta kirdi — sahifa qayta yuklanmaydi. */
+    sessionRestored(state, action: PayloadAction<LoginResponse>) {
+      state.sessionVersion += 1;
+      state.accessToken = action.payload.accessToken;
+      state.cookieSession = action.payload.accessToken === null;
+      state.sessionExpired = false;
+      state.manualLogout = false;
     },
     /** Admin sessiyasi saqlanadi; so'rovlar impersonatsiya token'i bilan ketadi. */
     impersonationStarted(state, action: PayloadAction<ImpersonationGrant & { returnTo: string }>) {
@@ -102,6 +127,7 @@ const authSlice = createSlice({
     selectImpersonation: (state) => state.impersonation,
     selectImpersonationEnd: (state) => state.impersonationEnd,
     selectManualLogout: (state) => state.manualLogout,
+    selectSessionExpired: (state) => state.sessionExpired,
   },
 });
 
@@ -113,7 +139,15 @@ export const {
   impersonationEnded,
   impersonationStarted,
   loggedOut,
+  sessionExpired,
+  sessionRestored,
 } = authSlice.actions;
-export const { selectAuthUser, selectImpersonation, selectImpersonationEnd, selectIsAuthenticated, selectManualLogout } =
-  authSlice.selectors;
+export const {
+  selectAuthUser,
+  selectImpersonation,
+  selectImpersonationEnd,
+  selectIsAuthenticated,
+  selectManualLogout,
+  selectSessionExpired,
+} = authSlice.selectors;
 export const authReducer = authSlice.reducer;

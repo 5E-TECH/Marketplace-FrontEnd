@@ -125,7 +125,9 @@ test('doimiy 401 da so‘rov faqat bir marta qaytariladi (cheksiz sikl yo‘q)',
   await mockLogout(page);
 
   await page.goto('/affiliate');
-  await expect(page).toHaveURL(/\/login$/);
+  // Foydalanuvchi ma'lum — sahifa yopilmaydi, ustida «Sessiya tugadi» oynasi (umumiy-sessiya, FE-02).
+  await expect(page.getByTestId('session-expired')).toBeVisible();
+  await expect(page).toHaveURL(/\/affiliate$/);
 
   // Bir marta asl so'rov + bir marta refreshdan keyingi qayta urinish.
   expect(dataCalls).toBe(2);
@@ -186,7 +188,7 @@ test('deploydan keyin eski lazy chunk topilmasa sahifa bir marta yangilanib tikl
   await installAuthenticatedSession(page);
   let chunkRequests = 0;
 
-  await page.route('**/src/pages/PlaceholderPage/PlaceholderPage.tsx*', async (route) => {
+  await page.route('**/src/pages/AffiliateHomePage/AffiliateHomePage.tsx*', async (route) => {
     chunkRequests += 1;
 
     if (chunkRequests === 1) {

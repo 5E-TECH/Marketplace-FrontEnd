@@ -1,0 +1,77 @@
+/* operator-karkas: «Holat» segmentlari va bron/soat. */
+.state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stateLabel {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.segments {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.segment[aria-checked='true'] {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(16 23 51 / 6%);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-text-subtle);
+}
+
+.segment[data-state='ONLINE'] .dot {
+  background: var(--color-success);
+}
+
+.segment[data-state='BREAK'] .dot {
+  background: var(--color-warning);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.meta strong {
+  color: var(--color-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

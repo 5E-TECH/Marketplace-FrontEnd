@@ -1,0 +1,128 @@
+/* operator-bosh: kartalar orasi 20, karta radius 16, padding 20. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.card,
+.idle {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.card h2,
+.idle h2 {
+  margin: 0 0 12px;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.idle {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.idle h2 {
+  margin-bottom: 4px;
+}
+
+.idle p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 21px;
+}
+
+.idleIcon {
+  display: inline-flex;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-muted);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 20px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  line-height: 21px;
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 21px;
+}
+
+.badge,
+.soon {
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge {
+  background: var(--color-action-soft);
+  color: var(--color-action);
+}
+
+.soon {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.metrics dt {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.metrics dd {
+  margin: 4px 0 0;
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;
+}

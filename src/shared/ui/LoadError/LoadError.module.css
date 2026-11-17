@@ -1,0 +1,87 @@
+/* umumiy-xato-yuklanish §1: karta ichida, karkas joyida qoladi. */
+.panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.icon {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  color: var(--color-danger);
+}
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 6px;
+}
+
+.meta,
+.code {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.code {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 0;
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.copy:hover {
+  background: var(--color-sunken);
+}
+
+.copy svg {
+  width: 16px;
+  height: 16px;
+}
