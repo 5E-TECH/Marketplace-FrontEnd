@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { getRoleHome } from '../../../../app/router/routeAccess';
+import { canAccessRoute, getRoleHome } from '../../../../app/router/routeAccess';
 import { useAppSelector } from '../../../../app/store/hooks';
 import { selectAuthUser, selectIsAuthenticated } from '../../model/authSlice';
 
@@ -35,9 +35,13 @@ export function PublicOnlyRoute() {
   const location = useLocation();
   // Profil hali yuklanmagan bo'lsa `/` — u yerdan rol bosh sahifasiga yo'naltiriladi.
   const fallback = user ? getRoleHome(user.role) : '/';
+  const target = getRedirectPath(location.state, fallback);
+  // `from` — oldingi foydalanuvchining sahifasi bo'lishi mumkin (chiqib, boshqa rol bilan
+  // kirilganda). Yangi rolga yopiq bo'lsa 403 emas, o'z bosh sahifasi.
+  const allowed = !user || canAccessRoute(target, user.role);
 
   return isAuthenticated ? (
-    <Navigate to={getRedirectPath(location.state, fallback)} replace />
+    <Navigate to={allowed ? target : fallback} replace />
   ) : (
     <Outlet />
   );

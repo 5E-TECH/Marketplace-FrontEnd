@@ -8,7 +8,7 @@ import {
   operatorUser,
   roleUsers,
 } from './support/auth';
-import { mainNav, pageTitle } from './support/shell';
+import { logoutViaUserMenu, mainNav, pageTitle } from './support/shell';
 
 /**
  * FE-01: 8 rol, yagona marshrut manifesti va karkas-E. Har rol o'z bosh
@@ -66,6 +66,42 @@ test('TC1: OPERATOR_LEAD bilan login → operator karkasi, boshqa menyu yo‘q',
   await expect(mainNav(page).getByRole('link')).toHaveText(roleCases[2].menu);
   await expect(page.getByTestId('user-menu-button')).toContainText('Operator');
   await expect(page.getByRole('searchbox')).toHaveCount(0);
+});
+
+test('chiqib boshqa rol bilan kirilsa — oldingi foydalanuvchi sahifasiga emas, o‘z bosh sahifasiga tushadi', async ({ page }) => {
+  await installAuthenticatedSession(page);
+  let meUser: Record<string, unknown> = roleUsers.AFFILIATE;
+  await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: { data: meUser } }));
+  await page.route('**/api/v1/auth/login', (route) => route.fulfill({ json: { accessToken: TEST_ACCESS_TOKEN } }));
+  await page.goto('/affiliate/offers');
+  await expect(pageTitle(page)).toHaveText('Offerlar');
+  await logoutViaUserMenu(page);
+  await expect(page).toHaveURL(/\/login$/);
+
+  meUser = operatorUser;
+  await page.getByLabel('Telefon raqami').fill('901234567');
+  await page.getByLabel('Parol').fill('Secure123');
+  await page.getByRole('button', { name: 'Kirish', exact: true }).click();
+  await expect(page).toHaveURL(/\/operator$/);
+  await expect(pageTitle(page)).toHaveText('Ish joyi');
+  await expect(page.getByTestId('forbidden-page')).toHaveCount(0);
+});
+
+test('qo‘lda chiqilgach keyingi kirgan odam oldingi sahifaga emas, o‘z bosh sahifasiga tushadi (ruxsati bo‘lsa ham)', async ({ page }) => {
+  await installAuthenticatedSession(page, roleUsers.ADMIN);
+  let meUser: Record<string, unknown> = roleUsers.ADMIN;
+  await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: { data: meUser } }));
+  await page.route('**/api/v1/auth/login', (route) => route.fulfill({ json: { accessToken: TEST_ACCESS_TOKEN } }));
+  await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({ json: { data: [] } }));
+  await page.goto('/admin/categories');
+  await expect(pageTitle(page)).toHaveText('Kategoriyalar');
+  await logoutViaUserMenu(page);
+
+  meUser = roleUsers.SUPERADMIN;
+  await page.getByLabel('Telefon raqami').fill('901234567');
+  await page.getByLabel('Parol').fill('Secure123');
+  await page.getByRole('button', { name: 'Kirish', exact: true }).click();
+  await expect(page).toHaveURL(/\/admin\/moderation$/);
 });
 
 test('TC2: AFFILIATE /admin/* ga kiradi → 403 sahifa, admin so‘rovlari yuborilmaydi', async ({ page }) => {

@@ -66,7 +66,7 @@ export default function ProfilePage() {
     form.setFieldsValue({ password: '', confirmPassword: '' });
     authStorage.setNotice('Parol yangilandi, qayta tizimga kiring');
     queryClient.clear();
-    dispatch(loggedOut());
+    dispatch(loggedOut({ manual: true }));
     void navigate('/login', { replace: true });
   };
 

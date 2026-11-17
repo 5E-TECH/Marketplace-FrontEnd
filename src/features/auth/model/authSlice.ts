@@ -12,6 +12,12 @@ interface AuthState {
   impersonation: ImpersonationSession | null;
   /** Impersonatsiya tugadi: UI bir marta qaytish sahifasiga o'tadi va xabar beradi. */
   impersonationEnd: { reason: ImpersonationEndReason; returnTo: string } | null;
+  /**
+   * Foydalanuvchi o'zi «Chiqish» bosdi: login sahifasi oldingi sahifani eslab
+   * qolmaydi — keyingi kirgan (boshqa) odam o'z bosh sahifasiga tushadi.
+   * Sessiya muddati tugaganda `false`: o'sha foydalanuvchi o'z sahifasiga qaytadi.
+   */
+  manualLogout: boolean;
 }
 
 const persistedAccessToken = authStorage.getAccessToken();
@@ -27,6 +33,7 @@ const initialState: AuthState = {
     ? { ...persistedImpersonation, admin: { accessToken: persistedAccessToken, cookieSession: persistedCookieSession } }
     : null,
   impersonationEnd: null,
+  manualLogout: false,
 };
 
 const authSlice = createSlice({
@@ -39,6 +46,7 @@ const authSlice = createSlice({
       state.cookieSession = action.payload.accessToken === null;
       state.user = null;
       state.impersonationEnd = null;
+      state.manualLogout = false;
     },
     /**
      * Token yangilandi (refresh cookie orqali). Bu login emas — yuklangan
@@ -55,7 +63,8 @@ const authSlice = createSlice({
     currentUserLoaded(state, action: PayloadAction<AuthUser>) {
       state.user = action.payload;
     },
-    loggedOut(state) {
+    loggedOut(state, action: PayloadAction<{ manual?: boolean } | undefined>) {
+      state.manualLogout = action.payload?.manual === true;
       state.sessionVersion += 1;
       state.accessToken = null;
       state.cookieSession = false;
@@ -92,6 +101,7 @@ const authSlice = createSlice({
     selectAuthUser: (state) => state.user,
     selectImpersonation: (state) => state.impersonation,
     selectImpersonationEnd: (state) => state.impersonationEnd,
+    selectManualLogout: (state) => state.manualLogout,
   },
 });
 
@@ -104,6 +114,6 @@ export const {
   impersonationStarted,
   loggedOut,
 } = authSlice.actions;
-export const { selectAuthUser, selectImpersonation, selectImpersonationEnd, selectIsAuthenticated } =
+export const { selectAuthUser, selectImpersonation, selectImpersonationEnd, selectIsAuthenticated, selectManualLogout } =
   authSlice.selectors;
 export const authReducer = authSlice.reducer;
