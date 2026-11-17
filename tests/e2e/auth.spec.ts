@@ -7,18 +7,8 @@ import {
   seedAccessToken,
 } from './support/auth';
 
-test.beforeEach(async ({ page }) => {
-  await page.route('**/api/v1/seller/dashboard', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ data: {
-        ordersTotal: 0, revenue: 0, pendingShipments: 0, delivered: 0,
-        lowStockCount: 0, topProducts: [], salesByDay: [],
-      } }),
-    });
-  });
-});
+/** `/` sotuvchini o'z bosh sahifasiga yo'naltiradi (FE-01). */
+const SELLER_HOME = /\/affiliate$/;
 
 test('TC1: token Authorization headerga Bearer formatida qo‘shiladi', async ({
   page,
@@ -37,7 +27,7 @@ test('TC1: token Authorization headerga Bearer formatida qo‘shiladi', async ({
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+    page.getByRole('heading', { level: 1, name: 'Bosh sahifa' }),
   ).toBeVisible();
   expect(authorizationHeader).toBe(`Bearer ${TEST_ACCESS_TOKEN}`);
 });
@@ -68,7 +58,7 @@ test('TC2: 401 javobi sessiyani tozalab login sahifasiga chiqaradi', async ({
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole('heading', { name: 'Elchi Market' }),
+    page.getByRole('heading', { name: 'Tizimga kirish' }),
   ).toBeVisible();
   expect(
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
@@ -84,11 +74,11 @@ test('TC3: tokensiz himoyalangan route login sahifasiga redirect qiladi', async 
     await route.abort();
   });
 
-  await page.goto('/products');
+  await page.goto('/affiliate');
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole('heading', { name: 'Elchi Market' }),
+    page.getByRole('heading', { name: 'Tizimga kirish' }),
   ).toBeVisible();
   expect(currentUserRequested).toBe(false);
 });
@@ -101,14 +91,14 @@ test('TC4: sahifa yangilanganda token va autentifikatsiya saqlanadi', async ({
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+    page.getByRole('heading', { level: 1, name: 'Bosh sahifa' }),
   ).toBeVisible();
 
   await page.reload();
 
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL(SELLER_HOME);
   await expect(
-    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+    page.getByRole('heading', { level: 1, name: 'Bosh sahifa' }),
   ).toBeVisible();
   expect(
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),
@@ -131,9 +121,9 @@ test('TC5: pending seller sessiyasi saqlanadi va kabinetga kiradi', async ({
 
   await page.goto('/');
 
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL(SELLER_HOME);
   await expect(
-    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+    page.getByRole('heading', { level: 1, name: 'Bosh sahifa' }),
   ).toBeVisible();
   expect(
     await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY),

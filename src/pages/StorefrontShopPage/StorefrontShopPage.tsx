@@ -107,7 +107,7 @@ export default function StorefrontShopPage() {
     if (!shop) return;
     const description = shop.description || t('storefront.noDescription');
     const canonical = `${window.location.origin}/dokon/${encodeURIComponent(shop.slug)}`;
-    const image = shop.logoUrl || `${window.location.origin}/og-markethub.jpg`;
+    const image = shop.logoUrl || `${window.location.origin}/og-elchi.jpg`;
     document.title = `${shop.name} — MarketHub`;
     setMeta('name', 'description', description);
     setMeta('name', 'robots', 'index, follow, max-image-preview:large');

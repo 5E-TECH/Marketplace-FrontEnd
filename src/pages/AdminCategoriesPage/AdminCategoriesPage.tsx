@@ -107,7 +107,7 @@ export default function AdminCategoriesPage() {
       : { name: '', parentId, iconUrl: undefined, sortOrder: 0, isActive: true });
     setEditing(category);
   };
-  return <main className={styles.page}>
+  return <div className={styles.page}>
     <PageHeader title={t('admin.categories.title')} description={t('admin.categories.description')} extra={<Button type="primary" icon={<Plus size={18} />} disabled={!query.data} onClick={() => openForm(null)}>{t('admin.categories.add')}</Button>} />
     {query.isPending ? <ContentState state="loading" /> : query.isError ? <ContentState state="error" title={t('admin.categories.loadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} /> : <>
       <div className={styles.overview}>
@@ -165,5 +165,5 @@ export default function AdminCategoriesPage() {
       setDeleteError('');
       remove.mutate(deleting.id, { onSuccess: () => { setDeleting(null); void message.success(t('admin.categories.deleted')); }, onError: error => setDeleteError(getApiErrorMessage(error)) });
     }} />
-  </main>;
+  </div>;
 }

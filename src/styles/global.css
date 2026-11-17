@@ -8,250 +8,232 @@
   --space-8: 32px;
   --space-12: 48px;
   --space-16: 64px;
-  --radius-xs: 4px;
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 18%), 0 8px 24px rgb(0 0 0 / 10%);
-  --shadow-md: 0 18px 50px rgb(0 0 0 / 20%);
-  --color-bg: #080c16;
+  /* E: kartada soya yo'q (1 px chegara); soya faqat suzuvchi qatlamlarda. */
+  --shadow-sm: 0 1px 2px rgb(16 23 51 / 6%);
+  --shadow-md: 0 16px 40px rgb(16 23 51 / 16%), 0 2px 6px rgb(16 23 51 / 6%);
+  --shadow-floating: var(--shadow-md);
+
+  /* E tokenlari (docs/dizayn: brend-qoidalari 1.1, karkas-E). Yorug' tema — sukut. */
+  --color-bg: #f4f6fb;
   --color-background: var(--color-bg);
-  --color-surface: #121a2a;
-  --color-surface-subtle: #0e1523;
-  --color-surface-hover: #182235;
-  --color-border: #243149;
-  --color-text: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-  --color-accent: #f59e0b;
-  --color-accent-hover: #fbbf24;
-  --color-success: #10b981;
-  --color-success-soft: rgb(16 185 129 / 12%);
-  --color-warning: #f59e0b;
-  --color-warning-soft: rgb(245 158 11 / 12%);
-  --color-error: #ef4444;
-  --color-error-soft: rgb(239 68 68 / 12%);
+  --color-surface: #ffffff;
+  --color-sunken: #f0f3f9;
+  --color-surface-subtle: var(--color-sunken);
+  --color-row-hover: #f7f9fd;
+  --color-surface-hover: var(--color-row-hover);
+  --color-border: #e1e6f0;
+  --color-border-strong: #c9d1e0;
+  --color-field-border: #7c859f;
+  --color-border-hover: #7c859f;
+  --color-text: #101733;
+  --color-text-secondary: #4b5575;
+  --color-text-muted: #4b5575;
+  --color-text-subtle: #7c859f;
+  --color-text-faint: #7c859f;
+  --color-text-soft: #101733;
+  --color-action: #2b50d8;
+  --color-action-hover: #2443b8;
+  --color-action-soft: #e8edfd;
+  --color-focus-ring: rgb(43 80 216 / 28%);
+  --color-accent: var(--color-action);
+  --color-accent-hover: var(--color-action-hover);
+  --color-accent-bright: var(--color-action);
+  --color-accent-soft: var(--color-action-soft);
+  --color-success: #12704f;
+  --color-success-soft: #e3f4ec;
+  --color-warning: #95560a;
+  --color-warning-soft: #fcf0dc;
+  --color-error: #be2a3b;
+  --color-error-soft: #fde8ea;
+  --color-danger: #be2a3b;
+  --color-danger-soft: #be2a3b;
+  --color-info: #1a62a8;
+  --color-info-soft: #e2effa;
+  --color-teal: #12704f;
   --color-white: #fff;
   --color-black: #000;
-  --color-accent-bright: #fb923c;
-  --color-info: #60a5fa;
-  --color-teal: #2dd4bf;
-  --color-danger-soft: #fb7185;
-  --color-control-bg: #0d1525;
-  --color-control-hover: #101a2d;
-  --color-panel-deep: #101827;
-  --color-border-strong: #2d3a55;
-  --color-border-hover: #50617e;
-  --color-text-soft: #d6deeb;
-  --color-text-faint: #71809f;
-  --color-accent-soft: rgb(245 158 11 / 12%);
-  --color-white-soft: rgb(255 255 255 / 4%);
-  --color-overlay: rgb(0 0 0 / 52%);
-  --color-scrollbar: #3b4b69;
-  --color-support: #7c3aed;
-  --color-drawer-bg: #0e1424;
-  --font-display: 600 28px/36px Inter, sans-serif;
-  --font-h2: 600 18px/28px Inter, sans-serif;
-  --font-body: 400 14px/22px Inter, sans-serif;
-  --font-metric: 700 28px/36px Inter, sans-serif;
-  --font-label: 600 12px/18px Inter, sans-serif;
-  --font-caption: 400 12px/18px Inter, sans-serif;
+  --color-control-bg: #ffffff;
+  --color-control-hover: var(--color-row-hover);
+  --color-panel-deep: var(--color-sunken);
+  --color-white-soft: rgb(16 23 51 / 4%);
+  --color-overlay: rgb(16 23 51 / 45%);
+  --color-scrollbar: #c9d1e0;
+  --color-support: var(--color-action);
+  /* Navy menyu (karkas-E 1.2–1.5). */
+  --color-nav: #1f2853;
+  --color-nav-text: rgb(255 255 255 / 80%);
+  --color-nav-muted: rgb(255 255 255 / 52%);
+  --color-nav-hover: rgb(255 255 255 / 8%);
+  --color-nav-active: rgb(255 255 255 / 14%);
+  --color-nav-line: rgb(255 255 255 / 10%);
+  --color-nav-accent: #8ea6ff;
+  --color-drawer-bg: var(--color-nav);
+  --font-family: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 700 24px/32px var(--font-family);
+  --font-h2: 700 16px/24px var(--font-family);
+  --font-body: 400 14px/21px var(--font-family);
+  --font-metric: 700 28px/36px var(--font-family);
+  --font-label: 600 12px/18px var(--font-family);
+  --font-caption: 400 12px/18px var(--font-family);
   --font-size-sm: 0.875rem;
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --color-token-rgb-245-158-11-24: rgb(245 158 11 / 24%);
-  --color-token-526581: #526581;
-  --color-token-rgb-245-158-11-18: rgb(245 158 11 / 18%);
-  --color-token-rgb-245-158-11-45: rgb(245 158 11 / 45%);
-  --color-token-a8b4ca: #a8b4ca;
-  --color-token-e2e8f0: #e2e8f0;
-  --color-token-27344c: #27344c;
-  --color-token-rgb-251-146-60-20: rgb(251 146 60 / 20%);
-  --color-token-rgb-45-212-191-14: rgb(45 212 191 / 14%);
-  --color-token-18243a: #18243a;
-  --color-token-rgb-9-15-28-62: rgb(9 15 28 / 62%);
-  --color-token-rgb-255-255-255-48: rgb(255 255 255 / 48%);
-  --color-token-rgb-9-15-28-72: rgb(9 15 28 / 72%);
-  --color-token-rgb-255-255-255-16: rgb(255 255 255 / 16%);
-  --color-token-rgb-9-15-28-90: rgb(9 15 28 / 90%);
-  --color-token-111a2b: #111a2b;
-  --color-token-rgb-0-0-0-26: rgb(0 0 0 / 26%);
-  --color-token-rgb-15-23-42-34: rgb(15 23 42 / 34%);
-  --color-token-rgb-255-255-255-9: rgb(255 255 255 / 9%);
-  --color-token-rgb-245-158-11-10: rgb(245 158 11 / 10%);
-  --color-token-rgb-245-158-11-28: rgb(245 158 11 / 28%);
-  --color-token-rgb-245-158-11-22: rgb(245 158 11 / 22%);
-  --color-token-rgb-245-158-11-42: rgb(245 158 11 / 42%);
-  --color-token-334155: #334155;
-  --color-token-111827: #111827;
-  --color-token-5eead4: #5eead4;
-  --color-token-91a0be: #91a0be;
-  --color-token-7f8ca8: #7f8ca8;
-  --color-token-rgb-255-255-255-7: rgb(255 255 255 / 7%);
-  --color-token-fda4af: #fda4af;
-  --color-token-rgb-8-12-22-88: rgb(8 12 22 / 88%);
-  --color-token-rgb-0-0-0-12: rgb(0 0 0 / 12%);
-  --color-token-rgb-17-24-39-38: rgb(17 24 39 / 38%);
-  --color-token-rgb-255-255-255-6: rgb(255 255 255 / 6%);
-  --color-token-rgb-245-158-11-8: rgb(245 158 11 / 8%);
-  --color-token-rgb-245-158-11-20: rgb(245 158 11 / 20%);
-  --color-token-rgb-245-158-11-9: rgb(245 158 11 / 9%);
-  --color-token-3a4664: #3a4664;
-  --color-token-rgb-251-146-60-14: rgb(251 146 60 / 14%);
-  --color-token-rgb-251-146-60-10: rgb(251 146 60 / 10%);
-  --color-token-rgb-251-146-60-15: rgb(251 146 60 / 15%);
-  --color-token-rgb-251-146-60-8: rgb(251 146 60 / 8%);
-  --color-token-151c2f: #151c2f;
-  --color-token-d8deea: #d8deea;
-  --color-token-rgb-148-163-184-12: rgb(148 163 184 / 12%);
-  --color-token-rgb-251-113-133-14: rgb(251 113 133 / 14%);
-  --color-token-8e9ab2: #8e9ab2;
-  --color-token-6f7c96: #6f7c96;
-  --color-token-27314a: #27314a;
-  --color-token-f4f6fa: #f4f6fa;
-  --color-token-e2e6ef: #e2e6ef;
-  --color-token-rgb-31-41-55-10: rgb(31 41 55 / 10%);
-  --color-token-rgb-31-41-55-5: rgb(31 41 55 / 5%);
-  --color-token-8d93a6: #8d93a6;
-  --color-token-737b91: #737b91;
-  --color-token-6750e7: #6750e7;
-  --color-token-159fea: #159fea;
-  --color-token-5e54e8: #5e54e8;
-  --color-token-753fdc: #753fdc;
-  --color-token-rgb-71-86-218-28: rgb(71 86 218 / 28%);
-  --color-token-rgb-255-255-255-30: rgb(255 255 255 / 30%);
-  --color-token-20263b: #20263b;
-  --color-token-33364a: #33364a;
-  --color-token-353d5c: #353d5c;
-  --color-token-30364d: #30364d;
-  --color-token-rgb-248-249-253-90: rgb(248 249 253 / 90%);
-  --color-token-e1e4ee: #e1e4ee;
-  --color-token-rgb-32-38-59-3: rgb(32 38 59 / 3%);
-  --color-token-b9bfea: #b9bfea;
-  --color-token-rgb-103-80-231-12: rgb(103 80 231 / 12%);
-  --color-token-667085: #667085;
-  --color-token-4f46e5: #4f46e5;
-  --color-token-eef2ff: #eef2ff;
-  --color-token-818cf8: #818cf8;
-  --color-token-9298aa: #9298aa;
-  --color-token-444a61: #444a61;
-  --color-token-dfe2ec: #dfe2ec;
-  --color-token-159fe7: #159fe7;
-  --color-token-3e72e4: #3e72e4;
-  --color-token-7042dc: #7042dc;
-  --color-token-rgb-63-105-218-20: rgb(63 105 218 / 20%);
-  --color-token-rgb-63-105-218-28: rgb(63 105 218 / 28%);
-  --color-token-108ed2: #108ed2;
-  --color-token-316cd1: #316cd1;
-  --color-token-6537c5: #6537c5;
-  --color-token-rgb-56-189-248-5: rgb(56 189 248 / 5%);
-  --color-token-22d3ee: #22d3ee;
-  --color-token-rgb-34-211-238-12: rgb(34 211 238 / 12%);
-  --color-token-rgb-34-211-238-22: rgb(34 211 238 / 22%);
-  --color-token-rgb-239-68-68-10: rgb(239 68 68 / 10%);
-  --color-token-rgb-245-158-11-7: rgb(245 158 11 / 7%);
-  --color-token-172136: #172136;
-  --color-token-rgb-251-146-60-12: rgb(251 146 60 / 12%);
-  --color-token-161f34: #161f34;
-  --color-token-2a3650: #2a3650;
-  --color-token-rgb-45-212-191-8: rgb(45 212 191 / 8%);
-  --color-token-rgb-251-146-60-24: rgb(251 146 60 / 24%);
-  --color-token-rgb-255-255-255-10: rgb(255 255 255 / 10%);
-  --color-token-rgb-15-23-42-22: rgb(15 23 42 / 22%);
-  --color-token-rgb-255-255-255-3: rgb(255 255 255 / 3%);
-  --color-token-rgb-251-146-60-11: rgb(251 146 60 / 11%);
-  --color-token-c5cfdf: #c5cfdf;
-  --color-token-263149: #263149;
-  --color-token-5f6d85: #5f6d85;
-  --color-token-e7edf7: #e7edf7;
-  --color-token-7f8da5: #7f8da5;
-  --color-token-rgb-251-146-60-9: rgb(251 146 60 / 9%);
-  --color-token-40506d: #40506d;
-  --color-token-111b2e: #111b2e;
-  --color-token-rgb-251-146-60-65: rgb(251 146 60 / 65%);
-  --color-token-rgb-251-146-60-16: rgb(251 146 60 / 16%);
-  --color-token-60708d: #60708d;
-  --color-token-0b1220: #0b1220;
-  --color-token-rgb-4-9-17-52: rgb(4 9 17 / 52%);
-  --color-token-rgb-5-10-19-72: rgb(5 10 19 / 72%);
-  --color-token-rgb-5-10-19-80: rgb(5 10 19 / 80%);
-  --color-token-b7c2d5: #b7c2d5;
-  --color-token-rgb-251-113-133-10: rgb(251 113 133 / 10%);
-  --color-token-3a4968: #3a4968;
-  --color-token-rgb-59-130-246-13: rgb(59 130 246 / 13%);
-  --color-token-rgb-16-185-129-13: rgb(16 185 129 / 13%);
-  --color-token-rgb-245-158-11-13: rgb(245 158 11 / 13%);
+  /*
+   * Eski qorong'i temadan qolgan nuqtaviy ranglar (FE-03 da butunlay
+   * tozalanadi). Qiymatlari yorug' temaga moslab o'girildi.
+   */
+  --color-token-rgb-245-158-11-24: rgb(43 80 216 / 24%);
+  --color-token-526581: #f0f3f9;
+  --color-token-rgb-245-158-11-18: rgb(43 80 216 / 18%);
+  --color-token-rgb-245-158-11-45: rgb(43 80 216 / 45%);
+  --color-token-a8b4ca: #4b5575;
+  --color-token-e2e8f0: #101733;
+  --color-token-27344c: #ffffff;
+  --color-token-rgb-251-146-60-20: rgb(43 80 216 / 20%);
+  --color-token-rgb-45-212-191-14: rgb(18 112 79 / 14%);
+  --color-token-18243a: #ffffff;
+  --color-token-rgb-9-15-28-62: rgb(16 23 51 / 16%);
+  --color-token-rgb-255-255-255-48: #7c859f;
+  --color-token-rgb-9-15-28-72: rgb(16 23 51 / 18%);
+  --color-token-rgb-255-255-255-16: rgb(16 23 51 / 10%);
+  --color-token-rgb-9-15-28-90: rgb(16 23 51 / 22%);
+  --color-token-111a2b: #ffffff;
+  --color-token-rgb-0-0-0-26: rgb(16 23 51 / 6%);
+  --color-token-rgb-15-23-42-34: rgb(16 23 51 / 8%);
+  --color-token-rgb-255-255-255-9: rgb(16 23 51 / 5%);
+  --color-token-rgb-245-158-11-10: rgb(43 80 216 / 10%);
+  --color-token-rgb-245-158-11-28: rgb(43 80 216 / 28%);
+  --color-token-rgb-245-158-11-22: rgb(43 80 216 / 22%);
+  --color-token-rgb-245-158-11-42: rgb(43 80 216 / 42%);
+  --color-token-334155: #f0f3f9;
+  --color-token-111827: #101733;
+  --color-token-5eead4: #12704f;
+  --color-token-91a0be: #4b5575;
+  --color-token-7f8ca8: #4b5575;
+  --color-token-rgb-255-255-255-7: rgb(16 23 51 / 4%);
+  --color-token-fda4af: #be2a3b;
+  --color-token-rgb-8-12-22-88: rgb(16 23 51 / 22%);
+  --color-token-rgb-0-0-0-12: rgb(16 23 51 / 4%);
+  --color-token-rgb-17-24-39-38: rgb(16 23 51 / 10%);
+  --color-token-rgb-255-255-255-6: rgb(16 23 51 / 4%);
+  --color-token-rgb-245-158-11-8: rgb(43 80 216 / 8%);
+  --color-token-rgb-245-158-11-20: rgb(43 80 216 / 20%);
+  --color-token-rgb-245-158-11-9: rgb(43 80 216 / 9%);
+  --color-token-3a4664: #e1e6f0;
+  --color-token-rgb-251-146-60-14: rgb(43 80 216 / 14%);
+  --color-token-rgb-251-146-60-10: rgb(43 80 216 / 10%);
+  --color-token-rgb-251-146-60-15: rgb(43 80 216 / 15%);
+  --color-token-rgb-251-146-60-8: rgb(43 80 216 / 8%);
+  --color-token-151c2f: #ffffff;
+  --color-token-d8deea: #101733;
+  --color-token-rgb-148-163-184-12: rgb(16 23 51 / 12%);
+  --color-token-rgb-251-113-133-14: rgb(190 42 59 / 14%);
+  --color-token-8e9ab2: #4b5575;
+  --color-token-6f7c96: #4b5575;
+  --color-token-27314a: #e1e6f0;
+  --color-token-f4f6fa: #ffffff;
+  --color-token-e2e6ef: #e1e6f0;
+  --color-token-rgb-31-41-55-10: rgb(16 23 51 / 10%);
+  --color-token-rgb-31-41-55-5: rgb(16 23 51 / 5%);
+  --color-token-8d93a6: #4b5575;
+  --color-token-737b91: #f0f3f9;
+  --color-token-6750e7: #2b50d8;
+  --color-token-159fea: #1a62a8;
+  --color-token-5e54e8: #2b50d8;
+  --color-token-753fdc: #2b50d8;
+  --color-token-rgb-71-86-218-28: rgb(43 80 216 / 28%);
+  --color-token-rgb-255-255-255-30: rgb(16 23 51 / 18%);
+  --color-token-20263b: #4b5575;
+  --color-token-33364a: #4b5575;
+  --color-token-353d5c: #4b5575;
+  --color-token-30364d: #4b5575;
+  --color-token-rgb-248-249-253-90: rgb(16 23 51 / 90%);
+  --color-token-e1e4ee: #e1e6f0;
+  --color-token-rgb-32-38-59-3: rgb(16 23 51 / 3%);
+  --color-token-b9bfea: #e1e6f0;
+  --color-token-rgb-103-80-231-12: rgb(43 80 216 / 12%);
+  --color-token-667085: #4b5575;
+  --color-token-4f46e5: #2b50d8;
+  --color-token-eef2ff: #ffffff;
+  --color-token-818cf8: #2b50d8;
+  --color-token-9298aa: #4b5575;
+  --color-token-444a61: #4b5575;
+  --color-token-dfe2ec: #e1e6f0;
+  --color-token-159fe7: #1a62a8;
+  --color-token-3e72e4: #2b50d8;
+  --color-token-7042dc: #2b50d8;
+  --color-token-rgb-63-105-218-20: rgb(43 80 216 / 20%);
+  --color-token-rgb-63-105-218-28: rgb(43 80 216 / 28%);
+  --color-token-108ed2: #1a62a8;
+  --color-token-316cd1: #2b50d8;
+  --color-token-6537c5: #2b50d8;
+  --color-token-rgb-56-189-248-5: rgb(26 98 168 / 5%);
+  --color-token-22d3ee: #12704f;
+  --color-token-rgb-34-211-238-12: rgb(18 112 79 / 12%);
+  --color-token-rgb-34-211-238-22: rgb(18 112 79 / 22%);
+  --color-token-rgb-239-68-68-10: rgb(190 42 59 / 10%);
+  --color-token-rgb-245-158-11-7: rgb(43 80 216 / 7%);
+  --color-token-172136: #ffffff;
+  --color-token-rgb-251-146-60-12: rgb(43 80 216 / 12%);
+  --color-token-161f34: #ffffff;
+  --color-token-2a3650: #f0f3f9;
+  --color-token-rgb-45-212-191-8: rgb(18 112 79 / 8%);
+  --color-token-rgb-251-146-60-24: rgb(43 80 216 / 24%);
+  --color-token-rgb-255-255-255-10: rgb(16 23 51 / 6%);
+  --color-token-rgb-15-23-42-22: rgb(16 23 51 / 6%);
+  --color-token-rgb-255-255-255-3: rgb(16 23 51 / 3%);
+  --color-token-rgb-251-146-60-11: rgb(43 80 216 / 11%);
+  --color-token-c5cfdf: #4b5575;
+  --color-token-263149: #ffffff;
+  --color-token-5f6d85: #7c859f;
+  --color-token-e7edf7: #101733;
+  --color-token-7f8da5: #4b5575;
+  --color-token-rgb-251-146-60-9: rgb(43 80 216 / 9%);
+  --color-token-40506d: #f0f3f9;
+  --color-token-111b2e: #ffffff;
+  --color-token-rgb-251-146-60-65: rgb(43 80 216 / 65%);
+  --color-token-rgb-251-146-60-16: rgb(43 80 216 / 16%);
+  --color-token-60708d: #4b5575;
+  --color-token-0b1220: #ffffff;
+  --color-token-rgb-4-9-17-52: rgb(16 23 51 / 13%);
+  --color-token-rgb-5-10-19-72: rgb(16 23 51 / 18%);
+  --color-token-rgb-5-10-19-80: rgb(16 23 51 / 20%);
+  --color-token-b7c2d5: #4b5575;
+  --color-token-rgb-251-113-133-10: rgb(190 42 59 / 10%);
+  --color-token-3a4968: #e1e6f0;
+  --color-token-rgb-59-130-246-13: rgb(43 80 216 / 13%);
+  --color-token-rgb-16-185-129-13: rgb(18 112 79 / 13%);
+  --color-token-rgb-245-158-11-13: rgb(43 80 216 / 13%);
 }
 
 /*
- * Ant Design overlaylari portal orqali body ichiga render qilinadi. CSS module
- * scope ularga doim yetib bormaydi, shuning uchun barcha popup yuzalari shu
- * markaziy dark palette bilan bir xil qilinadi.
+ * Ant Design overlaylari portal orqali body ichiga render qilinadi. E qoidasi:
+ * fon rgba(16,23,51,.45), blur yo'q; suzuvchi qatlam — oq, 1 px chegara, soya-2.
  */
 :where(.ant-modal-root) .ant-modal-mask,
 :where(.ant-drawer-root) .ant-drawer-mask {
   background: var(--color-overlay) !important;
-  backdrop-filter: blur(3px);
 }
 
-:where(.ant-modal-root) .ant-modal-content,
-:where(.ant-modal-root) .ant-modal-container,
-:where(.ant-modal-root) .ant-modal-header,
-:where(.ant-modal-root) .ant-modal-footer,
-:where(.ant-drawer-root) .ant-drawer-content,
-:where(.ant-drawer-root) .ant-drawer-header,
-:where(.ant-drawer-root) .ant-drawer-body,
-:where(.ant-popover) .ant-popover-inner,
-:where(.ant-select-dropdown),
-:where(.ant-dropdown) .ant-dropdown-menu,
-:where(.ant-picker-dropdown) .ant-picker-panel-container {
-  color: var(--color-text) !important;
-  background: var(--color-surface) !important;
-}
-
-:where(.ant-modal-root) .ant-modal-content,
-:where(.ant-modal-root) .ant-modal-container,
 :where(.ant-popover) .ant-popover-inner,
 :where(.ant-select-dropdown),
 :where(.ant-dropdown) .ant-dropdown-menu,
 :where(.ant-picker-dropdown) .ant-picker-panel-container {
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md) !important;
+  box-shadow: var(--shadow-floating);
 }
 
-:where(.ant-modal-root) .ant-modal-title,
-:where(.ant-popover) .ant-popover-title {
-  color: var(--color-text) !important;
-}
-
-:where(.ant-modal-root) .ant-modal-body,
-:where(.ant-popover) .ant-popover-inner-content {
-  color: var(--color-text-secondary) !important;
-}
-
-:where(.ant-modal-root) .ant-input,
-:where(.ant-modal-root) .ant-input-affix-wrapper,
-:where(.ant-modal-root) .ant-input-number,
-:where(.ant-modal-root) .ant-input-number-input,
-:where(.ant-modal-root) .ant-select-selector,
-:where(.ant-modal-root) textarea.ant-input {
-  color: var(--color-text) !important;
-  background: var(--color-surface-subtle) !important;
-  border-color: var(--color-border) !important;
-}
-
-:where(.ant-select-dropdown) .ant-select-item-option-active:not(.ant-select-item-option-disabled),
-:where(.ant-dropdown) .ant-dropdown-menu-item:hover,
-:where(.ant-dropdown) .ant-dropdown-menu-submenu-title:hover {
-  background: var(--color-surface-hover) !important;
-}
-
-:where(.ant-select-dropdown) .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  color: var(--color-accent) !important;
-  background: var(--color-accent-soft) !important;
+:where(.ant-modal-root) .ant-modal-container {
+  border: 1px solid var(--color-border);
 }
 
 * {
@@ -260,7 +242,7 @@
 
 html {
   min-width: 320px;
-  background: var(--ant-color-bg-layout);
+  background: var(--color-bg);
 }
 
 body {
@@ -280,14 +262,19 @@ select {
 }
 
 a {
+  color: var(--color-action);
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-action-hover);
 }
 
 .ant-btn,
 .ant-input,
 .ant-input-affix-wrapper,
 .ant-select-selector {
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease !important;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease !important;
 }
 
 /*
@@ -295,7 +282,7 @@ a {
  * jadval ota konteynerni kontentdan kengaytirib, sahifani kesib yuboradi.
  * :where — nol specificity: antd yoki CSS module'dagi har qanday aniq qoida ustun.
  */
-:where(.ant-layout-content) :where(main, section, article, header, footer, aside, form, div, ul, ol, li, dl) {
+:where(.ant-layout-content, [data-app-main]) :where(main, section, article, header, footer, aside, form, div, ul, ol, li, dl) {
   min-width: 0;
 }
 
@@ -307,36 +294,23 @@ a {
 .ant-table-content::-webkit-scrollbar-track { background: transparent; }
 .ant-table-content::-webkit-scrollbar-thumb { background: var(--color-scrollbar); border-radius: 999px; }
 
+/* E: global fokus — 2 px `action` chiziq, 2 px oraliq. */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-action);
   outline-offset: 2px;
 }
 
+/* E jadvali: sarlavha 12/600 katta harf +0.04em, kulrang; qatorlar faqat pastki chiziq bilan. */
 .ant-table-thead > tr > th {
-  color: var(--color-text-secondary) !important;
+  color: var(--color-text-muted) !important;
   font: var(--font-label);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .ant-table-tbody > tr > td {
-  position: relative;
   font-size: 14px;
-}
-
-.ant-table-tbody > tr > td:not(:last-child)::after {
-  position: absolute;
-  top: 12px;
-  right: 0;
-  bottom: 12px;
-  width: 1px;
-  background: color-mix(in srgb, var(--color-border) 72%, transparent);
-  content: '';
-  pointer-events: none;
-}
-
-.ant-table-tbody > tr:hover > td:not(:last-child)::after {
-  background: color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+  font-variant-numeric: tabular-nums;
 }
 
 .ant-pagination {

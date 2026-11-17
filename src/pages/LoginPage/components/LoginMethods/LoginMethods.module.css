@@ -1,0 +1,114 @@
+/* umumiy-kirish: chap navy blok (desktop) va telefondagi och blok. */
+.navy {
+  display: flex;
+  flex: 1 1 360px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  max-width: 560px;
+  min-width: 0;
+  padding: 20px clamp(16px, 2.4vw, 32px) 32px;
+  background: var(--color-nav);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  padding: 0 16px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+.method {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.method dt {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.method dd {
+  margin: 0;
+  color: var(--color-nav-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.method .note {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.navy .method[aria-current='true'] {
+  background: var(--color-nav-active);
+}
+
+/* Telefon: forma ostida, kartalar, izohsiz. */
+.light {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  padding: 16px 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.light .body {
+  gap: 8px;
+}
+
+.light .title {
+  padding: 0;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+.light .list {
+  gap: 8px;
+}
+
+.light .method {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.light .method dt {
+  color: var(--color-text);
+}
+
+.light .method dd {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.light .method[aria-current='true'] {
+  border-color: var(--color-action-soft);
+  background: var(--color-action-soft);
+}

@@ -7,11 +7,20 @@
 .heading { min-width: 0; flex: 1 1 320px; }
 .before { margin-bottom: 8px; }
 .before :global(.ant-btn) { margin-inline-start: -12px; color: var(--color-text-secondary); }
-.before :global(.ant-btn:hover) { color: var(--color-accent) !important; }
 
 .title {
   margin: 0 0 var(--space-1) !important;
   font: var(--font-display) !important;
+}
+
+/* Karkas ichida: asboblar qatori (karkas-E 1.12) — chapda izoh, o'ngda amallar. */
+.toolbar {
+  margin-bottom: var(--space-5);
+}
+
+.description {
+  font-size: 14px;
+  line-height: 21px;
 }
 
 @container content (max-width: 575px) {
@@ -25,8 +34,8 @@
   .heading { flex: none; }
 
   .title {
-    font-size: 22px !important;
-    line-height: 30px !important;
+    font-size: 20px !important;
+    line-height: 28px !important;
     overflow-wrap: anywhere;
   }
 }

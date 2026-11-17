@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
   await installAuthenticatedSession(page);
 });
 
-for (const role of ['SELLER', 'ADMIN', 'SUPERADMIN', 'OPERATOR'] as const) {
+for (const role of ['AFFILIATE', 'WHOLESALER', 'OPERATOR_LEAD', 'SUPERVISOR', 'WAREHOUSE', 'FINANCE', 'ADMIN', 'SUPERADMIN'] as const) {
   test(`${role} roli profil sahifasiga kira oladi`, async ({ page }) => {
     await page.route('**/api/v1/auth/me', (route) => route.fulfill({
       status: 200,

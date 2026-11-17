@@ -11,7 +11,27 @@ export interface LoginResponse {
   accessToken: string | null;
 }
 
-export type UserRole = 'SELLER' | 'OPERATOR' | 'BUYER' | 'ADMIN' | 'SUPERADMIN';
+/**
+ * Lid-sotuv modelidagi 8 rol (BE-05). Eski SELLER, OPERATOR va BUYER yo'q:
+ * mijoz tizim foydalanuvchisi emas, do'kon xodimi o'rnini lid operatori oldi.
+ * Rollar OpenAPI'ga chiqmaydi, shuning uchun ro'yxat shu yerda yagona.
+ */
+export const USER_ROLES = [
+  'AFFILIATE',
+  'WHOLESALER',
+  'OPERATOR_LEAD',
+  'SUPERVISOR',
+  'WAREHOUSE',
+  'FINANCE',
+  'ADMIN',
+  'SUPERADMIN',
+] as const;
+
+export type UserRole = (typeof USER_ROLES)[number];
+
+export function isUserRole(value: unknown): value is UserRole {
+  return typeof value === 'string' && (USER_ROLES as readonly string[]).includes(value);
+}
 
 export interface AuthUser {
   id: string;
@@ -34,7 +54,8 @@ export interface UpdateAuthProfilePayload {
 }
 
 export interface AuthSession extends LoginResponse {
-  user: AuthUser;
+  /** `null` — rol noma'lum: sessiya bor, profilni `/auth/me` qayta tekshiradi. */
+  user: AuthUser | null;
 }
 export interface AuthDeviceSession { id: string; userAgent: string; ipAddress: string; createdAt: string; lastUsedAt: string | null; current: boolean }
 

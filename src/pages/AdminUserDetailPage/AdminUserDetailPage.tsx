@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getDefaultRoute } from '../../app/router/appRouteConfig';
+import { getRoleHome } from '../../app/router/routeAccess';
 import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
 import { impersonationStarted, selectAuthUser } from '../../features/auth/model/authSlice';
 import {
@@ -150,7 +150,7 @@ export default function AdminUserDetailPage() {
 
   if (!userId || userQuery.isPending || userQuery.isError || !user) {
     return (
-      <main className={styles.statePage}>
+      <div className={styles.statePage}>
         <PageHeader
           before={<BackButton fallback="/admin/users" />}
           title={t('admin.users.detailTitle')}
@@ -172,7 +172,7 @@ export default function AdminUserDetailPage() {
         ) : (
           <ContentState state="loading" />
         )}
-      </main>
+      </div>
     );
   }
 
@@ -204,7 +204,7 @@ export default function AdminUserDetailPage() {
       onSuccess: (grant) => {
         setImpersonateDialogOpen(false);
         dispatch(impersonationStarted({ ...grant, returnTo: `/admin/users/${encodeURIComponent(user.id)}` }));
-        void navigate(getDefaultRoute(grant.user.role), { replace: true });
+        void navigate(getRoleHome(grant.user.role), { replace: true });
       },
       onError: (error) => void message.error(getApiErrorMessage(error)),
     });

@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '../../../app/store/hooks';
+import { shouldRetry } from '../../../shared/api/queryClient';
+import { UnknownRoleError } from '../lib/unknownRoleError';
 import { currentUserLoaded, selectIsAuthenticated } from '../model/authSlice';
 import { getCurrentUser } from './authApi';
 
@@ -17,5 +19,11 @@ export function useCurrentUserQuery() {
     },
     enabled: isAuthenticated,
     staleTime: 5 * 60_000,
+    // Noma'lum rolni qayta so'rash javobni o'zgartirmaydi.
+    retry: (failureCount, error) => !(error instanceof UnknownRoleError) && shouldRetry(failureCount, error),
+    // Xato holatidagi profilni yangi kuzatuvchi (masalan, karkas) ulanganda qayta so'ramaydi:
+    // aks holda ma'lumotsiz so'rov `pending` ga qaytib, ProtectedRoute karkasni yechadi va
+    // u qayta ulanib yana so'raydi — cheksiz aylanish. Qayta urinish — faqat tugma bilan.
+    retryOnMount: false,
   });
 }

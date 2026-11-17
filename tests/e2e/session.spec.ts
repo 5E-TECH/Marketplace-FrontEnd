@@ -3,17 +3,17 @@ import type { Page } from '@playwright/test';
 import {
   authenticatedUser,
   installAuthenticatedSession,
-  mockDashboard,
   mockLogout,
-  mockProducts,
-  mockSellerShop,
   seedAccessToken,
 } from './support/auth';
 
 const REFRESHED_TOKEN = 'e2e.refreshed.token';
 
-const ordersPage = {
-  data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 },
+// Sotuvchi bosh sahifasida header qo'ng'iroqchasi bildirishnomalarni so'raydi —
+// token yangilanishi shu ma'lumot so'rovida tekshiriladi.
+const NOTIFICATIONS = '**/api/v1/notifications**';
+const notificationsPage = {
+  data: { items: [], total: 0, unreadCount: 0, page: 1, limit: 20 },
 };
 
 function unauthorized() {
@@ -59,7 +59,7 @@ test('access token muddati tuganda sessiya refresh orqali tiklanadi', async ({
   page,
 }) => {
   const meTokens: string[] = [];
-  const orderTokens: string[] = [];
+  const dataTokens: string[] = [];
   let refreshCalls = 0;
 
   await seedAccessToken(page);
@@ -77,33 +77,25 @@ test('access token muddati tuganda sessiya refresh orqali tiklanadi', async ({
     { statusCode: 200, message: 'OK', data: authenticatedUser },
     meTokens,
   );
-  await mockExpiringEndpoint(
-    page,
-    '**/api/v1/seller/orders**',
-    ordersPage,
-    orderTokens,
-  );
+  await mockExpiringEndpoint(page, NOTIFICATIONS, notificationsPage, dataTokens);
   await mockLogout(page);
-  await mockProducts(page);
-  await mockDashboard(page);
-  await mockSellerShop(page);
 
-  await page.goto('/orders');
+  await page.goto('/affiliate');
 
   // Sahifa login'ga tashlanmaydi — so'rovlar yangi token bilan qaytariladi.
-  await expect(page.getByRole('heading', { name: 'Buyurtmalar' })).toBeVisible();
-  await expect(page).toHaveURL(/\/orders$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
+  await expect(page).toHaveURL(/\/affiliate$/);
 
   expect(refreshCalls).toBeGreaterThan(0);
   expect(meTokens.at(-1)).toBe(`Bearer ${REFRESHED_TOKEN}`);
-  expect(orderTokens.at(-1)).toBe(`Bearer ${REFRESHED_TOKEN}`);
+  await expect.poll(() => dataTokens.at(-1)).toBe(`Bearer ${REFRESHED_TOKEN}`);
 });
 
 test('doimiy 401 da so‘rov faqat bir marta qaytariladi (cheksiz sikl yo‘q)', async ({
   page,
 }) => {
   let refreshCalls = 0;
-  let orderCalls = 0;
+  let dataCalls = 0;
 
   await seedAccessToken(page);
   await page.route('**/api/v1/auth/refresh', async (route) => {
@@ -126,20 +118,17 @@ test('doimiy 401 da so‘rov faqat bir marta qaytariladi (cheksiz sikl yo‘q)',
     });
   });
   // Token yangilangandan keyin ham 401 — server haqiqatan ruxsat bermayapti.
-  await page.route('**/api/v1/seller/orders**', async (route) => {
-    orderCalls += 1;
+  await page.route(NOTIFICATIONS, async (route) => {
+    dataCalls += 1;
     await route.fulfill(unauthorized());
   });
   await mockLogout(page);
-  await mockProducts(page);
-  await mockDashboard(page);
-  await mockSellerShop(page);
 
-  await page.goto('/orders');
+  await page.goto('/affiliate');
   await expect(page).toHaveURL(/\/login$/);
 
   // Bir marta asl so'rov + bir marta refreshdan keyingi qayta urinish.
-  expect(orderCalls).toBe(2);
+  expect(dataCalls).toBe(2);
   expect(refreshCalls).toBe(1);
 });
 
@@ -155,7 +144,7 @@ test('refresh ham ishlamasa foydalanuvchi login sahifasiga qaytariladi', async (
   });
   await mockLogout(page);
 
-  await page.goto('/orders');
+  await page.goto('/affiliate');
 
   await expect(page).toHaveURL(/\/login$/);
 });
@@ -183,14 +172,10 @@ test('refresh paytida profil so‘rovi vaqtincha ishlamasa avtomatik tiklanadi',
       body: JSON.stringify({ data: authenticatedUser }),
     });
   });
-  await mockDashboard(page);
-  await mockProducts(page);
-  await mockSellerShop(page);
-
   await page.goto('/');
 
   await expect(
-    page.getByRole('heading', { name: 'Boshqaruv paneli' }),
+    page.getByRole('heading', { level: 1, name: 'Bosh sahifa' }),
   ).toBeVisible();
   expect(profileCalls).toBe(2);
 });
@@ -201,7 +186,7 @@ test('deploydan keyin eski lazy chunk topilmasa sahifa bir marta yangilanib tikl
   await installAuthenticatedSession(page);
   let chunkRequests = 0;
 
-  await page.route('**/src/pages/ProductsPage/ProductsPage.tsx*', async (route) => {
+  await page.route('**/src/pages/PlaceholderPage/PlaceholderPage.tsx*', async (route) => {
     chunkRequests += 1;
 
     if (chunkRequests === 1) {
@@ -212,9 +197,9 @@ test('deploydan keyin eski lazy chunk topilmasa sahifa bir marta yangilanib tikl
     await route.continue();
   });
 
-  await page.goto('/products');
+  await page.goto('/affiliate');
 
-  await expect(page.getByRole('heading', { name: 'Mahsulotlar' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
   expect(chunkRequests).toBe(2);
   await expect(page.getByText('Nimadir noto‘g‘ri ketdi')).toHaveCount(0);
 });

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ACCESS_TOKEN_KEY, authenticatedUser, mockDashboard, mockLogout, mockProducts, mockSellerShop, seedAccessToken } from './support/auth';
+import { logoutViaUserMenu } from './support/shell';
 
 const ADMIN_TOKEN = 'admin.token';
 const IMPERSONATION_TOKEN = 'imp.token';
@@ -10,7 +11,8 @@ const seller = {
   isActive: true, isBlocked: false, isDeleted: false, shopId: '15',
   createdAt: '2026-09-01T08:00:00.000Z', updatedAt: '2026-09-02T08:00:00.000Z',
 };
-const impersonatedSeller = { ...authenticatedUser, id: '42', name: 'Ali Valiyev', role: 'SELLER' };
+// Admin foydalanuvchilar bo'limi hali eski rollarda (FE-15); nomidan kirilgan sessiya esa yangi rol bilan (BE-05).
+const impersonatedSeller = { ...authenticatedUser, id: '42', name: 'Ali Valiyev', role: 'AFFILIATE' };
 const adminUser = (role: 'ADMIN' | 'SUPERADMIN', id = 'admin-1') => ({ id, role, name: 'Bosh Admin', phone: '+998900000001', isActive: true, isDeleted: false });
 
 interface ApiLog { me: string[]; refresh: number; logout: number; roleBody?: unknown; impersonate: number }
@@ -43,7 +45,7 @@ async function mockAdminApi(page: Page, admin = adminUser('SUPERADMIN'), target:
     log.impersonate += 1;
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: {
       impersonationToken: IMPERSONATION_TOKEN, expiresIn: 900, expiresAt: new Date(Date.now() + 900_000).toISOString(),
-      user: { id: '42', name: 'Ali Valiyev', role: 'SELLER', shopId: '15' },
+      user: { id: '42', name: 'Ali Valiyev', role: 'AFFILIATE' },
     } }) });
   });
   return log;
@@ -59,7 +61,7 @@ async function seedImpersonation(page: Page, expiresInMs: number, token = IMPERS
     adminKey: ACCESS_TOKEN_KEY,
     adminToken: ADMIN_TOKEN,
     key: IMPERSONATION_KEY,
-    value: JSON.stringify({ token, expiresAt: new Date(Date.now() + expiresInMs).toISOString(), returnTo: '/admin/users/42', user: { id: '42', name: 'Ali Valiyev', role: 'SELLER' } }),
+    value: JSON.stringify({ token, expiresAt: new Date(Date.now() + expiresInMs).toISOString(), returnTo: '/admin/users/42', user: { id: '42', name: 'Ali Valiyev', role: 'AFFILIATE' } }),
   });
 }
 
@@ -118,7 +120,7 @@ test('SUPERADMIN sotuvchi nomidan kiradi: ogohlantirish chizig‘i, alohida toke
   await expect(confirm).toContainText('15 daqiqa');
   await confirm.getByRole('button', { name: 'Nomidan kirish' }).click();
 
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL('/affiliate');
   const banner = page.getByTestId('impersonation-banner');
   await expect(banner).toContainText('Siz Ali Valiyev nomidan ko‘ryapsiz');
   await expect(banner).toContainText(/1[45]:\d\d/);
@@ -163,13 +165,13 @@ test('15 daqiqalik muddat tugashi bilan avtomatik admin hisobiga qaytadi', async
   await expect(page.getByTestId('impersonation-banner')).toHaveCount(0);
 });
 
-test('nomidan kirish paytida "Tizimdan chiqish" /auth/logout chaqirmaydi, faqat impersonatsiyadan chiqaradi', async ({ page }) => {
+test('nomidan kirish paytida «Chiqish» /auth/logout chaqirmaydi, faqat impersonatsiyadan chiqaradi', async ({ page }) => {
   const log = await mockAdminApi(page);
   await seedImpersonation(page, 600_000);
   await page.goto('/');
   await expect(page.getByTestId('impersonation-banner')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Tizimdan chiqish' }).click();
+  await logoutViaUserMenu(page);
   await expect(page).toHaveURL('/admin/users/42');
   expect(log.logout).toBe(0);
   expect(await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY)).toBe(ADMIN_TOKEN);

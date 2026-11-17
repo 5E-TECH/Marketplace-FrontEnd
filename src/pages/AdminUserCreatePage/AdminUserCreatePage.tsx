@@ -67,7 +67,7 @@ export default function AdminUserCreatePage() {
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <PageHeader
         before={<BackButton fallback="/admin/users" disabled={createMutation.isPending} />}
         title={t('admin.users.createTitle')}
@@ -174,6 +174,6 @@ export default function AdminUserCreatePage() {
           </div>
         </Form>
       </section>
-    </main>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ACCESS_TOKEN_KEY, authenticatedUser, mockDashboard, mockLogout, mockProducts, mockSellerShop, seedAccessToken } from './support/auth';
+import { logoutViaUserMenu } from './support/shell';
 
 /**
  * Backend `AUTH_TOKENS_IN_BODY=false` rejimida tokenni javob tanasida bermaydi —
@@ -31,16 +32,16 @@ test('token tanada kelmasa sessiya cookie bilan ochiladi va token saqlanmaydi', 
   await page.goto('/login');
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
-  await page.getByRole('button', { name: 'PLATFORMAGA KIRISH' }).click();
+  await page.getByRole('button', { name: 'Kirish', exact: true }).click();
 
-  await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+  await expect(page).toHaveURL(/\/affiliate$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
   const storage = await page.evaluate(([tokenKey, cookieKey]) => [sessionStorage.getItem(tokenKey), localStorage.getItem(tokenKey), sessionStorage.getItem(cookieKey)], [ACCESS_TOKEN_KEY, COOKIE_SESSION_KEY]);
   expect(storage).toEqual([null, null, '1']);
 
   // Sahifa yangilanganda sessiya cookie orqali `/auth/me` bilan tiklanadi.
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
   expect(meAuthorizations.length).toBeGreaterThanOrEqual(2);
   expect(meAuthorizations.every((value) => value === '')).toBe(true);
 });
@@ -62,7 +63,7 @@ test('cookie sessiyada 401 bo‘lsa refresh qilinadi va so‘rov tokensiz qayta 
   });
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
   expect(refreshCalls).toBe(1);
   expect(meAuthorizations).toEqual(['', '']);
   expect(await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY)).toBeNull();
@@ -80,8 +81,8 @@ test('cookie sessiyada o‘zgartiruvchi so‘rovlar CSRF sarlavhasi bilan ketadi
   });
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
-  await page.getByRole('button', { name: 'Tizimdan chiqish' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
+  await logoutViaUserMenu(page);
   await expect(page).toHaveURL(/\/login/);
   expect(logoutHeaders).toEqual(['XMLHttpRequest']);
 });
@@ -110,7 +111,7 @@ test('backend cookie rejimiga o‘tganda tokenli sessiya uzilmaydi: refresh toke
   await page.route('**/api/v1/auth/refresh', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ statusCode: 200, data: { user: authenticatedUser } }) }));
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
   expect(meAuthorizations).toEqual(['Bearer expired.body.token', '']);
   const storage = await page.evaluate(([tokenKey, cookieKey]) => [sessionStorage.getItem(tokenKey), sessionStorage.getItem(cookieKey)], [ACCESS_TOKEN_KEY, COOKIE_SESSION_KEY]);
   expect(storage).toEqual([null, '1']);

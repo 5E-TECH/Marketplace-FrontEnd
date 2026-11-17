@@ -11,6 +11,7 @@ export function useLoginMutation() {
     mutationFn: authenticate,
     onSuccess: (authSession) => {
       dispatch(authenticated({ accessToken: authSession.accessToken }));
+      if (!authSession.user) return;
       dispatch(currentUserLoaded(authSession.user));
       queryClient.setQueryData(['auth', 'me'], authSession.user);
     },

@@ -1,39 +1,39 @@
 import { httpClient } from '../../../shared/api/httpClient';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
-import type {
-  AuthUser,
-  AuthSession,
-  LoginCredentials,
-  LoginResponse,
-  UpdateAuthProfilePayload,
-  UserRole,
-  AuthDeviceSession,
+import {
+  isUserRole,
+  type AuthUser,
+  type AuthSession,
+  type LoginCredentials,
+  type LoginResponse,
+  type UpdateAuthProfilePayload,
+  type UserRole,
+  type AuthDeviceSession,
 } from '../model/authTypes';
+import { UnknownRoleError } from '../lib/unknownRoleError';
 
 interface LoginApiResponse {
   accessToken?: unknown;
 }
-
-
-const USER_ROLES: UserRole[] = [
-  'SELLER',
-  'OPERATOR',
-  'BUYER',
-  'ADMIN',
-  'SUPERADMIN',
-];
 
 function parseAuthUser(value: unknown): AuthUser {
   if (typeof value !== 'object' || value === null) {
     throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
   }
 
+  // Rol bor, lekin frontend uni bilmaydi — format xatosi emas, alohida holat.
+  if ('role' in value && typeof value.role === 'string' && value.role && !isUserRole(value.role)) {
+    throw new UnknownRoleError(value.role, {
+      id: 'id' in value ? value.id : undefined,
+      name: 'name' in value ? value.name : undefined,
+    });
+  }
+
   const valid = (
     'id' in value &&
     typeof value.id === 'string' &&
     'role' in value &&
-    typeof value.role === 'string' &&
-    USER_ROLES.includes(value.role as UserRole) &&
+    isUserRole(value.role) &&
     'name' in value &&
     typeof value.name === 'string' &&
     'phone' in value &&
@@ -111,9 +111,14 @@ export async function authenticate(
   credentials: LoginCredentials,
 ): Promise<AuthSession> {
   const authSession = await login(credentials);
-  const user = await getCurrentUser(authSession.accessToken ?? undefined);
-
-  return { ...authSession, user };
+  try {
+    const user = await getCurrentUser(authSession.accessToken ?? undefined);
+    return { ...authSession, user };
+  } catch (error) {
+    // Parol to'g'ri, rol noma'lum: sessiya ochiladi, panel menyusiz sababni ko'rsatadi (FE-01 TC3).
+    if (error instanceof UnknownRoleError) return { ...authSession, user: null };
+    throw error;
+  }
 }
 
 export async function updateAuthProfile(

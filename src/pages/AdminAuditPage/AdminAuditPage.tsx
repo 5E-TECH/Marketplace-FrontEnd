@@ -78,7 +78,7 @@ export default function AdminAuditPage() {
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <PageHeader title={t('admin.audit.title')} description={t('admin.audit.description')} />
       <FilterPanel className={styles.filters} aria-label={t('admin.common.filters')}>
         <SearchInput
@@ -125,6 +125,6 @@ export default function AdminAuditPage() {
           />
         </TablePanel>
       )}
-    </main>
+    </div>
   );
 }

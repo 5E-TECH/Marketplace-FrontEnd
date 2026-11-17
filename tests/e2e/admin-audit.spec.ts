@@ -108,9 +108,11 @@ test('TC4: faqat ADMIN va SUPERADMIN audit jurnalini ochadi', async ({ page }) =
   await page.goto('/admin/audit-logs');
   await expect(page.getByRole('heading', { name: 'Audit jurnali' })).toBeVisible();
 
+  // Sotuvchi (AFFILIATE) shu URL'da qoladi, lekin 403 sahifani ko'radi (FE-01).
   await installAuthenticatedSession(page);
   await page.reload();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/admin\/audit-logs$/);
+  await expect(page.getByTestId('forbidden-page')).toContainText('Bu sahifa sotuvchi uchun yopiq');
   await expect(page.getByTestId('admin-layout')).toHaveCount(0);
 });
 

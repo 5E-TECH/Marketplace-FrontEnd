@@ -1,4 +1,4 @@
-import type { ImpersonationSession, UserRole } from '../model/authTypes';
+import { isUserRole, type ImpersonationSession } from '../model/authTypes';
 
 const ACCESS_TOKEN_KEY = 'elchi_access_token';
 const AUTH_NOTICE_KEY = 'elchi_auth_notice';
@@ -6,7 +6,6 @@ const AUTH_NOTICE_KEY = 'elchi_auth_notice';
 const COOKIE_SESSION_KEY = 'elchi_cookie_session';
 const MAX_TOKEN_LENGTH = 16_384;
 const IMPERSONATION_KEY = 'elchi_impersonation';
-const IMPERSONATION_ROLES: readonly UserRole[] = ['SELLER', 'OPERATOR', 'BUYER', 'ADMIN', 'SUPERADMIN'];
 
 type StoredImpersonation = Omit<ImpersonationSession, 'admin'>;
 
@@ -19,7 +18,7 @@ function parseStoredImpersonation(raw: string | null): StoredImpersonation | nul
       !isValidStoredToken(value.token ?? null) ||
       typeof value.expiresAt !== 'string' || Number.isNaN(Date.parse(value.expiresAt)) ||
       typeof value.returnTo !== 'string' || !value.returnTo.startsWith('/') ||
-      !user || typeof user.id !== 'string' || typeof user.name !== 'string' || !IMPERSONATION_ROLES.includes(user.role)
+      !user || typeof user.id !== 'string' || typeof user.name !== 'string' || !isUserRole(user.role)
     ) return null;
     return { token: value.token as string, expiresAt: value.expiresAt, returnTo: value.returnTo, user: { id: user.id, name: user.name, role: user.role } };
   } catch {

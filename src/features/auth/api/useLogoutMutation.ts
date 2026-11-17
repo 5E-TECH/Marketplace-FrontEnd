@@ -19,7 +19,7 @@ export function useLogoutMutation() {
         dispatch(impersonationEnded('exited'));
         return;
       }
-      dispatch(loggedOut());
+      dispatch(loggedOut({ manual: true }));
       queryClient.clear();
     },
   });

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { installAuthenticatedSession } from './support/auth';
+import { mainNav, pageTitle } from './support/shell';
 
 const adminUser = {
   id: 'admin-e2e',
@@ -10,124 +11,109 @@ const adminUser = {
   isDeleted: false,
 } as const;
 
-const superAdminUser = {
-  ...adminUser,
-  id: 'superadmin-e2e',
-  role: 'SUPERADMIN',
-  name: 'E2E Superadmin',
-} as const;
-
-async function mockAdminDashboard(page: Page) {
-  await page.route('**/api/v1/admin/dashboard', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({
-      data: {
-        revenue: 1_000_000,
-        gmv: 1_200_000,
-        orders: { total: 20, today: 2 },
-        shops: { active: 5, pending: 1 },
-        users: { total: 100, buyers: 80 },
-      },
-    }),
-  }));
-  await page.route('**/api/v1/admin/shops?**', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ data: { items: [], total: 0, page: 1, limit: 5 } }),
-  }));
+async function mockAdminPages(page: Page) {
+  await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({ status: 200, json: { data: [] } }));
+  await page.route('**/api/v1/admin/users**', (route) => route.fulfill({ status: 200, json: { data: { items: [], total: 0, page: 1, limit: 20, totalPages: 1 } } }));
 }
 
-test('TC2: ADMIN login admin sidebarni ko‘radi', async ({ page }) => {
+const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+
+test('TC2: ADMIN desktop karkasi — navy menyu, yuqori qatorda h1, til, qo‘ng‘iroqcha va foydalanuvchi', async ({ page }) => {
   await installAuthenticatedSession(page, adminUser);
-  await mockAdminDashboard(page);
-  await page.goto('/admin/overview');
+  await page.goto('/');
 
-  await expect(page.getByTestId('admin-layout')).toBeVisible();
-  const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
-  for (const item of ['Dashboard', 'Accountlar', 'Do‘konlar', 'Buyurtmalar', 'Yetkazib berish', 'Ombor va qoldiqlar', 'Qaytarishlar', 'Mahsulot moderatsiyasi', 'Kategoriyalar', 'Bannerlar', 'Xabarlar', 'Audit loglar', 'Tizim holati']) {
-    await expect(sidebar.getByRole('menuitem', { name: item })).toBeVisible();
-  }
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(13);
-  await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toHaveCount(0);
-  await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/admin\/moderation$/);
+  const layout = page.getByTestId('admin-layout');
+  await expect(layout).toHaveAttribute('data-layout', 'desktop');
+  await expect(mainNav(page)).toBeVisible();
+  await expect(pageTitle(page)).toHaveText('Moderatsiya');
+  // Sahifa nomi faqat yuqori qatorda — `main` ichida ikkinchi h1 yo'q.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Til: o‘zbekcha' })).toHaveText('UZ');
+  await expect(page.getByRole('button', { name: 'Bildirishnomalar' })).toBeVisible();
+  const userButton = page.getByTestId('user-menu-button');
+  await expect(userButton).toHaveAttribute('title', 'Profil va Chiqish');
+  await expect(userButton).toContainText('E2E Admin');
+  await expect(userButton).toContainText('Admin');
 
-  await page.goto('/admin/finance');
-  await expect(page).toHaveURL(/\/admin\/overview$/);
-  await page.goto('/admin/team');
-  await expect(page.getByText('Sahifa topilmadi')).toBeVisible();
-});
-
-test('TC1: SELLER admin URL ga kira olmaydi va redirect qilinadi', async ({ page }) => {
-  await installAuthenticatedSession(page);
-  await page.goto('/admin/overview');
-
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByTestId('admin-layout')).toHaveCount(0);
+  // karkas-E: breadcrumb, «ADMIN REJIM» belgisi va global qidiruv M1 da yo'q.
   await expect(page.getByText('ADMIN REJIM', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Boshqaruv paneli' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: /breadcrumb/i })).toHaveCount(0);
+  await expect(page.getByRole('searchbox')).toHaveCount(0);
+
+  // Menyu bandi: 44 px, ikonka 20 px.
+  const item = mainNav(page).getByRole('link', { name: 'Moderatsiya' });
+  await expect(item).toHaveAttribute('aria-current', 'page');
+  expect((await item.boundingBox())?.height).toBe(44);
+  const icon = await item.locator('svg').boundingBox();
+  expect(icon?.width).toBe(20);
+  expect(icon?.height).toBe(20);
 });
 
-test('TC3: SUPERADMIN ishlaydigan barcha bo‘limlarni, jumladan moliyani ko‘radi', async ({ page }) => {
-  await installAuthenticatedSession(page, superAdminUser);
-  await mockAdminDashboard(page);
-  await page.goto('/admin/overview');
+test('TC1: sotuvchi admin URL ga kira olmaydi — o‘z karkasida 403 ko‘radi', async ({ page }) => {
+  await installAuthenticatedSession(page);
+  await page.goto('/admin/moderation');
 
-  const sidebar = page.getByRole('complementary', { name: 'Admin menyusi' });
-  await expect(sidebar.getByRole('menuitem', { name: 'Moliya' })).toBeVisible();
-  await expect(sidebar.getByRole('menuitem')).toHaveCount(14);
-  await expect(sidebar.getByRole('menuitem', { name: 'Jamoa' })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/admin\/moderation$/);
+  await expect(page.getByTestId('admin-layout')).toHaveCount(0);
+  await expect(page.getByTestId('app-layout')).toBeVisible();
+  await expect(page.getByTestId('forbidden-page')).toBeVisible();
+  // Menyu o'z rolida qoladi, hech bir band tanlanmaydi (umumiy-403).
+  await expect(mainNav(page).getByRole('link', { name: 'Moderatsiya' })).toHaveCount(0);
+  await expect(mainNav(page).locator('[aria-current="page"]')).toHaveCount(0);
 });
 
-test('TC4: ADMIN rejim belgisi ko‘rinadi', async ({ page }) => {
+test('foydalanuvchi menyusi: sarlavha, Profil, Til va Chiqish', async ({ page }) => {
   await installAuthenticatedSession(page, adminUser);
-  await mockAdminDashboard(page);
-  await page.goto('/admin/overview');
+  await page.goto('/admin/moderation');
 
-  await expect(page.getByText('ADMIN REJIM', { exact: true })).toBeVisible();
+  const userButton = page.getByTestId('user-menu-button');
+  await userButton.click();
+  await expect(userButton).toHaveAttribute('aria-expanded', 'true');
+  const menu = page.getByRole('menu');
+  await expect(menu.getByRole('menuitem')).toHaveText(['Profil', /^TilO‘zbekcha/, 'Chiqish']);
+
+  await menu.getByRole('menuitem', { name: 'Profil' }).click();
+  await expect(page).toHaveURL(/\/admin\/profile$/);
+  await expect(pageTitle(page)).toHaveText('Mening profilim');
 });
 
-test('admin mobile menyusi overflow bermaydi va navigatsiya qiladi', async ({ page }) => {
+test('ichki sahifa: «‹ Bo‘lim» havolasi h1 dan oldin, menyuda bo‘lim faol', async ({ page }) => {
   await installAuthenticatedSession(page, adminUser);
-  await mockAdminDashboard(page);
-  await page.route('**/api/v1/admin/categories**', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ data: [] }),
-  }));
+  await mockAdminPages(page);
+  await page.goto('/admin/users/new');
+
+  await expect(pageTitle(page)).toHaveText('Yangi foydalanuvchi');
+  await expect(mainNav(page).locator('[aria-current="page"]')).toHaveText('Foydalanuvchilar');
+  await page.getByRole('link', { name: 'Orqaga: Foydalanuvchilar' }).click();
+  await expect(page).toHaveURL(/\/admin\/users$/);
+});
+
+test('planshet (900 px): menyu chap panelda, yuqori qatorda menyu tugmasi va avatar', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 900 });
+  await installAuthenticatedSession(page, adminUser);
+  await page.goto('/admin/moderation');
+
+  await expect(page.getByTestId('admin-layout')).toHaveAttribute('data-layout', 'tablet');
+  await expect(mainNav(page)).toHaveCount(0);
+  await expect(page.getByTestId('user-menu-button')).toHaveAttribute('aria-label', 'E2E Admin, Admin: Profil va Chiqish');
+  await page.getByRole('button', { name: 'Menyu', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('navigation', { name: 'Asosiy menyu' })).toBeVisible();
+});
+
+test('admin telefon menyusi overflow bermaydi va navigatsiya qiladi', async ({ page }) => {
+  await installAuthenticatedSession(page, adminUser);
+  await mockAdminPages(page);
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/admin/overview');
+  await page.goto('/admin/moderation');
 
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await page.getByRole('button', { name: 'Menyuni ochish' }).click();
+  await expect(page.getByTestId('admin-layout')).toHaveAttribute('data-layout', 'phone');
+  await expect.poll(() => noOverflow(page)).toBe(true);
+  await page.getByRole('button', { name: 'Menyu', exact: true }).click();
   const drawer = page.getByRole('dialog');
-  await drawer.getByRole('menuitem', { name: 'Kategoriyalar' }).click();
+  await expect(drawer.getByText('Til', { exact: true })).toBeVisible();
+  await drawer.getByRole('link', { name: 'Kategoriyalar' }).click();
   await expect(page).toHaveURL(/\/admin\/categories$/);
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-});
-
-test('sidebar yig‘ilganda admin ikonkalari o‘lchami saqlanadi va search ikonka ixcham', async ({ page }) => {
-  await installAuthenticatedSession(page, adminUser);
-  await mockAdminDashboard(page);
-  await page.goto('/admin/overview');
-
-  const dashboardIcon = page
-    .getByRole('complementary', { name: 'Admin menyusi' })
-    .getByRole('menuitem', { name: 'Dashboard' })
-    .locator('svg');
-  const expandedBox = await dashboardIcon.boundingBox();
-  expect(expandedBox?.width).toBe(22);
-  expect(expandedBox?.height).toBe(22);
-
-  await page.getByRole('button', { name: 'Menyuni yopish' }).click();
-  const collapsedBox = await dashboardIcon.boundingBox();
-  expect(collapsedBox?.width).toBe(22);
-  expect(collapsedBox?.height).toBe(22);
-
-  const searchIconBox = await page
-    .getByRole('searchbox', { name: 'Global qidiruv' })
-    .locator('xpath=preceding-sibling::*[1]//*[name()="svg"]')
-    .boundingBox();
-  expect(searchIconBox?.width).toBeLessThanOrEqual(15);
-  expect(searchIconBox?.height).toBeLessThanOrEqual(15);
+  await expect(drawer).toBeHidden();
+  await expect.poll(() => noOverflow(page)).toBe(true);
 });

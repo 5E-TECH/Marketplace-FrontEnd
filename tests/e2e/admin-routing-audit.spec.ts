@@ -24,25 +24,41 @@ async function mockAdminEndpoints(page: Page) {
   await page.route('**/health**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'ok' }) }));
 }
 
-test('TC1: barcha admin route’lar direct URL orqali ochiladi', async ({ page }) => {
-  // O'n uchta sahifa ketma-ket ochiladi — yuklama ostida umumiy 30 s yetmaydi.
+test('TC1: M1 admin menyusidagi har bir route direct URL orqali ochiladi', async ({ page }) => {
+  // O'n beshta sahifa ketma-ket ochiladi — yuklama ostida umumiy 30 s yetmaydi.
   test.setTimeout(90_000);
   await installAuthenticatedSession(page, superadmin);
   await mockAdminEndpoints(page);
-  const routes = ['/admin/overview', '/admin/shops', '/admin/orders', '/admin/delivery', '/admin/inventory', '/admin/returns', '/admin/products', '/admin/users', '/admin/categories', '/admin/notifications', '/admin/audit-logs', '/admin/finance', '/admin/system-settings'];
+  const routes = [
+    '/admin/moderation', '/admin/leads', '/admin/orders', '/admin/products', '/admin/categories', '/admin/inventory',
+    '/admin/sellers', '/admin/wholesalers', '/admin/recordings', '/admin/audit-logs', '/admin/users', '/admin/users/new',
+    '/admin/integrations', '/admin/settings', '/admin/profile',
+  ];
   for (const path of routes) {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`${path.replaceAll('/', '\\/')}$`));
     await expect(page.getByTestId('admin-layout')).toBeVisible();
-    await expect(page.getByRole('heading', { name: '404' })).toHaveCount(0);
-    await expect(page.getByText('Sahifa topilmadi')).toHaveCount(0);
+    await expect(page.getByTestId('not-found-page')).toHaveCount(0);
+    await expect(page.getByTestId('forbidden-page')).toHaveCount(0);
   }
 });
 
-test('TC3: ADMIN va SUPERADMIN kiradi, SELLER admin route’dan qaytariladi', async ({ page }) => {
+test('eski admin sahifalari uzilgan: admin karkasi ichida 404', async ({ page }) => {
+  test.setTimeout(60_000);
   await installAuthenticatedSession(page, admin);
   await mockAdminEndpoints(page);
-  await page.goto('/admin/overview');
+  for (const path of ['/admin/overview', '/admin/shops', '/admin/delivery', '/admin/returns', '/admin/finance', '/admin/notifications', '/admin/banners', '/admin/system-settings', '/admin/orders/91']) {
+    await page.goto(path);
+    await expect(page.getByTestId('admin-layout')).toBeVisible();
+    await expect(page.getByTestId('not-found-page')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Sahifa topilmadi' })).toBeVisible();
+  }
+});
+
+test('TC3: ADMIN va SUPERADMIN kiradi, sotuvchi admin route’da 403 ko‘radi', async ({ page }) => {
+  await installAuthenticatedSession(page, admin);
+  await mockAdminEndpoints(page);
+  await page.goto('/admin/moderation');
   await expect(page.getByTestId('admin-layout')).toBeVisible();
 
   await installAuthenticatedSession(page, superadmin);
@@ -51,7 +67,8 @@ test('TC3: ADMIN va SUPERADMIN kiradi, SELLER admin route’dan qaytariladi', as
 
   await installAuthenticatedSession(page);
   await page.reload();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/admin\/moderation$/);
+  await expect(page.getByTestId('forbidden-page')).toBeVisible();
   await expect(page.getByTestId('admin-layout')).toHaveCount(0);
 });
 
@@ -64,5 +81,5 @@ test('TC4: F5 dan keyin admin route va sahifa saqlanadi', async ({ page }) => {
   await page.reload();
   await expect(page).toHaveURL(/\/admin\/orders$/);
   await expect(page.getByTestId('admin-layout')).toBeVisible();
-  await expect(page.getByRole('heading', { name: '404' })).toHaveCount(0);
+  await expect(page.getByTestId('not-found-page')).toHaveCount(0);
 });
