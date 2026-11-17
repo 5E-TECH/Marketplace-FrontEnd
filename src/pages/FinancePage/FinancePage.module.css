@@ -10,6 +10,9 @@
 .scheduleControls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; }
 .muted { color: var(--color-text-muted); font-size: 12px; }
 .tabs { margin-top: var(--space-4); }
+.sectionTitle { margin: var(--space-5) 0 0; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.idCell { display: grid; gap: 2px; justify-items: start; }
+.idCell small { color: var(--color-text-muted); font-size: 12px; }
 .statusFilter { min-width: 180px; }
 .amount { white-space: nowrap; }
 .income { color: var(--color-success); }
