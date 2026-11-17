@@ -97,7 +97,7 @@ export function SeoManager() {
     const title = publicConfig?.title ?? `${BRAND.name} — boshqaruv paneli`;
     const description = publicConfig?.description ?? DEFAULT_DESCRIPTION;
     const canonical = indexable ? `${origin}${pathname}` : null;
-    const image = `${origin}/og-markethub.jpg`;
+    const image = `${origin}/og-elchi.jpg`;
 
     document.title = title;
     setMeta('name', 'description', description);
