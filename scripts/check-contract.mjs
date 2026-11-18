@@ -23,6 +23,8 @@ import ts from 'typescript';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SPEC_FILE = resolve(root, 'contract/openapi.json');
+/** Backendda hali yo'q, mock bilan ishlatilayotgan endpointlar (karta raqami bilan). */
+const PENDING_FILE = resolve(root, 'contract/pending-endpoints.json');
 const SOURCE_DIR = resolve(root, 'src');
 const API_PREFIX = '/api/v1';
 const PARAM = '{}';
@@ -111,13 +113,40 @@ function collectSpec() {
   return known;
 }
 
+function collectPending() {
+  let list = [];
+  try {
+    list = JSON.parse(readFileSync(PENDING_FILE, 'utf8')).endpoints ?? [];
+  } catch {
+    return new Map();
+  }
+  return new Map(list.map((item) => {
+    const [method, path] = item.operation.split(' ');
+    return [`${method.toUpperCase()} ${normalize(path)}`, item];
+  }));
+}
+
 const calls = collectCalls();
 const known = collectSpec();
-const missing = [...calls.keys()].filter((key) => !known.has(key)).sort();
+const pending = collectPending();
+const missing = [...calls.keys()].filter((key) => !known.has(key) && !pending.has(key)).sort();
 
 console.log(
   `Kontrakt: ${calls.size} ta endpoint chaqiruvi, sxemada ${known.size} ta operatsiya.`,
 );
+
+const waiting = [...calls.keys()].filter((key) => !known.has(key) && pending.has(key)).sort();
+if (waiting.length > 0) {
+  console.warn('\nBackendda hali yo‘q (mock bilan ishlaydi) — contract/pending-endpoints.json:');
+  for (const key of waiting) console.warn(`  … ${key} — ${pending.get(key).card}`);
+}
+// Backend qo'shgan endpoint ro'yxatda qolib ketmasin: shakl endi sxemadan tekshiriladi.
+const arrived = [...pending.keys()].filter((key) => known.has(key)).sort();
+if (arrived.length > 0) {
+  console.error('\nBackendga qo‘shilgan — contract/pending-endpoints.json dan o‘chiring:');
+  for (const key of arrived) console.error(`  ✓ ${key}`);
+  process.exit(1);
+}
 
 if (missing.length > 0) {
   console.error('\nSxemada topilmagan endpointlar:');

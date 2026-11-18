@@ -5,21 +5,18 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { getApiErrorMessage } from '../../shared/api/apiError';
-import { BRAND } from '../../shared/config/brand';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { normalizeUzPhone } from '../../shared/lib/phone';
-import { useMediaQuery } from '../../shared/lib/useMediaQuery';
-import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher/LanguageSwitcher';
 import { LoginForm, type LoginFormValues, type LoginNotice } from './components/LoginForm/LoginForm';
 import { LoginMethods } from './components/LoginMethods/LoginMethods';
-import styles from './LoginPage.module.css';
-
-const BRAND_ICON = '/brand/elchi-app-icon.png';
+import { RoleSwitch, type LoginMode } from './components/RoleSwitch/RoleSwitch';
+import { SellerLoginForm } from './components/SellerLoginForm/SellerLoginForm';
+import { AuthLayout } from '../../shared/ui/AuthLayout/AuthLayout';
 
 /**
- * Tizimga kirish (umumiy-kirish, FE-01). Desktop: chapda navy «Kirish usuli»,
- * o'ngda forma; telefon: navy sarlavha, forma, ostida usullar. Hozircha faqat
- * platforma xodimi formasi — sotuvchi SMS kodi FE-04 (BE-06) bilan qo'shiladi.
+ * Tizimga kirish (umumiy-kirish). Desktop: chapda navy «Kirish usuli», o'ngda forma;
+ * telefon: navy sarlavha, forma, ostida usullar. «Kim sifatida kirasiz»: sotuvchi va
+ * optovik — SMS kod (FE-04), platforma xodimi — telefon va parol (FE-01).
  */
 export default function LoginPage() {
   const { message } = App.useApp();
@@ -29,7 +26,9 @@ export default function LoginPage() {
   const loginMutation = useLoginMutation();
   const [form] = Form.useForm<LoginFormValues>();
   const [notice, setNotice] = useState<LoginNotice | null>(null);
-  const phone = useMediaQuery('(max-width: 767.98px)');
+  const [mode, setMode] = useState<LoginMode>('seller');
+  // Foydalanuvchi tanlovni almashtirgan — yangi formadagi tanlov fokusni saqlaydi.
+  const [modeChanged, setModeChanged] = useState(false);
 
   useEffect(() => {
     const state: unknown = location.state as unknown;
@@ -72,49 +71,36 @@ export default function LoginPage() {
     );
   };
 
-  const formBlock = (
-    <LoginForm
-      form={form}
-      isSubmitting={loginMutation.isPending}
-      notice={notice}
-      onSubmit={handleSubmit}
-      onChange={() => setNotice(null)}
+  const roleSwitch = (
+    <RoleSwitch
+      value={mode}
+      keepFocus={modeChanged}
+      onChange={(next) => {
+        setMode(next);
+        setModeChanged(true);
+      }}
     />
   );
-
-  if (phone) {
-    return (
-      <div className={styles.phonePage}>
-        <header className={styles.phoneHeader}>
-          <span className={styles.brand}>
-            <img src={BRAND_ICON} alt="" width={32} height={32} />
-            <span>{BRAND.name}</span>
-          </span>
-          <LanguageSwitcher className={styles.navyLanguage} />
-        </header>
-        <main className={styles.phoneMain}>{formBlock}</main>
-        <LoginMethods tone="light" />
-      </div>
-    );
-  }
+  // Ro'yxatdan «Kirishga o‘tish» — raqam qayta kiritilmaydi.
+  const routeState: unknown = location.state as unknown;
+  const initialPhone = typeof routeState === 'object' && routeState !== null && 'phone' in routeState && typeof routeState.phone === 'string'
+    ? routeState.phone
+    : undefined;
 
   return (
-    <div className={styles.page}>
-      <LoginMethods
-        tone="navy"
-        brand={
-          <span className={`${styles.brand} ${styles.asideBrand}`}>
-            <img src={BRAND_ICON} alt="" width={36} height={36} />
-            <span>{BRAND.name}</span>
-          </span>
-        }
-      />
-      <main className={styles.main}>
-        <div className={styles.toolbar}>
-          <LanguageSwitcher />
-        </div>
-        <div className={styles.center}>{formBlock}</div>
-      </main>
-    </div>
+    <AuthLayout renderAside={(tone, brand) => <LoginMethods tone={tone} brand={brand} active={mode} />}>
+      {mode === 'seller' ? (
+        <SellerLoginForm roleSwitch={roleSwitch} initialPhone={initialPhone} />
+      ) : (
+        <LoginForm
+          form={form}
+          isSubmitting={loginMutation.isPending}
+          notice={notice}
+          onSubmit={handleSubmit}
+          onChange={() => setNotice(null)}
+          roleSwitch={roleSwitch}
+        />
+      )}
+    </AuthLayout>
   );
 }

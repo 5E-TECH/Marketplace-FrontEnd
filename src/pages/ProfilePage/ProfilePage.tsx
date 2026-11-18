@@ -1,6 +1,6 @@
 import { Camera, LockKeyhole, Mail, Pencil, Phone, UserRound } from 'lucide-react';
 import { App, Avatar, Button, Form, Tag, Typography } from 'antd';
-import { useState } from 'react';
+import { lazy, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
@@ -30,7 +30,15 @@ const EDITABLE_FIELDS = new Set<keyof ProfileFormValues>([
   'name', 'phone', 'password', 'confirmPassword',
 ]);
 
+const SellerProfilePage = lazy(() => import('../SellerProfilePage/SellerProfilePage'));
+
+/** `/profile`: sotuvchida — sotuvchi-profil (FE-04), boshqa rollarda — umumiy profil. */
 export default function ProfilePage() {
+  const role = useAppSelector(selectAuthUser)?.role;
+  return role === 'AFFILIATE' ? <SellerProfilePage /> : <StaffProfilePage />;
+}
+
+function StaffProfilePage() {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();

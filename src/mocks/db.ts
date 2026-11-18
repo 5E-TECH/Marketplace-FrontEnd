@@ -1,4 +1,7 @@
 import type { components } from '../generated/api-types';
+import { resetRegisteredMockAccounts } from './fixtures/users';
+import { resetMockOtp } from './handlers/sellerAuth';
+import { resetMockProfiles } from './handlers/sellerProfile';
 import { addDays, seeded, tashkentDate } from './utils';
 
 /**
@@ -117,4 +120,7 @@ export const db = createMockDb();
 
 export function resetMockDb(): void {
   Object.assign(db, createMockDb());
+  resetRegisteredMockAccounts();
+  resetMockOtp();
+  resetMockProfiles();
 }

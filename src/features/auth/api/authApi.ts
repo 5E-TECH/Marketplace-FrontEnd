@@ -110,7 +110,11 @@ export async function getCurrentUser(
 export async function authenticate(
   credentials: LoginCredentials,
 ): Promise<AuthSession> {
-  const authSession = await login(credentials);
+  return openSession(await login(credentials));
+}
+
+/** Token olindi (parol yoki SMS kod, FE-04) — profilni yuklab sessiyani ochadi. */
+export async function openSession(authSession: LoginResponse): Promise<AuthSession> {
   try {
     const user = await getCurrentUser(authSession.accessToken ?? undefined);
     return { ...authSession, user };

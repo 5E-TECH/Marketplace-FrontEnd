@@ -1,0 +1,460 @@
+/* sotuvchi-royxat: forma ustuni 400 px, bloklar orasi 20. */
+/* sotuvchi-royxat: forma ustuni 400 px, bloklar orasi 20. */
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ── Bosqichlar ─────────────────────────────────────────────────────────── */
+.steps {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.step:last-child {
+  flex: 0 0 104px;
+}
+
+.stepHead {
+  display: flex;
+  align-items: center;
+}
+
+.stepDot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.step[data-state='current'] .stepDot {
+  border-color: var(--color-nav);
+  color: var(--color-nav);
+}
+
+.step[data-state='done'] .stepDot {
+  border-color: var(--color-nav);
+  background: var(--color-nav);
+  color: #fff;
+}
+
+.stepLine {
+  flex: 1 1 auto;
+  height: 2px;
+  margin: 0 8px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.step[data-state='done'] .stepLine {
+  background: var(--color-nav);
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  padding-right: 8px;
+}
+
+.stepTitle {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.step[data-state='current'] .stepTitle {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.step[data-state='done'] .stepTitle {
+  color: var(--color-text);
+}
+
+.stepHint {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* «Raqam to‘g‘rimi?» — SMS kechikkanda. */
+.checkNumber {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.checkNumberTitle {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.checkNumberText {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Oferta qadami ──────────────────────────────────────────────────────── */
+.offerBox {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.offerHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.offerHead > svg {
+  flex: none;
+}
+
+.offerName {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.offerName p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.offerName p:first-child {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.offerSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  background: var(--color-surface-subtle);
+}
+
+.offerSummary > p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.offerSummary dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.offerSummary dl > div {
+  display: contents;
+}
+
+.offerSummary dt {
+  color: var(--color-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.offerSummary dd {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Belgi qatori: 52 px, chegarali, butun qator bosiladi. */
+.check {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 12px;
+  box-sizing: border-box;
+  min-height: 52px;
+  margin: 0 !important;
+  padding: 13px 14px;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.check:has(:global(.ant-checkbox-checked)) {
+  border-color: var(--color-action);
+}
+
+.check :global(.ant-checkbox) {
+  align-self: flex-start;
+}
+
+.check > span:last-child {
+  padding: 1px 0 0;
+}
+
+.dot {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ── Oynalar ────────────────────────────────────────────────────────────── */
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 32px;
+}
+
+.modalTitle > span:first-child {
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.modalMeta {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.modalLead {
+  margin: -8px 0 16px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalForm :global(.ant-form-item-label > label) {
+  height: auto !important;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.oldNumber {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-sunken);
+}
+
+.oldNumber strong {
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.oldNumber > span:last-child {
+  margin: 0;
+}
+
+.modalActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modalActions :global(.ant-btn) {
+  height: 44px;
+}
+
+/* ── «Siz reklama qilasiz» ──────────────────────────────────────────────── */
+.benefitsNavy {
+  display: flex;
+  flex: 1 1 360px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  max-width: 560px;
+  min-width: 0;
+  padding: 20px clamp(16px, 2.4vw, 32px) 32px;
+  background: var(--color-nav);
+}
+
+.benefitsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefitsTitle {
+  margin: 0;
+  padding: 0 16px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+.benefitList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.benefitIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+}
+
+.benefitText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.benefitTitle {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.benefitDescription,
+.benefitsNote {
+  color: var(--color-nav-text);
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.benefitsNote {
+  margin: 0;
+  padding: 0 16px;
+}
+
+/* Telefon va planshet: forma ostida och blok. */
+.benefitsLight {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.benefitsLight .benefitsBody {
+  gap: 8px;
+}
+
+.benefitsLight .benefitsTitle {
+  padding: 0;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+.benefitsLight .benefitList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 8px;
+}
+
+.benefitsLight .benefit {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.benefitsLight .benefitIcon {
+  background: var(--color-sunken);
+  color: var(--color-nav);
+}
+
+.benefitsLight .benefitTitle {
+  color: var(--color-text);
+}
+
+.benefitsLight .benefitDescription,
+.benefitsLight .benefitsNote {
+  color: var(--color-text-muted);
+}
+
+.benefitsLight .benefitsNote {
+  padding: 0;
+}

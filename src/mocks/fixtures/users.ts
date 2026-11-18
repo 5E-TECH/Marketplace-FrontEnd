@@ -22,6 +22,8 @@ export const MOCK_USERS = {
   '900000006': { ...base, id: 'U-0006', role: 'FINANCE', name: 'Gulnora Saidova', phone: '+998900000006' },
   '900000007': { ...base, id: 'U-0007', role: 'ADMIN', name: 'Nodira Karimova', phone: '+998900000007' },
   '900000008': { ...base, id: 'U-0008', role: 'SUPERADMIN', name: 'Akmal Sobirov', phone: '+998900000008' },
+  // Ikkinchi sotuvchi (FE-04 namunasi): eski oferta 0.9 qabul qilingan, JShShIR rad etilgan — bannerlar.
+  '900000010': { ...base, id: 'U-0010', role: 'AFFILIATE', name: 'Sevara Yusupova', phone: '+998900000010' },
   // Backend hali eski rolni qaytarsa (BE-05 gacha) — «Ish joyi topilmadi» holati.
   '900000009': { ...base, id: 'U-2087', role: 'SELLER', name: 'Laylo Nazarova', phone: '+998900000009' },
 } as const;
@@ -29,9 +31,43 @@ export const MOCK_USERS = {
 export type MockPhone = keyof typeof MOCK_USERS;
 export type MockUser = (typeof MOCK_USERS)[MockPhone];
 
-export function findMockUser(phoneOrDigits: string): MockUser | null {
-  const digits = phoneOrDigits.replace(/\D/g, '').slice(-9);
-  return digits in MOCK_USERS ? MOCK_USERS[digits as MockPhone] : null;
+/** Mock hisob: tayyor foydalanuvchilar va dev'da SMS bilan ro'yxatdan o'tgan sotuvchilar (FE-04). */
+export interface MockAccount {
+  id: string;
+  role: string;
+  name: string;
+  phone: string;
+  email: null;
+  avatarUrl: null;
+  isActive: boolean;
+  isDeleted: boolean;
+  isBlocked: boolean;
+}
+
+/** Sessiya davomida ro'yxatdan o'tganlar; `resetMockDb()` tozalaydi. */
+const registered = new Map<string, MockAccount>();
+
+export const digitsOf = (phoneOrDigits: string) => phoneOrDigits.replace(/\D/g, '').slice(-9);
+
+export function findMockUser(phoneOrDigits: string): MockAccount | null {
+  const digits = digitsOf(phoneOrDigits);
+  return digits in MOCK_USERS ? MOCK_USERS[digits as MockPhone] : registered.get(digits) ?? null;
+}
+
+export function registerMockAffiliate(phoneOrDigits: string): MockAccount {
+  const digits = digitsOf(phoneOrDigits);
+  const account: MockAccount = {
+    ...base, id: `U-${(1000 + registered.size + 1).toString()}`, role: 'AFFILIATE', name: '', phone: `+998${digits}`,
+  };
+  registered.set(digits, account);
+  return account;
+}
+
+/** Dev'da hozirgina ro'yxatdan o'tgan sotuvchi — sahifasi va statistikasi yo'q («Birinchi qadamlar»). */
+export const isNewMockAccount = (account: Pick<MockAccount, 'phone'>) => registered.has(digitsOf(account.phone));
+
+export function resetRegisteredMockAccounts(): void {
+  registered.clear();
 }
 
 export function mockUserByRole(role: MockUser['role']): MockUser {
@@ -41,8 +77,8 @@ export function mockUserByRole(role: MockUser['role']): MockUser {
 }
 
 /** Mock token: `mock.<telefonning 9 raqami>` — backend tokeni kabi bo'shliqsiz. */
-export const mockTokenFor = (user: MockUser) => `mock.${user.phone.slice(-9)}`;
+export const mockTokenFor = (user: Pick<MockAccount, 'phone'>) => `mock.${user.phone.slice(-9)}`;
 
-export function userFromMockToken(token: string | null): MockUser | null {
+export function userFromMockToken(token: string | null): MockAccount | null {
   return token?.startsWith('mock.') ? findMockUser(token.slice(5)) : null;
 }

@@ -59,15 +59,21 @@ test('foydalanuvchi tugmasi rol nomini ko‘rsatadi, menyudagi Profil profil sah
   await page.getByRole('menuitem', { name: 'Profil' }).click();
 
   await expect(page).toHaveURL(/\/profile$/);
-  await expect(pageTitle(page)).toHaveText('Mening profilim');
+  // Sotuvchi profili (FE-04, sotuvchi-profil) — sarlavha «Profil».
+  await expect(pageTitle(page)).toHaveText('Profil');
 });
 
 test('til foydalanuvchi menyusidan almashtiriladi: menyu va sarlavha shu tilda', async ({ page }) => {
   await installAuthenticatedSession(page);
   await page.goto('/affiliate');
   await page.getByTestId('user-menu-button').click();
-  await page.getByRole('menuitem', { name: /^Til/ }).hover();
-  await page.getByRole('menuitem', { name: 'Русский' }).click();
+  // Ichki menyu hover bilan ochiladi; sahifa ma'lumoti shu payt kelib qayta chizilsa hover yo'qolishi mumkin.
+  const russian = page.getByRole('menuitem', { name: 'Русский' });
+  await expect(async () => {
+    await page.getByRole('menuitem', { name: /^Til/ }).hover();
+    await expect(russian).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 10_000 });
+  await russian.click();
 
   await expect(pageTitle(page)).toHaveText('Главная');
   await expect(page.getByRole('navigation', { name: 'Главное меню' }).getByRole('link', { name: 'Офферы' })).toBeVisible();

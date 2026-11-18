@@ -20,3 +20,21 @@ export function usePageTitle(title: string | null | undefined): void {
     return () => setTitle(null);
   }, [setTitle, title]);
 }
+
+/** Yuqori qatordagi sahifa holati: «Statistika har soatda yangilanadi · 14:00» (sotuvchi-bosh). */
+export interface PageStatus {
+  label: string;
+  value: string;
+}
+
+export const PageStatusContext = createContext<((status: PageStatus | null) => void) | null>(null);
+
+/** Sahifa holatini yuqori qatorga chiqaradi (telefonda — mazmun tepasida). */
+export function usePageStatus(label: string | null, value: string | null): void {
+  const setStatus = useContext(PageStatusContext);
+  useLayoutEffect(() => {
+    if (!setStatus) return;
+    setStatus(label && value ? { label, value } : null);
+    return () => setStatus(null);
+  }, [setStatus, label, value]);
+}

@@ -9,5 +9,5 @@ export async function startMockApi(): Promise<void> {
     onUnhandledRequest: 'bypass',
     quiet: true,
   });
-  console.info('[mock] API mock rejimida: telefon 900000001…900000008 (8 rol), parol — istalgan.');
+  console.info('[mock] API mock rejimida: telefon 900000001…900000008 (8 rol), parol — istalgan; sotuvchi SMS kodi — 123456 (900000010 — eski oferta, JShShIR rad etilgan).');
 }

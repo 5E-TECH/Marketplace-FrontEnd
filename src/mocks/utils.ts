@@ -17,10 +17,11 @@ export function ok<T>(data: T, status = 200, headers?: Record<string, string>) {
 
 let requestCounter = 0;
 
-export function fail(status: number, errorCode: string, message: string, headers?: Record<string, string>) {
+/** `extra` — xatoning qo'shimcha maydonlari (masalan, `attemptsLeft`, `blockedUntil`). */
+export function fail(status: number, errorCode: string, message: string, headers?: Record<string, string>, extra: Record<string, unknown> = {}) {
   requestCounter += 1;
   return HttpResponse.json(
-    { statusCode: status, message, errorCode, requestId: `mock-${requestCounter.toString().padStart(4, '0')}` },
+    { statusCode: status, message, errorCode, requestId: `mock-${requestCounter.toString().padStart(4, '0')}`, ...extra },
     { status, headers },
   );
 }

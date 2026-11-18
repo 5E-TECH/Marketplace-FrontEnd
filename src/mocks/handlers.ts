@@ -3,6 +3,8 @@ import { affiliateHandlers } from './handlers/affiliate';
 import { authHandlers } from './handlers/auth';
 import { commonHandlers } from './handlers/common';
 import { operatorHandlers } from './handlers/operator';
+import { sellerAuthHandlers } from './handlers/sellerAuth';
+import { sellerProfileHandlers } from './handlers/sellerProfile';
 import { API, fail } from './utils';
 
 /**
@@ -10,7 +12,7 @@ import { API, fail } from './utils';
  * Vitest (`msw/node`) va Playwright (`tests/e2e/support/mockApi.ts`) bitta ro'yxatdan
  * foydalanadi. M2 bo'limlari (optovik, balans, sverka, softfon…) o'z kartasi bilan qo'shiladi.
  */
-export const handlers = [...authHandlers, ...commonHandlers, ...affiliateHandlers, ...operatorHandlers];
+export const handlers = [...authHandlers, ...sellerAuthHandlers, ...commonHandlers, ...affiliateHandlers, ...sellerProfileHandlers, ...operatorHandlers];
 
 /**
  * Dev rejimida mock'i yo'q API so'rovi jimgina haqiqiy serverga ketmasin: aniq 501

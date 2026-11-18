@@ -7,6 +7,7 @@ import {
   mockNotifications,
   operatorUser,
   roleUsers,
+  openStaffLogin,
 } from './support/auth';
 import { logoutViaUserMenu, mainNav, pageTitle } from './support/shell';
 
@@ -56,6 +57,7 @@ test('TC1: OPERATOR_LEAD bilan login → operator karkasi, boshqa menyu yo‘q',
   await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: { data: operatorUser } }));
 
   await page.goto('/login');
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
@@ -79,6 +81,7 @@ test('chiqib boshqa rol bilan kirilsa — oldingi foydalanuvchi sahifasiga emas,
   await expect(page).toHaveURL(/\/login$/);
 
   meUser = operatorUser;
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
@@ -98,6 +101,7 @@ test('qo‘lda chiqilgach keyingi kirgan odam oldingi sahifaga emas, o‘z bosh 
   await logoutViaUserMenu(page);
 
   meUser = roleUsers.SUPERADMIN;
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
@@ -187,6 +191,7 @@ test('TC3: login’da noma’lum rol — oq ekran emas, menyusiz karkas', async 
   await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: { data: { ...roleUsers.AFFILIATE, role: 'SELLER' } } }));
 
   await page.goto('/login');
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();

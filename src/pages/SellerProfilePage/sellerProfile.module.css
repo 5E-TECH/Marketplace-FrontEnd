@@ -1,0 +1,646 @@
+/* sotuvchi-profil, sotuvchi-jshshir, sotuvchi-oferta: oq kartalar 16 px, bloklar orasi 20. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.headText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Faqat sarlavha qatorida kenglik bo'yicha cho'ziladi (ustunli kartada balandlik bermaydi). */
+.head > .headText {
+  flex: 1 1 280px;
+}
+
+.head h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.headText p {
+  margin: 0;
+}
+
+.subTitle {
+  margin: 4px 0 0;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.alignStart {
+  align-self: flex-start;
+}
+
+.link {
+  align-self: flex-start;
+  color: var(--color-action);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+/* Hisob kartasi */
+.account {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--color-nav);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.accountText {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 240px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accountName {
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tags :global(.ant-tag) {
+  margin: 0;
+}
+
+.accountMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: right;
+}
+
+/* Tayyorlik ro'yxati */
+.readiness {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.readiness li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.readinessIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  color: #fff;
+}
+
+.readiness li[data-done='true'] .readinessIcon {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+.readinessText {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 140px;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readinessText strong {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.readiness .link {
+  flex-basis: 100%;
+  padding-left: 34px;
+  font-size: 13px;
+}
+
+/* Maydonlar ro'yxati */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.fields > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fields .wide {
+  grid-column: 1 / -1;
+}
+
+.fields dt {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.fields dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.fields dd.muted {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.sessions,
+.agreements {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessions li,
+.agreements li,
+.cardRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sessions li > svg,
+.agreements li > svg,
+.cardRow > svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+}
+
+.inlineTag {
+  margin-inline-start: 8px;
+  vertical-align: 1px;
+}
+
+.emptyLine {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+/* ── JShShIR sahifasi ───────────────────────────────────────────────────── */
+.statusCard {
+  border-width: 1px;
+}
+
+.statusCard[data-tone='success'] {
+  border-color: var(--color-success-soft);
+  background: linear-gradient(var(--color-success-soft), var(--color-surface) 120px);
+}
+
+.statusCard[data-tone='danger'] {
+  border-color: var(--color-error-soft);
+  background: linear-gradient(var(--color-error-soft), var(--color-surface) 120px);
+}
+
+.statusCard[data-tone='warning'] {
+  border-color: var(--color-warning-soft);
+  background: linear-gradient(var(--color-warning-soft), var(--color-surface) 120px);
+}
+
+.needList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.needList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.needNumber {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.reason {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.checkSteps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkSteps li {
+  display: flex;
+  flex: 1 1 180px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.checkSteps li[data-done='true'] {
+  border-color: var(--color-success);
+}
+
+.taxTable {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-surface-subtle);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.taxTable dt {
+  color: var(--color-text-muted);
+}
+
+.taxTable dd {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.taxTable dt:last-of-type,
+.taxTable dd:last-of-type {
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.guide dt {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.guide dd {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  text-align: center;
+  cursor: pointer;
+}
+
+.dropzone:focus-within,
+.dropzone:hover {
+  border-color: var(--color-action);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.fileRow > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readonlyValue {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.statusTag {
+  align-self: flex-start;
+  margin: 0 0 4px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Oynalar (yo'riqnoma, JShShIR kiritish, ism). */
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 32px;
+}
+
+.modalTitle > span:first-child {
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.modalTitle .muted {
+  font-weight: 400;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modalForm {
+  margin-top: 12px;
+}
+
+.guideSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.guideSteps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.taxExample {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.inlineLink {
+  align-self: flex-start;
+  height: auto;
+  padding: 0;
+  font-weight: 600;
+}
+
+.documentRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.fileRow[data-state='failed'] {
+  border-color: var(--color-error-soft);
+  background: var(--color-error-soft);
+  color: var(--color-danger);
+}
+
+.fileInfo {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fileName {
+  overflow: hidden;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileError {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.fileInfo :global(.ant-progress) {
+  margin: 0;
+}
+
+/* ── Oferta va roziliklar ───────────────────────────────────────────────── */
+.summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.summary > div {
+  display: contents;
+}
+
+.summary dt {
+  color: var(--color-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.summary dd {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 767.98px) {
+  .card {
+    padding: 16px;
+  }
+
+  .accountMeta {
+    flex-basis: 100%;
+    text-align: left;
+  }
+
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary dt {
+    white-space: normal;
+  }
+}

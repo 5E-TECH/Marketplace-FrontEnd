@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
+import { openStaffLogin } from './support/auth';
 import { installMockApi } from './support/mockApi';
 import { pageTitle } from './support/shell';
 
@@ -9,6 +10,7 @@ import { pageTitle } from './support/shell';
  */
 async function signIn(page: Page, phone: string, password = 'Secure123') {
   await page.goto('/login');
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill(phone);
   await page.getByLabel('Parol').fill(password);
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
@@ -39,11 +41,14 @@ test('TC1: operator ish joyi mock ma’lumot bilan ochiladi — bronlar, rejalas
 test('TC1: sotuvchi bosh sahifasi mock ma’lumot bilan — bugungi ko‘rsatkichlar va 7 kun', async ({ page }) => {
   await signIn(page, '900000001');
   await expect(page).toHaveURL(/\/affiliate$/);
-  await expect(page.getByRole('heading', { name: 'Bugun' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Bugun', exact: true })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Bugun' }).getByRole('listitem')).toHaveCount(5);
-  // 7 kun + «Jami» qatori.
-  await expect(page.locator('tbody tr.ant-table-row')).toHaveCount(7);
-  await expect(page.locator('.ant-table-summary')).toContainText('Jami');
+  // Sukut — grafik (7 ustun); «Jadval»da 7 kun + «Jami» qatori (FE-04: sotuvchi-bosh).
+  const revenue = page.getByRole('region', { name: 'Daromad kunlar bo‘yicha' });
+  await expect(revenue.getByTestId('income-bar')).toHaveCount(7);
+  await revenue.getByRole('radio', { name: 'Jadval' }).click();
+  await expect(revenue.locator('tbody tr.ant-table-row')).toHaveCount(7);
+  await expect(revenue.locator('.ant-table-summary')).toContainText('Jami');
 });
 
 test('TC2: ikkinchi tab ochildi → qayta login so‘ralmaydi; chiqish hamma tabda', async ({ context, page }) => {
@@ -78,7 +83,7 @@ test('TC2: ikkinchi tab ochildi → qayta login so‘ralmaydi; chiqish hamma tab
 
 test('TC3: CSV yuklab olish — fayl nomi, UTF-8 BOM, «;» ajratgich va toast', async ({ page }) => {
   await signIn(page, '900000001');
-  await expect(page.locator('tbody tr.ant-table-row')).toHaveCount(7);
+  await expect(page.getByRole('list', { name: 'Bugun' }).getByRole('listitem')).toHaveCount(5);
 
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Yuklab olish (CSV)' }).click();
@@ -150,7 +155,9 @@ test('blok yuklanmadi → «Xato raqami» va 429 da kutish sanog‘i', async ({ 
   }));
   await signIn(page, '900000001');
 
-  const error = page.getByTestId('load-error');
+  // Bloklar alohida yuklanadi (sotuvchi-bosh 1-bo'lim): statistika ochilmasa ham xabarlar ko'rinadi.
+  await expect(page.getByRole('region', { name: 'Bugungi xabarlar' })).toBeVisible();
+  const error = page.getByRole('region', { name: 'Bugun', exact: true }).getByTestId('load-error');
   await expect(error).toContainText('Ma’lumotni yuklab bo‘lmadi');
   await expect(error).toContainText('Xato raqami: req-7f3a');
   await expect(error).toContainText('Sahifa 60 soniyada o‘zi qayta urinadi');

@@ -97,3 +97,19 @@
   flex: 1 0 auto;
   padding: 24px 16px 32px;
 }
+
+/* ── Planshet (umumiy-kirish.planshet, sotuvchi-royxat.planshet): qator 64, forma markazda. ── */
+.tabletPage .phoneHeader {
+  height: 64px;
+  padding: 0 12px 0 24px;
+}
+
+.tabletPage .phoneMain {
+  display: flex;
+  justify-content: center;
+  padding: 40px 24px 48px;
+}
+
+.tabletPage > aside {
+  padding-inline: 24px;
+}
