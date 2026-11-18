@@ -1,5 +1,5 @@
 import { App, Drawer } from 'antd';
-import { MonitorSmartphone } from 'lucide-react';
+import { MonitorSmartphone, RefreshCw } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/store/hooks';
@@ -14,7 +14,8 @@ import { NotificationBell } from '../../features/notifications/ui/NotificationBe
 import { OperatorBookingsClock, OperatorStateSwitch } from '../../features/operator/ui/OperatorStatusBar';
 import { ConnectionBanner } from '../../shared/ui/ConnectionBanner/ConnectionBanner';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { PageTitleContext } from '../../shared/ui/PageHeader/pageTitle';
+import { formatUzPhone } from '../../shared/lib/phone';
+import { PageStatusContext, PageTitleContext, type PageStatus } from '../../shared/ui/PageHeader/pageTitle';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import { DrawerNav, SideNav, WarehouseRail } from './NavMenu';
 import { TopBar, UserMenu, type ShellLayout } from './TopBar';
@@ -59,6 +60,7 @@ export default function AppShell() {
   const shell = user ? getRoleShell(user.role) : null;
   const layout = useShellLayout(shell?.variant);
   const [pageTitle, setPageTitle] = useState<string | null>(null);
+  const [pageStatus, setPageStatus] = useState<PageStatus | null>(null);
   // Panel qaysi manzilda ochilgan bo'lsa, faqat o'sha yerda ochiq: boshqa sahifaga o'tganda o'zi yopiladi.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
 
@@ -117,7 +119,7 @@ export default function AppShell() {
           title={title}
           back={back}
           onMenuOpen={usesDrawer ? () => setDrawerPath(pathname) : undefined}
-          afterTitle={user.role === 'OPERATOR_LEAD' ? <OperatorStateSwitch /> : undefined}
+          afterTitle={user.role === 'OPERATOR_LEAD' ? <OperatorStateSwitch /> : pageStatus ? <PageStatusLine status={pageStatus} /> : undefined}
           beforeTools={user.role === 'OPERATOR_LEAD' ? <OperatorBookingsClock /> : undefined}
           bell={
             <NotificationBell
@@ -129,7 +131,8 @@ export default function AppShell() {
           }
           user={
             <UserMenu
-              name={user.name}
+              // Yangi sotuvchida ism yo'q (ro'yxat faqat telefon bilan, FE-04) — Profilda kiritadi.
+              name={user.name.trim() || formatUzPhone(user.phone)}
               roleLabel={t(ROLE_LABEL_KEYS[user.role])}
               touch={touch}
               profilePath={shell.profilePath}
@@ -141,13 +144,27 @@ export default function AppShell() {
         {sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>
-            {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}
-            <Suspense fallback={<PageLoader compact />}>
-              <Outlet />
-            </Suspense>
+            <PageStatusContext value={setPageStatus}>
+              {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}
+              {/* Telefonda yuqori qator 56 px — sahifa holati mazmun tepasida. */}
+              {layout === 'phone' && pageStatus ? <PageStatusLine status={pageStatus} /> : null}
+              <Suspense fallback={<PageLoader compact />}>
+                <Outlet />
+              </Suspense>
+            </PageStatusContext>
           </PageTitleContext>
         </main>
       </div>
     </div>
+  );
+}
+
+/** «Statistika har soatda yangilanadi · 14:00» (sotuvchi-bosh yuqori qatori). */
+function PageStatusLine({ status }: { status: PageStatus }) {
+  return (
+    <span className={styles.pageStatus} role="status">
+      <RefreshCw size={14} aria-hidden />
+      {status.label} · <strong>{status.value}</strong>
+    </span>
   );
 }

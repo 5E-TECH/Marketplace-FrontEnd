@@ -1,0 +1,16 @@
+{
+  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md",
+  "endpoints": [
+    {"operation": "POST /api/v1/auth/otp/send", "card": "BE-06", "note": "SMS kod: ro'yxat yoki kirish"},
+    {"operation": "POST /api/v1/auth/otp/verify", "card": "BE-06", "note": "Kodni tekshirish: kirish tokeni yoki ro'yxat tokeni"},
+    {"operation": "POST /api/v1/auth/register/affiliate", "card": "BE-06", "note": "Sotuvchi hisobi: oferta va rozilik versiyasi bilan"},
+    {"operation": "GET /api/v1/legal/documents/{}", "card": "BE-06 / EQ-10", "note": "Oferta va rozilik matni, joriy versiya"},
+    {"operation": "GET /api/v1/affiliate/profile", "card": "BE-05 / BE-06", "note": "Sotuvchi profili: ism, ro'yxat sanasi, qabul qilingan oferta/rozilik, JShShIR holati, karta"},
+    {"operation": "PATCH /api/v1/affiliate/profile", "card": "BE-05 / BE-06", "note": "Ism va familiya (soliq hisoboti uchun)"},
+    {"operation": "POST /api/v1/affiliate/self-employed", "card": "BE-23", "note": "JShShIR va maqom ma'lumotnomasi tekshiruvga (BE-23 da hozir faqat admin boolean)"},
+    {"operation": "GET /api/v1/legal/documents/{}/pdf", "card": "BE-06 / EQ-10", "note": "Oferta va rozilik PDF (superadmin yuklaydi)"},
+    {"operation": "POST /api/v1/affiliate/self-employed/document", "card": "BE-23", "note": "Maqom ma'lumotnomasini yuklash (yopiq fayl)"},
+    {"operation": "GET /api/v1/affiliate/self-employed/document", "card": "BE-23", "note": "Yuklangan ma'lumotnomani ochish (faqat egasi)"},
+    {"operation": "POST /api/v1/affiliate/agreements", "card": "BE-06", "note": "Ofertaning yangi versiyasini qabul qilish (versiya va vaqt saqlanadi)"}
+  ]
+}

@@ -108,6 +108,8 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/affiliate/balance', load: pending, roles: ['AFFILIATE'], label: 'nav.balance', navIcon: <Wallet /> },
   { path: '/affiliate/postback', load: pending, roles: ['AFFILIATE'], label: 'nav.postbackApi', navIcon: <Webhook /> },
   { path: '/profile', load: profile, roles: USER_ROLES, label: 'nav.profileShort', navIcon: <UserRound />, navRoles: ['AFFILIATE'] },
+  { path: '/profile/self-employed', load: () => import('../../pages/SellerProfilePage/SelfEmployedPage'), roles: ['AFFILIATE'], label: 'selfEmployed.title', section: '/profile' },
+  { path: '/profile/offer', load: () => import('../../pages/SellerProfilePage/AgreementsPage'), roles: ['AFFILIATE'], label: 'sellerProfile.agreementsTitle', section: '/profile' },
 
   // ── Operator (2.2) ─────────────────────────────────────────────────────────
   { path: '/operator', load: () => import('../../pages/OperatorHomePage/OperatorHomePage'), roles: ['OPERATOR_LEAD'], label: 'nav.operatorWorkspace', navIcon: <Headset /> },

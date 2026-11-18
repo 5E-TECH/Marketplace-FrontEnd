@@ -1,9 +1,10 @@
 import { Button, Form, Input, type FormInstance } from 'antd';
 import { CircleAlert, TriangleAlert } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
 import { getUzLocalPhone } from '../../../../shared/lib/phone';
-import styles from './LoginForm.module.css';
+import styles from '../../../../shared/ui/AuthLayout/authForm.module.css';
 
 export interface LoginFormValues {
   phone: string;
@@ -23,12 +24,14 @@ interface LoginFormProps {
   notice: LoginNotice | null;
   onSubmit: (values: LoginFormValues) => void;
   onChange: () => void;
+  /** «Kim sifatida kirasiz» tanlovi — sarlavha ostida (FE-04). */
+  roleSwitch?: ReactNode;
 }
 
 const PHONE_NUMBER_PATTERN = /^\d{9}$/;
 
 /** Platforma xodimi: telefon raqami va parol (umumiy-kirish §3). */
-export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange }: LoginFormProps) {
+export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange, roleSwitch }: LoginFormProps) {
   const { t } = useTranslation();
   return (
     <Form<LoginFormValues>
@@ -42,6 +45,7 @@ export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange }: Lo
       aria-labelledby="login-title"
     >
       <h1 id="login-title" className={styles.title}>{t('login.title')}</h1>
+      {roleSwitch}
 
       <Form.Item
         className={styles.field}

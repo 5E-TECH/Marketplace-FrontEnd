@@ -12,6 +12,7 @@ import { RequireRole } from './RequireRole';
 
 const AppShell = lazy(() => import('../../layouts/AppShell/AppShell'));
 const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
+const RegisterPage = lazy(() => import('../../pages/RegisterPage/RegisterPage'));
 const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
@@ -37,6 +38,7 @@ export function AppRouter() {
           ) : null}
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
           </Route>
 
           {/* Kirmagan foydalanuvchi har qanday manzildan login'ga; kirgani — panel ichida 404. */}

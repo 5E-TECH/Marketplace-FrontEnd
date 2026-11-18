@@ -1,7 +1,8 @@
 import { http } from 'msw';
 import type { components } from '../../generated/api-types';
 import { affiliateStatsRow, db } from '../db';
-import { addDays, API, fail, ok, pageOf, seeded } from '../utils';
+import { addDays, API, fail, ok, pageOf, seeded, tashkentDate } from '../utils';
+import { isNewMockAccount } from '../fixtures/users';
 import { currentMockUser } from './auth';
 
 type Schemas = components['schemas'];
@@ -20,6 +21,32 @@ function statsRows(from: string, to: string): Schemas['AffiliateStatsRowDto'][] 
   return rows;
 }
 
+const ROW_FIELDS = ['clicks', 'leads', 'validLeads', 'confirmed', 'delivered', 'refused'] as const;
+
+/**
+ * Kunlik qatorni sahifalarga bo'ladi: sahifalar yig'indisi kunlik jamiga teng (backendda ham
+ * shunday — bitta lidlar to'plami). Birinchi sahifaga ~60 %, qolgani teng.
+ */
+function splitByStream(row: Schemas['AffiliateStatsRowDto'], count: number): Schemas['AffiliateStatsRowDto'][] {
+  const weights = Array.from({ length: count }, (_, index) => (count === 1 ? 1 : index === 0 ? 0.6 : 0.4 / (count - 1)));
+  const part = (value: number) => {
+    const parts = weights.map((weight) => Math.floor(value * weight));
+    parts[0] += value - parts.reduce((sum, item) => sum + item, 0);
+    return parts;
+  };
+  const split = Object.fromEntries(ROW_FIELDS.map((field) => [field, part(row[field])])) as Record<(typeof ROW_FIELDS)[number], number[]>;
+  return weights.map((_, index) => {
+    const income = split.delivered[index] * 65_000;
+    const hold = row.incomeHold > 0 ? income : 0;
+    return {
+      key: row.key,
+      ...(Object.fromEntries(ROW_FIELDS.map((field) => [field, split[field][index]])) as Record<(typeof ROW_FIELDS)[number], number>),
+      incomeHold: hold,
+      incomeAvailable: income - hold,
+    };
+  });
+}
+
 function totals(rows: Schemas['AffiliateStatsRowDto'][]): Schemas['AffiliateStatsRowDto'] {
   const sum = (field: Exclude<keyof Schemas['AffiliateStatsRowDto'], 'key'>) => rows.reduce((total, row) => total + row[field], 0);
   return {
@@ -28,6 +55,41 @@ function totals(rows: Schemas['AffiliateStatsRowDto'][]): Schemas['AffiliateStat
     delivered: sum('delivered'), refused: sum('refused'), incomeHold: sum('incomeHold'), incomeAvailable: sum('incomeAvailable'),
   };
 }
+
+type LeadStatus = Schemas['AffiliateLeadRowDto']['status'];
+const OPEN_STATUSES: readonly LeadStatus[] = ['CALLBACK', 'CALLBACK', 'NEW', 'MERGED', 'BOOKED', 'REJECTED', 'NO_CONTACT'];
+
+/** Kun qatoridagi lidlar: tasdiqlangan va yaroqsiz soni statistikadagidek, qolgani — urug'li tasodif. */
+function leadsOfDay(day: Schemas['AffiliateStatsRowDto'], today: string): Schemas['AffiliateLeadRowDto'][] {
+  const perStream = splitByStream(day, Math.max(db.streams.length, 1));
+  const codes = perStream.flatMap((part, index) => Array.from({ length: part.leads }, () => db.streams[index]?.code ?? 'k7m2qa'));
+  const invalid = day.leads - day.validLeads;
+  const now = Date.now();
+  // Bugungi lidlar hozirgacha bo'lgan soatlarga, o'tgan kunlarniki — kun bo'ylab.
+  const dayStart = Date.parse(`${day.key}T00:00:00+05:00`);
+  const span = day.key === today ? Math.max(60_000, now - dayStart - 60_000) : 24 * 3_600_000 - 60_000;
+  return codes.map((streamCode, index) => {
+    const leadStatus: LeadStatus = index < day.confirmed
+      ? 'CONFIRMED'
+      : index < day.confirmed + invalid
+        ? 'INVALID'
+        : OPEN_STATUSES[seeded(`${day.key}:${index}:s`, 0, OPEN_STATUSES.length - 1)];
+    const confirmed = leadStatus === 'CONFIRMED';
+    return {
+      id: `L-${day.key.replaceAll('-', '').slice(2)}${String(index + 1).padStart(2, '0')}`,
+      createdAt: new Date(dayStart + Math.round((span * (index + 1)) / (codes.length + 1))).toISOString(),
+      streamCode,
+      sub1: index % 2 ? 'fb-reels-1' : null, sub2: null, sub3: null, sub4: null, sub5: null,
+      phoneLast4: String(seeded(`${day.key}:${index}:p`, 1000, 9999)),
+      status: leadStatus,
+      orderStatus: confirmed ? 'IN_TRANSIT' : null,
+      commission: confirmed ? 65_000 : null,
+      commissionState: confirmed ? 'PENDING' : leadStatus === 'MERGED' ? 'NONE' : null,
+    };
+  });
+}
+
+const emptyCounts = { clicks: 0, leads: 0, validLeads: 0, confirmed: 0, delivered: 0, refused: 0, incomeHold: 0, incomeAvailable: 0 };
 
 export const affiliateHandlers = [
   http.get(`${API}/affiliate/stats`, ({ request, cookies }) => {
@@ -40,10 +102,14 @@ export const affiliateHandlers = [
       return fail(400, 'VALIDATION_ERROR', 'from va to sanasi kerak (YYYY-MM-DD)');
     }
     const groupBy = url.searchParams.get('groupBy') ?? 'DAY';
-    const daily = statsRows(from, to);
+    // Yangi sotuvchi (dev'da ro'yxatdan o'tgan): sahifasi yo'q — hamma son 0.
+    const fresh = isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' });
+    const daily = statsRows(from, to).map((row) => (fresh ? { ...row, ...emptyCounts } : row));
+    const streams = fresh ? [] : db.streams;
+    const byStream = daily.map((row) => splitByStream(row, Math.max(streams.length, 1)));
     const rows = groupBy === 'DAY'
       ? daily
-      : db.streams.map((stream) => ({ ...totals(daily.map((row) => affiliateStatsRow(`${row.key}:${stream.code}`))), key: groupBy === 'SUB1' ? 'fb-reels-1' : stream.code }));
+      : streams.map((stream, index) => ({ ...totals(byStream.map((parts) => parts[index])), key: groupBy === 'SUB1' ? 'fb-reels-1' : stream.code }));
     const body: Schemas['AffiliateStatsDto'] = { rows, totals: totals(daily) };
     return ok(body);
   }),
@@ -60,7 +126,8 @@ export const affiliateHandlers = [
   http.get(`${API}/affiliate/streams`, ({ request, cookies }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;
-    const page: Schemas['AffiliateStreamsPageDto'] = pageOf(db.streams, new URL(request.url));
+    const fresh = isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' });
+    const page: Schemas['AffiliateStreamsPageDto'] = pageOf(fresh ? [] : db.streams, new URL(request.url));
     return ok(page);
   }),
 
@@ -83,19 +150,20 @@ export const affiliateHandlers = [
   http.get(`${API}/affiliate/leads`, ({ request, cookies }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;
-    const statuses = ['CALLBACK', 'CONFIRMED', 'MERGED', 'NEW', 'CONFIRMED', 'REJECTED'] as const;
-    const rows: Schemas['AffiliateLeadRowDto'][] = statuses.map((status, index) => ({
-      id: `L-12${72 - index}`,
-      createdAt: new Date(Date.now() - (index + 1) * 47 * 60_000).toISOString(),
-      streamCode: db.streams[index % db.streams.length].code,
-      sub1: index % 2 ? 'fb-reels-1' : null, sub2: null, sub3: null, sub4: null, sub5: null,
-      phoneLast4: String(2087 + index * 1111).slice(-4),
-      status,
-      orderStatus: status === 'CONFIRMED' ? 'IN_TRANSIT' : null,
-      commission: status === 'CONFIRMED' ? 65_000 : null,
-      commissionState: status === 'CONFIRMED' ? 'PENDING' : status === 'MERGED' ? 'NONE' : null,
-    }));
-    const page: Schemas['AffiliateLeadsPageDto'] = pageOf(rows, new URL(request.url));
+    const url = new URL(request.url);
+    const today = tashkentDate();
+    const from = url.searchParams.get('from') ?? today;
+    const to = url.searchParams.get('to') ?? today;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from > to) {
+      return fail(400, 'VALIDATION_ERROR', 'from va to sanasi kerak (YYYY-MM-DD)');
+    }
+    const fresh = isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' });
+    const status = url.searchParams.get('status');
+    // Lidlar statistika bilan bir xil: kun va sahifa bo'yicha soni `/affiliate/stats` dagidek.
+    const rows = (fresh ? [] : statsRows(from, to).flatMap((day) => leadsOfDay(day, today)))
+      .filter((row) => !status || row.status === status)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const page: Schemas['AffiliateLeadsPageDto'] = pageOf(rows, url);
     return ok(page);
   }),
 ];

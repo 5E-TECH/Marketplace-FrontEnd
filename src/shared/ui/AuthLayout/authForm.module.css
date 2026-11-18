@@ -1,0 +1,456 @@
+/* umumiy-kirish: forma 400 px, bloklar orasi 20, maydon va tugma 52 px. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+}
+
+.field {
+  margin: 0 !important;
+}
+
+.field :global(.ant-form-item-label) {
+  padding-bottom: 6px !important;
+}
+
+.field :global(.ant-form-item-label > label) {
+  height: auto !important;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.field :global(.ant-form-item-explain-error) {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.phone,
+.password {
+  height: 52px;
+  border-color: var(--color-field-border);
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.phone input,
+.password input {
+  font-size: 16px !important;
+}
+
+/* «+998» — chapdagi kulrang blok, o'ngida chiziq. */
+.phone {
+  overflow: hidden;
+  padding-block: 0;
+  padding-left: 0;
+}
+
+.phone input,
+.password input {
+  height: 50px;
+}
+
+.password {
+  padding-block: 0;
+}
+
+.phone :global(.ant-input-prefix) {
+  align-self: stretch;
+  margin-inline-end: 14px;
+}
+
+.phonePrefix {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 14px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-sunken);
+  color: var(--color-text-muted);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.password {
+  letter-spacing: 0.12em;
+}
+
+.password :global(.ant-input-suffix) {
+  margin-inline-end: -4px;
+  color: var(--color-text-muted);
+}
+
+.warning,
+.danger {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.danger {
+  background: var(--color-error-soft);
+  color: var(--color-danger);
+}
+
+.warning > svg,
+.danger > svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.noticeTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.noticeText {
+  margin: 2px 0 0;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.submit {
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+/* Yopiq asosiy tugma — o'sha ko'k, 45% (sotuvchi-royxat: «tugma yopiq»). */
+.submit:global(.ant-btn-primary):disabled {
+  border-color: transparent;
+  background: var(--color-action);
+  color: #fff;
+  opacity: 0.45;
+}
+
+.hint {
+  margin: 4px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+/* ── SMS kod formalari (umumiy-kirish §1, sotuvchi-royxat) ─────────────────── */
+.info,
+.success {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.info {
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+
+.success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.info > svg,
+.success > svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.noticeBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.noticeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+/* Yorliq qatori: chapda yorliq, o'ngda «O‘zgartirish» yoki «amal qiladi: 04:12». */
+.fieldHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.fieldLabel {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.fieldAside {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.fieldAside strong {
+  color: var(--color-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fieldAside strong[data-expired='true'] {
+  color: var(--color-danger);
+}
+
+.fieldHint {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.field :global(.ant-form-item-extra) {
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* Matn ichidagi tugma-havola: bosish joyi telefonda 44 px (R0). */
+.linkButton {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-action);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--color-action-hover);
+}
+
+.linkButton:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.link {
+  color: var(--color-action);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Kod yuborilgach raqam o'zgarmaydi — kulrang, faqat o'qish. */
+.phoneReadonly {
+  border-color: var(--color-border) !important;
+  background: var(--color-sunken) !important;
+  box-shadow: none !important;
+}
+
+.phoneReadonly .phonePrefix {
+  background: transparent;
+}
+
+.code {
+  height: 52px;
+  padding: 0 16px;
+  border-color: var(--color-field-border);
+  border-radius: 12px;
+  font-size: 20px !important;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.code::placeholder {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.secondary {
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.caption {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.footer p {
+  margin: 0;
+}
+
+/* «Qayta urinishgacha 12:40» — 3 xatodan keyingi blok. */
+.timerBox {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--color-sunken);
+}
+
+.timerLabel {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.timerValue {
+  color: var(--color-text);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.timerPhone {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* «Kim sifatida kirasiz» — ikki bo'lakli tanlov, 44 px. */
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  height: 44px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 36px;
+  margin: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segment[aria-checked='true'] {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgb(16 23 51 / 6%);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.lead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lead p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.lead strong {
+  color: var(--color-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Telefonda bosish joyi 44 px (R0): ichki padding qatorni surmaydi. */
+@media (max-width: 767.98px) {
+  .linkButton {
+    margin-block: -12px;
+    padding-block: 12px;
+  }
+}

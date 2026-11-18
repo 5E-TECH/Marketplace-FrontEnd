@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ACCESS_TOKEN_KEY, authenticatedUser, mockDashboard, mockLogout, mockProducts, mockSellerShop, seedAccessToken } from './support/auth';
+import { ACCESS_TOKEN_KEY, authenticatedUser, mockDashboard, mockLogout, mockProducts, mockSellerShop, seedAccessToken, openStaffLogin } from './support/auth';
 import { logoutViaUserMenu } from './support/shell';
 
 /**
@@ -30,6 +30,7 @@ test('token tanada kelmasa sessiya cookie bilan ochiladi va token saqlanmaydi', 
   });
 
   await page.goto('/login');
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();

@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import { authenticatedUser, installAuthenticatedSession, TEST_ACCESS_TOKEN } from './support/auth';
+import { authenticatedUser, installAuthenticatedSession, roleUsers, TEST_ACCESS_TOKEN } from './support/auth';
 import { collectUnconnectedFormWarnings } from './support/console';
+
+/** Umumiy profil (parol, telefon) — xodimlar uchun; sotuvchida `/profile` — sotuvchi-profil (FE-04). */
+const staffUser = roleUsers.OPERATOR_LEAD;
 
 async function mockProfileUpdate(page: Page) {
   let requestBody: Record<string, unknown> | undefined;
@@ -11,17 +14,17 @@ async function mockProfileUpdate(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ data: { ...authenticatedUser, ...requestBody, isBlocked: false } }),
+      body: JSON.stringify({ data: { ...staffUser, ...requestBody, isBlocked: false } }),
     });
   });
   return { body: () => requestBody, authorization: () => authorization };
 }
 
 test.beforeEach(async ({ page }) => {
-  await installAuthenticatedSession(page);
+  await installAuthenticatedSession(page, staffUser);
 });
 
-for (const role of ['AFFILIATE', 'WHOLESALER', 'OPERATOR_LEAD', 'SUPERVISOR', 'WAREHOUSE', 'FINANCE', 'ADMIN', 'SUPERADMIN'] as const) {
+for (const role of ['WHOLESALER', 'OPERATOR_LEAD', 'SUPERVISOR', 'WAREHOUSE', 'FINANCE', 'ADMIN', 'SUPERADMIN'] as const) {
   test(`${role} roli profil sahifasiga kira oladi`, async ({ page }) => {
     await page.route('**/api/v1/auth/me', (route) => route.fulfill({
       status: 200,
@@ -40,7 +43,7 @@ test('profil ma’lumotlarini PATCH /auth/profile orqali yangilaydi', async ({ p
   await page.goto('/profile');
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
   const dialog = page.getByRole('dialog', { name: 'Profilni tahrirlash' });
-  await expect(dialog.getByLabel('Ism')).toHaveValue(authenticatedUser.name);
+  await expect(dialog.getByLabel('Ism')).toHaveValue(staffUser.name);
   // `UpdateProfileDto` da email yo'q — backend qo'shmaguncha tahrirlanmaydi, faqat ko'rsatiladi.
   await expect(dialog.getByLabel('Email')).toHaveCount(0);
   await dialog.getByLabel('Ism').fill('Ali Valiyev');
@@ -63,7 +66,7 @@ test('bekor qilingan tahrir qayta ochilganda asl qiymatlar ko‘rinadi', async (
   await expect(dialog).toBeHidden();
 
   await page.getByRole('button', { name: 'Tahrirlash' }).click();
-  await expect(page.getByRole('dialog', { name: 'Profilni tahrirlash' }).getByLabel('Ism')).toHaveValue(authenticatedUser.name);
+  await expect(page.getByRole('dialog', { name: 'Profilni tahrirlash' }).getByLabel('Ism')).toHaveValue(staffUser.name);
   expect(formWarnings).toEqual([]);
 });
 
@@ -128,4 +131,32 @@ test('backend field xatosini mos formada ko‘rsatadi', async ({ page }) => {
   await dialog.getByLabel('Telefon').fill('+998991234567');
   await dialog.getByRole('button', { name: 'Saqlash' }).click();
   await expect(dialog.getByText('Bu telefon raqami allaqachon ishlatilgan')).toBeVisible();
+});
+
+test('sotuvchi (AFFILIATE) /profile da sotuvchi profilini ko‘radi: ism, JShShIR holati, oferta', async ({ page }) => {
+  await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: { data: authenticatedUser } }));
+  await page.route('**/api/v1/auth/sessions', (route) => route.fulfill({ json: { data: [] } }));
+  await page.route('**/api/v1/affiliate/profile', (route) => route.fulfill({
+    json: {
+      data: {
+        id: 'seller-e2e', firstName: '', lastName: '', phone: '+998901234567', registeredAt: '2026-11-18T04:12:00.000Z', lastLoginAt: null,
+        agreements: [
+          { type: 'affiliate-offer', version: '1.0', acceptedAt: '2026-11-18T04:12:00.000Z', current: true },
+          { type: 'personal-data-consent', version: '1.0', acceptedAt: '2026-11-18T04:12:00.000Z', current: true },
+        ],
+        selfEmployed: { status: 'NOT_SUBMITTED', pinflLast4: null, activity: null, submittedAt: null, checkedAt: null, reason: null, comment: null, documentName: null },
+        card: null,
+      },
+    },
+  }));
+  await page.goto('/profile');
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Profil' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pul yechishga tayyorlik' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Pul yechishga tayyorlik' }).getByRole('listitem')).toHaveCount(4);
+  await expect(page.getByText('Oferta — bajarildi')).toBeVisible();
+  await expect(page.getByText('JShShIR — qilinmagan')).toBeVisible();
+  await expect(page.getByText('1.0-versiya · qabul qilingan 18.11.2026, 09:12')).toBeVisible();
+  // Ism hali kiritilmagan — sarlavhada telefon raqami.
+  await expect(page.getByText('+998 90 123 45 67').first()).toBeVisible();
 });

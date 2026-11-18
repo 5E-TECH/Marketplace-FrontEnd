@@ -1,5 +1,5 @@
 import { http } from 'msw';
-import { findMockUser, MOCK_WRONG_PASSWORD, mockTokenFor, userFromMockToken, type MockUser } from '../fixtures/users';
+import { findMockUser, MOCK_WRONG_PASSWORD, mockTokenFor, userFromMockToken, type MockAccount } from '../fixtures/users';
 import { API, bearerToken, fail, ok } from '../utils';
 
 /**
@@ -8,11 +8,11 @@ import { API, bearerToken, fail, ok } from '../utils';
  */
 const SESSION_COOKIE = 'elchi_mock_session';
 
-const sessionCookie = (user: MockUser) => `${SESSION_COOKIE}=${user.phone.slice(-9)}; Path=/; SameSite=Lax`;
+export const sessionCookie = (user: Pick<MockAccount, 'phone'>) => `${SESSION_COOKIE}=${user.phone.slice(-9)}; Path=/; SameSite=Lax`;
 const clearedCookie = `${SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
 
 /** Bearer token (body rejimi) yoki mock cookie — qaysi foydalanuvchi so'rayapti. */
-export function currentMockUser(request: Request, cookies: Record<string, string>): MockUser | null {
+export function currentMockUser(request: Request, cookies: Record<string, string>): MockAccount | null {
   return userFromMockToken(bearerToken(request)) ?? (cookies[SESSION_COOKIE] ? findMockUser(cookies[SESSION_COOKIE]) : null);
 }
 

@@ -20,8 +20,9 @@ function endsWithPath(url: string | undefined, path: string): boolean {
   return Boolean(url?.endsWith(path));
 }
 
+/** Kirish so'rovlari: parol, SMS kod va sotuvchi ro'yxati (FE-04) — token qo'shilmaydi, 401 da refresh yo'q. */
 function isLoginRequest(url?: string): boolean {
-  return endsWithPath(url, '/auth/login');
+  return ['/auth/login', '/auth/otp/send', '/auth/otp/verify', '/auth/register/affiliate'].some((path) => endsWithPath(url, path));
 }
 
 /**

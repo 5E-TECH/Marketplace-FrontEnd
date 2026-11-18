@@ -1,6 +1,11 @@
 import type { Page } from '@playwright/test';
 
 export const ACCESS_TOKEN_KEY = 'elchi_access_token';
+
+/** Login sahifasida «Platforma xodimi» (telefon + parol) — sukut bo'yicha sotuvchi SMS formasi ochiq (FE-04). */
+export async function openStaffLogin(page: Page): Promise<void> {
+  await page.getByRole('radio', { name: 'Platforma xodimi' }).click();
+}
 export const TEST_ACCESS_TOKEN = 'e2e.access.token';
 
 /** Standart sessiya — sotuvchi (AFFILIATE), lid-sotuv modelidagi asosiy rol. */

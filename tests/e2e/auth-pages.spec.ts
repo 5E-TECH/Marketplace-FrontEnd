@@ -5,25 +5,40 @@ import {
   authenticatedUser,
   installAuthenticatedSession,
   mockNotifications,
+  openStaffLogin,
 } from './support/auth';
 
-test('login sahifasi (umumiy-kirish): xodim formasi va «Kirish usuli rolingizga bog‘liq»', async ({ page }) => {
+test('login sahifasi (umumiy-kirish): sukut — sotuvchi SMS kodi, «Platforma xodimi» — parol', async ({ page }) => {
   await page.goto('/login');
 
   await expect(page.getByRole('heading', { level: 1, name: 'Tizimga kirish' })).toBeVisible();
+  const who = page.getByRole('radiogroup', { name: 'Kim sifatida kirasiz' });
+  await expect(who.getByRole('radio', { name: 'Sotuvchi, optovik' })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByLabel('Telefon raqami')).toBeVisible();
   await expect(page.getByText('+998', { exact: true })).toBeVisible();
-  await expect(page.getByLabel('Parol')).toBeVisible();
-  await expect(page.getByText('Hisob va parolni admin ochib beradi. Admin, superadmin va moliya keyingi qadamda ilovadagi kodni kiritadi.')).toBeVisible();
-  // Sotuvchi SMS kodi va ro'yxatdan o'tish — FE-04; hozir yo'q.
-  await expect(page.getByRole('link', { name: /ro‘yxatdan o‘tish/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Kod olish' })).toHaveCount(0);
+  await expect(page.getByText('Shu raqamga 6 xonali SMS kod yuboramiz.')).toBeVisible();
+  await expect(page.getByLabel('Parol')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Kod olish' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ro‘yxatdan o‘tish' })).toHaveAttribute('href', '/register');
 
   const methods = page.getByRole('complementary', { name: 'Kirish usuli rolingizga bog‘liq' });
   await expect(methods.locator('dt')).toHaveText(['Sotuvchi, optovik', 'Operator, nazoratchi, omborchi', 'Admin, superadmin, moliya']);
+  // Sotuvchi formasi ochiq — 1-qator faol.
+  await expect(methods.locator('[aria-current="true"] dt')).toHaveText(['Sotuvchi, optovik']);
+
+  await openStaffLogin(page);
+  await expect(who.getByRole('radio', { name: 'Platforma xodimi' })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByLabel('Parol')).toBeVisible();
+  await expect(page.getByText('Hisob va parolni admin ochib beradi. Admin, superadmin va moliya keyingi qadamda ilovadagi kodni kiritadi.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Kod olish' })).toHaveCount(0);
   // Xodim formasi ochiq — 2- va 3-qator faol.
   await expect(methods.locator('[aria-current="true"] dt')).toHaveText(['Operator, nazoratchi, omborchi', 'Admin, superadmin, moliya']);
   expect((await page.getByRole('button', { name: 'Kirish', exact: true }).boundingBox())?.height).toBe(52);
+
+  // Strelka bilan qaytadi (radio guruh).
+  await who.getByRole('radio', { name: 'Platforma xodimi' }).press('ArrowLeft');
+  await expect(who.getByRole('radio', { name: 'Sotuvchi, optovik' })).toBeFocused();
+  await expect(page.getByLabel('Parol')).toHaveCount(0);
 });
 
 test('login telefonda: navy sarlavha, forma, ostida usullar, gorizontal scroll yo‘q', async ({ page }) => {
@@ -48,6 +63,7 @@ test('FE-01 TC3: noma’lum rol (eski BUYER) bilan login → menyusiz karkas va 
   }));
 
   await page.goto('/login');
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
@@ -59,7 +75,17 @@ test('FE-01 TC3: noma’lum rol (eski BUYER) bilan login → menyusiz karkas va 
   expect(await page.evaluate((key) => sessionStorage.getItem(key), ACCESS_TOKEN_KEY)).toBe(TEST_ACCESS_TOKEN);
 });
 
-for (const path of ['/register', '/register/account', '/forgot-password', '/reset-password', '/verify-phone']) {
+test('/register — ochiq sahifa (FE-04); kirgan foydalanuvchi o‘z bosh sahifasiga qaytadi', async ({ page }) => {
+  await page.goto('/register');
+  await expect(page.getByRole('heading', { level: 1, name: 'Ro‘yxatdan o‘tish' })).toBeVisible();
+  await expect(page).toHaveTitle(/ro‘yxatdan o‘tish/);
+
+  await installAuthenticatedSession(page);
+  await page.goto('/register');
+  await expect(page).toHaveURL(/\/affiliate$/);
+});
+
+for (const path of ['/register/account', '/forgot-password', '/reset-password', '/verify-phone']) {
   test(`${path} kabinetda mavjud emas: kirmagan login’ga, kirgan 404 ga tushadi`, async ({ page }) => {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login$/);
@@ -94,6 +120,7 @@ test('sotuvchi (AFFILIATE) login token oladi, saqlaydi va o‘z bosh sahifasiga 
   });
 
   await page.goto('/login');
+  await openStaffLogin(page);
   const phoneInput = page.getByLabel('Telefon raqami');
   const passwordInput = page.getByLabel('Parol');
   await phoneInput.fill('901234567');
@@ -132,6 +159,7 @@ test('noto‘g‘ri parol server xatosini ko‘rsatadi va token saqlamaydi', asy
   });
 
   await page.goto('/login');
+  await openStaffLogin(page);
   await page.getByLabel('Telefon raqami').fill('901234567');
   await page.getByLabel('Parol').fill('Wrong123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
@@ -148,6 +176,7 @@ test('login formasi bo‘sh va noto‘g‘ri qiymatlarni serverga yubormaydi', a
   let loginRequests = 0;
   await page.route('**/api/v1/auth/login', (route) => { loginRequests++; return route.abort(); });
   await page.goto('/login');
+  await openStaffLogin(page);
   const phone = page.getByLabel('Telefon raqami');
   const password = page.getByLabel('Parol');
   const submit = page.getByRole('button', { name: 'Kirish', exact: true });
@@ -179,6 +208,7 @@ for (const [status, title] of [[429, 'Urinishlar juda ko‘p'], [500, 'Tizim jav
   test(`login ${status} → «${title}» bloki, raqam saqlanadi`, async ({ page }) => {
     await page.route('**/api/v1/auth/login', (route) => route.fulfill({ status, json: { statusCode: status, message: 'x' } }));
     await page.goto('/login');
+    await openStaffLogin(page);
     await page.getByLabel('Telefon raqami').fill('901234567');
     await page.getByLabel('Parol').fill('Secure123');
     await page.getByRole('button', { name: 'Kirish', exact: true }).click();

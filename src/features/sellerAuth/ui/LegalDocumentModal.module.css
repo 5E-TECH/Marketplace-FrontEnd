@@ -1,0 +1,197 @@
+/* Oferta va rozilik matni oynasi (sotuvchi-royxat §4) — ro'yxat va Profil (sotuvchi-oferta). */
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 32px;
+}
+
+.modalTitle > span:first-child {
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.modalMeta {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.modalActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modalActionsSingle {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modalActions :global(.ant-btn),
+.modalActionsSingle :global(.ant-btn) {
+  height: 44px;
+}
+
+.offerLayout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px;
+  min-height: 0;
+}
+
+.toc {
+  align-self: start;
+}
+
+.tocTitle {
+  margin: 0 0 8px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.toc ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc button {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toc button:hover {
+  background: var(--color-surface-hover);
+}
+
+.documentBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: min(60vh, 560px);
+  overflow-y: auto;
+  padding-right: 4px;
+  outline: 0;
+}
+
+.documentBody:focus-visible {
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.documentSummary {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--color-surface-subtle);
+}
+
+.documentSummary h3,
+.documentSection h3 {
+  margin: 0 0 8px;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.documentSummary ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.documentSummary strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.documentSection p {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--color-sunken);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.sectionSelect {
+  width: 100%;
+}
+
+.sectionSelect :global(.ant-select-selector),
+.sectionSelect:global(.ant-select) {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+.consentList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.consentList > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.consentList dt {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.consentList dd {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+/* Telefonda oyna — pastdan varaq (komponentlar-E §32). */
+.phone .offerLayout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.phone .documentBody {
+  max-height: none;
+  overflow: visible;
+}
+
+.phone .modalActions :global(.ant-btn),
+.phone .modalActionsSingle :global(.ant-btn) {
+  height: 48px;
+  font-size: 16px;
+}
