@@ -103,7 +103,7 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/affiliate', load: () => import('../../pages/AffiliateHomePage/AffiliateHomePage'), roles: ['AFFILIATE'], label: 'nav.home', navIcon: <House /> },
   { path: '/affiliate/offers', load: pending, roles: ['AFFILIATE'], label: 'nav.offers', navIcon: <Tag /> },
   { path: '/affiliate/pages', load: pending, roles: ['AFFILIATE'], label: 'nav.myPages', navIcon: <Link /> },
-  { path: '/affiliate/stats', load: pending, roles: ['AFFILIATE'], label: 'nav.statistics', navIcon: <ChartColumn /> },
+  { path: '/affiliate/stats', load: () => import('../../pages/AffiliateStatsPage/AffiliateStatsPage'), roles: ['AFFILIATE'], label: 'nav.statistics', navIcon: <ChartColumn /> },
   { path: '/affiliate/leads', load: pending, roles: ['AFFILIATE'], label: 'nav.leads', navIcon: <Inbox /> },
   { path: '/affiliate/balance', load: pending, roles: ['AFFILIATE'], label: 'nav.balance', navIcon: <Wallet /> },
   { path: '/affiliate/postback', load: pending, roles: ['AFFILIATE'], label: 'nav.postbackApi', navIcon: <Webhook /> },

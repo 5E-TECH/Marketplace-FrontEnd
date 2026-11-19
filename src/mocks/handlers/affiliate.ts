@@ -28,7 +28,13 @@ const ROW_FIELDS = ['clicks', 'leads', 'validLeads', 'confirmed', 'delivered', '
  * shunday — bitta lidlar to'plami). Birinchi sahifaga ~60 %, qolgani teng.
  */
 function splitByStream(row: Schemas['AffiliateStatsRowDto'], count: number): Schemas['AffiliateStatsRowDto'][] {
-  const weights = Array.from({ length: count }, (_, index) => (count === 1 ? 1 : index === 0 ? 0.6 : 0.4 / (count - 1)));
+  return splitByWeights(row, Array.from({ length: count }, (_, index) => (count === 1 ? 1 : index === 0 ? 0.6 : 0.4 / (count - 1))));
+}
+
+/** sub1 qiymatlari (FE-06 «Kesim: Sub»): bo'sh qiymat — `''` («sub yo'q» qatori). Yig'indisi jamiga teng. */
+const SUB1_SPLIT: readonly [string, number][] = [['fb-reels-1', 0.45], ['fb-reels-2', 0.3], ['tg-kanal', 0.15], ['', 0.1]];
+
+function splitByWeights(row: Schemas['AffiliateStatsRowDto'], weights: readonly number[]): Schemas['AffiliateStatsRowDto'][] {
   const part = (value: number) => {
     const parts = weights.map((weight) => Math.floor(value * weight));
     parts[0] += value - parts.reduce((sum, item) => sum + item, 0);
@@ -79,7 +85,7 @@ function leadsOfDay(day: Schemas['AffiliateStatsRowDto'], today: string): Schema
       id: `L-${day.key.replaceAll('-', '').slice(2)}${String(index + 1).padStart(2, '0')}`,
       createdAt: new Date(dayStart + Math.round((span * (index + 1)) / (codes.length + 1))).toISOString(),
       streamCode,
-      sub1: index % 2 ? 'fb-reels-1' : null, sub2: null, sub3: null, sub4: null, sub5: null,
+      sub1: SUB1_SPLIT[index % SUB1_SPLIT.length][0] || null, sub2: null, sub3: null, sub4: null, sub5: null,
       phoneLast4: String(seeded(`${day.key}:${index}:p`, 1000, 9999)),
       status: leadStatus,
       orderStatus: confirmed ? 'IN_TRANSIT' : null,
@@ -102,15 +108,25 @@ export const affiliateHandlers = [
       return fail(400, 'VALIDATION_ERROR', 'from va to sanasi kerak (YYYY-MM-DD)');
     }
     const groupBy = url.searchParams.get('groupBy') ?? 'DAY';
+    const streamId = url.searchParams.get('streamId');
     // Yangi sotuvchi (dev'da ro'yxatdan o'tgan): sahifasi yo'q — hamma son 0.
     const fresh = isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' });
-    const daily = statsRows(from, to).map((row) => (fresh ? { ...row, ...emptyCounts } : row));
+    const allDaily = statsRows(from, to).map((row) => (fresh ? { ...row, ...emptyCounts } : row));
     const streams = fresh ? [] : db.streams;
-    const byStream = daily.map((row) => splitByStream(row, Math.max(streams.length, 1)));
+    const byStream = allDaily.map((row) => splitByStream(row, Math.max(streams.length, 1)));
+    // Sahifa filtri (`streamId`): faqat o'sha sahifaning ulushi — kun va sub kesimi ham shu bo'yicha.
+    const streamIndex = streamId ? streams.findIndex((stream) => stream.id === streamId) : -1;
+    if (streamId && streamIndex < 0) return fail(404, 'NOT_FOUND', 'Sahifa topilmadi');
+    const daily = streamIndex >= 0 ? byStream.map((parts, day) => ({ ...parts[streamIndex], key: allDaily[day].key })) : allDaily;
+    const all = totals(daily);
     const rows = groupBy === 'DAY'
       ? daily
-      : streams.map((stream, index) => ({ ...totals(byStream.map((parts) => parts[index])), key: groupBy === 'SUB1' ? 'fb-reels-1' : stream.code }));
-    const body: Schemas['AffiliateStatsDto'] = { rows, totals: totals(daily) };
+      : groupBy === 'SUB1'
+        ? splitByWeights(all, SUB1_SPLIT.map(([, weight]) => weight)).map((row, index) => ({ ...row, key: SUB1_SPLIT[index][0] })).filter((row) => row.clicks + row.leads > 0)
+        : streams
+            .map((stream, index) => ({ ...totals(byStream.map((parts) => parts[index])), key: stream.code }))
+            .filter((_, index) => streamIndex < 0 || index === streamIndex);
+    const body: Schemas['AffiliateStatsDto'] = { rows, totals: all };
     return ok(body);
   }),
 
@@ -159,9 +175,11 @@ export const affiliateHandlers = [
     }
     const fresh = isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' });
     const status = url.searchParams.get('status');
+    const streamCode = db.streams.find((stream) => stream.id === url.searchParams.get('streamId'))?.code;
     // Lidlar statistika bilan bir xil: kun va sahifa bo'yicha soni `/affiliate/stats` dagidek.
     const rows = (fresh ? [] : statsRows(from, to).flatMap((day) => leadsOfDay(day, today)))
       .filter((row) => !status || row.status === status)
+      .filter((row) => !streamCode || row.streamCode === streamCode)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const page: Schemas['AffiliateLeadsPageDto'] = pageOf(rows, url);
     return ok(page);
