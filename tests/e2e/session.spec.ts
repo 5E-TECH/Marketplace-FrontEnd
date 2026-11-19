@@ -201,7 +201,12 @@ test('deploydan keyin eski lazy chunk topilmasa sahifa bir marta yangilanib tikl
 
   await page.goto('/affiliate');
 
+  // Yuqori qatordagi «Bosh sahifa» (TopBar h1) marshrut nomidan — chunk yuklanmasdan oldin ham ko'rinadi. Shuning
+  // uchun qayta yuklashni kutamiz va sahifaning o'z mazmunini («Bugungi xabarlar») tekshiramiz.
+  await expect.poll(() => chunkRequests).toBe(2);
+  await expect(page.getByRole('heading', { level: 2, name: 'Bugungi xabarlar' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 1, name: 'Bosh sahifa' })).toBeVisible();
+  // Faqat bir marta yangilanadi — sikl yo'q.
   expect(chunkRequests).toBe(2);
   await expect(page.getByText('Nimadir noto‘g‘ri ketdi')).toHaveCount(0);
 });
