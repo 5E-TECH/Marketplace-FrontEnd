@@ -1,0 +1,799 @@
+/* «Statistika» (sotuvchi-statistika): karkas-E kartalari, komponentlar-E jadval va segment. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.card {
+  min-width: 0;
+  padding: 20px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.head h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* ── Asboblar qatori ─────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.toolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbarLabel {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.period {
+  min-width: 280px;
+}
+
+.pageFilter {
+  min-width: 200px;
+}
+
+.maskNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.maskNote strong {
+  color: var(--color-text);
+}
+
+/* ── Natija (voronka) ────────────────────────────────────────── */
+.funnel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 20px 24px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kpis li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kpiLabel {
+  color: var(--color-text-secondary, var(--color-text-muted));
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.kpiValue {
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiHint {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.income {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 24px;
+  border-left: 1px solid var(--color-border);
+}
+
+.incomeValue {
+  color: var(--color-text);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  font-variant-numeric: tabular-nums;
+}
+
+.incomeValue small {
+  margin-left: 4px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.split {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-sunken);
+}
+
+.splitAvailable {
+  background: var(--color-nav);
+}
+
+.splitHold {
+  background: var(--color-text-faint, var(--color-border-strong));
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend b {
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 2px;
+}
+
+.dotAvailable,
+.dotDelivered {
+  background: var(--color-nav);
+}
+
+.dotHold,
+.dotConfirmed {
+  background: var(--color-text-faint, var(--color-border-strong));
+}
+
+.dotLeads {
+  background: var(--color-border-strong);
+  opacity: 0.6;
+}
+
+.funnelNote {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* ── Sahifa sifati ───────────────────────────────────────────── */
+.quality {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quality > li {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.3fr) minmax(110px, 0.9fr) minmax(160px, 1.3fr) minmax(160px, 1.3fr) minmax(170px, auto);
+  align-items: center;
+  gap: 12px 24px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.quality > li:first-child {
+  border-top: 0;
+}
+
+.code {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.metricHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.metricValue {
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricValue span {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.metric[data-below='true'] .metricValue {
+  color: var(--color-danger);
+}
+
+.meter {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-sunken);
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-nav);
+}
+
+.metric[data-below='true'] .meterFill {
+  background: var(--color-danger);
+}
+
+.meterMark {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--color-text);
+}
+
+.qualityState {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-secondary, var(--color-text-muted));
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.qualityState[data-state='ok'] {
+  border-color: transparent;
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.qualityState[data-state='below'] {
+  border-color: transparent;
+  background: var(--color-error-soft);
+  color: var(--color-danger);
+}
+
+.note {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* ── Kunlar grafigi ──────────────────────────────────────────── */
+.chartRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.chart {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  align-items: end;
+  gap: 8px;
+  height: 200px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chartDay {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 160px;
+}
+
+.bar {
+  position: relative;
+  width: min(22px, 30%);
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+}
+
+.bar span {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 2px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.barLeads {
+  background: var(--color-border-strong);
+  opacity: 0.6;
+}
+
+.barConfirmed {
+  background: var(--color-text-faint, var(--color-border-strong));
+}
+
+.barDelivered {
+  background: var(--color-nav);
+}
+
+.chartAxis {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 15px;
+}
+
+.chartAxis b {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.chartLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chartLegend li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.chartLegend li:first-child {
+  border-top: 0;
+}
+
+.chartLegend li .dot {
+  margin-top: 5px;
+}
+
+.chartLegend strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.chartLegend small {
+  grid-column: 2;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.chartLegend b {
+  grid-column: 3;
+  grid-row: 1;
+  color: var(--color-text);
+  font-size: 16px;
+}
+
+/* ── Jadvallar ───────────────────────────────────────────────── */
+.tableWrap {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.table th {
+  padding: 12px 14px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary, var(--color-text-muted));
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: right;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 14px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+
+/* Qator sarlavhasi (sana, sahifa, sub) — oddiy katakdek, chapda. */
+.table tbody th {
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+
+.table tfoot td {
+  background: var(--color-sunken);
+  font-weight: 700;
+}
+
+.cellSub {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.negative {
+  color: var(--color-danger);
+}
+
+.zero {
+  color: var(--color-text-muted);
+}
+
+/* ── Lidlar havolasi ─────────────────────────────────────────── */
+.leadsFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.leadsIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary, var(--color-text-muted));
+}
+
+.leadsText {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.leadsText strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary, var(--color-text-muted));
+  font-size: 13px;
+}
+
+.chip[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
+.chip[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
+.chip[data-tone='danger'] { background: var(--color-error-soft); color: var(--color-danger); }
+.chip[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  color: var(--color-action);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── Eksport oynasi ──────────────────────────────────────────── */
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialogRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 12px;
+}
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.maskTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.choice[data-checked='true'] {
+  border-color: var(--color-action);
+  background: var(--color-action-soft);
+}
+
+.choice input {
+  margin-top: 3px;
+  accent-color: var(--color-action);
+}
+
+.choice span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.choice small {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+}
+
+.privacy {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.fileLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.fileLine strong {
+  color: var(--color-text);
+}
+
+/* ── Planshet va telefon ─────────────────────────────────────── */
+@media (max-width: 1279.98px) {
+  .funnel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .income {
+    padding-left: 0;
+    padding-top: 16px;
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quality > li {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .qualityState {
+    justify-self: start;
+  }
+
+  .chartRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .page {
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .toolbar > * {
+    flex: 1 1 100%;
+  }
+
+  .period,
+  .pageFilter {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .maskNote {
+    margin-left: 0;
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quality > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .table th:first-child,
+  .table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    border-right: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .table th:first-child,
+  .table tfoot td:first-child {
+    background: var(--color-sunken);
+  }
+
+  .table th,
+  .table td {
+    min-width: 96px;
+  }
+
+  .dialogRow,
+  .choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
