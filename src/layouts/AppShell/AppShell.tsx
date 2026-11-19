@@ -1,3 +1,4 @@
+import { shortPersonName } from '../../shared/lib/personName';
 import { App, Drawer } from 'antd';
 import { MonitorSmartphone, RefreshCw } from 'lucide-react';
 import { Suspense, useState } from 'react';
@@ -132,7 +133,7 @@ export default function AppShell() {
           user={
             <UserMenu
               // Yangi sotuvchida ism yo'q (ro'yxat faqat telefon bilan, FE-04) — Profilda kiritadi.
-              name={user.name.trim() || formatUzPhone(user.phone)}
+              name={user.name.trim() && user.role !== 'WHOLESALER' ? shortPersonName(user.name) : user.name.trim() || formatUzPhone(user.phone)}
               roleLabel={t(ROLE_LABEL_KEYS[user.role])}
               touch={touch}
               profilePath={shell.profilePath}

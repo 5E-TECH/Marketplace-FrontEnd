@@ -1,3 +1,4 @@
+import { shortPersonName } from '../../shared/lib/personName';
 import { Button } from 'antd';
 import { Lock, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -51,7 +52,7 @@ export function ForbiddenPage({ route }: { route: AppRoute }) {
         title: t('attempt.title'),
         rows: [
           { label: t('attempt.address'), value: <StatusPanelChip>{pathname}</StatusPanelChip> },
-          { label: t('attempt.account'), value: user.name },
+          { label: t('attempt.account'), value: shortPersonName(user.name) },
           { label: t('attempt.role'), value: roleName },
           { label: t('attempt.time'), value: formatDateTime(new Date().toISOString(), locale) },
         ],
