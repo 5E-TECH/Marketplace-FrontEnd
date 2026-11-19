@@ -113,7 +113,7 @@ test('sessiya tugadi → sahifa joyida, oynada parol bilan qayta kirish', async 
   // Jonli so'rov bizdan oldin yetib kelsa, oyna tugmani yopib qo'yadi — bu ham to'g'ri.
   await page.getByRole('radio', { name: 'Onlayn' }).click({ timeout: 3_000 }).catch(() => undefined);
   await expect(dialog).toBeVisible({ timeout: 20_000 });
-  await expect(dialog).toContainText('Dilnoza Rahimova · Operator');
+  await expect(dialog).toContainText('Dilnoza R. · Operator');
   await expect(dialog).toContainText('Panel: Ish joyi');
   await expect(pageTitle(page)).toHaveText('Ish joyi');
 
@@ -160,7 +160,7 @@ test('blok yuklanmadi → «Xato raqami» va 429 da kutish sanog‘i', async ({ 
   const error = page.getByRole('region', { name: 'Bugun', exact: true }).getByTestId('load-error');
   await expect(error).toContainText('Ma’lumotni yuklab bo‘lmadi');
   await expect(error).toContainText('Xato raqami: req-7f3a');
-  await expect(error).toContainText('Sahifa 60 soniyada o‘zi qayta urinadi');
+  await expect(error).toContainText('60 soniyadan keyin o‘zi qayta urinadi');
 
   status = 429;
   await page.reload();

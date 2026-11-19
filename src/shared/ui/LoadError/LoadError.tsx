@@ -1,5 +1,5 @@
-import { App, Button } from 'antd';
-import { CircleAlert, Copy } from 'lucide-react';
+import { App } from 'antd';
+import { CircleAlert, CircleX, Copy, Hand, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getApiRequestId, getRetryAfterSeconds } from '../../api/apiError';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -11,16 +11,21 @@ const AUTO_RETRY_SECONDS = 60;
 interface LoadErrorProps {
   error: unknown;
   onRetry: () => void;
-  /** Ekranda qolgan ma'lumotning vaqti (`dataUpdatedAt`); bo'lmasa 0. */
+  /** Ekranda qolgan ma'lumotning vaqti (`dataUpdatedAt`); bo'lmasa 0. Faqat sahifa xatosida ko'rinadi. */
   lastSuccessAt?: number;
+  /**
+   * `block` — karta ichidagi bitta blok (umumiy-xato-yuklanish asosiy ko'rinish: markazda, och fon);
+   * `page` — sahifaning asosiy ma'lumoti ochilmadi (holatlar «Server xatosi (500)»: oq karta, chapda).
+   */
+  variant?: 'block' | 'page';
 }
 
 /**
- * Bitta blok yuklanmadi (umumiy-xato-yuklanish §1): nima bo'ldi — oddiy o'zbekcha,
- * bitta keyingi qadam; 60 soniyada o'zi qayta urinadi; «Xato raqami» — backend `requestId`.
- * 429 — kutish vaqti tugaguncha «Qayta urinish · 12» (§4).
+ * Yuklanmadi (umumiy-xato-yuklanish): nima bo'ldi — oddiy o'zbekcha, bitta keyingi qadam;
+ * 60 soniyada o'zi qayta urinadi; «Xato raqami» — backend `requestId`.
+ * 429 — kutish vaqti tugaguncha «Qayta urinish · 12» (holatlar «429»).
  */
-export function LoadError({ error, onRetry, lastSuccessAt = 0 }: LoadErrorProps) {
+export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block' }: LoadErrorProps) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const retryAfter = getRetryAfterSeconds(error);
@@ -47,32 +52,71 @@ export function LoadError({ error, onRetry, lastSuccessAt = 0 }: LoadErrorProps)
     );
   };
 
-  const rateLimited = retryAfter !== null;
-  return (
-    <section className={styles.panel} role="alert" data-testid="load-error">
-      <CircleAlert className={styles.icon} aria-hidden />
-      <div className={styles.body}>
-        <h2 className={styles.title}>{rateLimited ? t('loadError.rateTitle') : t('loadError.title')}</h2>
-        <p className={styles.text}>{rateLimited ? t('loadError.rateText', { seconds: retryAfter }) : t('loadError.text')}</p>
-        <div className={styles.actions}>
-          <Button onClick={onRetry} disabled={rateLimited && secondsLeft > 0}>
-            {rateLimited && secondsLeft > 0 ? t('loadError.rateRetryIn', { seconds: secondsLeft }) : t('loadError.retry')}
-          </Button>
-          {!rateLimited ? (
+  if (retryAfter !== null) {
+    const waiting = secondsLeft > 0;
+    return (
+      <section className={styles.rate} role="alert" data-testid="load-error">
+        <span className={`${styles.badge} ${styles.badgeWarning}`} aria-hidden><Hand /></span>
+        <span className={styles.rateBody}>
+          <span className={styles.rateTitle}>{t('loadError.rateTitle')}</span>
+          <span className={styles.rateText}>{t('loadError.rateText', { seconds: retryAfter })}</span>
+        </span>
+        <button type="button" className={`${styles.button} ${styles.small}`} onClick={onRetry} disabled={waiting}>
+          <RefreshCw aria-hidden />
+          {waiting ? t('loadError.rateRetryIn', { seconds: secondsLeft }) : t('loadError.retry')}
+        </button>
+      </section>
+    );
+  }
+
+  const code = requestId ? (
+    <span className={styles.code}>
+      {t('loadError.code', { code: requestId })}
+      <button type="button" className={styles.copy} aria-label={t('loadError.copyCode')} title={t('loadError.copyCode')} onClick={copyCode}>
+        <Copy aria-hidden />
+      </button>
+    </span>
+  ) : null;
+
+  if (variant === 'page') {
+    return (
+      <section className={styles.page} role="alert" data-testid="load-error">
+        <div className={styles.pageBody}>
+          <span className={`${styles.badge} ${styles.badgeLarge}`} aria-hidden><CircleAlert /></span>
+          <h2 className={styles.pageTitle}>{t('loadError.title')}</h2>
+          <p className={styles.text}>{t('loadError.text')}</p>
+          <div className={styles.pageActions}>
+            <button type="button" className={`${styles.button} ${styles.primary}`} onClick={onRetry}>
+              <RefreshCw aria-hidden />
+              {t('loadError.retry')}
+            </button>
             <span className={styles.meta}>
               {t('loadError.autoRetry')}
-              {lastSuccessAt ? ` · ${t('loadError.lastSuccess', { time: tashkentClock(lastSuccessAt) })}` : null}
+              {lastSuccessAt ? (
+                <>
+                  {' · '}
+                  {t('loadError.lastSuccessLabel')} <strong>{tashkentClock(lastSuccessAt)}</strong>
+                </>
+              ) : null}
             </span>
-          ) : null}
+            {code}
+          </div>
         </div>
-        {requestId ? (
-          <p className={styles.code}>
-            {t('loadError.code', { code: requestId })}
-            <button type="button" className={styles.copy} aria-label={t('loadError.copyCode')} onClick={copyCode}>
-              <Copy aria-hidden />
-            </button>
-          </p>
-        ) : null}
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.block} role="alert" data-testid="load-error">
+      <span className={`${styles.badge} ${styles.badgeLarge}`} aria-hidden><CircleX /></span>
+      <h2 className={styles.blockTitle}>{t('loadError.title')}</h2>
+      <p className={`${styles.text} ${styles.blockText}`}>{t('loadError.blockText')}</p>
+      <div className={styles.blockActions}>
+        <button type="button" className={styles.button} onClick={onRetry}>
+          <RefreshCw aria-hidden />
+          {t('loadError.retry')}
+        </button>
+        {code}
       </div>
     </section>
   );

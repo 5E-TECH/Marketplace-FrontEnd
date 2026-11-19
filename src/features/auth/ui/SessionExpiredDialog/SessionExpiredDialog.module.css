@@ -1,22 +1,50 @@
-/* umumiy-sessiya §1: forma oynasi 440 px, ostida «Chiqish» va «Kirish». */
-.text {
-  margin: 0 0 16px;
-  color: var(--color-text-muted);
+/* umumiy-sessiya: oyna 480, padding 24, radius 20; telefonda — pastdan varaq (SheetModal). */
+.root :global(.ant-modal-container) {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgb(16 23 51 / 16%), 0 2px 6px rgb(16 23 51 / 6%);
+}
+
+/* Sarlavha o'z joyida (qulf ikonkasi bilan) — antd sarlavhasi faqat oyna nomi uchun (aria-labelledby). */
+.root :global(.ant-modal-header) { display: none; }
+.root :global(.ant-modal-body) { padding: 0; }
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--color-text);
   font-size: 14px;
   line-height: 21px;
 }
+
+.head { display: flex; align-items: flex-start; gap: 14px; }
+
+.icon {
+  display: inline-flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--color-action-soft);
+  color: var(--color-nav);
+}
+
+.icon svg { display: block; width: 20px; height: 20px; }
+.headText { flex: 1 1 auto; min-width: 0; }
+.headText h3 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.headText p { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
 
 .who {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  padding: 12px 14px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: var(--color-sunken);
-  color: var(--color-text);
-  font-size: 14px;
-  line-height: 20px;
 }
 
 .avatar {
@@ -29,23 +57,74 @@
   border-radius: 999px;
   background: var(--color-nav);
   color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.panel {
-  display: block;
-  color: var(--color-text-muted);
   font-size: 13px;
+  font-weight: 700;
   line-height: 18px;
 }
 
-.form :global(.ant-form-item) {
-  margin-bottom: 20px;
+.whoText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.whoName { font-size: 14px; font-weight: 600; line-height: 20px; white-space: nowrap; }
+.whoRole { color: var(--color-text-secondary); font-weight: 500; }
+.panel { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+
+.form { display: flex; flex-direction: column; gap: 14px; }
+.form :global(.ant-form-item) { margin-bottom: 0; }
+
+.form :global(.ant-form-item-label) { padding-bottom: 6px; }
+
+.form :global(.ant-form-item-label > label) {
+  height: auto;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
 }
+
+.sentTo { margin: 0; font-size: 14px; line-height: 21px; }
+.sentTo strong { font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 10px;
+  margin-top: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.secondary:hover { border-color: var(--color-border-hover); }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); }
+.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.primary[aria-busy='true'] { opacity: 1; cursor: progress; }
+.spin { animation: spin 0.9s linear infinite; }
+
+/* Telefon varag'i: «Chiqish» / «Kirish» 50/50 (holatlar 10). */
+@media (max-width: 767.98px) {
+  .actions { flex-wrap: nowrap; }
+  .actions .button { flex: 1 1 0; height: 48px; font-size: 16px; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

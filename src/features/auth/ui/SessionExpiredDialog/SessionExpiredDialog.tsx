@@ -1,11 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { App, Button, Form } from 'antd';
+import { App, Form } from 'antd';
 import axios from 'axios';
+import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../../app/store/hooks';
 import { getApiErrorMessage } from '../../../../shared/api/apiError';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
 import { initials } from '../../../../shared/lib/initials';
+import { shortPersonName } from '../../../../shared/lib/personName';
 import { formatUzPhone, normalizeUzPhone } from '../../../../shared/lib/phone';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import { SheetModal } from '../../../../shared/ui/SheetModal/SheetModal';
@@ -13,6 +15,7 @@ import { authenticate } from '../../api/authApi';
 import { ROLE_LABEL_KEYS } from '../../lib/roleLabels';
 import { authenticated, currentUserLoaded, loggedOut, selectAuthUser, sessionRestored } from '../../model/authSlice';
 import type { AuthSession } from '../../model/authTypes';
+import { SessionActions, SessionPrimary } from './SessionActions';
 import { SessionSmsForm } from './SessionSmsForm';
 import styles from './SessionExpiredDialog.module.css';
 
@@ -22,8 +25,8 @@ interface SessionExpiredDialogProps {
 }
 
 /**
- * Sessiya tugadi — joyida qayta kirish (umumiy-sessiya §1, FE-02). Sahifa yopilmaydi:
- * forma va belgilar joyida qoladi, kirgach shu yerdan davom etiladi (§2).
+ * Sessiya tugadi — joyida qayta kirish (umumiy-sessiya: asosiy ko'rinish, holatlar 1–2; FE-02). Sahifa yopilmaydi:
+ * forma va belgilar joyida qoladi, kirgach shu yerdan davom etiladi (holatlar 5).
  * Xodim — parol; sotuvchi va optovik — SMS kod (FE-04). Admin 2FA qadami — FE-27.
  */
 export function SessionExpiredDialog({ panelName }: SessionExpiredDialogProps) {
@@ -37,6 +40,7 @@ export function SessionExpiredDialog({ panelName }: SessionExpiredDialogProps) {
 
   if (!user) return null;
   const roleLabel = t(ROLE_LABEL_KEYS[user.role]);
+  const name = user.name.trim() ? shortPersonName(user.name) : formatUzPhone(user.phone);
 
   const sms = user.role === 'AFFILIATE' || user.role === 'WHOLESALER';
 
@@ -74,22 +78,29 @@ export function SessionExpiredDialog({ panelName }: SessionExpiredDialogProps) {
   return (
     <SheetModal
       open
-      width={440}
+      width={480}
       closable={false}
-      maskClosable={false}
+      mask={{ closable: false }}
       keyboard={false}
       footer={null}
       title={t('session.expiredTitle')}
+      rootClassName={styles.root}
       aria-describedby="session-expired-text"
     >
-      <div data-testid="session-expired">
-        <p id="session-expired-text" className={styles.text}>
-          {sms ? t('session.expiredTextSms', { phone: formatUzPhone(user.phone) }) : t('session.expiredText')}
-        </p>
+      <div className={styles.dialog} data-testid="session-expired">
+        <div className={styles.head}>
+          <span className={styles.icon} aria-hidden><Lock /></span>
+          <div className={styles.headText}>
+            <h3>{t('session.expiredTitle')}</h3>
+            <p id="session-expired-text">{sms ? t('session.expiredTextSms') : t('session.expiredText')}</p>
+          </div>
+        </div>
         <div className={styles.who}>
           <span className={styles.avatar} aria-hidden>{initials(user.name)}</span>
-          <span>
-            <strong>{user.name.trim() || formatUzPhone(user.phone)}</strong> · {roleLabel}
+          <span className={styles.whoText}>
+            <span className={styles.whoName}>
+              {name} <span className={styles.whoRole}>· {roleLabel}</span>
+            </span>
             <span className={styles.panel}>{t('session.panel', { name: panelName })}</span>
           </span>
         </div>
@@ -100,10 +111,9 @@ export function SessionExpiredDialog({ panelName }: SessionExpiredDialogProps) {
             <Form.Item name="password" label={t('auth.password')} rules={[{ required: true, message: t('auth.passwordRequired') }]}>
               <PasswordInput autoComplete="current-password" autoFocus maxLength={128} />
             </Form.Item>
-            <div className={styles.actions}>
-              <Button onClick={signOut}>{t('session.logout')}</Button>
-              <Button type="primary" htmlType="submit" loading={submitting}>{t('session.signIn')}</Button>
-            </div>
+            <SessionActions onSignOut={signOut}>
+              <SessionPrimary submit busy={submitting}>{t('session.signIn')}</SessionPrimary>
+            </SessionActions>
           </Form>
         )}
       </div>

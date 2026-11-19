@@ -29,6 +29,7 @@ export default function AgreementsPage() {
   if (failed) {
     return (
       <LoadError
+        variant="page"
         error={profile.error ?? offer.error}
         onRetry={() => {
           void profile.refetch();
