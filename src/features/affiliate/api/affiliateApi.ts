@@ -89,8 +89,8 @@ export async function fetchAllAffiliateLeads(
 ): Promise<{ items: AffiliateLead[]; total: number; truncated: boolean }> {
   const items: AffiliateLead[] = [];
   let page = 1;
-  let totalPages = 1;
-  let total = 0;
+  let totalPages: number;
+  let total: number;
   do {
     const result = await getAffiliateLeads({ ...params, page, limit: 100 }, signal);
     items.push(...result.items);

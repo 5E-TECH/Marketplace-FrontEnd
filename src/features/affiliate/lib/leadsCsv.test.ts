@@ -8,9 +8,9 @@ const t = (key: TranslationKey) => translations.uz[key];
 const lead = (patch: Partial<AffiliateLead>): AffiliateLead => ({
   id: 'L-1272', createdAt: '2027-01-14T08:20:00.000Z', streamCode: 'k7m2qa', sub1: 'fb-reels-2', sub2: null, sub3: null, sub4: null, sub5: null,
   phoneLast4: '****2087', status: 'CALLBACK', orderStatus: null, commission: null, commissionState: null, ...patch,
-} as AffiliateLead);
+});
 const period = { from: '2027-01-08', to: '2027-01-14' };
-const lines = (csv: string) => csv.replace(/^﻿/, '').trimEnd().split('\r\n');
+const lines = (csv: string) => csv.replace(/^\uFEFF/, '').trimEnd().split('\r\n');
 
 describe('buildLeadsCsv (hujjat-statistika-csv, 2-fayl; FE-06 TC2)', () => {
   it('ustunlar va qatorlar maketdagidek: Keldi (Toshkent vaqti), mijoz ****4567, bo‘sh maydon — bo‘sh katak', () => {
