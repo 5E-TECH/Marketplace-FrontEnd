@@ -12,8 +12,15 @@ export type AffiliateStream = Schemas['AffiliateStreamDto'];
 /** DAY — kunlar, STREAM — sahifalar (kalit = sahifa kodi), SUB1 — reklama belgisi. */
 export type AffiliateStatsGroupBy = 'DAY' | 'STREAM' | 'SUB1';
 
-export async function getAffiliateStats(from: string, to: string, signal?: AbortSignal, groupBy: AffiliateStatsGroupBy = 'DAY'): Promise<AffiliateStats> {
-  const { data } = await httpClient.get<unknown>('/affiliate/stats', { params: { from, to, groupBy }, signal });
+export async function getAffiliateStats(
+  from: string,
+  to: string,
+  signal?: AbortSignal,
+  groupBy: AffiliateStatsGroupBy = 'DAY',
+  streamId?: string,
+): Promise<AffiliateStats> {
+  const params = { from, to, groupBy, ...(streamId ? { streamId } : {}) };
+  const { data } = await httpClient.get<unknown>('/affiliate/stats', { params, signal });
   return readDto<AffiliateStats>(data, ['rows', 'totals']);
 }
 
@@ -21,10 +28,11 @@ export async function getAffiliateStats(from: string, to: string, signal?: Abort
  * Statistika soatda bir yangilanadi (sotuvchi-bosh: «har soatda yangilanadi»). Bosh sahifa va
  * «Statistika» (FE-06) bir xil kalit va bir xil so'rovdan foydalanadi — raqamlar bir xil (FE-04 TC3).
  */
-export function useAffiliateStatsQuery(from: string, to: string, groupBy: AffiliateStatsGroupBy = 'DAY') {
+export function useAffiliateStatsQuery(from: string, to: string, groupBy: AffiliateStatsGroupBy = 'DAY', streamId?: string) {
   return useQuery({
-    queryKey: ['affiliate', 'stats', from, to, groupBy],
-    queryFn: ({ signal }) => getAffiliateStats(from, to, signal, groupBy),
+    // Sahifa filtri bo'lmasa kalit bosh sahifadagidek — kesh umumiy (FE-04 TC3).
+    queryKey: streamId ? ['affiliate', 'stats', from, to, groupBy, streamId] : ['affiliate', 'stats', from, to, groupBy],
+    queryFn: ({ signal }) => getAffiliateStats(from, to, signal, groupBy, streamId),
     staleTime: 5 * 60_000,
   });
 }
@@ -46,7 +54,15 @@ export function useAffiliateStreamsQuery() {
 export type AffiliateLead = Schemas['AffiliateLeadRowDto'];
 export type AffiliateLeadStatus = AffiliateLead['status'];
 
-export async function getAffiliateLeads(params: { from: string; to: string; page: number; limit: number }, signal?: AbortSignal): Promise<Schemas['AffiliateLeadsPageDto']> {
+export interface AffiliateLeadsParams {
+  from: string;
+  to: string;
+  page: number;
+  limit: number;
+  streamId?: string;
+}
+
+export async function getAffiliateLeads(params: AffiliateLeadsParams, signal?: AbortSignal): Promise<Schemas['AffiliateLeadsPageDto']> {
   const { data } = await httpClient.get<unknown>('/affiliate/leads', { params, signal });
   return readDto<Schemas['AffiliateLeadsPageDto']>(data, ['items', 'total']);
 }
@@ -58,4 +74,29 @@ export function useAffiliateLeadsQuery(from: string, to: string) {
     queryFn: ({ signal }) => getAffiliateLeads({ from, to, page: 1, limit: 100 }, signal),
     staleTime: 60_000,
   });
+}
+
+/** Bitta eksportda eng ko'pi shuncha sahifa (100 tadan) — 5 000 lid; undan ko'pi uchun davrni qisqartirish kerak. */
+export const LEADS_EXPORT_MAX_PAGES = 50;
+
+/**
+ * CSV uchun davrdagi barcha lidlar (FE-06 TC2): sahifalab, 100 tadan. Raqam serverdan faqat
+ * `****4567` bo'lib keladi — to'liq raqam frontendga umuman kelmaydi (SOT-4).
+ */
+export async function fetchAllAffiliateLeads(
+  params: { from: string; to: string; streamId?: string },
+  signal?: AbortSignal,
+): Promise<{ items: AffiliateLead[]; total: number; truncated: boolean }> {
+  const items: AffiliateLead[] = [];
+  let page = 1;
+  let totalPages = 1;
+  let total = 0;
+  do {
+    const result = await getAffiliateLeads({ ...params, page, limit: 100 }, signal);
+    items.push(...result.items);
+    total = result.total;
+    totalPages = result.totalPages;
+    page += 1;
+  } while (page <= totalPages && page <= LEADS_EXPORT_MAX_PAGES);
+  return { items, total, truncated: items.length < total };
 }
