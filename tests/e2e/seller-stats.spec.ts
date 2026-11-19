@@ -114,9 +114,75 @@ test('TC1: davr, kesim va sahifa filtri; raqamlar BE-28 bilan bir xil; kunlik CS
   const filtered = statsResponse(page, (url) => url.searchParams.get('streamId') === '332');
   await page.getByRole('combobox', { name: 'Sahifa' }).click();
   await page.getByRole('option', { name: /^p3v9tx/ }).click();
-  await expectFunnel(page, (await statsBody(await filtered)).totals);
+  const filteredBody = await statsBody(await filtered);
+  await expectFunnel(page, filteredBody.totals);
   await expect(page.getByTestId('stats-quality').locator('[data-stream]')).toHaveCount(1);
   await expect(page).toHaveURL(/page=332/);
+
+  // Filtrlar faylga ham qo'llanadi: kunlik CSV jami — p3v9tx natijasi, lidlar CSV — faqat p3v9tx lidlari.
+  const f = filteredBody.totals;
+  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await expect(dialog).toContainText('Sahifa — p3v9tx');
+  const dailyFiltered = await download(page, () => dialog.getByRole('button', { name: 'Eksport qilish' }).click());
+  expect(dailyFiltered.text.trimEnd().split('\r\n').at(-1)).toBe(
+    `Jami;${f.clicks};${f.leads};${f.validLeads};${f.confirmed};${f.delivered};${f.refused};${f.incomeHold + f.incomeAvailable};${f.incomeHold};${f.incomeAvailable}`,
+  );
+  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await dialog.getByRole('radio', { name: /^Lidlar/ }).check();
+  const leadsFiltered = await download(page, () => dialog.getByRole('button', { name: 'Eksport qilish' }).click());
+  const leadRows = leadsFiltered.text.trimEnd().split('\r\n').slice(1);
+  expect(leadRows).toHaveLength(f.leads);
+  for (const row of leadRows) expect(row.split(';')[2]).toBe('p3v9tx');
+});
+
+test('qabul mezoni: har kun, sahifa sifati va sub qatorlari BE-28 javobi bilan bir xil', async ({ page }) => {
+  const week = await openStats(page);
+  const byDay = page.getByTestId('stats-by-day');
+  for (const row of week.rows) {
+    const cells = byDay.locator(`tbody tr[data-day="${row.key}"] td`);
+    const values = await Promise.all([0, 1, 2, 3, 4, 5].map(async (index) => digits(await cells.nth(index).textContent())));
+    expect(values, row.key).toEqual([row.clicks, row.leads, row.validLeads, row.confirmed, row.delivered, row.refused]);
+    expect(digits(await cells.nth(6).locator('span').first().textContent()), `${row.key} daromad`).toBe(row.incomeHold + row.incomeAvailable);
+  }
+  for (const row of week.byStream.rows) {
+    const item = page.getByTestId('stats-quality').locator(`[data-stream="${row.key}"]`);
+    await expect(item).toContainText(`${row.leads} / 50`);
+    await expect(item).toContainText(`${row.validLeads} / ${row.leads}`);
+    await expect(item).toContainText(`${row.confirmed} / ${row.validLeads}`);
+  }
+
+  const bySub = statsResponse(page, (url) => url.searchParams.get('groupBy') === 'SUB1');
+  await cutOption(page, 'Sub').click();
+  const subs = await statsBody(await bySub);
+  const subTable = page.getByTestId('stats-by-sub1');
+  for (const row of subs.rows) {
+    const cells = subTable.locator(`tbody tr[data-group="${row.key || 'no-sub'}"] td`);
+    expect(digits(await cells.nth(0).textContent()), `${row.key} kliklar`).toBe(row.clicks);
+    expect(digits(await cells.nth(1).textContent()), `${row.key} lidlar`).toBe(row.leads);
+  }
+  expect(digits(await subTable.locator('tfoot td').nth(1).textContent())).toBe(subs.totals.clicks);
+});
+
+test('holatlar: API xatosi — «Qayta urinish» bilan tiklanadi; davrda ma’lumot yo‘q — bo‘sh holat', async ({ page }) => {
+  let failing = true;
+  const zero: StatsRow = { key: 'TOTAL', clicks: 0, leads: 0, validLeads: 0, confirmed: 0, delivered: 0, refused: 0, incomeHold: 0, incomeAvailable: 0 };
+  await page.route('**/api/v1/affiliate/stats?*', async (route) => {
+    const url = new URL(route.request().url());
+    if (failing && url.searchParams.get('groupBy') === 'DAY') {
+      await route.fulfill({ status: 500, json: { statusCode: 500, message: 'Ichki xato' } });
+      return;
+    }
+    await route.fulfill({ json: { statusCode: 200, message: 'OK', data: { rows: [], totals: zero } } });
+  });
+  await loginSeller(page);
+  await page.goto('/affiliate/stats');
+  const retry = page.getByRole('button', { name: 'Qayta urinish' }).first();
+  await expect(retry).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId('stats-quality')).toBeVisible();
+  failing = false;
+  await retry.click();
+  await expect(page.getByText('Bu davrda klik yo‘q')).toBeVisible();
+  await expectFunnel(page, zero);
 });
 
 test('TC2: lidlar CSV da mijoz faqat ****4567; to‘liq raqam sahifada ham, faylda ham yo‘q', async ({ page }) => {
@@ -193,10 +259,24 @@ test('TC4: yetkazilgan buyurtma daromadi «ushlab turilgan»da; Elchi pulni o‘
   await expect(page.getByTestId('stats-by-day').locator('tbody tr').first()).not.toContainText('ushlab turilgan');
 });
 
-test('telefon (390 px): gorizontal scroll yo‘q, jadval o‘z ichida suriladi', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+test('planshet (768) va telefon (390): toshish yo‘q; telefonda eksport oynasi pastdan, fayl yuklanadi', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
   await openStats(page);
   await expect(page.getByTestId('stats-by-day')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await shot(page, 'stats-768-day');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByTestId('stats-by-day')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await shot(page, 'stats-390-day');
+  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: /Eksport — Statistika/ });
+  await expect(dialog).toBeVisible();
+  const sheet = page.locator('.ant-modal').filter({ hasText: 'Eksport — Statistika' });
+  await expect.poll(async () => { const box = await sheet.boundingBox(); return Math.round((box?.y ?? 0) + (box?.height ?? 0)); }).toBe(844);
+  await dialog.getByRole('radio', { name: /^Lidlar/ }).check();
+  await shot(page, 'stats-390-export');
+  const file = await download(page, () => dialog.getByRole('button', { name: 'Eksport qilish' }).click());
+  expect(file.name).toMatch(/^lidlar_/);
 });
