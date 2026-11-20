@@ -1,6 +1,6 @@
-import { App, Button, Form, Input, Progress, Skeleton, Tag } from 'antd';
+import { App, Button, Form, Input, Progress, Skeleton } from 'antd';
 import axios from 'axios';
-import { CircleAlert, FileText, Upload, X } from 'lucide-react';
+import { BadgeCheck, BookOpen, Check, CircleAlert, CircleCheck, CircleX, Clock, ExternalLink, FileText, Lock, Upload, X } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -12,7 +12,7 @@ import {
   type SellerProfile,
   type UploadedDocument,
 } from '../../features/sellerProfile/api/sellerProfileApi';
-import { selfEmployedStatusColor, selfEmployedStatusKey } from '../../features/sellerProfile/lib/selfEmployedStatus';
+import { selfEmployedStatusKey } from '../../features/sellerProfile/lib/selfEmployedStatus';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDateTime } from '../../shared/lib/tashkentTime';
@@ -21,6 +21,8 @@ import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
 import { PageActionBar } from '../../shared/ui/PageActionBar/PageActionBar';
 import { usePhoneActionBar } from '../../shared/ui/PageActionBar/usePhoneActionBar';
 import { SheetModal } from '../../shared/ui/SheetModal/SheetModal';
+import { useAffiliateBalanceQuery } from '../../features/affiliate/api/affiliateApi';
+import e from './profileE.module.css';
 import styles from './sellerProfile.module.css';
 
 /** Eng kam yechish summasi va soliq (FE-07 qoidasi: kamida 50 000 so'm, 1%). */
@@ -49,30 +51,55 @@ export default function SelfEmployedPage() {
   const info = profile.selfEmployed;
   const canSubmit = info.status === 'NOT_SUBMITTED' || info.status === 'REJECTED' || info.status === 'REVOKED';
   const submitLabel = info.status === 'NOT_SUBMITTED' ? t('selfEmployed.submit') : t('selfEmployed.resubmit');
-  const actions = (
+  // Tasdiqlangan va tekshirilayotgan holatda kartada amal yo'q (sotuvchi-jshshir) — yo'riqnoma o'ngdagi kartada.
+  const actions = canSubmit ? (
+    <>
+      <button type="button" className={e.btn} onClick={() => setGuideOpen(true)}>{t('selfEmployed.guideButton')}</button>
+      <button type="button" className={`${e.btn} ${e.btnPrimary}`} onClick={() => setSubmitting(true)}>{submitLabel}</button>
+    </>
+  ) : null;
+  // Telefon: pastki panel (karkas-E 4.4) — 52 px tugmalar.
+  const barActions = canSubmit ? (
     <>
       <Button size="large" onClick={() => setGuideOpen(true)}>{t('selfEmployed.guideButton')}</Button>
-      {canSubmit ? <Button type="primary" size="large" onClick={() => setSubmitting(true)}>{submitLabel}</Button> : null}
+      <Button type="primary" size="large" onClick={() => setSubmitting(true)}>{submitLabel}</Button>
     </>
-  );
+  ) : null;
 
   return (
-    <div className={styles.page}>
+    <div className={e.page}>
       <StatusCard profile={profile} actions={phone ? null : actions} />
 
-      <div className={styles.grid}>
-        <TaxCard />
-        <section className={styles.card} aria-labelledby="self-employed-guide">
-          <div className={styles.headText}>
-            <h2 id="self-employed-guide" className={styles.subTitle}>{t('selfEmployed.guideTitle')}</h2>
-            <span className={styles.muted}>{t('selfEmployed.guideLead')}</span>
-          </div>
-          <GuideAnswers />
-          <Button type="link" className={styles.inlineLink} onClick={() => setGuideOpen(true)}>{t('selfEmployed.fullGuide')}</Button>
-        </section>
+      <div className={e.cols}>
+        <div className={e.colMain}>
+          <TaxCard />
+          {info.documentName ? <DocumentCard name={info.documentName} /> : null}
+        </div>
+        <div className={e.colSide}>
+          <section className={e.card} data-gap="8" aria-labelledby="self-employed-guide">
+            <div className={e.sectionHead}>
+              <div>
+                <h2 id="self-employed-guide" className={e.h2}>{t('selfEmployed.guideTitle')}</h2>
+                <p className={e.lead}>{t('selfEmployed.guideLead')}</p>
+              </div>
+            </div>
+            <ul className={styles.guideList}>
+              {GUIDE_ITEMS.map(([title, text]) => (
+                <li key={title}>
+                  <span className={styles.guideQ}>{t(title)}</span>
+                  <span className={styles.guideA}>{t(text)}</span>
+                </li>
+              ))}
+            </ul>
+            <button type="button" className={`${e.btn} ${e.btnBlock}`} onClick={() => setGuideOpen(true)}>
+              <BookOpen aria-hidden />
+              {t('selfEmployed.fullGuide')}
+            </button>
+          </section>
+        </div>
       </div>
 
-      <PageActionBar>{actions}</PageActionBar>
+      {barActions ? <PageActionBar>{barActions}</PageActionBar> : null}
 
       <GuideModal
         open={guideOpen}
@@ -88,22 +115,75 @@ export default function SelfEmployedPage() {
   );
 }
 
+/** «Yo‘riqnoma» kartasi (sotuvchi-jshshir): savol — javob, chiziq bilan. */
+const GUIDE_ITEMS = [
+  ['selfEmployed.guideWhy', 'selfEmployed.guideWhyText'],
+  ['selfEmployed.guideActivity', 'selfEmployed.guideActivityText'],
+  ['selfEmployed.guideWhere', 'selfEmployed.guideWhereText'],
+  ['selfEmployed.guideRevoked', 'selfEmployed.guideRevokedText'],
+  ['selfEmployed.guideName', 'selfEmployed.guideNameText'],
+] as const;
+
+/** «Soliq — 1%»: misol hozirgi «Mavjud» summa bilan (50 000 dan kam bo'lsa — eng kam summa bilan). */
 function TaxCard() {
   const { t } = useTranslation();
-  const fee = Math.round((MIN_WITHDRAWAL * TAX_PERCENT) / 100);
+  const balance = useAffiliateBalanceQuery();
+  const available = balance.data?.available ?? 0;
+  const amount = available >= MIN_WITHDRAWAL ? available : MIN_WITHDRAWAL;
+  const fee = Math.round((amount * TAX_PERCENT) / 100);
   const money = (value: number) => t('affiliateHome.sum', { amount: formatMoney(value) });
   return (
-    <section className={styles.card} aria-labelledby="self-employed-tax">
-      <h2 id="self-employed-tax" className={styles.subTitle}>{t('selfEmployed.taxTitle')}</h2>
-      <p className={styles.note}>{t('selfEmployed.taxText')}</p>
-      <dl className={styles.taxTable}>
-        <dt>{t('selfEmployed.taxAmount')}</dt>
-        <dd>{money(MIN_WITHDRAWAL)}</dd>
-        <dt>{t('selfEmployed.taxFee')}</dt>
-        <dd>−{money(fee)}</dd>
-        <dt>{t('selfEmployed.taxNet')}</dt>
-        <dd>{money(MIN_WITHDRAWAL - fee)}</dd>
-      </dl>
+    <section className={e.card} data-gap="14" aria-labelledby="self-employed-tax">
+      <div className={e.sectionHead}>
+        <div>
+          <h2 id="self-employed-tax" className={e.h2}>{t('selfEmployed.taxTitle')}</h2>
+          <p className={e.lead}>{t('selfEmployed.taxLead')}</p>
+        </div>
+      </div>
+      <div className={styles.taxBox}>
+        <p className={styles.taxBoxTitle}>{available >= MIN_WITHDRAWAL ? t('selfEmployed.taxExampleBalance') : t('selfEmployed.taxExampleMin')}</p>
+        <dl className={styles.taxRows}>
+          <div><dt>{t('selfEmployed.taxAmount')}</dt><dd>{money(amount)}</dd></div>
+          <div><dt>{t('selfEmployed.taxFee')}</dt><dd>{'\u2212'}{money(fee)}</dd></div>
+          <div><dt>{t('selfEmployed.taxNet')}</dt><dd className={styles.taxNet}>{money(amount - fee)}</dd></div>
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+/** «Hujjat»: yopiq ma'lumotnoma — faqat egasi va tekshiruvchi ochadi. */
+function DocumentCard({ name }: { name: string }) {
+  const { t } = useTranslation();
+  const { message } = App.useApp();
+  const [opening, setOpening] = useState(false);
+  const openDocument = () => {
+    setOpening(true);
+    openSelfEmployedDocument()
+      .catch((error: unknown) => void message.error(`${t('selfEmployed.openFailed')}: ${getApiErrorMessage(error)}`))
+      .finally(() => setOpening(false));
+  };
+  return (
+    <section className={e.card} data-gap="8" aria-labelledby="self-employed-document">
+      <div className={e.sectionHead}>
+        <div>
+          <h2 id="self-employed-document" className={e.h2}>{t('selfEmployed.document')}</h2>
+          <p className={e.lead}>{t('selfEmployed.documentText')}</p>
+        </div>
+      </div>
+      <div className={styles.fileLine}>
+        <span className={styles.docBox} aria-hidden><FileText /></span>
+        <div className={styles.fileLineText}>
+          <p className={styles.fileLineName}>
+            {name} <Lock className={styles.fileLock} aria-label={t('selfEmployed.documentPrivate')} />
+          </p>
+          <p className={styles.fileLineSub}>{t('selfEmployed.documentUsed')}</p>
+        </div>
+        <button type="button" className={`${e.btn} ${e.btnSmall}`} title={t('selfEmployed.documentLink')} disabled={opening} aria-busy={opening || undefined} onClick={openDocument}>
+          <ExternalLink aria-hidden />
+          {t('selfEmployed.openDocument')}
+        </button>
+      </div>
     </section>
   );
 }
@@ -172,13 +252,16 @@ function GuideModal({ open, onClose, submitLabel, onSubmit }: { open: boolean; o
   );
 }
 
+const STATUS_ICON = { NOT_SUBMITTED: FileText, PENDING: Clock, VERIFIED: BadgeCheck, REJECTED: CircleX, REVOKED: CircleAlert } as const;
+const STATUS_TONE = { NOT_SUBMITTED: 'neutral', PENDING: 'info', VERIFIED: 'success', REJECTED: 'danger', REVOKED: 'warning' } as const;
+
+/** Holat kartasi (sotuvchi-jshshir 1-qator): chapda belgi, holat va ma'lumot; o'ngda tekshiruv bosqichlari. */
 function StatusCard({ profile, actions }: { profile: SellerProfile; actions: ReactNode }) {
   const { t } = useTranslation();
-  const { message } = App.useApp();
-  const [opening, setOpening] = useState(false);
   const info = profile.selfEmployed;
   const fullName = `${profile.firstName} ${profile.lastName}`.trim();
-  const tone = info.status === 'VERIFIED' ? 'success' : info.status === 'REJECTED' ? 'danger' : info.status === 'REVOKED' ? 'warning' : undefined;
+  const tone = STATUS_TONE[info.status];
+  const Icon = STATUS_ICON[info.status];
   const heading = {
     NOT_SUBMITTED: { title: t('selfEmployed.notSubmittedTitle'), text: t('selfEmployed.notSubmittedText') },
     PENDING: { title: t('selfEmployed.pendingTitle'), text: t('selfEmployed.pendingText', { time: info.submittedAt ? tashkentDateTime(info.submittedAt) : '—' }) },
@@ -187,97 +270,102 @@ function StatusCard({ profile, actions }: { profile: SellerProfile; actions: Rea
     REVOKED: { title: t('selfEmployed.revokedTitle'), text: t('selfEmployed.revokedText') },
   }[info.status];
   const canSubmit = info.status === 'NOT_SUBMITTED' || info.status === 'REJECTED' || info.status === 'REVOKED';
-
-  const openDocument = () => {
-    setOpening(true);
-    openSelfEmployedDocument()
-      .catch((error: unknown) => void message.error(`${t('selfEmployed.openFailed')}: ${getApiErrorMessage(error)}`))
-      .finally(() => setOpening(false));
-  };
+  const showSteps = info.status === 'PENDING' || info.status === 'VERIFIED';
+  const verified = info.status === 'VERIFIED';
+  const steps = [
+    { title: t('selfEmployed.stepSent'), text: t('selfEmployed.stepSentText'), done: true, time: null },
+    { title: t('selfEmployed.stepChecked'), text: t('selfEmployed.stepCheckedText'), done: verified, time: null },
+    { title: t('selfEmployed.stepVerified'), text: t('selfEmployed.stepVerifiedText'), done: verified, time: verified && info.checkedAt ? tashkentDateTime(info.checkedAt).slice(0, 5) + ', ' + tashkentDateTime(info.checkedAt).slice(-5) : null },
+  ];
 
   return (
-    <section className={`${styles.card} ${styles.statusCard}`} data-tone={tone} aria-labelledby="self-employed-status">
-      <header className={styles.head}>
-        <div className={styles.headText}>
-          <Tag color={selfEmployedStatusColor[info.status]} className={styles.statusTag}>{t(selfEmployedStatusKey(info.status))}</Tag>
-          <h2 id="self-employed-status">{heading.title}</h2>
-          <p className={styles.muted}>{heading.text}</p>
+    <section className={`${e.card} ${styles.hero}`} aria-labelledby="self-employed-status">
+      <div className={styles.heroMain}>
+        <div className={styles.heroHead}>
+          <span className={styles.heroIcon} data-tone={tone} aria-hidden><Icon /></span>
+          <div className={styles.heroText}>
+            <span className={styles.heroChip}>
+              <span className={e.chip} data-tone={tone}>
+                {verified ? <CircleCheck aria-hidden /> : null}
+                {t(selfEmployedStatusKey(info.status))}
+              </span>
+            </span>
+            <h2 id="self-employed-status" className={styles.heroTitle}>{heading.title}</h2>
+            <p className={styles.heroLead}>{heading.text}</p>
+          </div>
         </div>
-      </header>
 
-      {info.status === 'REJECTED' || info.status === 'REVOKED' ? (
-        info.reason || info.comment ? (
+        {(info.status === 'REJECTED' || info.status === 'REVOKED') && (info.reason || info.comment) ? (
           <div className={styles.reason}>
             {info.reason ? <span><strong>{t('selfEmployed.reason')}:</strong> {info.reason}</span> : null}
             {info.comment ? <span className={styles.muted}>{t('selfEmployed.comment', { comment: info.comment })}</span> : null}
           </div>
-        ) : null
-      ) : null}
+        ) : null}
 
-      {info.status === 'NOT_SUBMITTED' ? (
-        <>
-          <h3 className={styles.subTitle}>{t('selfEmployed.needTitle')}</h3>
-          <ol className={styles.needList}>
-            {([['selfEmployed.need1', 'selfEmployed.need1Text'], ['selfEmployed.need2', 'selfEmployed.need2Text'], ['selfEmployed.need3', 'selfEmployed.need3Text']] as const).map(([title, text], index) => (
-              <li key={title}>
-                <span className={styles.needNumber} aria-hidden>{index + 1}</span>
-                <span className={styles.readinessText}>
-                  <strong>{t(title)}</strong>
-                  <span className={styles.muted}>{t(text)}</span>
+        {info.status === 'NOT_SUBMITTED' ? (
+          <>
+            <h3 className={styles.subTitle}>{t('selfEmployed.needTitle')}</h3>
+            <ol className={styles.needList}>
+              {([['selfEmployed.need1', 'selfEmployed.need1Text'], ['selfEmployed.need2', 'selfEmployed.need2Text'], ['selfEmployed.need3', 'selfEmployed.need3Text']] as const).map(([title, text], index) => (
+                <li key={title}>
+                  <span className={styles.needNumber} aria-hidden>{index + 1}</span>
+                  <span className={styles.readinessText}>
+                    <strong>{t(title)}</strong>
+                    <span className={styles.muted}>{t(text)}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <>
+            {info.status === 'PENDING' ? <p className={e.note}>{t('selfEmployed.sentDataLocked')}</p> : null}
+            <dl className={e.rows}>
+              <InfoRow label={t('sellerProfile.pinfl')} value={info.pinflLast4 ? `···· ${info.pinflLast4}` : '—'} sub={t('selfEmployed.pinflHidden')} />
+              <InfoRow label={t('selfEmployed.fullName')} value={fullName || '—'} sub={t('selfEmployed.fullNameNote')} />
+              <InfoRow label={t('sellerProfile.activity')} value={info.activity ?? t('sellerProfile.activityValue')} sub={t('sellerProfile.activityNote')} />
+              {info.checkedAt && verified ? <InfoRow label={t('sellerProfile.checkedAt')} value={tashkentDateTime(info.checkedAt)} /> : null}
+            </dl>
+          </>
+        )}
+
+        {actions ? <div className={e.actions}>{actions}</div> : null}
+        {canSubmit && !fullName ? (
+          <span className={styles.muted}>{t('selfEmployed.nameMissing')} <Link to="/profile" className={styles.link}>{t('sellerProfile.title')}</Link></span>
+        ) : null}
+      </div>
+
+      {showSteps ? (
+        <div className={styles.heroSteps}>
+          <ol className={styles.vSteps} aria-label={t('selfEmployed.steps')}>
+            {steps.map((step) => (
+              <li key={step.title} data-done={step.done}>
+                <span className={styles.vDot} aria-hidden>{step.done ? <Check /> : null}</span>
+                <span className={styles.vText}>
+                  <span className={styles.vTitle}>{step.title}</span>
+                  <span className={styles.vSub}>{step.text}</span>
                 </span>
+                {step.time ? <span className={styles.vTime}>{step.time}</span> : null}
               </li>
             ))}
           </ol>
-        </>
-      ) : (
-        <>
-          {info.status === 'PENDING' ? <p className={styles.note}>{t('selfEmployed.sentDataLocked')}</p> : null}
-          <dl className={styles.fields}>
-            <div>
-              <dt>{t('selfEmployed.fullName')}</dt>
-              <dd>{fullName || '—'}</dd>
-              <dd className={styles.muted}>{t('selfEmployed.fullNameNote')}</dd>
-            </div>
-            <div>
-              <dt>{t('sellerProfile.pinfl')}</dt>
-              <dd className={styles.numeric}>{info.pinflLast4 ? `···· ${info.pinflLast4}` : '—'}</dd>
-              <dd className={styles.muted}>{t('selfEmployed.pinflHidden')}</dd>
-            </div>
-            <div>
-              <dt>{t('sellerProfile.activity')}</dt>
-              <dd>{info.activity ?? t('sellerProfile.activityValue')}</dd>
-              <dd className={styles.muted}>{t('sellerProfile.activityNote')}</dd>
-            </div>
-            {info.checkedAt && info.status === 'VERIFIED' ? (
-              <div><dt>{t('sellerProfile.checkedAt')}</dt><dd>{tashkentDateTime(info.checkedAt)}</dd></div>
-            ) : null}
-            {info.documentName ? (
-              <div className={styles.wide}>
-                <dt>{t('selfEmployed.document')}</dt>
-                <dd className={styles.documentRow}>
-                  <FileText size={16} aria-hidden />
-                  <span>{info.documentName} — <span className={styles.muted}>{t('selfEmployed.documentPrivate')}</span></span>
-                  <Button size="small" loading={opening} onClick={openDocument}>{t('selfEmployed.openDocument')}</Button>
-                </dd>
-                <dd className={styles.muted}>{t('selfEmployed.documentText')}</dd>
-              </div>
-            ) : null}
-          </dl>
-          {info.status === 'PENDING' || info.status === 'VERIFIED' ? (
-            <ol className={styles.checkSteps} aria-label={t('selfEmployed.steps')}>
-              <li data-done="true"><strong>{t('selfEmployed.stepSent')}</strong><span className={styles.muted}>{t('selfEmployed.stepSentText')}</span></li>
-              <li data-done={info.status === 'VERIFIED'}><strong>{t('selfEmployed.stepChecked')}</strong><span className={styles.muted}>{t('selfEmployed.stepCheckedText')}</span></li>
-              <li data-done={info.status === 'VERIFIED'}><strong>{t('selfEmployed.stepVerified')}</strong><span className={styles.muted}>{t('selfEmployed.stepVerifiedText')}</span></li>
-            </ol>
-          ) : null}
-        </>
-      )}
-
-      {actions ? <div className={styles.actions}>{actions}</div> : null}
-      {canSubmit && !fullName ? (
-        <span className={styles.muted}>{t('selfEmployed.nameMissing')} <Link to="/profile" className={styles.link}>{t('sellerProfile.title')}</Link></span>
+        </div>
       ) : null}
     </section>
+  );
+}
+
+function InfoRow({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
+  return (
+    <div className={e.row}>
+      <dt className={e.rowLabel}>{label}</dt>
+      <dd className={e.rowValue}>
+        <span className={e.rowMain}>
+          <span className={e.val}>{value}</span>
+          {sub ? <span className={e.sub}>{sub}</span> : null}
+        </span>
+      </dd>
+    </div>
   );
 }
 

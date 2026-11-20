@@ -406,43 +406,46 @@
   padding: 0 16px;
 }
 
-/* Telefon va planshet: forma ostida och blok. */
+/* Telefon va planshet: forma ostida och blok, kartasiz ro'yxat (sotuvchi-royxat.mobil / .planshet). */
 .benefitsLight {
   display: flex;
-  flex: none;
+  flex: 1 0 auto;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 16px 24px;
+  gap: 16px;
+  padding: 24px 16px 32px;
+  box-sizing: border-box;
   border-top: 1px solid var(--color-border);
   background: var(--color-bg);
 }
 
 .benefitsLight .benefitsBody {
-  gap: 8px;
+  gap: 16px;
 }
 
 .benefitsLight .benefitsTitle {
   padding: 0;
   color: var(--color-text);
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 0;
+  font-size: 18px;
+  line-height: 26px;
 }
 
 .benefitsLight .benefitList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
 }
 
 .benefitsLight .benefit {
-  padding: 12px 14px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  gap: 12px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
 }
 
 .benefitsLight .benefitIcon {
-  background: var(--color-sunken);
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   color: var(--color-nav);
 }
 
@@ -452,9 +455,15 @@
 
 .benefitsLight .benefitDescription,
 .benefitsLight .benefitsNote {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .benefitsLight .benefitsNote {
   padding: 0;
+}
+
+@media (min-width: 768px) {
+  .benefitsLight { padding: 32px 24px 40px; }
+  .benefitsLight .benefitsTitle { font-size: 20px; line-height: 28px; }
+  .benefitsLight .benefitList { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
 }

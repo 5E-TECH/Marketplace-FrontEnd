@@ -59,7 +59,7 @@ export function TodaySummary({ today, week, byStream, asOf }: TodaySummaryProps)
     : [];
 
   return (
-    <section className={styles.card} aria-labelledby="affiliate-today">
+    <section className={`${styles.card} ${styles.today}`} aria-labelledby="affiliate-today">
       <header className={styles.head}>
         <h2 id="affiliate-today">{t('affiliateHome.todayTitle')}</h2>
         <span className={styles.muted}>

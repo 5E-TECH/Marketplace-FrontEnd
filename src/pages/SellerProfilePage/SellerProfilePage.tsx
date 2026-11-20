@@ -1,6 +1,6 @@
-import { App, Button, Form, Input, Skeleton, Tag } from 'antd';
-import { Check, CreditCard, FileText, LogOut, MonitorSmartphone } from 'lucide-react';
-import { useState } from 'react';
+import { App, Form, Input, Skeleton } from 'antd';
+import { Check, ChevronRight, CircleCheck, CreditCard, Lock, LogOut, Monitor, Pencil, ScrollText, Smartphone } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthSessionsQuery, useRevokeAuthSessionMutation } from '../../features/auth/api/authQueries';
 import { useLogoutMutation } from '../../features/auth/api/useLogoutMutation';
@@ -10,7 +10,7 @@ import {
   useUpdateSellerNameMutation,
   type SellerProfile,
 } from '../../features/sellerProfile/api/sellerProfileApi';
-import { selfEmployedStatusColor, selfEmployedStatusKey } from '../../features/sellerProfile/lib/selfEmployedStatus';
+import { selfEmployedStatusKey } from '../../features/sellerProfile/lib/selfEmployedStatus';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { initials } from '../../shared/lib/initials';
@@ -18,6 +18,7 @@ import { formatUzPhone } from '../../shared/lib/phone';
 import { tashkentClock, tashkentDate, tashkentDateTime } from '../../shared/lib/tashkentTime';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import { SheetModal } from '../../shared/ui/SheetModal/SheetModal';
+import e from './profileE.module.css';
 import styles from './sellerProfile.module.css';
 
 const dateOnly = (iso: string) => tashkentDateTime(iso).slice(0, 10);
@@ -69,138 +70,189 @@ export default function SellerProfilePage() {
   ];
   const doneCount = readiness.filter((step) => step.done).length;
   const ready = doneCount === readiness.length;
+  const firstTodo = readiness.findIndex((step) => !step.done);
+  const lastLogin = profile.lastLoginAt ? relative(profile.lastLoginAt) : null;
+  const statusTone = selfEmployed.status === 'VERIFIED' ? 'success' : selfEmployed.status === 'PENDING' ? 'info' : selfEmployed.status === 'NOT_SUBMITTED' ? 'neutral' : 'danger';
+  const cardBrand = profile.card ? (profile.card.brand === 'HUMO' ? 'Humo' : 'Uzcard') : null;
 
   return (
-    <div className={styles.page}>
-      <section className={`${styles.card} ${styles.account}`} aria-label={t('sellerProfile.title')}>
-        <span className={styles.avatar} aria-hidden>{initials(fullName)}</span>
-        <div className={styles.accountText}>
-          <strong className={styles.accountName}>{fullName || formatUzPhone(profile.phone)}</strong>
-          <span className={styles.tags}>
-            <Tag>{t('sellerProfile.seller')}</Tag>
-            <Tag color="success">{t('sellerProfile.active')}</Tag>
-          </span>
+    <div className={e.page}>
+      <section className={`${e.card} ${styles.accountRow}`} aria-label={t('sellerProfile.title')}>
+        <span className={styles.accountAvatar} aria-hidden>{initials(fullName)}</span>
+        <div className={styles.accountMain}>
+          <p className={styles.accountTitle}>{fullName || formatUzPhone(profile.phone)}</p>
+          <div className={styles.accountChips}>
+            <span className={styles.roleChip}>{t('sellerProfile.seller')}</span>
+            <span className={e.chip} data-tone="success"><CircleCheck aria-hidden />{t('sellerProfile.active')}</span>
+            <span className={e.sub}>{t('sellerProfile.registered', { date: dateOnly(profile.registeredAt) })}</span>
+          </div>
         </div>
-        <p className={styles.accountMeta}>
-          <span>{t('sellerProfile.registered', { date: dateOnly(profile.registeredAt) })}</span>
-          {profile.lastLoginAt ? <span>{t('sellerProfile.lastLogin', { time: relative(profile.lastLoginAt) })}</span> : null}
-        </p>
+        {lastLogin ? (
+          <div className={styles.accountLogin}>
+            <span className={e.sub}>{t('sellerProfile.lastLoginLabel')}</span>
+            <span className={e.val}>{lastLogin}</span>
+          </div>
+        ) : null}
       </section>
 
-      <section className={styles.card} aria-labelledby="profile-readiness">
-        <header className={styles.head}>
-          <div className={styles.headText}>
-            <h2 id="profile-readiness">{ready ? t('sellerProfile.readyTitle') : t('sellerProfile.notReadyTitle')}</h2>
-            <p className={styles.muted}>{ready ? t('sellerProfile.readyText') : t('sellerProfile.notReadyText')}</p>
+      <section className={e.card} aria-labelledby="profile-readiness">
+        <div className={e.sectionHead}>
+          <div>
+            <h2 id="profile-readiness" className={e.h2}>{ready ? t('sellerProfile.readyTitle') : t('sellerProfile.notReadyTitle')}</h2>
+            <p className={e.lead}>{ready ? t('sellerProfile.readyText') : t('sellerProfile.notReadyText')}</p>
           </div>
-          <Tag color={ready ? 'success' : 'default'}>{ready ? t('sellerProfile.readyBadge') : t('sellerProfile.notReadyBadge', { done: doneCount })}</Tag>
-        </header>
-        <ol className={styles.readiness} aria-label={t('sellerProfile.readiness')}>
-          {readiness.map((step) => (
-            <li key={step.key} data-done={step.done}>
-              <span className={styles.readinessIcon} aria-hidden>{step.done ? <Check size={14} /> : null}</span>
-              <span className={styles.readinessText}>
-                <strong>{step.title} — {step.done ? t('sellerProfile.stepDone') : t('sellerProfile.stepTodo')}</strong>
-                <span className={styles.muted}>{step.text}</span>
-              </span>
-              {step.link ? <Link to={step.link.to} className={styles.link}>{step.link.label}</Link> : null}
-            </li>
-          ))}
+          {ready ? (
+            <span className={e.chip} data-tone="success"><CircleCheck aria-hidden />{t('sellerProfile.readyBadge')}</span>
+          ) : (
+            <span className={e.chip} data-tone="neutral">{t('sellerProfile.notReadyBadge', { done: doneCount })}</span>
+          )}
+        </div>
+        <ol className={styles.stepper} aria-label={t('sellerProfile.readiness')}>
+          {readiness.map((step, index) => {
+            const state = step.done ? 'done' : index === firstTodo ? 'current' : 'todo';
+            return (
+              <li key={step.key} data-state={state}>
+                <span className={styles.stepTrack}>
+                  <span className={styles.stepDot} aria-hidden>{step.done ? <Check /> : index + 1}</span>
+                  {index < readiness.length - 1 ? <span className={styles.stepLine} data-done={step.done || undefined} /> : null}
+                </span>
+                <span className={styles.stepText}>
+                  <span className={styles.stepTitle}>
+                    {step.title}
+                    <span className={styles.srOnly}> — {step.done ? t('sellerProfile.stepDone') : t('sellerProfile.stepTodo')}</span>
+                  </span>
+                  <span className={styles.stepSub}>{step.text}</span>
+                  {step.link ? (
+                    <Link to={step.link.to} className={`${e.link} ${styles.stepLink}`}>
+                      {step.link.label}
+                      <ChevronRight aria-hidden />
+                    </Link>
+                  ) : null}
+                </span>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
-      <div className={styles.grid}>
-        <section className={styles.card} aria-labelledby="profile-personal">
-          <header className={styles.head}>
-            <h2 id="profile-personal">{t('sellerProfile.personalTitle')}</h2>
-            <Button onClick={() => setEditing(true)}>{t('sellerProfile.edit')}</Button>
-          </header>
-          <dl className={styles.fields}>
-            <div><dt>{t('sellerProfile.firstName')}</dt><dd>{profile.firstName || <span className={styles.muted}>{t('sellerProfile.notFilled')}</span>}</dd></div>
-            <div><dt>{t('sellerProfile.lastName')}</dt><dd>{profile.lastName || <span className={styles.muted}>{t('sellerProfile.notFilled')}</span>}</dd></div>
-            <div className={styles.wide}>
-              <dt>{t('sellerProfile.phone')}</dt>
-              <dd className={styles.numeric}>{formatUzPhone(profile.phone)}</dd>
-              <dd className={styles.muted}>{t('sellerProfile.phoneHint')}</dd>
+      <div className={e.cols}>
+        <div className={e.colMain}>
+          <section className={e.card} data-gap="4" aria-labelledby="profile-personal">
+            <div className={e.sectionHead}>
+              <div><h2 id="profile-personal" className={e.h2}>{t('sellerProfile.personalTitle')}</h2></div>
+              <button type="button" className={`${e.btn} ${e.btnSmall}`} onClick={() => setEditing(true)}>
+                <Pencil aria-hidden />
+                {t('sellerProfile.edit')}
+              </button>
             </div>
-          </dl>
-          <p className={styles.note}>{t('sellerProfile.nameNote')}</p>
-        </section>
+            <dl className={`${e.rows} ${styles.rowsTop}`}>
+              <Row label={t('sellerProfile.firstName')} value={profile.firstName || <span className={e.placeholder}>{t('sellerProfile.notFilled')}</span>} />
+              <Row label={t('sellerProfile.lastName')} value={profile.lastName || <span className={e.placeholder}>{t('sellerProfile.notFilled')}</span>} />
+              <Row label={t('sellerProfile.phone')} value={formatUzPhone(profile.phone)} sub={t('sellerProfile.phoneHint')} />
+            </dl>
+            <p className={`${e.note} ${styles.noteTop}`}>{t('sellerProfile.nameNote')}</p>
+          </section>
 
-        <section className={styles.card} aria-labelledby="profile-self-employed">
-          <header className={styles.head}>
-            <h2 id="profile-self-employed">{t('sellerProfile.selfEmployedSection')}</h2>
-            <Tag color={selfEmployedStatusColor[selfEmployed.status]}>{t(selfEmployedStatusKey(selfEmployed.status))}</Tag>
-          </header>
-          <dl className={styles.fields}>
-            <div><dt>{t('sellerProfile.pinfl')}</dt><dd className={styles.numeric}>{selfEmployed.pinflLast4 ? `···· ${selfEmployed.pinflLast4}` : '—'}</dd></div>
-            <div>
-              <dt>{t('sellerProfile.activity')}</dt>
-              <dd>{selfEmployed.activity ?? t('sellerProfile.activityValue')}</dd>
-              <dd className={styles.muted}>{t('sellerProfile.activityNote')}</dd>
-            </div>
-            {selfEmployed.checkedAt ? (
-              <div><dt>{t('sellerProfile.checkedAt')}</dt><dd>{tashkentDateTime(selfEmployed.checkedAt)}</dd></div>
-            ) : selfEmployed.submittedAt ? (
-              <div><dt>{t('sellerProfile.submittedAt')}</dt><dd>{tashkentDateTime(selfEmployed.submittedAt)}</dd></div>
-            ) : null}
-            <div><dt>{t('sellerProfile.tax')}</dt><dd>{t('sellerProfile.taxText')}</dd></div>
-          </dl>
-          <Link to="/profile/self-employed" className={styles.link}>{t('sellerProfile.selfEmployedLink')}</Link>
-        </section>
-
-        <SecuritySection phone={profile.phone} />
-
-        <section className={styles.card} aria-labelledby="profile-card">
-          <header className={styles.head}>
-            <h2 id="profile-card">{t('sellerProfile.cardTitle')}</h2>
-          </header>
-          {profile.card ? (
-            <div className={styles.cardRow}>
-              <CreditCard aria-hidden />
-              <span className={styles.readinessText}>
-                <strong className={styles.numeric}>{profile.card.brand === 'HUMO' ? 'Humo' : 'Uzcard'} ···· {profile.card.last4}</strong>
-                <span className={styles.muted}>{t('sellerProfile.cardAdded', { date: dateOnly(profile.card.addedAt) })}</span>
+          <section className={e.card} data-gap="10" aria-labelledby="profile-self-employed">
+            <div className={e.sectionHead}>
+              <div><h2 id="profile-self-employed" className={e.h2}>{t('sellerProfile.selfEmployedSection')}</h2></div>
+              <span className={e.chip} data-tone={statusTone}>
+                {selfEmployed.status === 'VERIFIED' ? <CircleCheck aria-hidden /> : null}
+                {t(selfEmployedStatusKey(selfEmployed.status))}
               </span>
             </div>
-          ) : (
-            <p className={styles.emptyLine}>{t('sellerProfile.cardNone')}</p>
-          )}
-          <p className={styles.muted}>{t('sellerProfile.cardText')}</p>
-          <p className={styles.note}>{t('sellerProfile.cardPrivacy')}</p>
-          {/* Karta qo'shish va almashtirish — FE-07 (balans va pul yechish). */}
-          <Link to="/affiliate/balance" className={styles.link}>{profile.card ? t('sellerProfile.cardChange') : t('sellerProfile.cardAdd')}</Link>
-        </section>
+            <dl className={`${e.rows} ${styles.rowsTop}`}>
+              <Row label={t('sellerProfile.pinfl')} value={selfEmployed.pinflLast4 ? `···· ${selfEmployed.pinflLast4}` : '—'} />
+              <Row label={t('sellerProfile.activity')} value={selfEmployed.activity ?? t('sellerProfile.activityValue')} sub={t('sellerProfile.activityNote')} />
+              {selfEmployed.checkedAt ? (
+                <Row label={t('sellerProfile.checkedAt')} value={tashkentDateTime(selfEmployed.checkedAt)} />
+              ) : selfEmployed.submittedAt ? (
+                <Row label={t('sellerProfile.submittedAt')} value={tashkentDateTime(selfEmployed.submittedAt)} />
+              ) : null}
+              <Row label={t('sellerProfile.tax')} value={t('sellerProfile.taxValue')} sub={t('sellerProfile.taxSub')} />
+            </dl>
+            <div className={styles.linkRow}>
+              <Link to="/profile/self-employed" className={e.link}>
+                {t('sellerProfile.selfEmployedLink')}
+                <ChevronRight aria-hidden />
+              </Link>
+            </div>
+          </section>
 
-        <section className={styles.card} aria-labelledby="profile-agreements">
-          <header className={styles.head}>
-            <h2 id="profile-agreements">{t('sellerProfile.agreementsTitle')}</h2>
-            <Link to="/profile/offer" className={styles.link}>{t('sellerProfile.open')}</Link>
-          </header>
-          <ul className={styles.agreements}>
-            <li>
-              <FileText aria-hidden />
-              <span className={styles.readinessText}>
-                <strong>{t('agreements.offerName')}</strong>
-                <span className={styles.muted}>{offer ? t('sellerProfile.offerAccepted', { version: offer.version, time: tashkentDateTime(offer.acceptedAt) }) : '—'}</span>
+          <SecuritySection phone={profile.phone} />
+        </div>
+
+        <div className={e.colSide}>
+          <section className={e.card} data-gap="14" aria-labelledby="profile-card">
+            <div className={e.sectionHead}>
+              <div><h2 id="profile-card" className={e.h2}>{t('sellerProfile.cardTitle')}</h2></div>
+            </div>
+            {profile.card && cardBrand ? (
+              <div className={styles.cardTile}>
+                <span className={styles.cardBrand}><CreditCard aria-hidden />{cardBrand}</span>
+                <span className={styles.cardNumber}>···· {profile.card.last4}</span>
+                <span className={styles.cardAdded}>{t('sellerProfile.cardAdded', { date: dateOnly(profile.card.addedAt) })}</span>
+              </div>
+            ) : (
+              <p className={styles.emptyLine}>{t('sellerProfile.cardNone')}</p>
+            )}
+            <p className={styles.bodyText}>{t('sellerProfile.cardText')}</p>
+            <p className={e.small}>{t('sellerProfile.cardPrivacy')}</p>
+            {/* Karta qo'shish va almashtirish — FE-07 (balans va pul yechish). */}
+            <Link to="/affiliate/balance" className={`${e.btn} ${e.btnBlock}`}>{profile.card ? t('sellerProfile.cardChange') : t('sellerProfile.cardAdd')}</Link>
+          </section>
+
+          <section className={e.card} data-gap="14" aria-labelledby="profile-agreements">
+            <div className={e.sectionHead}>
+              <div><h2 id="profile-agreements" className={e.h2}>{t('sellerProfile.agreementsTitle')}</h2></div>
+            </div>
+            <div className={styles.docRow}>
+              <span className={styles.docBox} aria-hidden><ScrollText /></span>
+              <span className={styles.docText}>
+                <span className={styles.docName}>{t('agreements.offerName')}</span>
+                <span className={e.sub}>{offer ? t('sellerProfile.offerAccepted', { version: offer.version, time: tashkentDateTime(offer.acceptedAt) }) : '—'}</span>
               </span>
-            </li>
-            <li>
-              <FileText aria-hidden />
-              <span className={styles.readinessText}>
-                <strong>{t('agreements.consentName')}</strong>
-                <span className={styles.muted}>{consent ? t('sellerProfile.consentGiven', { time: tashkentDateTime(consent.acceptedAt) }) : '—'}</span>
+            </div>
+            <div className={styles.docRow}>
+              <span className={styles.docBox} aria-hidden><Lock /></span>
+              <span className={styles.docText}>
+                <span className={styles.docName}>{t('sellerProfile.consentShort')}</span>
+                <span className={e.sub}>{consent ? t('sellerProfile.consentGiven', { time: tashkentDateTime(consent.acceptedAt) }) : '—'}</span>
               </span>
-            </li>
-          </ul>
-          <p className={styles.note}>{t('sellerProfile.agreementsNote')}</p>
-        </section>
+            </div>
+            <div className={styles.docFoot}>
+              <Link to="/profile/offer" className={e.link}>
+                {t('sellerProfile.open')}
+                <ChevronRight aria-hidden />
+              </Link>
+              <p className={e.small}>{t('sellerProfile.agreementsNote')}</p>
+            </div>
+          </section>
+        </div>
       </div>
 
       <EditNameModal open={editing} profile={profile} onClose={() => setEditing(false)} />
     </div>
   );
 }
+
+/** Qator: yorliq 168 px, qiymat (14/600) va izoh (13). */
+function Row({ label, value, sub, action }: { label: string; value: ReactNode; sub?: string; action?: ReactNode }) {
+  return (
+    <div className={e.row}>
+      <dt className={e.rowLabel}>{label}</dt>
+      <dd className={e.rowValue}>
+        <span className={e.rowMain}>
+          <span className={e.val}>{value}</span>
+          {sub ? <span className={e.sub}>{sub}</span> : null}
+        </span>
+        {action}
+      </dd>
+    </div>
+  );
+}
+
+const MOBILE_UA = /Android|iPhone|iPad|iPod|Mobile/i;
 
 function SecuritySection({ phone }: { phone: string }) {
   const { t } = useTranslation();
@@ -212,40 +264,48 @@ function SecuritySection({ phone }: { phone: string }) {
   const when = (iso: string) => (tashkentDate(new Date(iso)) === today ? t('sellerProfile.today', { time: tashkentClock(new Date(iso)) }) : tashkentDateTime(iso));
 
   return (
-    <section className={styles.card} aria-labelledby="profile-security">
-      <header className={styles.head}>
-        <h2 id="profile-security">{t('sellerProfile.securityTitle')}</h2>
-        <Button icon={<LogOut size={16} />} loading={logout.isPending} onClick={() => logout.mutate()}>{t('sellerProfile.logout')}</Button>
-      </header>
-      <dl className={styles.fields}>
-        <div className={styles.wide}>
-          <dt>{t('sellerProfile.loginMethod')}</dt>
-          <dd>{t('sellerProfile.loginMethodValue')}</dd>
-          <dd className={styles.muted}>{t('sellerProfile.loginMethodText', { phone: formatUzPhone(phone) })}</dd>
-        </div>
+    <section className={e.card} data-gap="8" aria-labelledby="profile-security">
+      <div className={e.sectionHead}>
+        <div><h2 id="profile-security" className={e.h2}>{t('sellerProfile.securityTitle')}</h2></div>
+        <button type="button" className={`${e.btn} ${e.btnSmall}`} disabled={logout.isPending} aria-busy={logout.isPending || undefined} onClick={() => logout.mutate()}>
+          <LogOut aria-hidden />
+          {t('sellerProfile.logout')}
+        </button>
+      </div>
+      <dl className={e.rows}>
+        <Row label={t('sellerProfile.loginMethod')} value={t('sellerProfile.loginMethodValue')} sub={t('sellerProfile.loginMethodText', { phone: formatUzPhone(phone) })} />
       </dl>
       {sessions.data ? (
         <>
-          <h3 className={styles.subTitle}>{t('sellerProfile.sessions', { count: sessions.data.length })}</h3>
-          <ul className={styles.sessions} aria-label={t('sellerProfile.sessions', { count: sessions.data.length })}>
+          <div className={styles.sessionsHead}>
+            <h3>
+              {t('sellerProfile.sessionsTitle')} <span className={styles.sessionsCount}>· {sessions.data.length}</span>
+            </h3>
+          </div>
+          <ul className={styles.sessionList} aria-label={t('sellerProfile.sessions', { count: sessions.data.length })}>
             {sessions.data.map((session) => {
               const device = deviceLabel(session.userAgent);
+              const DeviceIcon = MOBILE_UA.test(session.userAgent ?? '') ? Smartphone : Monitor;
               return (
                 <li key={session.id}>
-                  <MonitorSmartphone aria-hidden />
-                  <span className={styles.readinessText}>
-                    <strong>{device}{session.current ? <Tag className={styles.inlineTag}>{t('sellerProfile.thisDevice')}</Tag> : null}</strong>
-                    <span className={styles.muted}>
+                  <span className={styles.sessionIcon} aria-hidden><DeviceIcon /></span>
+                  <div className={styles.sessionText}>
+                    <span className={styles.sessionName}>
+                      {device}
+                      {session.current ? <span className={e.chip} data-tone="success"><CircleCheck aria-hidden />{t('sellerProfile.thisDevice')}</span> : null}
+                    </span>
+                    <span className={e.sub}>
                       {session.current
                         ? t('sellerProfile.signedIn', { time: when(session.createdAt) })
                         : t('sellerProfile.lastActive', { time: when(session.lastUsedAt ?? session.createdAt) })}
                     </span>
-                  </span>
+                  </div>
                   {session.current ? null : (
-                    <Button
-                      size="small"
+                    <button
+                      type="button"
+                      className={`${e.btn} ${e.btnSmall}`}
                       aria-label={t('sellerProfile.closeSessionAria', { device })}
-                      loading={revoke.isPending && revoke.variables === session.id}
+                      disabled={revoke.isPending && revoke.variables === session.id}
                       onClick={() =>
                         revoke.mutate(session.id, {
                           onSuccess: () => void message.success(t('sellerProfile.sessionClosed')),
@@ -253,14 +313,15 @@ function SecuritySection({ phone }: { phone: string }) {
                         })
                       }
                     >
+                      <LogOut aria-hidden />
                       {t('sellerProfile.closeSession')}
-                    </Button>
+                    </button>
                   )}
                 </li>
               );
             })}
           </ul>
-          <p className={styles.note}>{t('sellerProfile.sessionsNote')}</p>
+          <p className={e.note}>{t('sellerProfile.sessionsNote')}</p>
         </>
       ) : sessions.isPending ? (
         <Skeleton active title={false} paragraph={{ rows: 2 }} />

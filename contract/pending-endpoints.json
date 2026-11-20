@@ -11,6 +11,7 @@
     {"operation": "GET /api/v1/legal/documents/{}/pdf", "card": "BE-06 / EQ-10", "note": "Oferta va rozilik PDF (superadmin yuklaydi)"},
     {"operation": "POST /api/v1/affiliate/self-employed/document", "card": "BE-23", "note": "Maqom ma'lumotnomasini yuklash (yopiq fayl)"},
     {"operation": "GET /api/v1/affiliate/self-employed/document", "card": "BE-23", "note": "Yuklangan ma'lumotnomani ochish (faqat egasi)"},
-    {"operation": "POST /api/v1/affiliate/agreements", "card": "BE-06", "note": "Ofertaning yangi versiyasini qabul qilish (versiya va vaqt saqlanadi)"}
+    {"operation": "POST /api/v1/affiliate/agreements", "card": "BE-06", "note": "Ofertaning yangi versiyasini qabul qilish (versiya va vaqt saqlanadi)"},
+    {"operation": "GET /api/v1/affiliate/balance", "card": "BE-23", "note": "Balans: mavjud va ushlab turilgan haq (bosh sahifa kartasi va menyu cho'ntagi; ekran — FE-07)"}
   ]
 }

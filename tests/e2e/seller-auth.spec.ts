@@ -290,7 +290,7 @@ test('profil: ism kiritiladi, JShShIR tekshiruvga yuboriladi, oferta va rozilikl
   await page.getByRole('link', { name: 'Orqaga: Profil' }).click();
   await page.getByRole('link', { name: 'Ochish' }).click();
   await expect(pageTitle(page)).toHaveText('Oferta va roziliklar');
-  await expect(page.getByRole('region', { name: 'Roziliklar' }).locator('tbody tr.ant-table-row')).toHaveCount(2);
+  await expect(page.getByRole('region', { name: 'Roziliklar' }).locator('tbody tr')).toHaveCount(2);
   await page.getByRole('button', { name: 'Sotuvchi ofertasi — matnni o‘qish' }).first().click();
   await expect(page.getByRole('dialog')).toContainText('Qisqacha — asosiy shartlar');
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Qabul qilaman' })).toHaveCount(0);

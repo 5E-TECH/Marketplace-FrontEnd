@@ -1,15 +1,15 @@
-import { App, Button, Skeleton, Table, Tag } from 'antd';
-import { Download } from 'lucide-react';
+import { App, Skeleton } from 'antd';
+import { CircleCheck, Download, FileText, LoaderCircle, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { downloadLegalDocumentPdf, type LegalDocument } from '../../features/sellerAuth/api/sellerAuthApi';
 import { useLegalDocumentQuery } from '../../features/sellerAuth/api/useLegalDocumentQuery';
 import { LegalDocumentModal } from '../../features/sellerAuth/ui/LegalDocumentModal';
-import { useAcceptAgreementMutation, useSellerProfileQuery, type AgreementAcceptance } from '../../features/sellerProfile/api/sellerProfileApi';
+import { useAcceptAgreementMutation, useSellerProfileQuery } from '../../features/sellerProfile/api/sellerProfileApi';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDateTime } from '../../shared/lib/tashkentTime';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
-import styles from './sellerProfile.module.css';
+import e from './profileE.module.css';
 
 /**
  * «Oferta va roziliklar» (sotuvchi-oferta): qabul qilingan versiya va vaqt, asosiy shartlar,
@@ -66,106 +66,167 @@ export default function AgreementsPage() {
   };
   const offerHistory = agreements.filter((item) => item.type === 'affiliate-offer');
   const documentName = (type: LegalDocument['type']) => (type === 'affiliate-offer' ? t('agreements.offerName') : t('agreements.consentName'));
-  const effective = offer.data.effectiveAt ? tashkentDateTime(offer.data.effectiveAt).slice(0, 10) : t('agreements.pending');
-  const readButton = (type: LegalDocument['type']) => (
-    <Button size="small" aria-label={t('agreements.readAria', { name: documentName(type) })} onClick={() => setReading(type)}>
+  const effective = offer.data.effectiveAt ? tashkentDateTime(offer.data.effectiveAt).slice(0, 10) : null;
+  const effectiveCell = effective ?? <span className={e.secondary}>{t('agreements.pending')}</span>;
+  const readButton = (type: LegalDocument['type'], label: string) => (
+    <button type="button" className={e.textBtn} aria-label={t('agreements.readAria', { name: label })} onClick={() => setReading(type)}>
+      <FileText aria-hidden />
       {t('agreements.readShort')}
-    </Button>
+    </button>
+  );
+  const okChip = (label: string) => (
+    <span className={e.chip} data-tone="success"><CircleCheck aria-hidden />{label}</span>
   );
 
   return (
-    <div className={styles.page}>
-      <section className={styles.card} aria-labelledby="agreements-offer">
-        <header className={styles.head}>
-          <div className={styles.headText}>
-            <h2 id="agreements-offer">{t('agreements.offerName')}</h2>
-            <p className={styles.muted}>{t('agreements.offerLead')}</p>
-          </div>
-          {newVersion ? <Tag color="warning">{t('agreements.newVersionTitle', { version: newVersion })}</Tag> : currentOffer ? <Tag color="success">{t('agreements.accepted')}</Tag> : null}
-        </header>
-        {newVersion && currentOffer ? (
-          <div className={styles.reason} role="status">
-            <strong>{t('agreements.newVersionTitle', { version: t('register.version', { version: newVersion }) })}</strong>
-            <span className={styles.muted}>{t('agreements.newVersionText', { accepted: currentOffer.version })}</span>
-          </div>
-        ) : null}
-        <dl className={styles.fields}>
-          <div>
-            <dt>{t('agreements.version')}</dt>
-            <dd>{t('register.version', { version: offer.data.version })} <span className={styles.muted}>{t('agreements.current')}</span></dd>
-          </div>
-          <div>
-            <dt>{t('agreements.youAccepted')}</dt>
-            <dd>{currentOffer ? tashkentDateTime(currentOffer.acceptedAt) : '—'}</dd>
-            <dd className={styles.muted}>{t('agreements.atRegistration')}</dd>
-          </div>
-          <div>
-            <dt>{t('agreements.effective')}</dt>
-            <dd>{effective}</dd>
-          </div>
-        </dl>
-        <div className={styles.actions}>
-          <Button type="primary" onClick={() => setReading('affiliate-offer')}>{newVersion ? t('agreements.readAccept') : t('agreements.read')}</Button>
-          <Button icon={<Download size={16} />} loading={downloading} onClick={downloadPdf}>{t('agreements.downloadPdf')}</Button>
-        </div>
-      </section>
-
-      <section className={styles.card} aria-labelledby="agreements-summary">
-        <div className={styles.headText}>
-          <h2 id="agreements-summary" className={styles.subTitle}>{t('register.summaryTitle')}</h2>
-          <span className={styles.muted}>{t('agreements.summaryLead')}</span>
-        </div>
-        <dl className={styles.summary}>
-          {offer.data.summary.map((item) => (
-            <div key={item.term}>
-              <dt>{item.term}</dt>
-              <dd>{item.text}</dd>
+    <div className={e.page}>
+      <div className={e.cols}>
+        <div className={e.colMain}>
+          <section className={e.card} aria-labelledby="agreements-offer">
+            <div className={e.docHead}>
+              <span className={e.docIcon} aria-hidden><ScrollText /></span>
+              <div className={e.docText}>
+                <h2 id="agreements-offer" className={e.docTitle}>{t('agreements.offerName')}</h2>
+                <span className={e.docLead}>{t('agreements.offerLead')}</span>
+              </div>
+              {newVersion ? (
+                <span className={e.chip} data-tone="warning">{t('agreements.newVersionTitle', { version: newVersion })}</span>
+              ) : currentOffer ? okChip(t('agreements.accepted')) : null}
             </div>
-          ))}
-        </dl>
+            {newVersion && currentOffer ? (
+              <div className={e.status} role="status">
+                <strong>{t('agreements.newVersionTitle', { version: t('register.version', { version: newVersion }) })}</strong>
+                <span className={e.sub}>{t('agreements.newVersionText', { accepted: currentOffer.version })}</span>
+              </div>
+            ) : null}
+            <dl className={e.rows}>
+              <div className={e.row}>
+                <dt className={e.rowLabel}>{t('agreements.version')}</dt>
+                <dd className={e.rowValue}>
+                  <span className={e.rowMain}>
+                    <span className={e.val}>{t('register.version', { version: offer.data.version })}</span>
+                    <span className={e.sub}>{t('agreements.current')}</span>
+                  </span>
+                </dd>
+              </div>
+              <div className={e.row}>
+                <dt className={e.rowLabel}>{t('agreements.youAccepted')}</dt>
+                <dd className={e.rowValue}>
+                  <span className={e.rowMain}>
+                    <span className={e.val}>{currentOffer ? tashkentDateTime(currentOffer.acceptedAt) : '—'}</span>
+                    <span className={e.sub}>{t('agreements.atRegistration')}</span>
+                  </span>
+                </dd>
+              </div>
+              <div className={e.row}>
+                <dt className={e.rowLabel}>{t('agreements.effective')}</dt>
+                <dd className={e.rowValue}>
+                  <span className={e.rowMain}>
+                    <span className={effective ? e.val : `${e.val} ${e.placeholder}`}>{effective ?? t('agreements.pending')}</span>
+                  </span>
+                </dd>
+              </div>
+            </dl>
+            <div className={e.actions}>
+              <button type="button" className={newVersion ? `${e.btn} ${e.btnPrimary}` : e.btn} onClick={() => setReading('affiliate-offer')}>
+                <FileText aria-hidden />
+                {newVersion ? t('agreements.readAccept') : t('agreements.read')}
+              </button>
+              <button type="button" className={e.btn} onClick={downloadPdf} disabled={downloading} aria-busy={downloading || undefined}>
+                {downloading ? <LoaderCircle className={e.spin} aria-hidden /> : <Download aria-hidden />}
+                {t('agreements.downloadPdf')}
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div className={e.colSide}>
+          <section className={e.card} data-gap="8" aria-labelledby="agreements-summary">
+            <div className={e.sectionHead}>
+              <div>
+                <h2 id="agreements-summary" className={e.h2}>{t('register.summaryTitle')}</h2>
+                <p className={e.lead}>{t('agreements.summaryLead')}</p>
+              </div>
+            </div>
+            <dl className={e.stack}>
+              {offer.data.summary.map((item) => (
+                <div key={item.term}>
+                  <dt>{item.term}</dt>
+                  <dd>{item.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </div>
+      </div>
+
+      <section className={e.card} data-gap="12" aria-labelledby="agreements-history">
+        <div className={e.sectionHead}>
+          <div>
+            <h2 id="agreements-history" className={e.h2}>{t('agreements.historyTitle')}</h2>
+            <p className={e.lead}>{t('agreements.historyLead')}</p>
+          </div>
+        </div>
+        <div className={e.tableWrap}>
+          <table className={e.table}>
+            <caption>{t('agreements.historyTitle')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('agreements.version')}</th>
+                <th scope="col">{t('agreements.published')}</th>
+                <th scope="col">{t('agreements.youAccepted')}</th>
+                <th scope="col">{t('agreements.status')}</th>
+                <th scope="col">{t('agreements.text')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {offerHistory.map((row) => (
+                <tr key={`${row.type}:${row.version}`}>
+                  <td><span className={e.strong}>{t('register.version', { version: row.version })}</span></td>
+                  <td>{row.version === offer.data.version ? effectiveCell : '—'}</td>
+                  <td>{tashkentDateTime(row.acceptedAt)}</td>
+                  <td>{row.current ? okChip(t('agreements.statusCurrent')) : <span className={e.chip} data-tone="neutral">{t('agreements.statusOld')}</span>}</td>
+                  <td>{row.current ? readButton('affiliate-offer', t('register.version', { version: row.version })) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className={e.note}>{t('agreements.newVersionNote')}</p>
       </section>
 
-      <section className={styles.card} aria-labelledby="agreements-history">
-        <div className={styles.headText}>
-          <h2 id="agreements-history" className={styles.subTitle}>{t('agreements.historyTitle')}</h2>
-          <span className={styles.muted}>{t('agreements.historyLead')}</span>
+      <section className={e.card} data-gap="12" aria-labelledby="agreements-consents">
+        <div className={e.sectionHead}>
+          <div>
+            <h2 id="agreements-consents" className={e.h2}>{t('agreements.consentsTitle')}</h2>
+            <p className={e.lead}>{t('agreements.consentsLead')}</p>
+          </div>
         </div>
-        <Table<AgreementAcceptance>
-          size="middle"
-          rowKey={(row) => `${row.type}:${row.version}`}
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-          dataSource={offerHistory}
-          columns={[
-            { title: t('agreements.version'), key: 'version', render: (_: unknown, row) => t('register.version', { version: row.version }) },
-            { title: t('agreements.effective'), key: 'effective', render: (_: unknown, row) => (row.version === offer.data.version ? effective : '—') },
-            { title: t('agreements.youAccepted'), key: 'accepted', render: (_: unknown, row) => tashkentDateTime(row.acceptedAt) },
-            { title: t('agreements.status'), key: 'status', render: (_: unknown, row) => <Tag color={row.current ? 'success' : 'default'}>{row.current ? t('agreements.statusCurrent') : t('agreements.statusOld')}</Tag> },
-            { title: t('agreements.text'), key: 'text', render: (_: unknown, row) => (row.current ? readButton('affiliate-offer') : '—') },
-          ]}
-        />
-        <p className={styles.note}>{t('agreements.newVersionNote')}</p>
-      </section>
-
-      <section className={styles.card} aria-labelledby="agreements-consents">
-        <div className={styles.headText}>
-          <h2 id="agreements-consents" className={styles.subTitle}>{t('agreements.consentsTitle')}</h2>
-          <span className={styles.muted}>{t('agreements.consentsLead')}</span>
+        <div className={e.tableWrap}>
+          <table className={e.table}>
+            <caption>{t('agreements.consentsTitle')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('agreements.document')}</th>
+                <th scope="col">{t('agreements.version')}</th>
+                <th scope="col">{t('agreements.accepted')}</th>
+                <th scope="col">{t('agreements.status')}</th>
+                <th scope="col">{t('agreements.text')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {agreements.filter((item) => item.current).map((row) => (
+                <tr key={`${row.type}:${row.version}`}>
+                  <td><span className={e.strong}>{documentName(row.type)}</span></td>
+                  <td>{row.version}</td>
+                  <td>{tashkentDateTime(row.acceptedAt)}</td>
+                  <td>{okChip(t('agreements.inForce'))}</td>
+                  <td>{readButton(row.type, documentName(row.type))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <Table<AgreementAcceptance>
-          size="middle"
-          rowKey={(row) => `${row.type}:${row.version}`}
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-          dataSource={agreements.filter((item) => item.current)}
-          columns={[
-            { title: t('agreements.document'), key: 'document', render: (_: unknown, row) => documentName(row.type) },
-            { title: t('agreements.version'), dataIndex: 'version' },
-            { title: t('agreements.accepted'), key: 'accepted', render: (_: unknown, row) => tashkentDateTime(row.acceptedAt) },
-            { title: t('agreements.status'), key: 'status', render: () => <Tag color="success">{t('agreements.inForce')}</Tag> },
-            { title: t('agreements.text'), key: 'text', render: (_: unknown, row) => readButton(row.type) },
-          ]}
-        />
       </section>
 
       <LegalDocumentModal
