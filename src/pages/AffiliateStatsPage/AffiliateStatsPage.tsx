@@ -1,9 +1,9 @@
 import { Skeleton } from 'antd';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAffiliateStatsQuery, useAffiliateStreamsQuery } from '../../features/affiliate/api/affiliateApi';
+import { useAffiliateStatsForStreams, useAffiliateStatsQuery, useAffiliateStreamsQuery } from '../../features/affiliate/api/affiliateApi';
+import { mergeStats } from '../../features/affiliate/lib/mergeStats';
 import { statsDays, statsIncome } from '../../features/affiliate/lib/statsSummary';
-import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentClock, tashkentDate } from '../../shared/lib/tashkentTime';
 import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
@@ -15,7 +15,7 @@ import { StatsByDay } from './components/StatsByDay';
 import { StatsExportDialog } from './components/StatsExportDialog';
 import { StatsFunnel } from './components/StatsFunnel';
 import { StatsGroupTable } from './components/StatsGroupTable';
-import { StatsToolbar } from './components/StatsToolbar';
+import { StatsToolbar, type StatsProduct } from './components/StatsToolbar';
 import { formatRange, parseCut, parsePeriod, periodDays, periodRange } from './model/statsView';
 import styles from './AffiliateStatsPage.module.css';
 
@@ -30,6 +30,8 @@ export default function AffiliateStatsPage() {
   const [params, setParams] = useSearchParams();
   const [today] = useState(() => tashkentDate());
   const [exportOpen, setExportOpen] = useState(false);
+  // Har ochilishda oyna yangidan: davr va tanlov sahifadagidek boshlanadi.
+  const [exportSession, setExportSession] = useState(0);
 
   const period = parsePeriod(params.get('period'));
   const cut = parseCut(params.get('cut'));
@@ -38,12 +40,19 @@ export default function AffiliateStatsPage() {
 
   const streamsQuery = useAffiliateStreamsQuery();
   const streams = streamsQuery.data?.items ?? [];
+  // Mahsulot filtri: sotuvchi sahifalaridagi mahsulotlar (BE-28 da parametr yo'q — sahifalar yig'indisi).
+  const products: StatsProduct[] = [...new Map(streams.map((stream) => [stream.productId, { id: stream.productId, name: stream.productName }])).values()];
+  const requestedProduct = params.get('product') || undefined;
+  const productId = requestedProduct && (!streamsQuery.data || products.some((product) => product.id === requestedProduct)) ? requestedProduct : undefined;
+  const productStreams = productId ? streams.filter((stream) => stream.productId === productId) : streams;
   const requested = params.get('page') || undefined;
-  // Ro'yxatda yo'q sahifa (o'chirilgan, eski havola) — filtrsiz.
-  const streamId = requested && (!streamsQuery.data || streams.some((stream) => stream.id === requested)) ? requested : undefined;
+  // Ro'yxatda yo'q (o'chirilgan, eski havola) yoki tanlangan mahsulotga tegishli bo'lmagan sahifa — filtrsiz.
+  const streamId = requested && (!streamsQuery.data || productStreams.some((stream) => stream.id === requested)) ? requested : undefined;
   const selectedStream = streams.find((stream) => stream.id === streamId);
+  const selectedProduct = products.find((product) => product.id === productId);
+  const streamIds = streamId ? [streamId] : productId ? productStreams.map((stream) => stream.id) : [];
 
-  const main = useAffiliateStatsQuery(from, to, cut, streamId);
+  const main = useAffiliateStatsForStreams(from, to, cut, streamIds, mergeStats);
   const quality = useAffiliateStatsQuery(from, to, 'STREAM');
   const asOf = main.dataUpdatedAt ? tashkentClock(main.dataUpdatedAt) : null;
   usePageStatus(t('sellerHome.statusLabel'), asOf);
@@ -63,7 +72,6 @@ export default function AffiliateStatsPage() {
 
   const totals = main.data?.totals;
   const empty = Boolean(totals && totals.clicks === 0 && totals.leads === 0 && statsIncome(totals) === 0);
-  const periodLabel = t('sellerStats.period.value', { name: t(`sellerStats.period.${period}` as TranslationKey), range });
 
   let breakdown;
   if (main.isError && !main.data) {
@@ -95,10 +103,15 @@ export default function AffiliateStatsPage() {
         cut={cut}
         onCut={(value) => update({ cut: value === 'DAY' ? undefined : value })}
         streamId={streamId}
-        streams={streams}
-        streamsLoading={streamsQuery.isPending}
+        streams={productStreams}
         onStream={(value) => update({ page: value })}
-        onExport={() => setExportOpen(true)}
+        productId={productId}
+        products={products}
+        onProduct={(value) => update({ product: value, page: undefined })}
+        onExport={() => {
+          setExportSession((value) => value + 1);
+          setExportOpen(true);
+        }}
       />
       {main.isError && !main.data ? (
         <section className={styles.card}>
@@ -108,7 +121,7 @@ export default function AffiliateStatsPage() {
         <StatsFunnel totals={totals} />
       )}
       <PageQualityCard
-        streams={streamId ? streams.filter((stream) => stream.id === streamId) : streams}
+        streams={streamIds.length ? streams.filter((stream) => streamIds.includes(stream.id)) : streams}
         rows={quality.data?.rows}
         loading={quality.isPending || streamsQuery.isPending}
         error={quality.error ?? streamsQuery.error}
@@ -121,13 +134,14 @@ export default function AffiliateStatsPage() {
       {breakdown}
       <LeadsFooter today={today} asOf={asOf} />
       <StatsExportDialog
+        key={exportSession}
         open={exportOpen}
         onClose={() => setExportOpen(false)}
-        from={from}
-        to={to}
-        periodLabel={periodLabel}
-        streamId={streamId}
+        today={today}
+        period={period}
+        streamIds={streamIds}
         streamLabel={selectedStream ? `${selectedStream.code} · ${selectedStream.productName}` : t('sellerStats.filter.all')}
+        productLabel={selectedProduct?.name ?? t('sellerStats.filter.all')}
         dailyStats={cut === 'DAY' ? main.data : undefined}
         leadsTotal={totals?.leads}
       />

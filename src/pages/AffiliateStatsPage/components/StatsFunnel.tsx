@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react';
 import { Skeleton } from 'antd';
 import type { AffiliateStatsRow } from '../../../features/affiliate/api/affiliateApi';
 import { statsIncome } from '../../../features/affiliate/lib/statsSummary';
@@ -37,11 +38,13 @@ export function StatsFunnel({ totals }: { totals: AffiliateStatsRow | undefined 
   return (
     <section className={`${styles.card} ${styles.funnel}`} aria-label={t('sellerStats.kpi.region')} data-testid="stats-funnel">
       <ul className={styles.kpis}>
-        {KPIS.map((kpi) => (
+        {KPIS.map((kpi, index) => (
           <li key={kpi.field} data-kpi={kpi.field}>
             <span className={styles.kpiLabel}>{t(kpi.label)}</span>
             <span className={styles.kpiValue}>{formatMoney(totals[kpi.field])}</span>
             <span className={styles.kpiHint}>{t(kpi.hint)}</span>
+            {/* Voronka: kliklar › lidlar › yaroqli › tasdiqlangan › yetkazilgan (rad etilgan — alohida). */}
+            {index < 4 ? <ChevronRight className={styles.kpiArrow} aria-hidden /> : null}
           </li>
         ))}
       </ul>

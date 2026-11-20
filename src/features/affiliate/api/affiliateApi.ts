@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import type { components } from '../../../generated/api-types';
 import { httpClient } from '../../../shared/api/httpClient';
 import { readDto } from '../../../shared/api/readDto';
@@ -99,4 +99,32 @@ export async function fetchAllAffiliateLeads(
     page += 1;
   } while (page <= totalPages && page <= LEADS_EXPORT_MAX_PAGES);
   return { items, total, truncated: items.length < total };
+}
+
+/**
+ * Bir nechta sahifa bo'yicha statistika («Mahsulot» filtri): har sahifa — alohida so'rov (kalit
+ * `useAffiliateStatsQuery` bilan bir xil, kesh umumiy), natija `mergeStats` bilan yig'iladi.
+ * `streamIds` bo'sh — filtrsiz bitta so'rov.
+ */
+export function useAffiliateStatsForStreams(from: string, to: string, groupBy: AffiliateStatsGroupBy, streamIds: readonly string[], merge: (list: AffiliateStats[]) => AffiliateStats) {
+  const ids: (string | undefined)[] = streamIds.length ? [...streamIds] : [undefined];
+  return useQueries({
+    queries: ids.map((streamId) => ({
+      queryKey: streamId ? ['affiliate', 'stats', from, to, groupBy, streamId] : ['affiliate', 'stats', from, to, groupBy],
+      queryFn: ({ signal }: { signal: AbortSignal }) => getAffiliateStats(from, to, signal, groupBy, streamId),
+      staleTime: 5 * 60_000,
+    })),
+    combine: (results) => {
+      const failed = results.find((result) => result.isError);
+      const ready = results.every((result) => result.data);
+      return {
+        data: ready ? (results.length === 1 ? results[0].data : merge(results.map((result) => result.data as AffiliateStats))) : undefined,
+        isError: Boolean(failed),
+        isPending: results.some((result) => result.isPending),
+        error: failed?.error ?? null,
+        dataUpdatedAt: Math.min(...results.map((result) => result.dataUpdatedAt)),
+        refetch: () => Promise.all(results.map((result) => result.refetch())),
+      };
+    },
+  });
 }

@@ -214,6 +214,8 @@ test('sessiya tugadi → sotuvchi joyida SMS kod bilan qayta kiradi, sahifa saql
   await loginSeller(page);
   await page.goto('/profile');
   await expect(pageTitle(page)).toHaveText('Profil');
+  // Profil yuklanib bo'lgach sessiya tugaydi (aks holda profil so'rovining o'zi 401 olib, sahifa xato bilan qoladi).
+  await expect(page.getByRole('button', { name: 'Tahrirlash' })).toBeVisible();
 
   const expire = (route: import('@playwright/test').Route) =>
     route.fulfill({ status: 401, json: { statusCode: 401, errorCode: 'UNAUTHENTICATED', message: 'Sessiya tugagan' } });
