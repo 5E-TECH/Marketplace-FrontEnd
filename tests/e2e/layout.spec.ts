@@ -12,10 +12,10 @@ test('TC1: menyu bandi route va yuqori qatordagi h1 ni yangilaydi, faol band bel
   // Sozlamalar menyuda yo'q — hech bir band faol emas.
   await expect(mainNav(page).locator('[aria-current="page"]')).toHaveCount(0);
 
-  await mainNav(page).getByRole('link', { name: 'Offerlar' }).click();
-  await expect(page).toHaveURL(/\/affiliate\/offers$/);
-  await expect(pageTitle(page)).toHaveText('Offerlar');
-  await expect(mainNav(page).getByRole('link', { name: 'Offerlar' })).toHaveAttribute('aria-current', 'page');
+  await mainNav(page).getByRole('link', { name: 'Lidlar' }).click();
+  await expect(page).toHaveURL(/\/affiliate\/leads$/);
+  await expect(pageTitle(page)).toHaveText('Lidlar');
+  await expect(mainNav(page).getByRole('link', { name: 'Lidlar' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByTestId('placeholder-page')).toBeVisible();
 });
 

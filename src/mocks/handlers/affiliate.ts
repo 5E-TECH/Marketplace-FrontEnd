@@ -1,7 +1,9 @@
-import { http } from 'msw';
+import { http, HttpResponse } from 'msw';
 import type { components } from '../../generated/api-types';
 import { affiliateStatsRow, db } from '../db';
 import { addDays, API, fail, ok, pageOf, seeded, tashkentDate } from '../utils';
+import type { OfferSort } from '../../features/affiliate/model/offerTypes';
+import { EMPTY_ZIP, offerDetail, offerListItem, type MockOffer } from '../fixtures/offers';
 import { isNewMockAccount } from '../fixtures/users';
 import { currentMockUser } from './auth';
 
@@ -95,6 +97,20 @@ function leadsOfDay(day: Schemas['AffiliateStatsRowDto'], today: string): Schema
   });
 }
 
+const SUB_KEYS = ['sub1', 'sub2', 'sub3', 'sub4', 'sub5'] as const;
+
+/** Bo'sh qiymat (statistika yo'q) ro'yxat oxirida — backenddagidek. */
+const desc = (pick: (offer: MockOffer) => number | null) => (a: MockOffer, b: MockOffer) => (pick(b) ?? -1) - (pick(a) ?? -1);
+const OFFER_SORT: Record<OfferSort, (a: MockOffer, b: MockOffer) => number> = {
+  NEWEST: desc((offer) => offer.createdOrder),
+  FEE: desc((offer) => offer.affiliateFee),
+  EPC: desc((offer) => offer.epc),
+  APPROVE_RATE: desc((offer) => offer.approveRate),
+};
+
+const CODE_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789';
+const newStreamCode = () => Array.from({ length: 6 }, () => CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)]).join('');
+
 const emptyCounts = { clicks: 0, leads: 0, validLeads: 0, confirmed: 0, delivered: 0, refused: 0, incomeHold: 0, incomeAvailable: 0 };
 
 export const affiliateHandlers = [
@@ -148,9 +164,37 @@ export const affiliateHandlers = [
     const denied = guard(request, cookies);
     if (denied) return denied;
     const url = new URL(request.url);
-    const search = url.searchParams.get('search')?.toLocaleLowerCase() ?? '';
-    const page: Schemas['AffiliateOffersPageDto'] = pageOf(db.offers.filter((offer) => offer.name.toLocaleLowerCase().includes(search)), url);
-    return ok(page);
+    const search = url.searchParams.get('search')?.trim().toLocaleLowerCase() ?? '';
+    const categoryId = url.searchParams.get('categoryId');
+    const minApproveRate = Number(url.searchParams.get('minApproveRate') ?? '');
+    const sort = (url.searchParams.get('sort') ?? 'NEWEST') as OfferSort;
+    if (!OFFER_SORT[sort]) return fail(400, 'VALIDATION_ERROR', 'sort noto‘g‘ri');
+    const items = db.offers
+      .filter((offer) => !search || `${offer.name} ${offer.categoryName ?? ''}`.toLocaleLowerCase().includes(search))
+      .filter((offer) => !categoryId || offer.categoryId === categoryId)
+      .filter((offer) => !url.searchParams.has('minApproveRate') || (offer.approveRate !== null && offer.approveRate >= minApproveRate))
+      .sort(OFFER_SORT[sort])
+      .map(offerListItem);
+    return ok(pageOf(items, url));
+  }),
+
+  // Taklif (docs/api-taklif/fe-05-sotuvchi-offer.md): offer tafsiloti va kreativlar arxivi.
+  http.get(`${API}/affiliate/offers/:productId`, ({ request, cookies, params }) => {
+    const denied = guard(request, cookies);
+    if (denied) return denied;
+    const offer = db.offers.find((item) => item.productId === params.productId);
+    if (!offer) return fail(404, 'NOT_FOUND', 'Offer topilmadi');
+    return ok(offerDetail(offer));
+  }),
+
+  http.get(`${API}/affiliate/offers/:productId/creatives/archive`, ({ request, cookies, params }) => {
+    const denied = guard(request, cookies);
+    if (denied) return denied;
+    const offer = db.offers.find((item) => item.productId === params.productId);
+    if (!offer) return fail(404, 'NOT_FOUND', 'Offer topilmadi');
+    return new HttpResponse(EMPTY_ZIP, {
+      headers: { 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="offer-${offer.productId}-kreativlar.zip"` },
+    });
   }),
 
   http.get(`${API}/affiliate/streams`, ({ request, cookies }) => {
@@ -161,20 +205,70 @@ export const affiliateHandlers = [
     return ok(page);
   }),
 
+  // Backend `StreamService.create`: faqat offer ID — standart shablon, tasdiqlangan narx, yangi kod.
   http.post(`${API}/affiliate/streams`, async ({ request, cookies }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;
     const body = (await request.json().catch(() => ({}))) as Partial<Schemas['CreateAffiliateStreamDto']>;
     const offer = db.offers.find((item) => item.productId === body.productId);
     if (!offer) return fail(404, 'NOT_FOUND', 'Offer topilmadi');
-    const code = `m${seeded(`${Date.now()}`, 10000, 99999).toString(36)}`;
+    if (offer.stock <= 0) return fail(409, 'CONFLICT', 'Qoldiq yo‘q: bu offerga sahifa ochilmaydi');
+    const code = newStreamCode();
     const stream: Schemas['AffiliateStreamDto'] = {
-      ...db.streams[0], id: `34${db.streams.length + 1}`, code, link: `https://elchi.example/${code}`,
-      productId: offer.productId, productName: offer.name, salePrice: offer.approvedPrice,
-      clicks: 0, leads: 0, sales: 0, createdAt: new Date().toISOString(),
+      id: String(3400 + db.streams.length + 1), code, link: `https://elchi.example/${code}`,
+      productId: offer.productId, productName: offer.name, template: 'STANDART', salePrice: offer.approvedPrice, status: 'ACTIVE',
+      sub1: null, sub2: null, sub3: null, sub4: null, sub5: null, metaPixelId: null, tiktokPixelId: null, postbackUrl: null,
+      hasPostbackSecret: false, hasCapiToken: false, clicks: 0, leads: 0, sales: null, createdAt: new Date().toISOString(),
     };
     db.streams.unshift(stream);
     return ok(stream, 201);
+  }),
+
+  // Backend `StreamService.update` qoidalari: narx tasdiqlangandan `maxSalePrice` gacha, piksel formati.
+  http.patch(`${API}/affiliate/streams/:id`, async ({ request, cookies, params }) => {
+    const denied = guard(request, cookies);
+    if (denied) return denied;
+    const stream = db.streams.find((item) => item.id === params.id);
+    if (!stream) return fail(404, 'NOT_FOUND', 'Sahifa bu sotuvchiniki emas');
+    const patch = (await request.json().catch(() => ({}))) as Partial<Schemas['UpdateAffiliateStreamDto']>;
+    const offer = db.offers.find((item) => item.productId === stream.productId);
+    if (patch.salePrice !== undefined) {
+      if (!offer) return fail(409, 'CONFLICT', 'Offer narxi tasdiqlanmagan');
+      if (!Number.isInteger(patch.salePrice) || patch.salePrice < offer.approvedPrice || patch.salePrice > offer.maxSalePrice) {
+        return fail(400, 'VALIDATION_ERROR', `salePrice ${offer.approvedPrice} dan ${offer.maxSalePrice} gacha bo‘lishi kerak`);
+      }
+    }
+    if (patch.metaPixelId !== undefined && !/^\d{0,64}$/.test(patch.metaPixelId)) return fail(400, 'VALIDATION_ERROR', 'metaPixelId faqat raqamlardan iborat bo‘ladi');
+    if (patch.tiktokPixelId !== undefined && !/^[A-Za-z0-9]{0,64}$/.test(patch.tiktokPixelId)) return fail(400, 'VALIDATION_ERROR', 'tiktokPixelId faqat lotin harflari va raqamlardan iborat bo‘ladi');
+    if (SUB_KEYS.some((key) => (patch[key]?.length ?? 0) > 255)) return fail(400, 'VALIDATION_ERROR', 'sub 255 belgidan oshmasin');
+    if (patch.template) stream.template = patch.template;
+    if (patch.salePrice !== undefined) stream.salePrice = patch.salePrice;
+    for (const key of SUB_KEYS) if (patch[key] !== undefined) stream[key] = patch[key] || null;
+    if (patch.metaPixelId !== undefined) stream.metaPixelId = patch.metaPixelId || null;
+    if (patch.tiktokPixelId !== undefined) stream.tiktokPixelId = patch.tiktokPixelId || null;
+    return ok(stream);
+  }),
+
+  // Ochiq: sotuvchi sahifasi (SF-01 landing shu javob bilan chiziladi) — narx va piksel sahifa sozlamasidan.
+  http.get(`${API}/landing/:code`, ({ params }) => {
+    const stream = db.streams.find((item) => item.code === params.code);
+    const offer = stream && db.offers.find((item) => item.productId === stream.productId);
+    if (!stream || !offer) return fail(404, 'NOT_FOUND', 'Bunday sotuvchi sahifasi yo‘q');
+    const state: Schemas['LandingPageDto']['state'] = stream.status === 'STOPPED' ? 'NOT_ACCEPTED' : offer.stock <= 0 ? 'OUT_OF_STOCK' : 'OPEN';
+    const body: Schemas['LandingPageDto'] = {
+      code: stream.code,
+      state,
+      template: stream.template,
+      product: {
+        id: offer.productId, name: offer.name, subtitle: offer.subtitle, images: [], videoUrl: null,
+        creatives: offer.creatives.map(({ id, type, url }) => ({ id, type, url })),
+        description: offer.description, highlights: [], boxContents: offer.boxContents ? [offer.boxContents] : [], specs: [], isBad: offer.isBad,
+      },
+      price: { salePrice: stream.salePrice, centerDeliveryFee: offer.centerDeliveryFee, addressDeliveryFee: offer.addressDeliveryFee ?? 0 },
+      metaPixelId: stream.metaPixelId,
+      tiktokPixelId: stream.tiktokPixelId,
+    };
+    return ok(body);
   }),
 
   http.get(`${API}/affiliate/leads`, ({ request, cookies }) => {

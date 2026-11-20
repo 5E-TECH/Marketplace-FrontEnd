@@ -1,0 +1,331 @@
+/* sotuvchi-sahifa-sozlash: «Sahifa tayyor», chapda forma (2.4), o'ngda «O‘zgarishlar» (1, yopishqoq). */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.loading { min-height: 420px; border-radius: 16px; background: var(--color-sunken); }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.layout { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; }
+.form { display: flex; flex: 2.4 1 600px; flex-direction: column; gap: 20px; min-width: 0; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.cardHead { display: flex; flex-direction: column; gap: 2px; }
+.cardHead h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.cardHead span { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.fieldLabel { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+.fieldHint { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.fieldError { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; font-weight: 600; line-height: 16px; }
+.fieldError > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 1px; }
+
+.input,
+.readonlyField {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  outline: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.input:focus { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.input::placeholder { color: var(--color-text-secondary); }
+.input[aria-invalid] { border-color: var(--color-danger); }
+.input:disabled { border-color: var(--color-border); background: var(--color-sunken); color: var(--color-text-secondary); }
+
+/* ── Bannerlar ── */
+.banner,
+.saveError { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 16px; border-radius: 12px; font-size: 14px; line-height: 21px; }
+.banner { background: var(--color-warning-soft); }
+.saveError { background: var(--color-danger-soft); }
+.banner > svg,
+.saveError > svg { flex: 0 0 20px; width: 20px; height: 20px; align-self: flex-start; margin-top: 1px; }
+.banner > svg,
+.banner strong { color: var(--color-warning); }
+.saveError > svg,
+.saveError strong { color: var(--color-danger); }
+.banner > span,
+.saveError > span { display: flex; flex: 1 1 360px; flex-direction: column; min-width: 0; }
+.banner strong,
+.saveError strong { font-weight: 700; }
+
+.bannerAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  margin: 0;
+  padding: 0 12px 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bannerAction > svg { width: 16px; height: 16px; }
+
+.compactLink {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.compactLink > strong { font-size: 18px; font-weight: 700; line-height: 26px; font-variant-numeric: tabular-nums; }
+.compactLink > span:not(:first-child) { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* ── Shablon ── */
+.templates { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.template {
+  position: relative;
+  display: flex;
+  flex: 1 1 260px;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 14px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.template[data-checked] { border: 2px solid var(--color-action); padding: 13px 15px; background: var(--color-action-soft); }
+.template[data-disabled] { cursor: default; }
+.template[data-disabled][data-checked] { border-color: var(--color-text-faint); background: var(--color-sunken); }
+.template:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.radio {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-text-faint);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.template[data-checked] .radio { border-color: var(--color-action); }
+.template[data-checked] .radio::after { content: ''; width: 10px; height: 10px; border-radius: 999px; background: var(--color-action); }
+.template[data-disabled][data-checked] .radio { border-color: var(--color-text-faint); }
+.template[data-disabled][data-checked] .radio::after { background: var(--color-text-faint); }
+
+.mini {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 56px;
+  height: 84px;
+  padding: 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.mini > span { display: block; height: 4px; border-radius: 2px; background: var(--color-border-strong); }
+.mini > span:nth-child(1) { display: flex; align-items: center; justify-content: center; height: 30px; border-radius: 4px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.mini > span:nth-child(1) > svg { width: 14px; height: 14px; }
+.mini > span:nth-child(2) { width: 80%; }
+.mini > span:nth-child(3) { width: 60%; }
+.mini > span:nth-child(4) { width: 70%; }
+.mini > span:nth-child(5) { height: 8px; margin-top: auto; border-radius: 3px; }
+.templateText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.templateText > span:first-child { font-size: 15px; font-weight: 700; line-height: 22px; }
+.templateText > span:nth-child(2) { color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+
+.previewLink {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-action);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.previewLink > svg { width: 16px; height: 16px; }
+
+/* ── Narx va surgich ── */
+.priceRow { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px 28px; }
+.priceField { flex: 0 1 260px; min-width: 0; }
+.slider { display: flex; flex: 1 1 300px; flex-direction: column; gap: 6px; min-width: 0; padding-top: 4px; }
+.bubbleRow { position: relative; height: 30px; }
+
+.bubble {
+  position: absolute;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--color-nav);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider[data-error] .bubble { background: var(--color-danger); }
+.track { position: relative; height: 10px; border-radius: 999px; background: var(--color-border); box-shadow: inset 0 0 0 1px var(--color-text-faint); }
+.fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px; background: var(--color-nav); }
+.slider[data-error='above'] .fill { background: var(--color-danger); }
+.thumb { position: absolute; top: -5px; width: 4px; height: 20px; border-radius: 2px; background: var(--color-text); pointer-events: none; }
+.rangeInput { position: absolute; inset: -10px 0; width: 100%; height: 30px; margin: 0; opacity: 0; cursor: pointer; }
+.rangeInput:disabled { cursor: default; }
+.rangeInput:focus-visible + * { outline: 0; }
+.track:focus-within { box-shadow: inset 0 0 0 1px var(--color-text-faint), 0 0 0 3px var(--color-focus-ring); }
+.ends { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.ends > span { display: flex; flex-direction: column; }
+.ends > span:last-child { align-items: flex-end; }
+.ends strong { font-size: 13px; font-weight: 700; }
+.ends span span { color: var(--color-text-secondary); }
+.breakdown { padding: 4px 16px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-row-hover); }
+.breakdown > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 12px 0; }
+.breakdown > div + div { border-top: 1px solid var(--color-border); }
+.breakdown > div > span:first-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.breakdown > div > span:last-child { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.breakdown strong { font-size: 14px; font-weight: 700; line-height: 20px; font-variant-numeric: tabular-nums; }
+.breakdown strong + span { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.note { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.note > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+
+/* ── Sub va piksellar ── */
+.subs { display: flex; flex-wrap: wrap; gap: 12px; }
+.sub { flex: 1 1 120px; min-width: 0; }
+.subLink { display: flex; gap: 8px; }
+.readonlyField { display: flex; flex: 1 1 auto; align-items: center; min-width: 0; border-color: var(--color-border); background: var(--color-sunken); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pixels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+
+/* ── O'zgarishlar ── */
+.changes {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex: 1 1 300px;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.changesHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.changesHead h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.feeBox { padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.feeBox > span { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.feeBox > p { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.feeBox > p:first-of-type { color: var(--color-text); font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; }
+.errorBox { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 12px; background: var(--color-danger-soft); }
+.errorBox > span:first-child { color: var(--color-danger); font-size: 13px; font-weight: 600; line-height: 18px; }
+.errorBox > span:last-child { color: var(--color-text); font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; }
+.changeRows > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; }
+.changeRows > div + div { border-top: 1px solid var(--color-border); }
+.changeRows > div > span:first-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.changeRows > div > span:last-child { font-size: 14px; line-height: 20px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.changeRows strong { color: var(--color-text); font-weight: 700; }
+.changeRows strong[data-error] { color: var(--color-danger); }
+.old { color: var(--color-text-secondary); }
+.small { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+.changeActions { display: flex; flex-direction: column; gap: 8px; }
+
+.save,
+.reset,
+.barSave,
+.barReset,
+.leaveDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.save,
+.barSave { border: 0; background: var(--color-action); color: #fff; }
+.save:hover:not(:disabled),
+.barSave:hover:not(:disabled) { background: var(--color-action-hover); }
+.save:disabled,
+.barSave:disabled { opacity: 0.45; cursor: not-allowed; }
+.reset,
+.barReset { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.reset:disabled,
+.barReset:disabled { color: var(--color-text-faint); border-color: var(--color-border); cursor: not-allowed; }
+.barSave { flex: 1 1 auto; height: 52px; font-size: 15px; }
+.barReset { flex: 0 0 auto; height: 52px; }
+.leaveDanger { margin-right: auto; padding: 0 14px; border: 0; background: var(--color-danger-soft); color: var(--color-danger); }
+.leaveBox { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.leaveBox > span:first-child { color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.leaveBox > span:last-child { font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.leaveNote { margin: 0; font-size: 14px; line-height: 21px; }
+
+/* Planshet (5.6): «O‘zgarishlar» forma ostiga tushadi. */
+@container content (max-width: 919.98px) {
+  .changes { position: static; flex-basis: 100%; }
+}
+
+/* Telefon (R11): bitta ustun, karta padding 16, sub — 2 ustun, piksellar — 1 ustun; tugmalar pastki panelda. */
+@container content (max-width: 575px) {
+  .card,
+  .changes { padding: 16px; }
+  .priceField { flex-basis: 100%; }
+  .sub { flex: 1 1 calc(50% - 6px); }
+  .pixels { grid-template-columns: minmax(0, 1fr); }
+  .subLink { flex-direction: column; }
+  .breakdown > div { flex-direction: column; }
+  .breakdown > div > span:last-child { align-items: flex-start; text-align: left; }
+}

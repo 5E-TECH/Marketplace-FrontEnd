@@ -13,12 +13,14 @@ interface ChartSegmentProps<T extends string> {
   options: readonly SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  /** Ikonka yonida nom ham («Kartalar», «Jadval» — sotuvchi-offerlar). */
+  showLabels?: boolean;
 }
 
 const ARROW_STEP: Readonly<Record<string, number | undefined>> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
 
 /** Radio guruh (komponentlar-E §23): bitta Tab to'xtashi, strelkalar bilan almashadi. */
-export function ChartSegment<T extends string>({ label, options, value, onChange }: ChartSegmentProps<T>) {
+export function ChartSegment<T extends string>({ label, options, value, onChange, showLabels = false }: ChartSegmentProps<T>) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const step = ARROW_STEP[event.key];
@@ -29,7 +31,7 @@ export function ChartSegment<T extends string>({ label, options, value, onChange
     refs.current[next]?.focus();
   };
   return (
-    <div role="radiogroup" aria-label={label} className={styles.segment} data-variant={options[0]?.icon ? undefined : 'text'}>
+    <div role="radiogroup" aria-label={label} className={styles.segment} data-variant={!options[0]?.icon ? 'text' : showLabels ? 'labelled' : undefined}>
       {options.map((option, index) => (
         <button
           key={option.value}
@@ -39,13 +41,13 @@ export function ChartSegment<T extends string>({ label, options, value, onChange
           type="button"
           role="radio"
           aria-checked={value === option.value}
-          aria-label={option.icon ? option.label : undefined}
-          title={option.icon ? option.label : undefined}
+          aria-label={option.icon && !showLabels ? option.label : undefined}
+          title={option.icon && !showLabels ? option.label : undefined}
           tabIndex={value === option.value ? 0 : -1}
           onClick={() => onChange(option.value)}
           onKeyDown={(event) => onKeyDown(event, index)}
         >
-          {option.icon ?? option.label}
+          {option.icon && showLabels ? <>{option.icon}{option.label}</> : option.icon ?? option.label}
         </button>
       ))}
     </div>

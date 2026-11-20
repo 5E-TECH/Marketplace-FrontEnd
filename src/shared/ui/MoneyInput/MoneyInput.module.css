@@ -1,7 +1,6 @@
-/* Pul maydoni (komponentlar-E §21): 44, «so‘m» ichida o‘ngda; asosiy summa — 52, 28/36/700. */
-.input { font-variant-numeric: tabular-nums; }
-.input input { font-size: 16px; font-variant-numeric: tabular-nums; }
+/* Pul maydoni (komponentlar-E §21): 44, «so‘m» ichida o‘ngda; asosiy summa — 52, 28/36/700.
+   Shrift o'ramda: antd ichki `input` ga `font-size: inherit` beradi (o'zining kuchliroq selektori bilan). */
+.input { font-size: 16px; font-variant-numeric: tabular-nums; }
 .currency { color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; pointer-events: none; }
-.large { height: 52px; padding-inline: 16px; }
-.large input { font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; }
-.large .currency { font-size: 15px; line-height: 22px; }
+.large { height: 52px; padding-inline: 16px; font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; }
+.large .currency { font-size: 15px; letter-spacing: 0; line-height: 22px; }

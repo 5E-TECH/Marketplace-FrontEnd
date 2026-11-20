@@ -1,0 +1,418 @@
+/* sotuvchi-sahifalarim: tablar va filtrlar, sahifalar jadvali, tanlangan sahifa, «Sahifa qachon ariza qabul qilmaydi». */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.strong { font-weight: 600; }
+.medium { font-weight: 500; }
+.sub { color: var(--color-text-secondary); font-size: 12px; font-weight: 400; line-height: 18px; }
+.stack { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.stackEnd { display: inline-flex; flex-direction: column; align-items: flex-end; }
+
+/* ── Bannerlar (qoldiq 0, to'xtatilgan) ── */
+.banner { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 16px; border-radius: 12px; font-size: 14px; line-height: 21px; }
+.banner > svg { flex: 0 0 20px; width: 20px; height: 20px; align-self: flex-start; margin-top: 1px; }
+.banner > span { display: flex; flex: 1 1 360px; flex-direction: column; min-width: 0; }
+.banner strong { font-weight: 700; }
+.banner[data-tone='neutral'] { border: 1px solid var(--color-border); background: var(--color-sunken); }
+.banner[data-tone='neutral'] > svg { color: var(--color-text-secondary); }
+.banner[data-tone='warning'] { background: var(--color-warning-soft); }
+.banner[data-tone='warning'] > svg,
+.banner[data-tone='warning'] strong { color: var(--color-warning); }
+
+.bannerAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  margin: 0;
+  padding: 0 10px 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bannerAction > svg { width: 16px; height: 16px; }
+
+/* ── Tablar va filtrlar ── */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin: 0;
+  padding: 0 8px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tab[aria-selected='true'] .tabCount { background: var(--color-surface); color: var(--color-action); }
+.filters { display: flex; flex: 1 1 420px; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; min-width: 0; }
+.search { position: relative; flex: 0 1 280px; min-width: 0; }
+.search > svg { position: absolute; top: 11px; left: 14px; width: 18px; height: 18px; color: var(--color-text-secondary); pointer-events: none; }
+
+.search input {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  padding: 0 16px 0 42px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 999px;
+  outline: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.search input:focus { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.search input::placeholder { color: var(--color-text-secondary); }
+
+.newPage,
+.primaryLink,
+.barPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--color-action);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.newPage > svg,
+.primaryLink > svg { width: 18px; height: 18px; }
+.newPage:hover,
+.primaryLink:hover,
+.barPrimary:hover { background: var(--color-action-hover); color: #fff; }
+.newPage[data-plain] { border-color: var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.primaryLink { height: 40px; padding: 0 16px; }
+
+/* ── Ro'yxat ── */
+.listCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.tableScroll { position: relative; overflow-x: auto; }
+.table { width: 100%; min-width: 1000px; border-collapse: separate; border-spacing: 0; }
+
+.table th {
+  height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+
+.table td {
+  height: 64px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  line-height: 21px;
+  white-space: nowrap;
+}
+
+.table tbody tr { cursor: pointer; }
+.table tbody tr:hover td { background: var(--color-row-hover); }
+.table tbody tr[aria-selected='true'] td { background: var(--color-action-soft); }
+.table tfoot td { height: 52px; border-bottom: 0; background: var(--color-row-hover); font-weight: 700; font-variant-numeric: tabular-nums; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.actionsCol { width: 60px; }
+.codeCell { display: inline-flex; align-items: center; gap: 4px; }
+
+.iconButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.iconButton[data-size='sm'] { width: 32px; height: 32px; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+.footNote { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.footNote > svg { width: 16px; height: 16px; }
+.footNote > b { color: var(--color-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.skeleton { height: 200px; border-radius: 12px; background: var(--color-sunken); }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 40px 20px; text-align: center; }
+.empty strong { margin-top: 6px; font-size: 16px; font-weight: 700; line-height: 24px; }
+.empty p { max-width: 360px; margin: 0 0 10px; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+.emptyIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.emptyIcon > svg { width: 20px; height: 20px; }
+.notFound { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.notFound .emptyIcon { width: 40px; height: 40px; }
+.notFoundText { display: flex; flex: 1 1 320px; flex-direction: column; min-width: 0; }
+.notFoundText > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.notFoundText > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.notFoundActions { display: flex; gap: 8px; }
+
+.smallButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.smallButton > svg { width: 16px; height: 16px; }
+
+/* ── Tanlangan sahifa ── */
+.selected {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.selectedLabel { margin: 0; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.selectedCols { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px 0; }
+.selectedMain { display: flex; flex: 2 1 440px; flex-direction: column; gap: 14px; min-width: 0; padding-right: 24px; }
+.selectedTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.selectedTitle h2 { margin: 0; font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
+.selectedTitle > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.selectedLink { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.selectedLink > div { flex-basis: 220px; }
+.selectedActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.attribution { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.attribution > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+.selectedCol { display: flex; flex: 1 1 240px; flex-direction: column; gap: 12px; min-width: 0; padding: 0 24px; border-left: 1px solid var(--color-border); }
+.selectedCol[data-settings] { flex: 1 1 260px; gap: 10px; padding-right: 0; }
+.resultBox { display: flex; gap: 24px; padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.resultBox > div,
+.income { display: flex; flex-direction: column; }
+.resultBox > div > span:first-child { color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.resultBox > div > span:last-child { font-size: 20px; font-weight: 700; line-height: 28px; font-variant-numeric: tabular-nums; }
+.income > span:nth-child(1) { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.income > span:nth-child(2) { font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.income > span:nth-child(3) { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.links { display: flex; flex-wrap: wrap; gap: 16px; }
+.links a { display: inline-flex; align-items: center; gap: 2px; color: var(--color-action); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; text-decoration: none; }
+.links a > svg { width: 14px; height: 14px; }
+.settings { margin: 0; }
+.settings > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 9px 0; }
+.settings > div + div { border-top: 1px solid var(--color-border); }
+.settings dt { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.settings dd { margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.settings dd[data-muted] { color: var(--color-text-secondary); font-weight: 500; }
+
+.settingsButton,
+.barSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.settingsButton { align-self: flex-start; }
+.settingsButton > svg { width: 18px; height: 18px; }
+
+/* ── «Sahifa qachon ariza qabul qilmaydi» ── */
+.when { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; border-radius: 16px; background: var(--color-info-soft); }
+.whenHead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.whenHead h2 { margin: 0; color: var(--color-info); font-size: 15px; font-weight: 700; line-height: 22px; }
+.whenHead > span { color: var(--color-text); font-size: 13px; line-height: 18px; }
+.when ul { display: flex; flex-wrap: wrap; gap: 16px 24px; margin: 0; padding: 0; list-style: none; }
+.when li { display: flex; flex: 1 1 300px; gap: 12px; min-width: 0; }
+.when li > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.when strong { font-size: 14px; font-weight: 700; line-height: 20px; }
+.when li > span:last-child > span { color: var(--color-text); font-size: 13px; line-height: 19px; }
+.whenIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-surface); color: var(--color-nav); }
+.whenIcon > svg { width: 18px; height: 18px; }
+
+/* ── Telefon: kartalar, alohida «Tanlangan sahifa» ── */
+.back {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 2px;
+  height: 44px;
+  margin: -8px 0 -8px -6px;
+  padding: 0 8px 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.back > svg { width: 20px; height: 20px; }
+.cards { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+
+.streamCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.cardOpen { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; border-radius: 16px; background: transparent; cursor: pointer; }
+.cardTop { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; width: 100%; pointer-events: none; }
+.cardTop > :last-child { margin-left: auto; pointer-events: auto; }
+.cardStats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; padding: 12px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); pointer-events: none; }
+.cardStats > div { display: flex; flex-direction: column; }
+.cardStats > div > span:first-child { color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.cardStats > div > span:last-child { font-size: 16px; font-weight: 700; line-height: 24px; font-variant-numeric: tabular-nums; }
+.cardStats > div[data-wide] { grid-column: 1 / -1; flex-direction: row; align-items: baseline; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--color-border); }
+.cardStats small { display: block; color: var(--color-text-secondary); font-size: 12px; font-weight: 400; line-height: 16px; text-align: right; }
+.cardActions { position: relative; z-index: 1; width: 100%; }
+.totalCard { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.totalTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; font-size: 14px; line-height: 20px; }
+.totalTop strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+.totalStats { display: flex; justify-content: space-between; gap: 12px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.totalStats b { margin-left: 4px; color: var(--color-text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.totalCard .footNote { align-items: flex-start; }
+.footNote > span > b { color: var(--color-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.barPrimary { flex: 1 1 auto; height: 52px; font-size: 15px; }
+.barSecondary { flex: 0 0 auto; height: 52px; }
+
+@container content (max-width: 900px) {
+  .filters { justify-content: flex-start; }
+  .search { flex: 1 1 100%; }
+  .selectedMain { flex-basis: 100%; padding-right: 0; }
+  .selectedCol { padding-left: 0; border-left: 0; }
+  .selectedCol + .selectedCol { padding-left: 24px; border-left: 1px solid var(--color-border); }
+}
+
+@container content (max-width: 575px) {
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .tab { height: 44px; }
+  .filters { flex: none; flex-flow: column nowrap; align-items: stretch; }
+  .search { flex: none; }
+  .search input { height: 44px; border-radius: 12px; font-size: 16px; }
+  .search > svg { top: 13px; }
+  .listCard { padding: 0; border: 0; background: transparent; }
+  .selected { padding: 16px; }
+  .selectedCol,
+  .selectedCol + .selectedCol { flex-basis: 100%; padding: 0; border-left: 0; }
+  .selectedLink > div { flex-basis: 100%; }
+}

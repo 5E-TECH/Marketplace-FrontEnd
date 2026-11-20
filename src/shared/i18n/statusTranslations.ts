@@ -37,6 +37,10 @@ const uz = {
   'status.user.ACTIVE': 'Faol',
   'status.user.INACTIVE': 'Nofaol',
   'status.user.BLOCKED': 'Bloklangan',
+  'status.stream.ACTIVE': 'Faol',
+  'status.stream.STOPPED': 'To‘xtatilgan',
+  'status.stream.OUT_OF_STOCK': 'Qoldiq tugagan',
+  'status.stream.PAUSED': 'Buyurtma qabul qilmaydi',
 } as const;
 
 export type StatusTranslationKey = keyof typeof uz;
@@ -77,6 +81,10 @@ const ru: Record<StatusTranslationKey, string> = {
   'status.user.ACTIVE': 'Активен',
   'status.user.INACTIVE': 'Неактивен',
   'status.user.BLOCKED': 'Заблокирован',
+  'status.stream.ACTIVE': 'Активна',
+  'status.stream.STOPPED': 'Остановлена',
+  'status.stream.OUT_OF_STOCK': 'Нет в наличии',
+  'status.stream.PAUSED': 'Не принимает заказы',
 };
 
 const en: Record<StatusTranslationKey, string> = {
@@ -115,6 +123,10 @@ const en: Record<StatusTranslationKey, string> = {
   'status.user.ACTIVE': 'Active',
   'status.user.INACTIVE': 'Inactive',
   'status.user.BLOCKED': 'Blocked',
+  'status.stream.ACTIVE': 'Active',
+  'status.stream.STOPPED': 'Stopped',
+  'status.stream.OUT_OF_STOCK': 'Out of stock',
+  'status.stream.PAUSED': 'Not taking orders',
 };
 
 export const statusTranslations = { uz, ru, en } as const;

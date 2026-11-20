@@ -16,12 +16,18 @@ export function tashkentClock(value: number | Date = Date.now()): string {
   return shifted(value).toISOString().slice(11, 16);
 }
 
-/** «07.01.2027, 09:14» — Toshkent vaqti (oferta qabul qilingan vaqt, ro'yxat sanasi). */
-export function tashkentDateTime(value: number | Date | string = Date.now()): string {
+/** «07.01.2027» — Toshkent sanasi (sahifa yaratilgan, kreativ tasdiqlangan kun). */
+export function tashkentDay(value: number | Date | string = Date.now()): string {
   const time = typeof value === 'string' ? Date.parse(value) : value;
   if (typeof time === 'number' && Number.isNaN(time)) return '—';
   const [year, month, day] = tashkentDate(time).split('-');
-  return `${day}.${month}.${year}, ${tashkentClock(time)}`;
+  return `${day}.${month}.${year}`;
+}
+
+/** «07.01.2027, 09:14» — Toshkent vaqti (oferta qabul qilingan vaqt, ro'yxat sanasi). */
+export function tashkentDateTime(value: number | Date | string = Date.now()): string {
+  const day = tashkentDay(value);
+  return day === '—' ? day : `${day}, ${tashkentClock(typeof value === 'string' ? Date.parse(value) : value)}`;
 }
 
 export function addDays(isoDate: string, days: number): string {

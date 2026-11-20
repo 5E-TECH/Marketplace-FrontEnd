@@ -1,6 +1,6 @@
 import { Keyboard } from 'lucide-react';
 import { Fragment } from 'react';
-import { DialogCancel, OperatorDialog } from '../../features/operator/ui/OperatorDialog';
+import { DialogCancel, Dialog } from '../../shared/ui/Dialog/Dialog';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import styles from './HelpDialog.module.css';
@@ -53,7 +53,7 @@ export function HelpDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const { t } = useTranslation();
   if (!open) return null;
   return (
-    <OperatorDialog
+    <Dialog
       open
       width={860}
       title={t('opw.help')}
@@ -101,6 +101,6 @@ export function HelpDialog({ open, onClose }: { open: boolean; onClose: () => vo
           </ul>
         </section>
       </div>
-    </OperatorDialog>
+    </Dialog>
   );
 }

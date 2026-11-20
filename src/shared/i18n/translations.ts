@@ -11,6 +11,8 @@ import { sellerAuthTranslations } from './sellerAuthTranslations';
 import { sellerHomeTranslations } from './sellerHomeTranslations';
 import { sellerProfileTranslations } from './sellerProfileTranslations';
 import { sellerStatsTranslations } from './sellerStatsTranslations';
+import { sellerOffersTranslations } from './sellerOffersTranslations';
+import { sellerOfferDetailTranslations } from './sellerOfferDetailTranslations';
 import { operatorWorkspaceTranslations } from './operatorWorkspaceTranslations';
 import { statusTranslations } from './statusTranslations';
 import { sharedUiTranslations } from './sharedUiTranslations';
@@ -52,6 +54,8 @@ export const translations = {
     ...sellerHomeTranslations.uz,
     ...sellerProfileTranslations.uz,
     ...sellerStatsTranslations.uz,
+    ...sellerOffersTranslations.uz,
+    ...sellerOfferDetailTranslations.uz,
     ...operatorWorkspaceTranslations.uz,
     ...statusTranslations.uz,
     ...sharedUiTranslations.uz,
@@ -92,6 +96,8 @@ export const translations = {
     ...sellerHomeTranslations.ru,
     ...sellerProfileTranslations.ru,
     ...sellerStatsTranslations.ru,
+    ...sellerOffersTranslations.ru,
+    ...sellerOfferDetailTranslations.ru,
     ...operatorWorkspaceTranslations.ru,
     ...statusTranslations.ru,
     ...sharedUiTranslations.ru,
@@ -132,6 +138,8 @@ export const translations = {
     ...sellerHomeTranslations.en,
     ...sellerProfileTranslations.en,
     ...sellerStatsTranslations.en,
+    ...sellerOffersTranslations.en,
+    ...sellerOfferDetailTranslations.en,
     ...operatorWorkspaceTranslations.en,
     ...statusTranslations.en,
     ...sharedUiTranslations.en,

@@ -5,7 +5,7 @@ import { statsIncome } from '../../../features/affiliate/lib/statsSummary';
 import type { TranslationKey } from '../../../shared/i18n/translations';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
-import { signedMoney } from '../model/statsView';
+import { signedMoney } from '../../../features/affiliate/lib/statsPeriod';
 import styles from '../AffiliateStatsPage.module.css';
 
 const KPIS: { field: keyof Omit<AffiliateStatsRow, 'key' | 'incomeHold' | 'incomeAvailable'>; label: TranslationKey; hint: TranslationKey }[] = [

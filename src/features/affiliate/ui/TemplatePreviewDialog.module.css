@@ -1,0 +1,138 @@
+/* «Shablonni oldindan ko‘rish» (720): chapda shablon va qatorlar, o'ngda telefon sxemasi 264 × 580. */
+.layout { display: flex; align-items: flex-start; gap: 24px; }
+.info { display: flex; flex: 1 1 0; flex-direction: column; gap: 14px; min-width: 0; }
+.info > [role='radiogroup'] { align-self: flex-start; }
+.label { font-size: 13px; font-weight: 600; line-height: 18px; }
+.rows { margin: 0; }
+.rows > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; }
+.rows > div + div { border-top: 1px solid var(--color-border); }
+.rows dt { font-size: 13px; font-weight: 600; line-height: 18px; }
+.rows dd { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+
+.note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.stage { display: flex; flex: none; justify-content: center; }
+
+.phone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 264px;
+  height: 580px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 28px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.hero { display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; background: var(--color-nav); }
+.bar { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 14px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; font-weight: 700; line-height: 16px; }
+.brand > img { display: block; width: 24px; height: 24px; border-radius: 7px; }
+.courier { color: rgb(255 255 255 / 80%); font-size: 11px; font-weight: 700; line-height: 16px; }
+
+.media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 12px;
+  aspect-ratio: 4 / 3;
+  box-sizing: border-box;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 8%);
+  color: rgb(255 255 255 / 80%);
+  overflow: hidden;
+}
+
+.media > svg { width: 22px; height: 22px; }
+.media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-nav);
+}
+
+.play > svg { width: 20px; height: 20px; margin-left: 2px; }
+
+.counter {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.title { display: flex; flex-direction: column; gap: 2px; padding: 0 14px; }
+.title > span:first-child { font-size: 20px; font-weight: 700; line-height: 26px; }
+.title > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.priceBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-sunken);
+}
+
+.bigPrice { font-size: 26px; font-weight: 700; line-height: 32px; font-variant-numeric: tabular-nums; }
+.bigPrice small { font-size: 14px; font-weight: 600; }
+.line,
+.total { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; line-height: 16px; }
+.line strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.total { padding-top: 6px; border-top: 1px dashed var(--color-border-strong); font-size: 13px; font-weight: 700; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+.order {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  margin: 0 12px;
+  border-radius: 999px;
+  background: var(--color-nav);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.hint { padding: 0 14px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+/* Telefon (R7): varaq; segment (teng ikki qism), sxema, keyin qatorlar. */
+@media (max-width: 767.98px) {
+  .layout { flex-direction: column; align-items: stretch; gap: 14px; }
+  .info { display: contents; }
+  .label { display: none; }
+  .info > [role='radiogroup'] { order: 1; align-self: stretch; }
+  .info > [role='radiogroup'] > button { flex: 1 1 0; }
+  .stage { order: 2; padding: 12px; border-radius: 16px; background: var(--color-sunken); }
+  .rows { order: 3; }
+  .note { order: 4; }
+}

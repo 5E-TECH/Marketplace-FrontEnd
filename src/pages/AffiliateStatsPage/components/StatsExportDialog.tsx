@@ -20,7 +20,7 @@ import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { csvFileName } from '../../../shared/lib/csv';
 import { shortPersonName } from '../../../shared/lib/personName';
 import { SheetModal } from '../../../shared/ui/SheetModal/SheetModal';
-import { formatRange, PERIOD_PRESETS, periodDays, periodRange, type PeriodPreset } from '../model/statsView';
+import { formatRange, PERIOD_PRESETS, periodDays, periodRange, type PeriodPreset } from '../../../features/affiliate/lib/statsPeriod';
 import styles from '../AffiliateStatsPage.module.css';
 
 type ExportKind = 'daily' | 'leads';

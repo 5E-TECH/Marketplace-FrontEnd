@@ -1,0 +1,47 @@
+/* «Davr: …», «Kategoriya: …» kabi pill-tanlov (komponentlar-E §4): 40 balandlik, yorliq ichida, o'ngda chevron. */
+.pill {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 38px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.pill:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.label { margin-right: 6px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+
+.select {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  appearance: none;
+  field-sizing: content;
+}
+
+.chevron {
+  position: absolute;
+  top: 11px;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+

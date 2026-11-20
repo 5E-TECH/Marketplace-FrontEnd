@@ -1,13 +1,13 @@
 import { ChevronRight, CircleCheck, CreditCard, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAffiliateBalanceQuery } from '../../../features/affiliate/api/affiliateApi';
-import { MIN_PAYOUT } from '../../../features/affiliate/model/affiliateBalance';
-import type { SellerProfile } from '../../../features/sellerProfile/api/sellerProfileApi';
+import { useAffiliateBalanceQuery } from '../api/affiliateApi';
+import { MIN_PAYOUT } from '../model/affiliateBalance';
+import type { SellerProfile } from '../../sellerProfile/api/sellerProfileApi';
 import type { TranslationKey } from '../../../shared/i18n/translations';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
 import { LoadError } from '../../../shared/ui/LoadError/LoadError';
-import styles from '../AffiliateHomePage.module.css';
+import styles from './BalanceCard.module.css';
 
 const BALANCE_PATH = '/affiliate/balance';
 const CARD_BRAND: Record<'UZCARD' | 'HUMO', string> = { UZCARD: 'Uzcard', HUMO: 'Humo' };
