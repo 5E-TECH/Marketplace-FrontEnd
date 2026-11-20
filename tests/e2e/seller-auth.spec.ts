@@ -187,7 +187,7 @@ test('sotuvchi SMS kod bilan kiradi; 3 xato → kirish 15 daqiqaga yopiladi', as
   await enterCode(page, MOCK_OTP_CODE, 'Kirish');
 
   await expect(page).toHaveURL(/\/affiliate$/);
-  await expect(page.getByTestId('user-menu-button')).toContainText('Jasur Toshmatov');
+  await expect(page.getByTestId('user-menu-button')).toContainText('Jasur T.');
 });
 
 test('kirish: ro‘yxatda yo‘q raqam va xodim raqami — «hisob topilmadi», ro‘yxatga havola', async ({ page }) => {
@@ -267,7 +267,7 @@ test('profil: ism kiritiladi, JShShIR tekshiruvga yuboriladi, oferta va rozilikl
   await edit.getByLabel('Familiya').fill('Xasanova');
   await edit.getByRole('button', { name: 'Saqlash' }).click();
   await expect(page.getByText('Shaxsiy ma’lumot saqlandi')).toBeVisible();
-  await expect(page.getByTestId('user-menu-button')).toContainText('Madina Xasanova');
+  await expect(page.getByTestId('user-menu-button')).toContainText('Madina X.');
 
   await page.getByRole('link', { name: 'JShShIR va soliq maqomi' }).first().click();
   await expect(pageTitle(page)).toHaveText('JShShIR va soliq maqomi');

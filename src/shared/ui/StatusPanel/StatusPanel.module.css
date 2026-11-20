@@ -141,3 +141,15 @@
     flex: 1 1 auto;
   }
 }
+
+/* «Balki shu kerakdir» (umumiy-404): chiziqdan keyin, bandlar 44 px, chegara va radius 12. */
+.extra { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--color-border); }
+.extraTitle { margin: 0; color: var(--color-text-muted); font-size: 13px; font-weight: 600; line-height: 18px; }
+.suggestions { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.suggestion { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); text-decoration: none; }
+.suggestion:hover { border-color: var(--color-border-hover); color: var(--color-text); }
+.suggestion > svg { flex: none; width: 18px; height: 18px; color: var(--color-text-muted); }
+.suggestion > svg:last-child { width: 16px; height: 16px; }
+.suggestionText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.suggestionText > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.suggestionText > span:last-child { color: var(--color-text-muted); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }

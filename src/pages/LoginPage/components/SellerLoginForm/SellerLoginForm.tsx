@@ -131,7 +131,7 @@ export function SellerLoginForm({ roleSwitch, initialPhone }: SellerLoginFormPro
               help={state.phoneError ? t('otp.phoneOperator') : undefined}
               extra={state.phase === 'code' ? t('otp.sentTo') : t('sellerLogin.phoneHint')}
             >
-              <PhoneInput id={PHONE_ID} readOnly={state.phase === 'code'} />
+              <PhoneInput id={PHONE_ID} readOnly={state.phase === 'code'} autoFocus={state.phase === 'phone'} />
             </Form.Item>
           </div>
 
