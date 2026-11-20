@@ -1,0 +1,129 @@
+/* Operator oynalari (operator-natija, operator-karkas 3, operator-yordam): eni 480, padding 24, radius 20. */
+.root :global(.ant-modal-content) {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(16, 23, 51, 0.16), 0 2px 6px rgba(16, 23, 51, 0.06);
+}
+
+.root :global(.ant-modal-body) { padding: 0; }
+/* Sarlavha o'z joyida (ikonka bilan) — antd sarlavhasi faqat oyna nomi uchun (aria-labelledby). */
+.root :global(.ant-modal-header) { display: none; }
+.root :global(.ant-modal-mask) { background: rgba(16, 23, 51, 0.45); }
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.head { display: flex; align-items: flex-start; gap: 14px; }
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 999px;
+  background: var(--color-action-soft);
+  color: var(--color-nav);
+}
+
+.icon > svg { width: 20px; height: 20px; }
+.icon[data-tone='danger'] { background: var(--color-error-soft); color: var(--color-danger); }
+.icon[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
+.icon[data-tone='neutral'] { background: var(--color-sunken); color: var(--color-text-secondary); }
+.headText { flex: 1 1 auto; min-width: 0; }
+.headText h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.headText p { margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.close:hover:not(:disabled) { background: var(--color-sunken); }
+.close:disabled { opacity: 0.4; cursor: not-allowed; }
+.body { display: flex; flex-direction: column; gap: 16px; }
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.footerHint { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.footerHint > svg { flex: 0 0 14px; }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button > svg { width: 18px; height: 18px; flex: 0 0 18px; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.secondary:hover:not(:disabled) { border-color: var(--color-border-hover); }
+.secondary:disabled { color: var(--color-text-faint); border-color: var(--color-border); cursor: not-allowed; }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); }
+.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.primary[aria-busy='true'] { opacity: 1; cursor: progress; }
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.spin { animation: spin 0.9s linear infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

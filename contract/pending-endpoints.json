@@ -1,5 +1,5 @@
 {
-  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md",
+  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md, docs/api-taklif/fe-08-operator.md",
   "endpoints": [
     {"operation": "POST /api/v1/auth/otp/send", "card": "BE-06", "note": "SMS kod: ro'yxat yoki kirish"},
     {"operation": "POST /api/v1/auth/otp/verify", "card": "BE-06", "note": "Kodni tekshirish: kirish tokeni yoki ro'yxat tokeni"},
@@ -11,6 +11,9 @@
     {"operation": "GET /api/v1/legal/documents/{}/pdf", "card": "BE-06 / EQ-10", "note": "Oferta va rozilik PDF (superadmin yuklaydi)"},
     {"operation": "POST /api/v1/affiliate/self-employed/document", "card": "BE-23", "note": "Maqom ma'lumotnomasini yuklash (yopiq fayl)"},
     {"operation": "GET /api/v1/affiliate/self-employed/document", "card": "BE-23", "note": "Yuklangan ma'lumotnomani ochish (faqat egasi)"},
-    {"operation": "POST /api/v1/affiliate/agreements", "card": "BE-06", "note": "Ofertaning yangi versiyasini qabul qilish (versiya va vaqt saqlanadi)"}
+    {"operation": "POST /api/v1/affiliate/agreements", "card": "BE-06", "note": "Ofertaning yangi versiyasini qabul qilish (versiya va vaqt saqlanadi)"},
+    {"operation": "GET /api/v1/operator/state", "card": "BE-13", "note": "Operator holati, bronlar soni va holat boshlangan vaqt: sahifa yangilanganda «Oflayn» dan boshlanmasin (docs/api-taklif/fe-08-operator.md)"},
+    {"operation": "GET /api/v1/operator/leads/{}/product", "card": "BE-13 / OPT-2", "note": "«Mahsulot ma'lumoti» paneli: tavsif, qoldiq, og'irlik, ikki yetkazish narxi (docs/api-taklif/fe-08-operator.md)"},
+    {"operation": "GET /api/v1/operator/attempts", "card": "BE-13", "note": "«Bugungi urinishlarim · oxirgi 10 tasi, jami N» — ish joyi bosh holati (docs/api-taklif/fe-08-operator.md)"}
   ]
 }

@@ -113,7 +113,7 @@ export const appRoutes: readonly AppRoute[] = [
 
   // ── Operator (2.2) ─────────────────────────────────────────────────────────
   { path: '/operator', load: () => import('../../pages/OperatorHomePage/OperatorHomePage'), roles: ['OPERATOR_LEAD'], label: 'nav.operatorWorkspace', navIcon: <Headset /> },
-  { path: '/operator/callbacks', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.scheduledCalls', navIcon: <CalendarClock /> },
+  { path: '/operator/callbacks', load: () => import('../../pages/OperatorCallbacksPage/OperatorCallbacksPage'), roles: ['OPERATOR_LEAD'], label: 'nav.scheduledCalls', navIcon: <CalendarClock /> },
   { path: '/operator/calls', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myCalls', navIcon: <AudioLines /> },
   { path: '/operator/orders', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myOrders', navIcon: <ShoppingBag /> },
   { path: '/operator/stats', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myStatistics', navIcon: <ChartColumn /> },

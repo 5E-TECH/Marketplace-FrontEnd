@@ -1,0 +1,132 @@
+/* Natija oynalari ichi (operator-natija 1–9): lid bloki, sana/vaqt, sabablar, xulosa qutilari. */
+.body { display: flex; flex-direction: column; gap: 16px; }
+.footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.hintSlot { margin-right: auto; }
+.lead { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.leadName { display: flex; flex-direction: column; }
+.leadName > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
+.leadName > span:first-child > span { font-weight: 500; font-variant-numeric: tabular-nums; }
+.leadName > span:last-child { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.flow > svg { color: var(--color-text-secondary); }
+
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.label { display: block; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text); }
+.label > span { color: var(--color-danger); }
+.labelRow > span:last-child:not(:first-child) { font-size: 12px; line-height: 18px; color: var(--color-text-secondary); white-space: nowrap; }
+
+.dateTime { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; }
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr 44px;
+  gap: 4px;
+  height: 44px;
+  padding: 3px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  margin: 0;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.segment[aria-checked='true'] { border-color: var(--color-border-strong); background: var(--color-surface); box-shadow: 0 1px 2px rgba(16, 23, 51, 0.06); color: var(--color-text); font-weight: 600; }
+.segment:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 1px; }
+.calendar { padding: 0; }
+
+.timeWrap { position: relative; }
+.timeWrap > svg { position: absolute; left: 14px; top: 13px; color: var(--color-text-secondary); pointer-events: none; }
+
+.input,
+.textarea {
+  display: block;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.input { height: 44px; padding: 0 14px 0 42px; font-size: 16px; line-height: 24px; font-variant-numeric: tabular-nums; }
+.dateInput { height: 44px; margin-top: 8px; padding: 0 14px; font-size: 15px; }
+.textarea { min-height: 68px; padding: 10px 14px; font-size: 15px; line-height: 22px; resize: vertical; }
+.input:focus,
+.dateInput:focus,
+.textarea:focus { outline: 2px solid var(--color-focus-ring); outline-offset: 0; border-color: var(--color-action); }
+.input[aria-invalid='true'] { border-color: var(--color-danger); }
+.fieldError { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-danger); }
+
+.note { margin: -8px 0 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.noteFlat { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+
+.summary { padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.summary > p { margin: 0; }
+.summary > p:first-child { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); }
+.summaryBig { margin-top: 2px !important; font-size: 20px; line-height: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.summary > p.summaryText { margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.summary > p.summaryText:first-of-type { margin-top: 6px; }
+
+.box { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 12px; }
+.box > svg { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; }
+.box strong { display: block; font-weight: 600; }
+.box p { margin: 2px 0 0; }
+.box[data-tone='warning'] { background: var(--color-warning-soft); }
+.box[data-tone='warning'] > svg,
+.box[data-tone='warning'] strong { color: var(--color-warning); }
+.box[data-tone='danger'] { background: var(--color-error-soft); }
+.box[data-tone='danger'] > svg,
+.box[data-tone='danger'] strong { color: var(--color-danger); }
+
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  margin: 0;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:hover { border-color: var(--color-action); }
+.option:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.option[aria-checked='true'] { border: 1.5px solid var(--color-action); background: var(--color-action-soft); font-weight: 600; }
+.option > svg { flex: 0 0 18px; color: var(--color-action); }
+
+.candidate { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--color-action); border-radius: 12px; background: var(--color-surface); }
+.candidate > svg { flex: 0 0 18px; color: var(--color-action); }
+.candidate > div { flex: 1 1 auto; min-width: 0; }
+.candidate strong { display: block; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.candidate span { display: block; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
