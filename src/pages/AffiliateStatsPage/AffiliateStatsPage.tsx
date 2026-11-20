@@ -16,7 +16,8 @@ import { StatsExportDialog } from './components/StatsExportDialog';
 import { StatsFunnel } from './components/StatsFunnel';
 import { StatsGroupTable } from './components/StatsGroupTable';
 import { StatsToolbar, type StatsProduct } from './components/StatsToolbar';
-import { formatRange, parseCut, parsePeriod, periodDays, periodRange } from './model/statsView';
+import { formatRange, parsePeriod, periodDays, periodRange } from '../../features/affiliate/lib/statsPeriod';
+import { parseCut } from './model/statsView';
 import styles from './AffiliateStatsPage.module.css';
 
 /**

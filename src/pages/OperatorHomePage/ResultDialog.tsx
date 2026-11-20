@@ -4,7 +4,7 @@ import { clock, dayLabel, rejectLabel, statusLabel } from '../../features/operat
 import { CALLBACK_GRACE_MINUTES, clampToCallWindow, duplicateCandidate, REMINDER_MINUTES, tashkentMoment, tashkentParts } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../features/operator/lib/useNow';
 import type { LeadCard, LeadRejectReason, LeadResultInput } from '../../features/operator/model/operatorTypes';
-import { DialogCancel, DialogHint, DialogPrimary, OperatorDialog } from '../../features/operator/ui/OperatorDialog';
+import { DialogCancel, DialogHint, DialogPrimary, Dialog } from '../../shared/ui/Dialog/Dialog';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { addDays } from '../../shared/lib/tashkentTime';
@@ -50,7 +50,7 @@ export function ResultDialog({ card, choice, saving, error, onSubmit, onClose }:
   const meta = META[choice];
   const Icon = ICONS[choice];
   return (
-    <OperatorDialog
+    <Dialog
       open
       title={t(meta.title)}
       description={t(meta.text)}
@@ -61,7 +61,7 @@ export function ResultDialog({ card, choice, saving, error, onSubmit, onClose }:
       testId="result-dialog"
     >
       <DialogBody key={choice} card={card} choice={choice} saving={saving} error={error} onSubmit={onSubmit} onClose={onClose} />
-    </OperatorDialog>
+    </Dialog>
   );
 }
 

@@ -12,3 +12,6 @@ export function formatMoney(value: number | bigint): string {
     })
     .join('');
 }
+
+/** Matn ichidagi summa qatorga bo'linmasin: «65 000» — bo'linmas bo'shliq bilan. */
+export const formatMoneyNbsp = (value: number | bigint) => formatMoney(value).replace(/ /g, '\u00a0');

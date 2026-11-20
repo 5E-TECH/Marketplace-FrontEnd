@@ -6,7 +6,7 @@ import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { BarChart, type ChartTone } from '../../../shared/ui/Chart/BarChart';
 import { ChartViewToggle, type ChartView } from '../../../shared/ui/Chart/ChartViewToggle';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
-import { ddmmyyyy, signedMoney } from '../model/statsView';
+import { ddmmyyyy, signedMoney } from '../../../features/affiliate/lib/statsPeriod';
 import styles from '../AffiliateStatsPage.module.css';
 
 interface StatsByDayProps {

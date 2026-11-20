@@ -4,7 +4,7 @@ import { useSellerProfileQuery } from '../../features/sellerProfile/api/sellerPr
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { addDays, tashkentClock, tashkentDate } from '../../shared/lib/tashkentTime';
 import { usePageStatus } from '../../shared/ui/PageHeader/pageTitle';
-import { BalanceCard } from './components/BalanceCard';
+import { BalanceCard } from '../../features/affiliate/ui/BalanceCard';
 import { HomeBanners } from './components/HomeBanners';
 import { NewsToday } from './components/NewsToday';
 import { OnboardingSteps } from './components/OnboardingSteps';

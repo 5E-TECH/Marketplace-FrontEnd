@@ -101,8 +101,10 @@ const profile = () => import('../../pages/ProfilePage/ProfilePage');
 export const appRoutes: readonly AppRoute[] = [
   // ── Sotuvchi (karkas-E 2.1) ────────────────────────────────────────────────
   { path: '/affiliate', load: () => import('../../pages/AffiliateHomePage/AffiliateHomePage'), roles: ['AFFILIATE'], label: 'nav.home', navIcon: <House /> },
-  { path: '/affiliate/offers', load: pending, roles: ['AFFILIATE'], label: 'nav.offers', navIcon: <Tag /> },
-  { path: '/affiliate/pages', load: pending, roles: ['AFFILIATE'], label: 'nav.myPages', navIcon: <Link /> },
+  { path: '/affiliate/offers', load: () => import('../../pages/AffiliateOffersPage/AffiliateOffersPage'), roles: ['AFFILIATE'], label: 'nav.offers', navIcon: <Tag /> },
+  { path: '/affiliate/offers/:productId', load: () => import('../../pages/AffiliateOfferPage/AffiliateOfferPage'), roles: ['AFFILIATE'], label: 'nav.offers', section: '/affiliate/offers' },
+  { path: '/affiliate/pages', load: () => import('../../pages/AffiliatePagesPage/AffiliatePagesPage'), roles: ['AFFILIATE'], label: 'nav.myPages', navIcon: <Link /> },
+  { path: '/affiliate/pages/:id', load: () => import('../../pages/AffiliatePageSettingsPage/AffiliatePageSettingsPage'), roles: ['AFFILIATE'], label: 'settings.title', section: '/affiliate/pages' },
   { path: '/affiliate/stats', load: () => import('../../pages/AffiliateStatsPage/AffiliateStatsPage'), roles: ['AFFILIATE'], label: 'nav.statistics', navIcon: <ChartColumn /> },
   { path: '/affiliate/leads', load: pending, roles: ['AFFILIATE'], label: 'nav.leads', navIcon: <Inbox /> },
   { path: '/affiliate/balance', load: pending, roles: ['AFFILIATE'], label: 'nav.balance', navIcon: <Wallet /> },

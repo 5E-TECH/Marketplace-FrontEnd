@@ -1,5 +1,5 @@
 {
-  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md, docs/api-taklif/fe-08-operator.md",
+  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md, docs/api-taklif/fe-05-sotuvchi-offer.md, docs/api-taklif/fe-08-operator.md",
   "endpoints": [
     {"operation": "POST /api/v1/auth/otp/send", "card": "BE-06", "note": "SMS kod: ro'yxat yoki kirish"},
     {"operation": "POST /api/v1/auth/otp/verify", "card": "BE-06", "note": "Kodni tekshirish: kirish tokeni yoki ro'yxat tokeni"},
@@ -15,6 +15,8 @@
     {"operation": "GET /api/v1/operator/state", "card": "BE-13", "note": "Operator holati, bronlar soni va holat boshlangan vaqt: sahifa yangilanganda «Oflayn» dan boshlanmasin (docs/api-taklif/fe-08-operator.md)"},
     {"operation": "GET /api/v1/operator/leads/{}/product", "card": "BE-13 / OPT-2", "note": "«Mahsulot ma'lumoti» paneli: tavsif, qoldiq, og'irlik, ikki yetkazish narxi (docs/api-taklif/fe-08-operator.md)"},
     {"operation": "GET /api/v1/operator/attempts", "card": "BE-13", "note": "«Bugungi urinishlarim · oxirgi 10 tasi, jami N» — ish joyi bosh holati (docs/api-taklif/fe-08-operator.md)"},
-    {"operation": "GET /api/v1/affiliate/balance", "card": "BE-23", "note": "Balans: mavjud va ushlab turilgan haq (bosh sahifa kartasi va menyu cho'ntagi; ekran — FE-07)"}
+    {"operation": "GET /api/v1/affiliate/balance", "card": "BE-23", "note": "Balans: mavjud va ushlab turilgan haq (bosh sahifa kartasi va menyu cho'ntagi; ekran — FE-07)"},
+    {"operation": "GET /api/v1/affiliate/offers/{}", "card": "BE-11 / BE-25", "note": "Offer tafsiloti: tavsif, yetkazish rejimi, holat, hamma sotuvchilar natijasi, narx taqsimoti, kreativlar (docs/api-taklif/fe-05-sotuvchi-offer.md)"},
+    {"operation": "GET /api/v1/affiliate/offers/{}/creatives/archive", "card": "BE-11 / BE-08", "note": "«Hammasini yuklab olish»: offer kreativlari bitta ZIP da (docs/api-taklif/fe-05-sotuvchi-offer.md)"}
   ]
 }

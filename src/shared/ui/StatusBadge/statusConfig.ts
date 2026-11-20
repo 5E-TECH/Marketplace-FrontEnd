@@ -1,4 +1,4 @@
-import { Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CircleX, Clock, TriangleAlert, type LucideIcon } from 'lucide-react';
+import { Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, Package, TriangleAlert, type LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '../../i18n/translations';
 import type { BadgeTone } from '../Badge/Badge';
 
@@ -72,6 +72,13 @@ export const STATUS_FAMILIES = {
     ACTIVE: { tone: 'success' },
     INACTIVE: { tone: 'neutral' },
     BLOCKED: { tone: 'danger', icon: Ban },
+  },
+  /** Sotuvchi sahifasi (T3 stream.status; sotuvchi-sahifalarim): OUT_OF_STOCK — offer qoldig'i 0 (offerdan). */
+  stream: {
+    ACTIVE: { tone: 'success' },
+    STOPPED: { tone: 'neutral', icon: CirclePause },
+    OUT_OF_STOCK: { tone: 'neutral', icon: Package },
+    PAUSED: { tone: 'neutral', icon: CirclePause },
   },
 } as const satisfies Record<string, Record<string, StatusEntry>>;
 

@@ -1,4 +1,5 @@
 import type { components } from '../generated/api-types';
+import { mockOffers } from './fixtures/offers';
 import { resetRegisteredMockAccounts } from './fixtures/users';
 import { resetMockOperator } from './handlers/operator';
 import { resetMockOtp } from './handlers/sellerAuth';
@@ -30,23 +31,6 @@ const PRODUCTS = [
   { id: '502', name: 'Oshxona tarozisi', salePrice: 189_000 },
   { id: '503', name: 'Elektr choynak', salePrice: 245_000 },
 ] as const;
-
-function offers(): Schemas['AffiliateOfferDto'][] {
-  return PRODUCTS.map((product, index) => ({
-    productId: product.id,
-    name: product.name,
-    imageUrl: null,
-    approvedPrice: product.salePrice,
-    maxSalePrice: Math.round(product.salePrice * 1.1),
-    affiliateFee: 65_000 - index * 5_000,
-    epc: 1_250 - index * 150,
-    approveRate: 0.41 - index * 0.04,
-    saleRate: 0.7,
-    stock: 120 - index * 35,
-    hasVideo: index === 0,
-    creatives: [],
-  }));
-}
 
 function streams(): Schemas['AffiliateStreamDto'][] {
   return [
@@ -107,7 +91,7 @@ export const MOCK_PRODUCTS = PRODUCTS;
 
 function createMockDb() {
   return {
-    offers: offers(),
+    offers: mockOffers(),
     streams: streams(),
     operator: {
       state: 'OFFLINE' as Schemas['OperatorStateDto']['state'],

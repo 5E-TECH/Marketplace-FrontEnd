@@ -90,49 +90,6 @@
   font-weight: 600;
 }
 
-.pill {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 40px;
-  padding: 0 38px 0 16px;
-  box-sizing: border-box;
-  border: 1px solid var(--color-field-border);
-  border-radius: 999px;
-  background: var(--color-surface);
-}
-
-.pill:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
-.pillLabel { margin-right: 6px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
-
-.pillSelect {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 21px;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  appearance: none;
-  field-sizing: content;
-}
-
-.pillChevron {
-  position: absolute;
-  top: 11px;
-  right: 14px;
-  width: 16px;
-  height: 16px;
-  color: var(--color-text-secondary);
-  pointer-events: none;
-}
-
 .toolbarEnd { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-left: auto; }
 
 .maskNote {
@@ -830,8 +787,6 @@
     flex: 1 1 100%;
   }
 
-  .pill { width: 100%; }
-  .pillSelect { flex: 1 1 auto; }
   .toolbarEnd { margin-left: 0; }
 
   .kpis {

@@ -1,0 +1,639 @@
+/* sotuvchi-offer: chapda mahsulot va natijalar, o'ngda (340) haq, sahifalaringiz, reklama qoidalari. */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.loading { min-height: 420px; border-radius: 16px; background: var(--color-sunken); }
+.layout { display: flex; flex-flow: row-reverse wrap; align-items: flex-start; gap: 20px; }
+.aside { display: flex; flex: 1 1 340px; flex-direction: column; gap: 20px; min-width: 0; }
+.main { display: flex; flex: 999 1 560px; flex-direction: column; gap: 20px; min-width: 0; }
+.strong { font-weight: 600; }
+.label { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.hint { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.hint13 { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.bigValue { font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bigValue small { color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0; }
+
+.card,
+.product,
+.feeCard,
+.asideCard {
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.card { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px 24px; }
+.cardHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.cardTitle { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
+.cardTitle[data-stack] { flex-direction: column; align-items: stretch; gap: 2px; }
+.cardTitle h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.cardTitle span { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* ── Holat banneri (qoldiq 0, to'xtatilgan, muddat) ── */
+.banner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 12px; font-size: 14px; line-height: 21px; }
+.banner > svg { display: block; flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; }
+.banner > span { display: flex; flex-direction: column; }
+.banner strong { font-weight: 700; }
+.banner[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-text); }
+.banner[data-tone='warning'] > svg,
+.banner[data-tone='warning'] strong { color: var(--color-warning); }
+.banner[data-tone='neutral'] { border: 1px solid var(--color-border); background: var(--color-sunken); }
+.banner[data-tone='neutral'] > svg,
+.banner[data-tone='neutral'] strong { color: var(--color-text-secondary); }
+
+/* ── Mahsulot ── */
+.product { display: flex; flex-wrap: wrap; gap: 20px 24px; padding: 20px; }
+.figure { position: relative; flex: 0 1 280px; align-self: flex-start; min-width: 0; margin: 0; }
+.figureButton { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.figureButton:disabled { cursor: default; }
+
+.photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+}
+
+.photo > svg { width: 22px; height: 22px; }
+.photo { position: relative; }
+.photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.figureChip,
+.badChip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.figureChip { bottom: 10px; left: 12px; }
+.badChip { top: 10px; left: 12px; border-color: transparent; background: var(--color-info-soft); color: var(--color-info); }
+.badChip > svg { width: 14px; height: 14px; }
+.productText { display: flex; flex: 1 1 320px; flex-direction: column; gap: 12px; min-width: 0; }
+.productCopy { display: flex; flex-direction: column; gap: 4px; }
+.productCopy p { margin: 0; font-size: 14px; line-height: 21px; }
+.subtitle { font-size: 16px !important; font-weight: 600; line-height: 24px !important; }
+.description { color: var(--color-text-secondary); }
+.strongLine { font-weight: 700; }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
+  overflow: hidden;
+}
+
+.facts > div { min-width: 0; padding: 10px 14px; }
+.facts > div + div { border-left: 1px solid var(--color-border); }
+.facts dt { color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 18px; }
+.facts dd { margin: 2px 0 0; font-size: 14px; font-weight: 600; line-height: 20px; }
+
+.badBox { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--color-info-soft); font-size: 14px; line-height: 21px; }
+.badBox > svg { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 2px; color: var(--color-info); }
+.badBox > span { display: flex; flex-direction: column; align-items: flex-start; }
+.badBox strong { color: var(--color-info); font-weight: 700; }
+
+.inlineLink {
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-info);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.productNote { margin: auto 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+
+/* ── Offer natijalari ── */
+.card[data-area='results'] { gap: 18px; }
+.refresh { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; white-space: nowrap; }
+.refresh > svg { width: 16px; height: 16px; }
+.refresh > b { color: var(--color-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.bigStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); row-gap: 16px; margin: 0 -20px; }
+.bigStats > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0 20px; }
+.bigStats > div + div { border-left: 1px solid var(--color-border); }
+.funnelBlock { display: flex; flex-direction: column; gap: 12px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.funnel { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px 10px; margin: 0; padding: 0; list-style: none; }
+.funnelItem { display: flex; flex: 1 1 74px; flex-direction: column; gap: 4px; min-width: 0; }
+.funnelItem[data-wide] { flex: 1.15 1 85px; }
+.funnelItem > .label { white-space: nowrap; }
+.funnelValue { font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -0.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.funnelArrow { flex: 0 0 16px; padding-top: 28px; color: var(--color-text-faint); }
+.funnelArrow > svg { display: block; width: 16px; height: 16px; }
+.noStats { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.noStats > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.noStats strong { font-size: 14px; font-weight: 600; line-height: 20px; }
+.noStats > span:last-child > span { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.noStatsIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); }
+.noStatsIcon > svg { width: 18px; height: 18px; }
+
+/* ── Kreativlar ── */
+.smallButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.smallButton > svg { width: 16px; height: 16px; }
+.smallButton:hover { border-color: var(--color-border-hover); }
+.creativeGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.creative { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin: 0; }
+.tileButton { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-row-hover);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+}
+
+.tile > svg { width: 22px; height: 22px; }
+.tile > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile > img:not([src]),
+.viewer > img:not([src]) { display: none; }
+
+.tileChip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.tileChip > svg { width: 14px; height: 14px; }
+
+.tilePlay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 20px 0 0;
+  padding: 0 0 0 3px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.tilePlay > svg { width: 18px; height: 18px; }
+.processing { margin-top: 20px; font-size: 12px; font-weight: 600; line-height: 16px; }
+.caption { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; min-height: 36px; }
+.caption > span { display: flex; flex-direction: column; min-width: 0; }
+.caption > span > span:first-child { font-size: 13px; font-weight: 600; line-height: 18px; }
+.caption > span > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+
+.iconButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.iconButton > svg { width: 20px; height: 20px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+.iconButton[data-disabled] { opacity: 0.4; pointer-events: none; }
+
+/* ── Shablonlar ── */
+.templates { display: flex; flex-wrap: wrap; gap: 12px; }
+.template { display: flex; flex: 1 1 280px; gap: 14px; min-width: 0; padding: 14px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; }
+
+.templateThumb {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  aspect-ratio: 3 / 4;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.templateThumb > svg { width: 20px; height: 20px; }
+.templateBody { display: flex; flex: 1 1 auto; flex-direction: column; gap: 6px; min-width: 0; }
+.templateBody > span:last-child { margin-top: auto; padding-top: 2px; }
+.templateName { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 24px; font-size: 14px; font-weight: 700; line-height: 20px; }
+.templateText { color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+
+/* ── Narx taqsimoti ── */
+.splitBar { display: flex; gap: 2px; height: 12px; }
+.splitBar > span { display: block; flex: 1 1 0; min-width: 0; border-radius: 4px; background: var(--color-text-faint); }
+.splitBar > span[data-mine] { background: var(--color-nav); }
+.splitList { margin: 0; padding: 0; list-style: none; }
+
+.splitList > li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto 56px;
+  align-items: baseline;
+  column-gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.splitList > li[data-mine] { border-top-color: transparent; border-radius: 10px; background: var(--color-sunken); }
+.splitList > li[data-mine] + li { border-top-color: transparent; }
+.splitList > li[data-total] { padding: 12px 12px 2px; border-top: 2px solid var(--color-text); }
+.swatch { display: block; align-self: center; width: 10px; height: 10px; border-radius: 3px; background: var(--color-text-faint); }
+.swatch[data-mine] { background: var(--color-nav); }
+.splitName { display: flex; flex-direction: column; min-width: 0; }
+.splitName > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.splitName > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+li[data-mine] .splitName > span:first-child,
+li[data-mine] .splitValue,
+li[data-total] .splitName > span,
+li[data-total] .splitValue { font-weight: 700; }
+.splitValue { font-size: 14px; font-weight: 600; line-height: 20px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.splitShare { color: var(--color-text-secondary); font-size: 13px; line-height: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.modeBox { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.modeBox p { margin: 0; }
+.modeBox p:first-child { font-size: 14px; font-weight: 700; line-height: 20px; }
+.modeBox p:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+
+/* ── O'ng ustun: haq ── */
+.feeCard { display: flex; flex-direction: column; gap: 16px; padding: 20px; }
+.feeHead { display: flex; flex-direction: column; }
+.feeRows { display: flex; flex-direction: column; margin: 0; border-top: 1px solid var(--color-border); }
+.feeRows > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.feeRows dt { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.feeRows dd { margin: 0; font-size: 14px; line-height: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.subValue { color: var(--color-text-secondary); font-size: 13px; }
+.totalBox { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.totalBox > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.totalBox > div > span:first-child { font-size: 13px; font-weight: 600; line-height: 18px; }
+.totalBox > div > span:last-child { font-size: 20px; font-weight: 700; line-height: 28px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.totalBox > span { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+.markup { display: flex; flex-direction: column; gap: 2px; }
+.markup p { margin: 0; }
+.markup p:first-child { font-size: 14px; line-height: 21px; }
+.markup p:last-child { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+.createBlock { display: flex; flex-direction: column; gap: 8px; }
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-action);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.createButton[data-block] { flex: 1 1 auto; width: 100%; }
+.createButton > svg { width: 18px; height: 18px; }
+.createButton:hover:not(:disabled) { background: var(--color-action-hover); }
+.createButton:disabled { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-faint); cursor: not-allowed; }
+.createButton[aria-busy='true'] { cursor: progress; }
+.spin { animation: spin 0.9s linear infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.blocked { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--color-warning); font-size: 13px; font-weight: 600; line-height: 18px; }
+.blocked > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 2px; }
+.createError { margin: 0; color: var(--color-danger); font-size: 12px; font-weight: 600; line-height: 16px; }
+.stockRow { display: flex; align-items: flex-start; gap: 10px; padding-top: 14px; border-top: 1px solid var(--color-border); font-size: 14px; line-height: 21px; }
+.stockRow > svg { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; color: var(--color-text-secondary); }
+.stockRow > span { display: flex; flex-direction: column; }
+
+/* ── O'ng ustun: sahifalaringiz, qoidalar ── */
+.asideCard { display: flex; flex-direction: column; gap: 8px; padding: 20px 20px 12px; }
+.asideCard[data-rules] { gap: 6px; padding: 20px 20px 8px; }
+.asideHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.asideHead h2,
+.rulesHead h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.count { color: var(--color-text-secondary); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.allLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  padding: 0 4px 0 8px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  color: var(--color-action);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.allLink > svg { width: 16px; height: 16px; }
+.streamList { margin: 0; padding: 0; list-style: none; }
+.streamList > li { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--color-border); }
+.streamList > li > div { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; }
+.streamTop { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; }
+.streamMeta { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.streamMeta > b { color: var(--color-text); font-weight: 600; }
+.asideNote { margin: 0; padding-top: 10px; border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+.asideEmpty { margin: 0 0 8px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.rulesHead { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; }
+.rulesHead > span { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* ── Oynalar: video, rasmlar, arxiv ── */
+.primaryLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--color-action);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.primaryLink > svg { width: 18px; height: 18px; }
+.primaryLink:hover { background: var(--color-action-hover); color: #fff; }
+.dialogNote { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+.player { display: flex; flex-direction: column; gap: 12px; }
+.screen { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 9; border-radius: 12px; background: var(--color-text); overflow: hidden; }
+.screen > video { width: 100%; height: 100%; object-fit: contain; }
+
+.bigPlay {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  padding: 0 0 0 4px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.bigPlay > svg { width: 26px; height: 26px; }
+.screenNote { position: absolute; bottom: 12px; color: rgb(255 255 255 / 80%); font-size: 13px; line-height: 18px; }
+.controls { display: flex; align-items: center; gap: 12px; }
+
+.controlButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.controlButton > svg { width: 18px; height: 18px; }
+.controlButton:hover { background: var(--color-sunken); }
+.time { font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.seek { flex: 1 1 auto; min-width: 0; accent-color: var(--color-nav); }
+
+.viewer { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 10; border-radius: 12px; background: var(--color-sunken); overflow: hidden; outline: 0; }
+.viewer > img { position: relative; z-index: 1; max-width: 100%; max-height: 100%; object-fit: contain; }
+.viewerFallback { position: absolute; width: 28px; height: 28px; color: var(--color-text-secondary); }
+
+.viewerCount {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.navButton {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.navButton[data-side='prev'] { left: 12px; }
+.navButton[data-side='next'] { right: 12px; }
+.navButton > svg { width: 20px; height: 20px; }
+.thumbs { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.thumbRow { display: flex; gap: 8px; overflow-x: auto; }
+
+.thumbButton {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.thumbButton[aria-current] { border: 2px solid var(--color-nav); }
+.thumbButton > svg { width: 18px; height: 18px; }
+.thumbButton > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.thumbCaption { display: flex; flex-direction: column; align-items: flex-end; color: var(--color-text-secondary); font-size: 12px; line-height: 18px; text-align: right; }
+.thumbCaption > span:first-child { color: var(--color-text); font-size: 13px; font-weight: 600; }
+.fileList { margin: 0; padding: 0; list-style: none; }
+.fileList > li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.fileList > li + li { border-top: 1px solid var(--color-border); }
+.fileIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.fileIcon > svg { width: 18px; height: 18px; }
+.fileText { display: flex; flex-direction: column; }
+.fileText > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.fileText > span:last-child { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+.fileTotal { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--color-sunken); font-size: 14px; font-weight: 600; line-height: 20px; }
+
+/* Planshet (5.2): mahsulot butun qatorda, «Haqingiz» | «Sahifalaringiz» + «Reklama qoidalari», keyin natijalar. */
+@container content (max-width: 919.98px) {
+  .layout {
+    display: grid;
+    grid-template-areas: 'product product' 'fee streams' 'fee rules' 'results results' 'creatives creatives' 'templates templates' 'split split';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .aside,
+  .main { display: contents; }
+
+  [data-area='product'] { grid-area: product; }
+  [data-area='fee'] { grid-area: fee; }
+  [data-area='streams'] { grid-area: streams; }
+  [data-area='rules'] { grid-area: rules; }
+  [data-area='results'] { grid-area: results; }
+  [data-area='creatives'] { grid-area: creatives; }
+  [data-area='templates'] { grid-area: templates; }
+  [data-area='split'] { grid-area: split; }
+}
+
+/* Telefon (R2): bitta ustun — mahsulot, haq, sahifalaringiz, natijalar, kreativlar, shablon, taqsimot, qoidalar. */
+@container content (max-width: 575px) {
+  .layout { grid-template-areas: 'product' 'fee' 'streams' 'results' 'creatives' 'templates' 'split' 'rules'; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .card { padding: 16px; }
+  .product,
+  .feeCard { padding: 16px; }
+  .figure { flex-basis: 100%; }
+  .facts { grid-template-columns: minmax(0, 1fr); }
+  .facts > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .facts > div + div { border-top: 1px solid var(--color-border); border-left: 0; }
+  .facts dd { margin: 0; }
+  .cardHead { flex-direction: column; align-items: flex-start; }
+  .cardTitle { flex-direction: column; align-items: flex-start; gap: 2px; }
+
+  /* Natijalar: EPC butun qatorda, tasdiq va sotilish yonma-yon — qutilarda; voronka — qatorlar. */
+  .bigStats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+  .bigStats > div,
+  .bigStats > div + div { padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; }
+  .bigStats > div:first-child { grid-column: 1 / -1; }
+  .funnelBlock { padding-top: 0; border-top: 0; }
+  .funnel { flex-direction: column; align-items: stretch; gap: 0; }
+  .funnelArrow { display: none; }
+
+  .funnelItem,
+  .funnelItem[data-wide] {
+    display: grid;
+    flex: none;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .funnelItem > .label { grid-column: 1; color: var(--color-text); font-weight: 600; }
+  .funnelItem > .hint { grid-column: 1; }
+  .funnelItem > .funnelValue { grid-column: 2; grid-row: 1 / span 2; font-size: 16px; line-height: 24px; }
+
+  /* Kreativlar: video butun qatorda (16:9), rasmlar 2 × 2, «Hammasini yuklab olish» pastda to'liq kenglikda. */
+  .card[data-area='creatives'] .cardHead { display: contents; }
+  .card[data-area='creatives'] .cardHead > button { order: 2; width: 100%; height: 44px; font-size: 14px; }
+  .card[data-area='creatives'] .creativeGrid { order: 1; }
+  .card[data-area='creatives'] > .hint { order: 3; }
+  .creativeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .creative[data-kind='video'] { grid-column: 1 / -1; }
+  .creative[data-kind='video'] .tile { aspect-ratio: 16 / 9; }
+  .templateThumb { width: 52px; aspect-ratio: 1 / 1; align-self: flex-start; }
+
+  /* Taqsimot: foiz summa ostida. */
+  .splitList > li { grid-template-columns: 12px minmax(0, 1fr) auto; }
+  .splitList > li > :first-child { grid-column: 1; grid-row: 1; }
+  .splitName { grid-column: 2; grid-row: 1 / span 2; }
+  .splitValue { grid-column: 3; grid-row: 1; }
+  .splitShare { grid-column: 3; grid-row: 2; font-size: 12px; line-height: 16px; }
+}

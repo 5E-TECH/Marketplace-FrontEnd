@@ -173,4 +173,7 @@
 }
 
 .rateTitle { font-size: 14px; font-weight: 600; line-height: 20px; }
+
+/* Qator (komponentlar-E §30): och fon, chegarali. */
+.row { padding: 16px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-row-hover); }
 .rateText { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }

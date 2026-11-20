@@ -15,9 +15,13 @@ interface LoadErrorProps {
   lastSuccessAt?: number;
   /**
    * `block` — karta ichidagi bitta blok (umumiy-xato-yuklanish asosiy ko'rinish: markazda, och fon);
-   * `page` — sahifaning asosiy ma'lumoti ochilmadi (holatlar «Server xatosi (500)»: oq karta, chapda).
+   * `page` — sahifaning asosiy ma'lumoti ochilmadi (holatlar «Server xatosi (500)»: oq karta, chapda);
+   * `row` — ro'yxat yoki jadval ichidagi qator (komponentlar-E §30: ikonka, matn, o'ngda tugma).
    */
-  variant?: 'block' | 'page';
+  variant?: 'block' | 'page' | 'row';
+  /** `row`: sarlavha («Offerlarni yuklab bo‘lmadi») va matn oxiri («Sahifalaringiz ishlashda davom etadi.»). */
+  title?: string;
+  note?: string;
 }
 
 /**
@@ -25,7 +29,7 @@ interface LoadErrorProps {
  * 60 soniyada o'zi qayta urinadi; «Xato raqami» — backend `requestId`.
  * 429 — kutish vaqti tugaguncha «Qayta urinish · 12» (holatlar «429»).
  */
-export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block' }: LoadErrorProps) {
+export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block', title, note }: LoadErrorProps) {
   const { t } = useTranslation();
   const retryAfter = getRetryAfterSeconds(error);
   const requestId = getApiRequestId(error);
@@ -66,6 +70,24 @@ export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block'
       <CopyButton text={requestId} size="sm" ariaLabel={t('loadError.copyCode')} successMessage={t('loadError.copied')} />
     </span>
   ) : null;
+
+  if (variant === 'row') {
+    return (
+      <section className={`${styles.rate} ${styles.row}`} role="alert" data-testid="load-error">
+        <span className={styles.badge} aria-hidden><CircleX /></span>
+        <span className={styles.rateBody}>
+          <span className={styles.rateTitle}>{title ?? t('loadError.title')}</span>
+          <span className={styles.rateText}>
+            {[t('loadError.rowText'), requestId ? `${t('loadError.code', { code: requestId })}.` : null, note].filter(Boolean).join(' ')}
+          </span>
+        </span>
+        <button type="button" className={`${styles.button} ${styles.small}`} onClick={onRetry}>
+          <RefreshCw aria-hidden />
+          {t('loadError.retry')}
+        </button>
+      </section>
+    );
+  }
 
   if (variant === 'page') {
     return (

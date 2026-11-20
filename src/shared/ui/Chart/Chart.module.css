@@ -178,6 +178,9 @@
 
 .segment[data-variant='text'] > button[aria-checked='true'] { font-weight: 600; }
 
+.segment[data-variant='labelled'] > button { gap: 6px; padding: 0 14px; font-size: 14px; font-weight: 500; line-height: 20px; white-space: nowrap; }
+.segment[data-variant='labelled'] > button[aria-checked='true'] { font-weight: 600; }
+
 @media (max-width: 767.98px) {
   .segment { height: 52px; }
   .segment > button { min-width: 44px; height: 44px; }

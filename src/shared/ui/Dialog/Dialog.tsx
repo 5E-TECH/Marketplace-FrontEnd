@@ -1,10 +1,10 @@
-import { Modal } from 'antd';
 import { Info, LoaderCircle, X } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useTranslation } from '../../../shared/i18n/useTranslation';
-import styles from './OperatorDialog.module.css';
+import { useTranslation } from '../../i18n/useTranslation';
+import { SheetModal } from '../SheetModal/SheetModal';
+import styles from './Dialog.module.css';
 
-interface OperatorDialogProps {
+interface DialogProps {
   open: boolean;
   title: string;
   description?: ReactNode;
@@ -19,11 +19,14 @@ interface OperatorDialogProps {
   testId?: string;
 }
 
-/** Operator oynasi: ikonka doirasi, sarlavha, izoh va yopish; pastda chiziq va tugmalar (dizayndagidek). */
-export function OperatorDialog({ open, title, description, icon, tone = 'action', width = 480, locked = false, onClose, footer, children, testId }: OperatorDialogProps) {
+/**
+ * Oyna (komponentlar-E §32; operator-natija, sotuvchi-offer oynalari): ikonka doirasi, sarlavha, izoh
+ * va yopish; pastda chiziq va tugmalar. Desktopda markazda, telefonda pastdan varaq.
+ */
+export function Dialog({ open, title, description, icon, tone = 'action', width = 480, locked = false, onClose, footer, children, testId }: DialogProps) {
   const { t } = useTranslation();
   return (
-    <Modal
+    <SheetModal
       open={open}
       onCancel={locked ? undefined : onClose}
       closable={false}
@@ -32,7 +35,6 @@ export function OperatorDialog({ open, title, description, icon, tone = 'action'
       footer={null}
       title={title}
       width={width}
-      centered
       destroyOnHidden
       rootClassName={styles.root}
     >
@@ -43,14 +45,14 @@ export function OperatorDialog({ open, title, description, icon, tone = 'action'
             <h3>{title}</h3>
             {description ? <p>{description}</p> : null}
           </div>
-          <button type="button" className={styles.close} aria-label={t('opw.close')} title={t('opw.close')} onClick={onClose} disabled={locked}>
+          <button type="button" className={styles.close} aria-label={t('dialog.close')} title={t('dialog.close')} onClick={onClose} disabled={locked}>
             <X size={18} aria-hidden />
           </button>
         </div>
         <div className={styles.body}>{children}</div>
         {footer ? <div className={styles.footer}>{footer}</div> : null}
       </div>
-    </Modal>
+    </SheetModal>
   );
 }
 

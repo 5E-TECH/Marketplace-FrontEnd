@@ -1,0 +1,94 @@
+/* «Sahifa tayyor» — yashil blok (sotuvchi-offerlar: karta ostida; sotuvchi-sahifa-sozlash: sahifa boshida). */
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background: var(--color-success-soft);
+}
+
+.panel[data-variant='settings'] { padding: 20px 24px; }
+
+.pointer {
+  position: absolute;
+  top: -12px;
+  display: block;
+  fill: var(--color-success-soft);
+}
+
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.title { display: inline-flex; align-items: center; gap: 8px; }
+.title > svg { display: block; flex: 0 0 22px; width: 22px; height: 22px; color: var(--color-success); align-self: center; }
+.title h2 { margin: 0; color: var(--color-text); font-size: 16px; font-weight: 700; line-height: 24px; }
+.panel[data-variant='settings'] .title { gap: 10px; }
+.panel[data-variant='settings'] .title h2 { font-size: 18px; line-height: 26px; }
+.subtitle { color: var(--color-text); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+.linkRow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.panel[data-variant='settings'] .linkRow { gap: 8px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+.summary {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 21px;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary b { color: var(--color-text); font-weight: 600; }
+.dot { padding: 0 8px; }
+
+.later { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.later p { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.settingsLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin-left: -10px;
+  padding: 0 10px;
+  border-radius: 12px;
+  color: var(--color-action);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.settingsLink > svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; }
+.settingsLink:hover { background: rgb(255 255 255 / 60%); }
+
+.current { margin: 0; color: var(--color-text); font-size: 14px; line-height: 21px; }
+.current strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.note > svg { display: block; flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+
+/* Telefon (R10): havola to'liq kenglikda, «Nusxa olish» butun qatorda, «Ochib ko‘rish» ostida. */
+@container content (max-width: 575px) {
+  .actions { width: 100%; }
+  .actions > * { flex: 1 1 100%; }
+}

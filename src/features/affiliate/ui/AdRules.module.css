@@ -1,0 +1,15 @@
+/* Reklama qoidalari ro'yxati (sotuvchi-offer o'ng ustun): qoida va «→ jazosi». */
+.list { margin: 0; padding: 0; list-style: none; }
+
+.list > li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.then { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; font-weight: 600; line-height: 18px; }
+.then > svg { display: block; flex: 0 0 14px; width: 14px; height: 14px; margin-top: 2px; }

@@ -7,7 +7,7 @@ import { tashkentClock } from '../../../shared/lib/tashkentTime';
 import type { OperatorState } from '../api/operatorApi';
 import { DEFAULT_MAX_BOOKINGS, useOperatorLeadsQuery, useOperatorStateMutation, useOperatorStateQuery } from '../api/operatorQueries';
 import { useNow } from '../lib/useNow';
-import { DialogCancel, DialogPrimary, OperatorDialog } from './OperatorDialog';
+import { DialogCancel, DialogPrimary, Dialog } from '../../../shared/ui/Dialog/Dialog';
 import { useCallbackReminders } from './useCallbackReminders';
 import styles from './OperatorStatusBar.module.css';
 import { StatusBadge } from '../../../shared/ui/StatusBadge/StatusBadge';
@@ -74,7 +74,7 @@ export function OperatorStateSwitch() {
           </button>
         ))}
       </div>
-      <OperatorDialog
+      <Dialog
         open={confirming !== null}
         title={confirming === 'OFFLINE' ? t('opw.offlineConfirmTitle') : t('opw.breakConfirmTitle')}
         description={confirming === 'OFFLINE' ? t('opw.offlineConfirmText') : t('opw.breakConfirmText')}
@@ -114,7 +114,7 @@ export function OperatorStateSwitch() {
             <p className={styles.confirmNote}>{t('opw.breakCallbacksRule')}</p>
           </div>
         ) : null}
-      </OperatorDialog>
+      </Dialog>
     </div>
   );
 }
