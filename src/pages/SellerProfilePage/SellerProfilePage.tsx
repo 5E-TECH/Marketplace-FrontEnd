@@ -32,7 +32,7 @@ export default function SellerProfilePage() {
   const [editing, setEditing] = useState(false);
 
   if (query.isError && !query.data) {
-    return <LoadError error={query.error} onRetry={() => void query.refetch()} lastSuccessAt={query.dataUpdatedAt} />;
+    return <LoadError variant="page" error={query.error} onRetry={() => void query.refetch()} lastSuccessAt={query.dataUpdatedAt} />;
   }
   if (!query.data) return <Skeleton active paragraph={{ rows: 8 }} />;
 

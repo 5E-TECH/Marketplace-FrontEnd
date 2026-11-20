@@ -38,7 +38,9 @@ const uz = {
   'otp.resentTitle': 'Yangi kod yuborildi',
   'otp.resentText': 'Oldingi kod endi ishlamaydi. Yangi kod 5 daqiqa amal qiladi.',
 
-  'session.expiredTextSms': 'Xavfsizlik uchun tizim sizni chiqardi. {phone} raqamiga SMS kod olib, shu yerda qayta kiring — ish yo‘qolmaydi.',
+  'session.expiredTextSms': 'Xavfsizlik uchun tizim sizni chiqardi. SMS kod bilan shu yerda qayta kiring.',
+  'session.smsSent': 'Kod {phone} raqamiga yuborildi.',
+  'session.smsWillSend': 'Kod {phone} raqamiga yuboriladi.',
   'sellerLogin.who': 'Kim sifatida kirasiz',
   'sellerLogin.phoneHint': 'Shu raqamga 6 xonali SMS kod yuboramiz.',
   'sellerLogin.serverText': 'Kod yuborilmadi. Internet aloqasini tekshirib, qayta urinib ko‘ring — kiritgan raqamingiz saqlandi.',
@@ -158,7 +160,9 @@ const ru: Record<SellerAuthTranslationKey, string> = {
   'otp.resentTitle': 'Новый код отправлен',
   'otp.resentText': 'Предыдущий код больше не работает. Новый код действует 5 минут.',
 
-  'session.expiredTextSms': 'В целях безопасности система вас вышла. Получите SMS-код на {phone} и войдите здесь же — работа не потеряется.',
+  'session.expiredTextSms': 'В целях безопасности система вас вышла. Войдите здесь же по SMS-коду.',
+  'session.smsSent': 'Код отправлен на номер {phone}.',
+  'session.smsWillSend': 'Код будет отправлен на номер {phone}.',
   'sellerLogin.who': 'Как вы входите',
   'sellerLogin.phoneHint': 'Отправим на этот номер SMS-код из 6 цифр.',
   'sellerLogin.serverText': 'Код не отправлен. Проверьте интернет и попробуйте снова — введённый номер сохранён.',
@@ -276,7 +280,9 @@ const en: Record<SellerAuthTranslationKey, string> = {
   'otp.resentTitle': 'New code sent',
   'otp.resentText': 'The previous code no longer works. The new code is valid for 5 minutes.',
 
-  'session.expiredTextSms': 'For security the system signed you out. Get an SMS code to {phone} and sign in here — your work is kept.',
+  'session.expiredTextSms': 'For security the system signed you out. Sign in again right here with an SMS code.',
+  'session.smsSent': 'The code was sent to {phone}.',
+  'session.smsWillSend': 'The code will be sent to {phone}.',
   'sellerLogin.who': 'How you sign in',
   'sellerLogin.phoneHint': 'We send a 6-digit SMS code to this number.',
   'sellerLogin.serverText': 'The code was not sent. Check the internet and try again — your number is kept.',

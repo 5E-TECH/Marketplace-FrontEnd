@@ -1,52 +1,63 @@
-/* umumiy-aloqa-uzildi: banner yuqori qator ostida, to'liq kenglik (komponentlar-E §28). */
-.warning,
-.success {
+/* umumiy-aloqa-uzildi: banner yuqori qator ostida, to'liq kenglik (komponentlar-E §28, holatlar «Banner variantlari»). */
+.banner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
-  padding: 10px 24px;
+  min-height: 52px;
+  padding: 10px 16px;
+  box-sizing: border-box;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
   font-size: 14px;
   line-height: 20px;
 }
 
-.warning {
-  background: var(--color-warning-soft);
-}
-
-.success {
-  background: var(--color-success-soft);
-}
-
-.warning > svg,
-.success > svg {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
-}
-
-.warning > svg {
-  color: var(--color-warning);
-}
-
-.success > svg {
-  color: var(--color-success);
-}
-
-.warning p,
-.success p {
-  flex: 1 1 320px;
-  min-width: 0;
-  margin: 0;
-}
+.banner > svg { display: block; flex: none; width: 20px; height: 20px; }
+.banner p { flex: 1 1 220px; min-width: 0; margin: 0; }
+.banner strong { font-weight: 700; }
+.banner[data-tone='danger'] { background: var(--color-error-soft); }
+.banner[data-tone='danger'] > svg,
+.banner[data-tone='danger'] strong { color: var(--color-danger); }
+.banner[data-tone='warning'] { background: var(--color-warning-soft); }
+.banner[data-tone='warning'] > svg,
+.banner[data-tone='warning'] strong { color: var(--color-warning); }
+.banner[data-tone='success'] { background: var(--color-success-soft); }
+.banner[data-tone='success'] > svg,
+.banner[data-tone='success'] strong { color: var(--color-success); }
 
 .meta {
-  color: var(--color-text-muted);
+  flex: none;
+  color: var(--color-text-secondary);
   font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.refresh:hover { border-color: var(--color-border-hover); }
+.refresh svg { display: block; flex: none; width: 16px; height: 16px; }
 
 .stamp {
   display: inline-flex;
@@ -66,9 +77,3 @@
   background: var(--color-success);
 }
 
-@media (max-width: 767.98px) {
-  .warning,
-  .success {
-    padding: 10px 16px;
-  }
-}

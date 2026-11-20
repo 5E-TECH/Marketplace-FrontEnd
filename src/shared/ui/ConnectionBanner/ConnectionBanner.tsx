@@ -1,5 +1,4 @@
-import { Button } from 'antd';
-import { CircleCheck, RefreshCw, WifiOff } from 'lucide-react';
+import { CloudOff, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { refetchFailingLiveQueries, useLiveSummary } from '../../api/liveQuery';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -31,9 +30,9 @@ export function ConnectionBanner() {
 
   if (!online) {
     return (
-      <div className={styles.warning} role="status" data-testid="connection-banner" data-state="offline">
+      <div className={styles.banner} data-tone="danger" role="alert" data-testid="connection-banner" data-state="offline">
         <WifiOff aria-hidden />
-        <p>{t('connection.offline')}</p>
+        <p><strong>{t('connection.offlineTitle')}</strong> {t('connection.offline')}</p>
         <span className={styles.meta}>{t('connection.since', { time: tashkentClock(changedAt) })}</span>
       </div>
     );
@@ -41,22 +40,23 @@ export function ConnectionBanner() {
 
   if (live.failing) {
     return (
-      <div className={styles.warning} role="status" data-testid="connection-banner" data-state="live-stopped">
-        <RefreshCw aria-hidden />
-        <p>
-          {t('connection.liveStopped')}{' '}
-          <span className={styles.meta}>{t('connection.lastUpdated', { time: tashkentClock(live.lastSuccessAt) })}</span>
-        </p>
-        <Button size="small" onClick={refetchFailingLiveQueries}>{t('connection.refresh')}</Button>
+      <div className={styles.banner} data-tone="warning" role="status" data-testid="connection-banner" data-state="live-stopped">
+        <CloudOff aria-hidden />
+        <p><strong>{t('connection.liveStoppedTitle')}</strong> {t('connection.liveStopped')}</p>
+        <span className={styles.meta}>{t('connection.lastUpdated', { time: tashkentClock(live.lastSuccessAt) })}</span>
+        <button type="button" className={styles.refresh} onClick={refetchFailingLiveQueries}>
+          <RefreshCw aria-hidden />
+          {t('connection.refresh')}
+        </button>
       </div>
     );
   }
 
   if (showRestored) {
     return (
-      <div className={styles.success} role="status" data-testid="connection-banner" data-state="restored">
-        <CircleCheck aria-hidden />
-        <p>{t('connection.restored')}</p>
+      <div className={styles.banner} data-tone="success" role="status" data-testid="connection-banner" data-state="restored">
+        <Wifi aria-hidden />
+        <p><strong>{t('connection.restoredTitle')}</strong> {t('connection.restored')}</p>
         <span className={styles.meta}>{tashkentClock(restoredAt)}</span>
       </div>
     );

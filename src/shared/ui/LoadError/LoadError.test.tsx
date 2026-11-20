@@ -11,25 +11,32 @@ function httpError(status: number, data: unknown, headers: Record<string, string
   return new AxiosError('xato', 'ERR_BAD_RESPONSE', config, null, { status, statusText: '', data, headers, config });
 }
 
-const renderError = (error: unknown, onRetry = vi.fn()) => {
-  render(<Provider store={store}><App><LoadError error={error} onRetry={onRetry} lastSuccessAt={Date.UTC(2027, 0, 14, 9, 31)} /></App></Provider>);
+const renderError = (error: unknown, onRetry = vi.fn(), variant: 'block' | 'page' = 'block') => {
+  render(<Provider store={store}><App><LoadError error={error} onRetry={onRetry} lastSuccessAt={Date.UTC(2027, 0, 14, 9, 31)} variant={variant} /></App></Provider>);
   return onRetry;
 };
 
 describe('LoadError (umumiy-xato-yuklanish)', () => {
   afterEach(() => vi.useRealTimers());
 
-  it('xato raqami, oxirgi yangilanish va 60 soniyada o‘zi qayta urinish', () => {
+  it('blok: xato raqami va 60 soniyada o‘zi qayta urinish', () => {
     vi.useFakeTimers();
     const onRetry = renderError(httpError(500, { requestId: 'req-7f3a' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Ma’lumotni yuklab bo‘lmadi');
+    expect(screen.getByRole('alert')).toHaveTextContent('Sahifaning qolgan bloklari ishlayapti');
     expect(screen.getByText(/Xato raqami: req-7f3a/)).toBeInTheDocument();
-    expect(screen.getByText(/oxirgi muvaffaqiyatli yangilanish: 14:31/)).toBeInTheDocument();
+    expect(screen.getByRole('alert')).not.toHaveTextContent('oxirgi muvaffaqiyatli');
 
     fireEvent.click(screen.getByRole('button', { name: 'Qayta urinish' }));
     expect(onRetry).toHaveBeenCalledTimes(1);
     act(() => { vi.advanceTimersByTime(60_000); });
     expect(onRetry).toHaveBeenCalledTimes(2);
+  });
+
+  it('sahifa: oxirgi muvaffaqiyatli yangilanish vaqti', () => {
+    renderError(httpError(500, { requestId: 'req-7f3a' }), vi.fn(), 'page');
+    expect(screen.getByRole('alert')).toHaveTextContent('Sahifa 60 soniyada o‘zi qayta urinadi · oxirgi muvaffaqiyatli yangilanish: 14:31');
+    expect(screen.getByRole('heading', { name: 'Ma’lumotni yuklab bo‘lmadi' })).toBeInTheDocument();
   });
 
   it('429 — kutish sanog‘i tugaguncha tugma o‘chiq', () => {
