@@ -434,6 +434,8 @@
 }
 
 /* Sahifa holati: yuqori qatorda `h1` dan keyin; telefonda mazmun tepasida. */
+.headerSlot { display: contents; }
+
 .pageStatus {
   display: inline-flex;
   align-items: center;

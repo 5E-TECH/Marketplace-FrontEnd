@@ -1,5 +1,6 @@
 import { Skeleton } from 'antd';
-import { CircleMinus, Clock, ShieldCheck, TriangleAlert, CircleCheck } from 'lucide-react';
+import { ChevronRight, CircleMinus, Clock, ShieldCheck, TriangleAlert, CircleCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { AffiliateStatsRow, AffiliateStream } from '../../../features/affiliate/api/affiliateApi';
 import {
   pageQuality,
@@ -120,6 +121,11 @@ export function PageQualityCard({ streams, rows, loading, error, onRetry, range 
           <h2 id="stats-quality">{t('sellerStats.quality.title')}</h2>
           <p className={styles.muted}>{t('sellerStats.quality.period', { range })}</p>
         </div>
+        {/* Reklama qoidalari — ofertaning bo'limi (alohida sahifa keyingi kartada). */}
+        <Link to="/profile/offer" className={styles.headLink}>
+          {t('sellerStats.quality.rules')}
+          <ChevronRight size={16} aria-hidden />
+        </Link>
       </div>
       {body}
       <p className={styles.note}>

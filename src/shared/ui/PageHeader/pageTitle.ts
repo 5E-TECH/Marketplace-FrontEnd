@@ -38,3 +38,13 @@ export function usePageStatus(label: string | null, value: string | null): void 
     return () => setStatus(null);
   }, [setStatus, label, value]);
 }
+
+/**
+ * Yuqori qatordagi sahifa boshqaruvi uchun joy (sotuvchi-statistika: `h1` yonida «Davr:» pilli).
+ * Faqat desktopda beriladi; planshet va telefonda sahifa uni o'z asboblar qatorida chizadi.
+ */
+export const PageHeaderSlotContext = createContext<HTMLElement | null>(null);
+
+export function usePageHeaderSlot(): HTMLElement | null {
+  return useContext(PageHeaderSlotContext);
+}
