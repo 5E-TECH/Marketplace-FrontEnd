@@ -1,10 +1,15 @@
 import { App } from 'antd';
-import { useEffect, useState } from 'react';
+import { Coffee, Power } from 'lucide-react';
+import { useState } from 'react';
 import { getApiErrorMessage } from '../../../shared/api/apiError';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { tashkentClock } from '../../../shared/lib/tashkentTime';
 import type { OperatorState } from '../api/operatorApi';
 import { DEFAULT_MAX_BOOKINGS, useOperatorLeadsQuery, useOperatorStateMutation, useOperatorStateQuery } from '../api/operatorQueries';
+import { useNow } from '../lib/useNow';
+import { LeadStatusChip } from './OperatorChip';
+import { DialogCancel, DialogPrimary, OperatorDialog } from './OperatorDialog';
+import { useCallbackReminders } from './useCallbackReminders';
 import styles from './OperatorStatusBar.module.css';
 
 const STATES: ReadonlyArray<{ value: OperatorState; label: 'operator.online' | 'operator.break' | 'operator.offline' }> = [
@@ -13,19 +18,41 @@ const STATES: ReadonlyArray<{ value: OperatorState; label: 'operator.online' | '
   { value: 'OFFLINE', label: 'operator.offline' },
 ];
 
-/** Yuqori qator, `h1` dan keyin: «Holat: Onlayn | Tanaffus | Oflayn» (operator-karkas). */
+/**
+ * Yuqori qator, `h1` dan keyin: «Holat: Onlayn | Tanaffus | Oflayn» (operator-karkas).
+ * Bron bor bo'lsa tanaffus va oflayn oldidan oyna: bronlar navbatga qaytadi (3-bo'lim);
+ * bron yo'q bo'lsa — oynasiz, toast.
+ */
 export function OperatorStateSwitch() {
   const { t } = useTranslation();
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
   const current = useOperatorStateQuery().data?.state ?? 'OFFLINE';
+  const mine = useOperatorLeadsQuery().data ?? [];
+  const bookings = mine.filter((lead) => lead.status === 'BOOKED');
+  const callbacks = mine.filter((lead) => lead.status === 'CALLBACK' && lead.callbackAt).sort((a, b) => (a.callbackAt ?? '').localeCompare(b.callbackAt ?? ''));
   const mutation = useOperatorStateMutation();
+  const [confirming, setConfirming] = useState<OperatorState | null>(null);
   const shown = mutation.isPending ? mutation.variables : current;
+
+  const apply = (state: OperatorState) => {
+    mutation.mutate(state, {
+      onSuccess: () => {
+        setConfirming(null);
+        if (state === 'BREAK' && !bookings.length) {
+          notification.info({ title: t('opw.breakStarted', { time: tashkentClock() }), description: t('opw.breakStartedText'), placement: 'bottomRight', duration: 6 });
+        }
+      },
+      onError: (error) => void message.error(`${t('operator.stateFailed')}: ${getApiErrorMessage(error)}`),
+    });
+  };
 
   const select = (state: OperatorState) => {
     if (state === current || mutation.isPending) return;
-    mutation.mutate(state, {
-      onError: (error) => void message.error(`${t('operator.stateFailed')}: ${getApiErrorMessage(error)}`),
-    });
+    if (state !== 'ONLINE' && bookings.length) {
+      setConfirming(state);
+      return;
+    }
+    apply(state);
   };
 
   return (
@@ -47,23 +74,60 @@ export function OperatorStateSwitch() {
           </button>
         ))}
       </div>
+      <OperatorDialog
+        open={confirming !== null}
+        title={confirming === 'OFFLINE' ? t('opw.offlineConfirmTitle') : t('opw.breakConfirmTitle')}
+        description={confirming === 'OFFLINE' ? t('opw.offlineConfirmText') : t('opw.breakConfirmText')}
+        icon={confirming === 'OFFLINE' ? <Power /> : <Coffee />}
+        tone="warning"
+        locked={mutation.isPending}
+        onClose={() => setConfirming(null)}
+        footer={(
+          <>
+            <DialogCancel onClick={() => setConfirming(null)} disabled={mutation.isPending}>{t('opw.cancel')}</DialogCancel>
+            <DialogPrimary onClick={() => confirming && apply(confirming)} saving={mutation.isPending} savingLabel={t('opw.saving')} icon={confirming === 'OFFLINE' ? <Power /> : <Coffee />} shortcut={false}>
+              {confirming === 'OFFLINE' ? t('opw.offlineGo') : t('opw.breakGo')}
+            </DialogPrimary>
+          </>
+        )}
+      >
+        <div className={styles.confirmBlock}>
+          <strong>{t('opw.breakReturns', { count: bookings.length })}</strong>
+          <ul className={styles.confirmList}>
+            {bookings.map((lead) => (
+              <li key={lead.id}>
+                <span><b>{lead.customerName} · {lead.id}</b><small>{lead.productName}</small></span>
+                <LeadStatusChip status={lead.status} />
+              </li>
+            ))}
+          </ul>
+          <p className={styles.confirmNote}>{t('opw.breakReturnsText')}</p>
+        </div>
+        {callbacks.length ? (
+          <div className={styles.confirmBlock}>
+            <strong>{t('opw.breakCallbacksStay')}</strong>
+            <ul className={styles.confirmCallbacks}>
+              {callbacks.map((lead) => (
+                <li key={lead.id}><span><b>{tashkentClock(Date.parse(lead.callbackAt ?? ''))}</b> · {lead.customerName}</span><span>{lead.productName}</span></li>
+              ))}
+            </ul>
+            <p className={styles.confirmNote}>{t('opw.breakCallbacksRule')}</p>
+          </div>
+        ) : null}
+      </OperatorDialog>
     </div>
   );
 }
 
-/** Yuqori qator o'ng tomoni: «Bronlarim: 1/5» va «14:37 Toshkent». */
+/** Yuqori qator o'ng tomoni: «Bronlarim: 1/5» va «14:37 Toshkent». Eslatmalar ham shu yerda — har sahifada. */
 export function OperatorBookingsClock() {
   const { t } = useTranslation();
   const leads = useOperatorLeadsQuery();
   const state = useOperatorStateQuery().data;
   const booked = leads.data?.filter((lead) => lead.status === 'BOOKED').length ?? state?.activeBookings ?? 0;
   const max = state?.maxBookings ?? DEFAULT_MAX_BOOKINGS;
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(timer);
-  }, []);
+  const now = useNow();
+  useCallbackReminders(leads.data, now);
 
   return (
     <div className={styles.meta}>

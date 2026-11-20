@@ -1,5 +1,6 @@
 import type { components } from '../generated/api-types';
 import { resetRegisteredMockAccounts } from './fixtures/users';
+import { resetMockOperator } from './handlers/operator';
 import { resetMockOtp } from './handlers/sellerAuth';
 import { resetMockProfiles } from './handlers/sellerProfile';
 import { addDays, seeded, tashkentDate } from './utils';
@@ -123,4 +124,5 @@ export function resetMockDb(): void {
   resetRegisteredMockAccounts();
   resetMockOtp();
   resetMockProfiles();
+  resetMockOperator();
 }

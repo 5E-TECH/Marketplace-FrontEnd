@@ -75,3 +75,17 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+
+/* Tanaffus tasdig'i (operator-karkas 3): navbatga qaytadigan bronlar va qoladigan qo'ng'iroqlar. */
+.confirmBlock { display: flex; flex-direction: column; gap: 8px; }
+.confirmBlock + .confirmBlock { padding-top: 16px; border-top: 1px solid var(--color-border); }
+.confirmBlock > strong { font-size: 14px; line-height: 20px; font-weight: 600; }
+.confirmList { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.confirmList li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.confirmList b { display: block; font-size: 14px; line-height: 20px; font-weight: 600; }
+.confirmList small { display: block; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.confirmCallbacks { margin: 0; padding: 0; list-style: none; }
+.confirmCallbacks li { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; font-size: 14px; line-height: 22px; }
+.confirmCallbacks li > span:last-child { color: var(--color-text-secondary); text-align: right; }
+.confirmCallbacks b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.confirmNote { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }

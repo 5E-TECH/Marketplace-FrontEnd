@@ -1,0 +1,45 @@
+/* operator-yordam: ikki ustun — tezkor tugmalar va lid qoidalari. */
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; max-height: min(70vh, 720px); overflow-y: auto; }
+.heading { margin: 0 0 8px; font-size: 15px; line-height: 22px; font-weight: 600; }
+.group { margin: 12px 0 6px; font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); }
+.list,
+.talk { margin: 0; padding: 0; list-style: none; }
+.list li { display: grid; grid-template-columns: 108px minmax(0, 1fr); gap: 12px; align-items: start; padding: 8px 0; border-top: 1px solid var(--color-border); }
+.list strong,
+.rules strong,
+.talk strong { display: block; font-size: 14px; line-height: 20px; font-weight: 500; }
+.list small,
+.rules small,
+.talk small { display: block; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.keys { display: inline-flex; align-items: center; gap: 4px; }
+.plus { font-size: 12px; color: var(--color-text-secondary); }
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.typing { display: flex; align-items: flex-start; gap: 6px; margin: 14px 0 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.typing > svg { flex: 0 0 14px; margin-top: 2px; }
+.rules { margin: 0; padding: 0; list-style: none; }
+.rules li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 14px; padding: 10px 0; border-top: 1px solid var(--color-border); }
+.number { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 999px; background: var(--color-sunken); font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+.talk li { padding: 10px 0; border-top: 1px solid var(--color-border); }
+.footNote { margin-right: auto; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+
+@media (max-width: 767.98px) {
+  .columns { grid-template-columns: minmax(0, 1fr); }
+}
