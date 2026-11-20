@@ -138,7 +138,7 @@ test('raqam allaqachon ro‘yxatda → «Bu raqam bilan hisob bor», «Kirishga 
   await expect(page.getByRole('status')).toContainText('+998 90 000 00 01 ro‘yxatdan o‘tgan.');
   await page.getByRole('button', { name: 'Kirishga o‘tish' }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByLabel('Telefon raqami')).toHaveValue('900000001');
+  await expect(page.getByLabel('Telefon raqami')).toHaveValue('90 000 00 01');
 });
 
 test('telefon tekshiruvi: 9 raqam va O‘zbekiston operatori; serverga yuborilmaydi', async ({ page }) => {
@@ -187,7 +187,7 @@ test('sotuvchi SMS kod bilan kiradi; 3 xato → kirish 15 daqiqaga yopiladi', as
   await enterCode(page, MOCK_OTP_CODE, 'Kirish');
 
   await expect(page).toHaveURL(/\/affiliate$/);
-  await expect(page.getByTestId('user-menu-button')).toContainText('Jasur Toshmatov');
+  await expect(page.getByTestId('user-menu-button')).toContainText('Jasur T.');
 });
 
 test('kirish: ro‘yxatda yo‘q raqam va xodim raqami — «hisob topilmadi», ro‘yxatga havola', async ({ page }) => {
@@ -267,7 +267,7 @@ test('profil: ism kiritiladi, JShShIR tekshiruvga yuboriladi, oferta va rozilikl
   await edit.getByLabel('Familiya').fill('Xasanova');
   await edit.getByRole('button', { name: 'Saqlash' }).click();
   await expect(page.getByText('Shaxsiy ma’lumot saqlandi')).toBeVisible();
-  await expect(page.getByTestId('user-menu-button')).toContainText('Madina Xasanova');
+  await expect(page.getByTestId('user-menu-button')).toContainText('Madina X.');
 
   await page.getByRole('link', { name: 'JShShIR va soliq maqomi' }).first().click();
   await expect(pageTitle(page)).toHaveText('JShShIR va soliq maqomi');
@@ -290,7 +290,7 @@ test('profil: ism kiritiladi, JShShIR tekshiruvga yuboriladi, oferta va rozilikl
   await page.getByRole('link', { name: 'Orqaga: Profil' }).click();
   await page.getByRole('link', { name: 'Ochish' }).click();
   await expect(pageTitle(page)).toHaveText('Oferta va roziliklar');
-  await expect(page.getByRole('region', { name: 'Roziliklar' }).locator('tbody tr.ant-table-row')).toHaveCount(2);
+  await expect(page.getByRole('region', { name: 'Roziliklar' }).locator('tbody tr')).toHaveCount(2);
   await page.getByRole('button', { name: 'Sotuvchi ofertasi — matnni o‘qish' }).first().click();
   await expect(page.getByRole('dialog')).toContainText('Qisqacha — asosiy shartlar');
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Qabul qilaman' })).toHaveCount(0);

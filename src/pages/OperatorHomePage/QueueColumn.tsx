@@ -4,10 +4,10 @@ import type { OperatorLead, OperatorStats } from '../../features/operator/api/op
 import { clock, mmss, outcomeLabel } from '../../features/operator/lib/leadFormat';
 import { useNow } from '../../features/operator/lib/useNow';
 import type { OperatorQueueSummary } from '../../features/operator/model/operatorTypes';
-import { OperatorChip } from '../../features/operator/ui/OperatorChip';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDate } from '../../shared/lib/tashkentTime';
 import styles from './OperatorWorkspace.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
 
 interface QueueColumnProps {
   bookings: OperatorLead[];
@@ -87,7 +87,7 @@ export function QueueColumn({ bookings, callbacks, max, activeId, queue, stats, 
                     <span className={styles.bookingHead}><span>{lead.customerName}</span><span>{lead.id}</span></span>
                     <span className={styles.bookingProduct}>{lead.productName}</span>
                     <span className={styles.bookingFoot}>
-                      <OperatorChip tone={urgent ? 'warning' : 'plain'} icon={Timer}>{t('opw.bookedLeft', { time: mmss(left) })}</OperatorChip>
+                      <Badge tone={urgent ? 'warning' : 'plain'} icon={Timer}>{t('opw.bookedLeft', { time: mmss(left) })}</Badge>
                       {active ? <span className={styles.bookingActive}>{t('opw.active')}</span> : null}
                     </span>
                   </button>

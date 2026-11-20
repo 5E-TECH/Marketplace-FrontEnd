@@ -235,7 +235,7 @@
   height: 40px;
   padding: 0 8px 0 2px;
   border-radius: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -280,7 +280,7 @@
   padding: 0;
   border: 0;
   border-radius: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   background: transparent;
   cursor: pointer;
 }
@@ -351,7 +351,7 @@
 }
 
 .userRole {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 16px;
 }
@@ -360,7 +360,7 @@
   flex: 0 0 16px;
   width: 16px;
   height: 16px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* Bildirishnoma: 40 px tugma, qizil son belgisi (1.7). */
@@ -368,7 +368,7 @@
   width: 40px !important;
   height: 40px !important;
   border-radius: 12px !important;
-  color: var(--color-text-muted) !important;
+  color: var(--color-text-secondary) !important;
 }
 
 .bellButton svg {
@@ -434,11 +434,13 @@
 }
 
 /* Sahifa holati: yuqori qatorda `h1` dan keyin; telefonda mazmun tepasida. */
+.headerSlot { display: contents; }
+
 .pageStatus {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   white-space: nowrap;
@@ -595,7 +597,7 @@
 .userMenuValue > span,
 .userMenuValue > svg {
   margin-left: auto;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .userMenuValue > svg {
@@ -607,7 +609,7 @@
 .userMenu :global(.ant-dropdown-menu-item-icon) {
   width: 18px;
   height: 18px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* ── Noma'lum rol (umumiy-403 §2) ──────────────────────────────────────────── */
@@ -670,7 +672,7 @@
 
 .desktopOnly p {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 15px;
   line-height: 23px;
 }
@@ -682,6 +684,6 @@
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   background: var(--color-sunken);
 }

@@ -83,10 +83,18 @@ test('TC2: ikkinchi tab ochildi → qayta login so‘ralmaydi; chiqish hamma tab
 
 test('TC3: CSV yuklab olish — fayl nomi, UTF-8 BOM, «;» ajratgich va toast', async ({ page }) => {
   await signIn(page, '900000001');
-  await expect(page.getByRole('list', { name: 'Bugun' }).getByRole('listitem')).toHaveCount(5);
+  // CSV — «Statistika» eksport oynasidan (bosh sahifada eksport yo'q — sotuvchi-bosh).
+  await page.goto('/affiliate/stats');
+  await page.getByTestId('stats-funnel').waitFor();
 
+  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: /Eksport — Statistika/ });
+  // «Eksport ▾» menyu bo'lsa (FE-06, sotuvchi-statistika) — avval «CSV».
+  const csv = page.getByRole('menuitem', { name: /^CSV/ });
+  await expect(dialog.or(csv)).toBeVisible();
+  if (await csv.isVisible()) await csv.click();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Yuklab olish (CSV)' }).click();
+  await dialog.getByRole('button', { name: 'Eksport qilish' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^statistika_\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{4}\.csv$/);
 
@@ -113,7 +121,7 @@ test('sessiya tugadi → sahifa joyida, oynada parol bilan qayta kirish', async 
   // Jonli so'rov bizdan oldin yetib kelsa, oyna tugmani yopib qo'yadi — bu ham to'g'ri.
   await page.getByRole('radio', { name: 'Onlayn' }).click({ timeout: 3_000 }).catch(() => undefined);
   await expect(dialog).toBeVisible({ timeout: 20_000 });
-  await expect(dialog).toContainText('Dilnoza Rahimova · Operator');
+  await expect(dialog).toContainText('Dilnoza R. · Operator');
   await expect(dialog).toContainText('Panel: Ish joyi');
   await expect(pageTitle(page)).toHaveText('Ish joyi');
 
@@ -160,7 +168,7 @@ test('blok yuklanmadi → «Xato raqami» va 429 da kutish sanog‘i', async ({ 
   const error = page.getByRole('region', { name: 'Bugun', exact: true }).getByTestId('load-error');
   await expect(error).toContainText('Ma’lumotni yuklab bo‘lmadi');
   await expect(error).toContainText('Xato raqami: req-7f3a');
-  await expect(error).toContainText('Sahifa 60 soniyada o‘zi qayta urinadi');
+  await expect(error).toContainText('60 soniyadan keyin o‘zi qayta urinadi');
 
   status = 429;
   await page.reload();

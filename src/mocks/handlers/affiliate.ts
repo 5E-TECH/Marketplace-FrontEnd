@@ -130,6 +130,20 @@ export const affiliateHandlers = [
     return ok(body);
   }),
 
+  // Balans (taklif, BE-23): oxirgi 30 kun daromadi. Ushlab turilgani — oxirgi 2 kundagisi (odatda 1–2 kunda
+  // «mavjud»ga o'tadi), eskisi mavjudga qo'shiladi. FE-07 gacha pul yechilmagan.
+  http.get(`${API}/affiliate/balance`, ({ request, cookies }) => {
+    const denied = guard(request, cookies);
+    if (denied) return denied;
+    if (isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' })) return ok({ available: 0, held: 0 });
+    const today = tashkentDate();
+    const recentFrom = addDays(today, -1);
+    const rows = statsRows(addDays(today, -29), today);
+    const held = rows.filter((row) => row.key >= recentFrom).reduce((sum, row) => sum + row.incomeHold, 0);
+    const all = totals(rows);
+    return ok({ available: all.incomeAvailable + all.incomeHold - held, held });
+  }),
+
   http.get(`${API}/affiliate/offers`, ({ request, cookies }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;

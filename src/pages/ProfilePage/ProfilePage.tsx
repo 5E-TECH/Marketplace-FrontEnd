@@ -1,5 +1,5 @@
 import { Camera, LockKeyhole, Mail, Pencil, Phone, UserRound } from 'lucide-react';
-import { App, Avatar, Button, Form, Tag, Typography } from 'antd';
+import { App, Avatar, Button, Form, Typography } from 'antd';
 import { lazy, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -18,6 +18,8 @@ import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { TextControl } from '../../shared/ui/FormControls/FormControls';
 import { PasswordInput } from '../../shared/ui/PasswordInput/PasswordInput';
 import styles from './ProfilePage.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
+import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 
 interface ProfileFormValues {
   name: string;
@@ -113,10 +115,8 @@ function StaffProfilePage() {
           <div className={styles.identityContent}>
             <Typography.Title level={2}>{user.name}</Typography.Title>
             <div className={styles.tags}>
-              <Tag color="gold" title={t(ROLE_LABEL_KEYS[user.role])}>{user.role}</Tag>
-              <Tag color={user.isActive && !user.isBlocked ? 'success' : 'warning'}>
-                {user.isBlocked ? 'Bloklangan' : user.isActive ? 'Faol' : 'Faolsizlantirilgan'}
-              </Tag>
+              <Badge tone="neutral" title={t(ROLE_LABEL_KEYS[user.role])}>{user.role}</Badge>
+              <StatusBadge family="user" code={user.isBlocked ? 'BLOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'} />
             </div>
           </div>
           <Button className={styles.editButton} type="primary" icon={<Pencil />} onClick={() => setOpen(true)}>

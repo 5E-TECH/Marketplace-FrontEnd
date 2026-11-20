@@ -14,6 +14,7 @@ import {
 import type { LeadProductInfo, OperatorAttemptItem, OperatorLeadListItem, OperatorStateInfo } from '../../features/operator/model/operatorTypes';
 import { addDays } from '../../shared/lib/tashkentTime';
 import { db, MOCK_PRODUCTS } from '../db';
+import { REGION_TREE } from '../fixtures/regions';
 import { API, fail, ok, seeded } from '../utils';
 import { currentMockUser } from './auth';
 
@@ -38,7 +39,7 @@ const OPERATOR = 'Dilnoza R.';
 
 const ADDRESSES: ReadonlyArray<Omit<NonNullable<LeadCard['address']>, 'whereDeliver' | 'confirmedAt' | 'editedByOperator'>> = [
   { regionSoato: '1730', regionName: 'Farg‘ona viloyati', districtSoato: '1730412', districtName: 'Qo‘qon shahri', addressLine: 'Navoiy ko‘chasi, 12-uy' },
-  { regionSoato: '1726', regionName: 'Toshkent shahri', districtSoato: '1726269', districtName: 'Yunusobod tumani', addressLine: '19-mavze, 4-uy, 27-xonadon' },
+  { regionSoato: '1726', regionName: 'Toshkent shahri', districtSoato: '1726266', districtName: 'Yunusobod tumani', addressLine: '19-mavze, 4-uy, 27-xonadon' },
   { regionSoato: '1718', regionName: 'Samarqand viloyati', districtSoato: '1718401', districtName: 'Samarqand shahri', addressLine: 'Registon ko‘chasi, 5-uy' },
   { regionSoato: '1722', regionName: 'Surxondaryo viloyati', districtSoato: '1722401', districtName: 'Termiz shahri', addressLine: 'Alpomish ko‘chasi, 3-uy' },
   { regionSoato: '1703', regionName: 'Andijon viloyati', districtSoato: '1703401', districtName: 'Andijon shahri', addressLine: 'Bobur shoh ko‘chasi, 44-uy' },
@@ -445,21 +446,21 @@ export const operatorHandlers = [
     const lead = mine().find((item) => item.id === String(params.id));
     if (!lead) return fail(404, 'NOT_FOUND', 'Lid topilmadi');
     const body = (await request.json().catch(() => ({}))) as Partial<Schemas['UpdateLeadAddressDto']>;
-    const region = ADDRESSES.find((item) => item.regionSoato === body.regionSoato);
-    if (!region || !body.districtSoato?.startsWith(region.regionSoato) || !body.addressLine?.trim() || !body.whereDeliver) {
+    const region = REGION_TREE.find((item) => item.satoCode === body.regionSoato);
+    const district = region?.districts.find((item) => item.satoCode === body.districtSoato);
+    if (!region || !district || !body.addressLine?.trim() || !body.whereDeliver) {
       return fail(400, 'VALIDATION_ERROR', 'Tuman tanlangan viloyatga tegishli emas yoki maydon bo‘sh');
     }
-    const district = ADDRESSES.find((item) => item.districtSoato === body.districtSoato) ?? region;
     const edited = lead.address !== null && (body.addressLine.trim() !== lead.address.addressLine || body.districtSoato !== lead.address.districtSoato);
     const deliveryFee = body.whereDeliver === 'ADDRESS' ? ADDRESS_FEE : CENTER_FEE;
     const subtotal = lead.product.salePrice * lead.quantity;
     const updated: LeadCard = {
       ...lead,
       address: {
-        regionSoato: region.regionSoato,
-        regionName: region.regionName,
-        districtSoato: district.districtSoato,
-        districtName: district.districtName,
+        regionSoato: region.satoCode,
+        regionName: region.name,
+        districtSoato: district.satoCode,
+        districtName: district.name,
         addressLine: body.addressLine.trim(),
         whereDeliver: body.whereDeliver,
         confirmedAt: new Date().toISOString(),

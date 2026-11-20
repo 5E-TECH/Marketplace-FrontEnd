@@ -27,6 +27,10 @@ export const palette = {
   dangerSoft: '#fde8ea',
   info: '#1a62a8',
   infoSoft: '#e2effa',
+  priceYellow: '#6b5200',
+  priceYellowSoft: '#fbf2cc',
+  priceOrange: '#9a4100',
+  priceOrangeSoft: '#fde6d4',
   overlay: 'rgba(16, 23, 51, 0.45)',
   shadowFloating: '0 16px 40px rgba(16, 23, 51, 0.16), 0 2px 6px rgba(16, 23, 51, 0.06)',
 } as const;

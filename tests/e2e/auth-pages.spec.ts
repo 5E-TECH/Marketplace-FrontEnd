@@ -185,16 +185,16 @@ test('login formasi bo‘sh va noto‘g‘ri qiymatlarni serverga yubormaydi', a
   await expect(page.getByText('Telefon raqamini kiriting')).toBeVisible();
   await expect(page.getByText('Parolni kiriting')).toBeVisible();
 
-  // Harf va belgilar tashlanadi, 9 raqamdan ortig'i kesiladi.
+  // Harf va belgilar tashlanadi, 9 raqamdan ortig'i kesiladi; raqam 2-3-2-2 guruhlanadi (komponentlar-E §19).
   await phone.fill('90-abc 12');
-  await expect(phone).toHaveValue('9012');
+  await expect(phone).toHaveValue('90 12');
   await phone.fill('9012345678901');
-  await expect(phone).toHaveValue('901234567');
+  await expect(phone).toHaveValue('90 123 45 67');
   // Joylangan to'liq raqamda 998 prefiksi tashlanadi.
   await phone.fill('+998 90 123 45 67');
-  await expect(phone).toHaveValue('901234567');
+  await expect(phone).toHaveValue('90 123 45 67');
   await phone.fill('998931112233');
-  await expect(phone).toHaveValue('931112233');
+  await expect(phone).toHaveValue('93 111 22 33');
 
   await phone.fill('90123456');
   await password.fill('x'.repeat(300));
@@ -214,7 +214,7 @@ for (const [status, title] of [[429, 'Urinishlar juda ko‘p'], [500, 'Tizim jav
     await page.getByRole('button', { name: 'Kirish', exact: true }).click();
 
     await expect(page.getByRole('alert')).toContainText(title);
-    await expect(page.getByLabel('Telefon raqami')).toHaveValue('901234567');
+    await expect(page.getByLabel('Telefon raqami')).toHaveValue('90 123 45 67');
     // Maydon o'zgarsa blok yo'qoladi.
     await page.getByLabel('Parol').fill('Secure1234');
     await expect(page.getByRole('alert')).toHaveCount(0);

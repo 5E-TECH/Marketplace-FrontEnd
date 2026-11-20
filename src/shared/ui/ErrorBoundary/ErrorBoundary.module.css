@@ -2,7 +2,7 @@
   display: grid;
   min-height: 100vh;
   padding: clamp(1rem, 4vw, 3rem);
-  background: var(--color-background);
+  background: var(--color-bg);
   place-items: center;
 }
 

@@ -65,14 +65,14 @@
 }
 
 .muted {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
 
 .note {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
@@ -136,16 +136,12 @@
   gap: 6px;
 }
 
-.tags :global(.ant-tag) {
-  margin: 0;
-}
-
 .accountMeta {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   text-align: right;
@@ -229,7 +225,7 @@
 }
 
 .fields dt {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -243,7 +239,7 @@
 }
 
 .fields dd.muted {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
@@ -273,7 +269,7 @@
   flex: none;
   width: 20px;
   height: 20px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .inlineTag {
@@ -285,7 +281,7 @@
   margin: 0;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   color: var(--color-text);
   font-size: 14px;
   font-weight: 600;
@@ -303,8 +299,8 @@
 }
 
 .statusCard[data-tone='danger'] {
-  border-color: var(--color-error-soft);
-  background: linear-gradient(var(--color-error-soft), var(--color-surface) 120px);
+  border-color: var(--color-danger-soft);
+  background: linear-gradient(var(--color-danger-soft), var(--color-surface) 120px);
 }
 
 .statusCard[data-tone='warning'] {
@@ -394,13 +390,13 @@
   margin: 0;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   font-size: 14px;
   line-height: 21px;
 }
 
 .taxTable dt {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .taxTable dd {
@@ -435,7 +431,7 @@
 
 .guide dd {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 21px;
 }
@@ -448,7 +444,7 @@
   padding: 20px;
   border: 1px dashed var(--color-border-strong);
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   color: var(--color-text);
   text-align: center;
   cursor: pointer;
@@ -550,7 +546,7 @@
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   color: var(--color-text);
   font-size: 14px;
   line-height: 21px;
@@ -571,8 +567,8 @@
 }
 
 .fileRow[data-state='failed'] {
-  border-color: var(--color-error-soft);
-  background: var(--color-error-soft);
+  border-color: var(--color-danger-soft);
+  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
@@ -623,7 +619,7 @@
 
 .summary dd {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 767.98px) {
@@ -644,3 +640,274 @@
     white-space: normal;
   }
 }
+
+/* ===== sotuvchi-profil (E): hisob qatori, bosqichli tayyorlik, karta, hujjatlar, sessiyalar ===== */
+.accountRow { flex-direction: row; flex-wrap: wrap; align-items: center; }
+
+.accountAvatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: var(--color-nav);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.accountMain { display: flex; flex: 1 1 320px; flex-direction: column; gap: 6px; min-width: 0; }
+.accountTitle { margin: 0; font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -0.01em; }
+.accountChips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.roleChip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+}
+
+.accountLogin { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+
+.stepper { display: flex; flex-wrap: wrap; align-items: flex-start; row-gap: 20px; margin: 4px 0 0; padding: 0; list-style: none; }
+.stepper > li { display: flex; flex: 1 1 200px; flex-direction: column; gap: 8px; min-width: 0; }
+.stepTrack { display: flex; align-items: center; }
+
+.stepDot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.stepDot > svg { display: block; width: 16px; height: 16px; }
+.stepper > li[data-state='done'] .stepDot { border: 0; background: var(--color-nav); color: #fff; }
+.stepper > li[data-state='current'] .stepDot { border-color: var(--color-nav); color: var(--color-nav); }
+.stepLine { flex: 1 1 auto; height: 2px; margin: 0 8px; border-radius: 2px; background: var(--color-border); }
+.stepLine[data-done] { background: var(--color-nav); }
+.stepText { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; padding-right: 12px; }
+.stepTitle { color: var(--color-text); font-size: 14px; font-weight: 600; line-height: 20px; }
+.stepper > li[data-state='current'] .stepTitle { font-weight: 700; }
+.stepSub { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.stepLink { margin-top: 2px; }
+
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.rowsTop { margin-top: 4px; }
+.noteTop { margin-top: 8px; }
+.linkRow { display: flex; justify-content: flex-start; padding-top: 4px; }
+
+.cardTile { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 12px; background: var(--color-sunken); }
+
+.cardBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.cardBrand > svg { display: block; flex: none; width: 18px; height: 18px; }
+
+.cardNumber {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cardAdded { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.bodyText { margin: 0; font-size: 14px; line-height: 21px; }
+
+.docRow { display: flex; align-items: flex-start; gap: 12px; }
+
+.docBox {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.docBox > svg { display: block; width: 18px; height: 18px; }
+.docText { display: flex; flex-direction: column; min-width: 0; }
+.docName { font-size: 14px; font-weight: 600; line-height: 20px; }
+.docFoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+
+.sessionsHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.sessionsHead h3 { margin: 0; font-size: 14px; font-weight: 700; line-height: 20px; }
+.sessionsCount { color: var(--color-text-secondary); font-weight: 500; font-variant-numeric: tabular-nums; }
+.sessionList { margin: 0; padding: 0; list-style: none; }
+
+.sessionList > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 68px;
+  padding: 12px 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sessionList > li:last-child { border-bottom: 0; }
+
+.sessionIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.sessionIcon > svg { display: block; width: 20px; height: 20px; }
+.sessionText { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.sessionName { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 14px; font-weight: 600; line-height: 20px; }
+
+/* ===== sotuvchi-jshshir (E): holat kartasi, tik bosqichlar, soliq misoli, hujjat, yo'riqnoma ===== */
+.hero { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+.heroMain { display: flex; flex: 2 1 420px; flex-direction: column; gap: 14px; min-width: 0; }
+.heroHead { display: flex; align-items: flex-start; gap: 16px; }
+
+.heroIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.heroIcon > svg { display: block; width: 24px; height: 24px; }
+.heroIcon[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
+.heroIcon[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
+.heroIcon[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
+.heroIcon[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
+.heroText { display: flex; flex: 1 1 auto; flex-direction: column; gap: 6px; min-width: 0; }
+.heroChip { align-self: flex-start; }
+.heroTitle { margin: 0; font-size: 20px; font-weight: 700; line-height: 28px; }
+.heroLead { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+.heroSteps {
+  flex: 1 1 280px;
+  min-width: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-row-hover);
+}
+
+.vSteps { margin: 0; padding: 0; list-style: none; }
+.vSteps > li { position: relative; display: flex; gap: 12px; padding: 0 0 12px; }
+.vSteps > li:last-child { padding-bottom: 0; }
+
+/* Nuqtalar orasidagi tik chiziq. */
+.vSteps > li:not(:last-child)::before {
+  position: absolute;
+  top: 20px;
+  bottom: 2px;
+  left: 7px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--color-border-strong);
+  content: '';
+}
+
+.vSteps > li[data-done='true']:not(:last-child)::before { background: var(--color-nav); }
+
+.vDot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: #fff;
+}
+
+.vSteps > li[data-done='true'] .vDot { border: 0; background: var(--color-nav); }
+.vDot > svg { display: block; width: 10px; height: 10px; }
+.vText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.vTitle { color: var(--color-text); font-size: 14px; font-weight: 600; line-height: 20px; }
+.vSteps > li[data-done='false'] .vTitle { color: var(--color-text-secondary); }
+.vSub { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.vTime { flex: none; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; font-variant-numeric: tabular-nums; }
+
+.taxBox { padding: 6px 16px 8px; border-radius: 12px; background: var(--color-sunken); }
+.taxBoxTitle { margin: 8px 0 2px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.taxRows { margin: 0; }
+
+.taxRows > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.taxRows > div:last-child { border-bottom: 0; }
+.taxRows dt { color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+.taxRows dd { margin: 0; font-size: 14px; font-weight: 600; line-height: 21px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.taxRows dd.taxNet { font-size: 16px; font-weight: 700; }
+
+.fileLine { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; box-sizing: border-box; }
+.fileLineText { flex: 1 1 auto; min-width: 0; }
+.fileLineName { margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; overflow-wrap: anywhere; }
+.fileLock { display: inline-block; width: 14px; height: 14px; color: var(--color-text-secondary); vertical-align: -2px; }
+.fileLineSub { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+.guideList { margin: 0; padding: 0; list-style: none; }
+.guideList > li { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-top: 1px solid var(--color-border); }
+.guideList > li:first-child { border-top: 0; }
+.guideQ { font-size: 14px; font-weight: 600; line-height: 20px; }
+.guideA { color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }

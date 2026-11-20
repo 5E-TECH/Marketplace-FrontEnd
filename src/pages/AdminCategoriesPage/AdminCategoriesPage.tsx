@@ -1,4 +1,4 @@
-import { Alert, App, Avatar, Button, Form, Input, InputNumber, Space, Switch, Tag, TreeSelect } from 'antd';
+import { Alert, App, Avatar, Button, Form, Input, InputNumber, Space, Switch, TreeSelect } from 'antd';
 import { ChevronRight, FolderTree, Image, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useAdminCategoriesQuery, useCreateCategoryMutation, useDeleteCategoryMutation, useUpdateCategoryMutation } from '../../features/categories/api/categoryQueries';
@@ -14,6 +14,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { ToolbarButton } from '../../shared/ui/ToolbarButton/ToolbarButton';
 import styles from './AdminCategoriesPage.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
 
 interface CategoryValues { name: string; parentId?: string; iconUrl?: string; sortOrder: number; isActive: boolean }
 interface ParentOption { value: string; title: string; children: ParentOption[] }
@@ -63,7 +64,7 @@ function CategoryTree({ items, collapsed, onToggle, onAdd, onEdit, onDelete }: C
           <div className={styles.nodeMeta}>
             {hasChildren ? <span className={styles.childCount}>{t('admin.categories.childCount', { count: category.children.length })}</span> : null}
             <span className={styles.order}><small>{t('admin.common.order')}</small>{category.sortOrder}</span>
-            <Tag color={category.isActive ? 'success' : 'default'}>{t(category.isActive ? 'status.active' : 'status.inactive')}</Tag>
+            <Badge tone={category.isActive ? 'success' : 'muted'}>{t(category.isActive ? 'status.active' : 'status.inactive')}</Badge>
           </div>
           <Space className={styles.actions} size={2}>
             <Button type="text" icon={<Plus size={16} />} aria-label={t('admin.categories.addChildAria', { name: category.name })} onClick={() => onAdd(category.id)} />

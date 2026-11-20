@@ -19,7 +19,7 @@
   display: flex;
   padding: var(--space-4) var(--space-5);
   background:
-    linear-gradient(120deg, var(--color-accent-soft), transparent 48%),
+    linear-gradient(120deg, var(--color-action-soft), transparent 48%),
     var(--color-surface);
   align-items: center;
   gap: var(--space-4);
@@ -27,9 +27,9 @@
 
 .avatar {
   flex: none;
-  color: var(--color-accent) !important;
-  background: var(--color-surface-hover) !important;
-  border: 2px solid var(--color-accent);
+  color: var(--color-action) !important;
+  background: var(--color-row-hover) !important;
+  border: 2px solid var(--color-action);
   font-size: 1.125rem !important;
   font-weight: 800;
 }
@@ -81,7 +81,7 @@
 .cardHeading > svg {
   width: 18px;
   height: 18px;
-  color: var(--color-accent);
+  color: var(--color-action);
 }
 
 .cardHeading h3 {
@@ -91,7 +91,7 @@
 
 .cardHeading p {
   margin-top: 2px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: .75rem;
 }
 
@@ -108,7 +108,7 @@
   display: grid;
   min-width: 0;
   padding: 10px var(--space-3);
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   grid-template-columns: auto minmax(0, 1fr);
@@ -126,7 +126,7 @@
   width: 28px;
   height: 28px;
   color: var(--color-text-secondary);
-  background: var(--color-surface-hover);
+  background: var(--color-row-hover);
   border-radius: var(--radius-sm);
   place-items: center;
 }
@@ -138,7 +138,7 @@
 
 .detailItem dt {
   margin-bottom: 2px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: .75rem;
 }
 

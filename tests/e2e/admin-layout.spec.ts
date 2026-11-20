@@ -33,7 +33,8 @@ test('TC2: ADMIN desktop karkasi — navy menyu, yuqori qatorda h1, til, qo‘ng
   await expect(page.getByRole('button', { name: 'Bildirishnomalar' })).toBeVisible();
   const userButton = page.getByTestId('user-menu-button');
   await expect(userButton).toHaveAttribute('title', 'Profil va Chiqish');
-  await expect(userButton).toContainText('E2E Admin');
+  // Yuqori qatorda qisqa ism (karkas-E 1.6): «E2E A.».
+  await expect(userButton).toContainText('E2E A.');
   await expect(userButton).toContainText('Admin');
 
   // karkas-E: breadcrumb, «ADMIN REJIM» belgisi va global qidiruv M1 da yo'q.
@@ -96,7 +97,7 @@ test('planshet (900 px): menyu chap panelda, yuqori qatorda menyu tugmasi va ava
 
   await expect(page.getByTestId('admin-layout')).toHaveAttribute('data-layout', 'tablet');
   await expect(mainNav(page)).toHaveCount(0);
-  await expect(page.getByTestId('user-menu-button')).toHaveAttribute('aria-label', 'E2E Admin, Admin: Profil va Chiqish');
+  await expect(page.getByTestId('user-menu-button')).toHaveAttribute('aria-label', 'E2E A., Admin: Profil va Chiqish');
   await page.getByRole('button', { name: 'Menyu', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('navigation', { name: 'Asosiy menyu' })).toBeVisible();
 });

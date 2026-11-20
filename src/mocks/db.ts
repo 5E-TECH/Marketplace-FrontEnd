@@ -97,8 +97,9 @@ function operatorLeads(): Schemas['OperatorLeadListItemDto'][] {
 
 function notifications(): MockNotification[] {
   return [
-    { id: '1', type: 'lead_confirmed', title: 'Yangi sotuv', body: 'Simsiz quloqchinlar · p3v9tx — operator buyurtmani tasdiqladi.', isRead: false, data: {}, createdAt: minutesFromNow(-30) },
-    { id: '2', type: 'order_delivered', title: 'Yetkazildi', body: 'Simsiz quloqchinlar · k7m2qa +65 000 so‘m', isRead: true, data: {}, createdAt: minutesFromNow(-120) },
+    // Sotuvchi xabarlari (sotuvchi-bosh «Bugungi xabarlar»): `data` — mahsulot, sahifa kodi va haq (taklif, fe-04-sotuvchi.md 5-bo'lim).
+    { id: '1', type: 'lead_confirmed', title: 'Yangi sotuv', body: 'Operator buyurtmani tasdiqladi. Haqingiz 86 250 so‘m — mijoz to‘lagach yoziladi.', isRead: false, data: { productName: 'Simsiz quloqchinlar', streamCode: 'p3v9tx' }, createdAt: minutesFromNow(-30) },
+    { id: '2', type: 'order_delivered', title: 'Yetkazildi', body: 'Ushlab turilgan: odatda 1–2 kunda «mavjud»ga o‘tadi', isRead: true, data: { productName: 'Simsiz quloqchinlar', streamCode: 'k7m2qa', amount: 65_000 }, createdAt: minutesFromNow(-120) },
   ];
 }
 

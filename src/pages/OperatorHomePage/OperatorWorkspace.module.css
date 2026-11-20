@@ -291,7 +291,7 @@
   gap: 12px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: var(--color-error-soft);
+  background: var(--color-danger-soft);
   text-align: left;
 }
 
@@ -378,7 +378,7 @@
 .notice[data-tone='warning'] { background: var(--color-warning-soft); border-color: transparent; }
 .notice[data-tone='warning'] > svg,
 .notice[data-tone='warning'] strong { color: var(--color-warning); }
-.notice[data-tone='danger'] { background: var(--color-error-soft); border-color: transparent; }
+.notice[data-tone='danger'] { background: var(--color-danger-soft); border-color: transparent; }
 .notice[data-tone='info'] { background: var(--color-info-soft); border-color: transparent; }
 .notice[data-tone='info'] > svg,
 .notice[data-tone='info'] strong { color: var(--color-info); }

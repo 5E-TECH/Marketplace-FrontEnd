@@ -2,6 +2,7 @@ import type { TranslationKey } from '../../../shared/i18n/translations';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
 import { addDays, tashkentClock, tashkentDate } from '../../../shared/lib/tashkentTime';
 import type { LeadCard, LeadOutcome, LeadRejectReason, LeadStatus } from '../model/operatorTypes';
+import { statusKey } from '../../../shared/ui/StatusBadge/statusConfig';
 
 type T = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
@@ -36,7 +37,7 @@ export function durationLabel(ms: number, t: T): string {
   return hours ? t('opc.hours', { h: hours, m: minutes % 60 }) : t('opc.mins', { m: minutes });
 }
 
-export const statusLabel = (status: LeadStatus, t: T) => t(`opw.status.${status}` as TranslationKey);
+export const statusLabel = (status: LeadStatus, t: T) => t(statusKey('lead', status));
 export const outcomeLabel = (outcome: LeadOutcome, t: T) => t(`opw.outcome.${outcome}` as TranslationKey);
 export const rejectLabel = (reason: LeadRejectReason, t: T) => t(`opw.reject.${reason}` as TranslationKey);
 

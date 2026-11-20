@@ -30,7 +30,7 @@
 
 .modal :global(.ant-modal-close:hover) {
   color: var(--color-text);
-  background: var(--color-surface-hover);
+  background: var(--color-row-hover);
 }
 
 .modal :global(.ant-modal-body) {
@@ -54,7 +54,7 @@
 .modal :global(.ant-input-number),
 .modal :global(.ant-select-selector) {
   color: var(--color-text) !important;
-  background: var(--color-surface-subtle) !important;
+  background: var(--color-sunken) !important;
   border-color: var(--color-border) !important;
   border-radius: var(--radius-md) !important;
   box-shadow: none !important;
@@ -80,8 +80,8 @@
 .modal :global(.ant-input-affix-wrapper-focused),
 .modal :global(.ant-input-number-focused),
 .modal :global(.ant-select-focused .ant-select-selector) {
-  border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 3px var(--color-accent-soft) !important;
+  border-color: var(--color-action) !important;
+  box-shadow: 0 0 0 3px var(--color-action-soft) !important;
 }
 
 .modal :global(.ant-modal-footer) {

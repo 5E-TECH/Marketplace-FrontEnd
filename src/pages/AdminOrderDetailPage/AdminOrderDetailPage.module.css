@@ -1,9 +1,0 @@
-.page {
-  width: 100%;
-  min-width: 0;
-}
-
-.actionForm {
-  margin-top: 16px;
-}
-.actionHint { color: var(--color-text-muted); font-size: 12px; }

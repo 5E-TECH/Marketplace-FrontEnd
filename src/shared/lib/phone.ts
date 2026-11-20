@@ -12,7 +12,16 @@ export function normalizeUzPhone(value: string): string {
  */
 export function getUzLocalPhone(value: string): string {
   const digits = value.replace(/\D/g, '');
-  return (digits.length > 9 && digits.startsWith('998') ? digits.slice(3) : digits).slice(0, 9);
+  if (digits.length > 9 && digits.startsWith('998')) return digits.slice(3, 12);
+  // Eski yozuv «8 90 123 45 67» (komponentlar-E §19).
+  if (digits.length === 10 && digits.startsWith('8')) return digits.slice(1);
+  return digits.slice(0, 9);
+}
+
+/** Maydonda ko'rinishi: 2-3-2-2 — «90 123 45 67» (yozish paytida ham, chala raqam ham). */
+export function formatLocalPhone(local: string): string {
+  const digits = local.replace(/\D/g, '').slice(0, 9);
+  return [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5, 7), digits.slice(7, 9)].filter(Boolean).join(' ');
 }
 
 /**

@@ -33,50 +33,164 @@
 
 .muted {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
 
-/* ── Asboblar qatori ─────────────────────────────────────────── */
+/* ── Asboblar qatori (sotuvchi-statistika: segment 44, pillar 40, «Eksport ▾» 44) ── */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
+  gap: 12px;
 }
 
-.toolbarGroup {
-  display: flex;
+.toolbarGroup { display: flex; align-items: center; gap: 10px; }
+.toolbarLabel { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+
+.segment {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 2px;
+  height: 44px;
+  padding: 3px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-sunken);
 }
 
-.toolbarLabel {
-  color: var(--color-text-muted);
-  font-size: 13px;
+.segmentItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-.period {
-  min-width: 280px;
+.segmentItem[aria-checked='true'] {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgb(16 23 51 / 6%);
+  color: var(--color-text);
+  font-weight: 600;
 }
 
-.pageFilter {
-  min-width: 200px;
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 38px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 999px;
+  background: var(--color-surface);
 }
+
+.pill:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.pillLabel { margin-right: 6px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+
+.pillSelect {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  appearance: none;
+  field-sizing: content;
+}
+
+.pillChevron {
+  position: absolute;
+  top: 11px;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.toolbarEnd { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-left: auto; }
 
 .maskNote {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
 }
 
-.maskNote strong {
+.maskNote strong { color: var(--color-text); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
   color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
 }
+
+.exportButton:hover { border-color: var(--color-border-hover); }
+.exportButton > svg { display: block; flex: none; width: 18px; height: 18px; }
+
+/* «Eksport ▾» menyusi (sotuvchi-statistika holatlari): 264 px, band 48, ikonka 18. */
+.exportMenu :global(.ant-dropdown-menu) {
+  width: 264px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgb(16 23 51 / 16%), 0 2px 6px rgb(16 23 51 / 6%);
+}
+
+.exportMenu :global(.ant-dropdown-menu-item) {
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.exportMenu :global(.ant-dropdown-menu-item-icon) { width: 18px; height: 18px; color: var(--color-text-secondary); }
+.exportItem { display: flex; flex-direction: column; min-width: 0; }
+.exportItem > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.exportItem > span:last-child { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
 
 /* ── Natija (voronka) ────────────────────────────────────────── */
 .funnel {
@@ -95,14 +209,18 @@
 }
 
 .kpis li {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
+/* Voronka strelkasi: ustunlar orasidagi 16 px bo'shliqda (sotuvchi-statistika). */
+.kpiArrow { position: absolute; top: 30px; right: -16px; width: 16px; height: 16px; color: var(--color-text-faint); }
+
 .kpiLabel {
-  color: var(--color-text-secondary, var(--color-text-muted));
+  color: var(--color-text-secondary, var(--color-text-secondary));
   font-size: 13px;
   font-weight: 600;
 }
@@ -116,7 +234,7 @@
 }
 
 .kpiHint {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 16px;
 }
@@ -139,7 +257,7 @@
 
 .incomeValue small {
   margin-left: 4px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -188,19 +306,12 @@
   border-radius: 2px;
 }
 
-.dotAvailable,
-.dotDelivered {
+.dotAvailable {
   background: var(--color-nav);
 }
 
-.dotHold,
-.dotConfirmed {
+.dotHold {
   background: var(--color-text-faint, var(--color-border-strong));
-}
-
-.dotLeads {
-  background: var(--color-border-strong);
-  opacity: 0.6;
 }
 
 .funnelNote {
@@ -208,7 +319,7 @@
   margin: 0;
   padding-top: 14px;
   border-top: 1px solid var(--color-border);
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
@@ -254,7 +365,7 @@
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 
@@ -266,7 +377,7 @@
 }
 
 .metricValue span {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 400;
 }
@@ -309,7 +420,7 @@
   padding: 4px 10px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  color: var(--color-text-secondary, var(--color-text-muted));
+  color: var(--color-text-secondary, var(--color-text-secondary));
   font-size: 13px;
   white-space: nowrap;
 }
@@ -322,7 +433,7 @@
 
 .qualityState[data-state='below'] {
   border-color: transparent;
-  background: var(--color-error-soft);
+  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
@@ -330,129 +441,14 @@
   display: flex;
   gap: 8px;
   margin: 14px 0 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
 
-/* ── Kunlar grafigi ──────────────────────────────────────────── */
-.chartRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 24px;
+/* ── Kunlar grafigi (umumiy BarChart) ─────────────────────────── */
+.byDayChart {
   margin-bottom: 20px;
-}
-
-.chart {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  align-items: end;
-  gap: 8px;
-  height: 200px;
-  padding-bottom: 36px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.chartDay {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 4px;
-  height: 160px;
-}
-
-.bar {
-  position: relative;
-  width: min(22px, 30%);
-  min-height: 2px;
-  border-radius: 3px 3px 0 0;
-}
-
-.bar span {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  padding-bottom: 2px;
-  color: var(--color-text);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.barLeads {
-  background: var(--color-border-strong);
-  opacity: 0.6;
-}
-
-.barConfirmed {
-  background: var(--color-text-faint, var(--color-border-strong));
-}
-
-.barDelivered {
-  background: var(--color-nav);
-}
-
-.chartAxis {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: var(--color-text-muted);
-  font-size: 12px;
-  line-height: 15px;
-}
-
-.chartAxis b {
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-.chartLegend {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.chartLegend li {
-  display: grid;
-  grid-template-columns: 12px minmax(0, 1fr) auto;
-  gap: 2px 10px;
-  padding: 10px 0;
-  border-top: 1px solid var(--color-border);
-}
-
-.chartLegend li:first-child {
-  border-top: 0;
-}
-
-.chartLegend li .dot {
-  margin-top: 5px;
-}
-
-.chartLegend strong {
-  color: var(--color-text);
-  font-size: 14px;
-}
-
-.chartLegend small {
-  grid-column: 2;
-  color: var(--color-text-muted);
-  font-size: 12px;
-}
-
-.chartLegend b {
-  grid-column: 3;
-  grid-row: 1;
-  color: var(--color-text);
-  font-size: 16px;
 }
 
 /* ── Jadvallar ───────────────────────────────────────────────── */
@@ -478,7 +474,7 @@
 .table th {
   padding: 12px 14px;
   background: var(--color-sunken);
-  color: var(--color-text-secondary, var(--color-text-muted));
+  color: var(--color-text-secondary, var(--color-text-secondary));
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -521,7 +517,7 @@
 
 .cellSub {
   display: block;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 400;
 }
@@ -535,7 +531,7 @@
 }
 
 .zero {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* ── Lidlar havolasi ─────────────────────────────────────────── */
@@ -555,7 +551,7 @@
   flex: none;
   border-radius: 12px;
   background: var(--color-sunken);
-  color: var(--color-text-secondary, var(--color-text-muted));
+  color: var(--color-text-secondary, var(--color-text-secondary));
 }
 
 .leadsText {
@@ -584,13 +580,13 @@
   padding: 3px 10px;
   border-radius: 999px;
   background: var(--color-sunken);
-  color: var(--color-text-secondary, var(--color-text-muted));
+  color: var(--color-text-secondary, var(--color-text-secondary));
   font-size: 13px;
 }
 
 .chip[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
 .chip[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
-.chip[data-tone='danger'] { background: var(--color-error-soft); color: var(--color-danger); }
+.chip[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
 .chip[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
 
 .linkButton {
@@ -605,111 +601,194 @@
 }
 
 /* ── Eksport oynasi ──────────────────────────────────────────── */
-.dialogBody {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* ── Eksport oynasi (umumiy-eksport: 520, padding 24, radius 20) ── */
+.exportDialog :global(.ant-modal-container) {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgb(16 23 51 / 16%), 0 2px 6px rgb(16 23 51 / 6%);
 }
 
-.dialogRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: 12px;
+.exportDialog :global(.ant-modal-header) { display: none; }
+.exportDialog :global(.ant-modal-body) { padding: 0; }
+.dialog { display: flex; flex-direction: column; gap: 16px; color: var(--color-text); }
+.dialogHead { display: flex; align-items: flex-start; gap: 14px; }
+
+.dialogIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
 }
 
-.fieldset {
-  min-width: 0;
-  margin: 0;
+.dialogIcon > svg { display: block; width: 20px; height: 20px; }
+.dialogTitle { flex: 1 1 auto; min-width: 0; }
+.dialogTitle h3 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.dialogTitle p { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.dialogClose {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px 0 0;
   padding: 0;
   border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
 }
+
+.dialogClose:hover { background: var(--color-sunken); }
+.dialogClose > svg { display: block; width: 18px; height: 18px; }
+.dialogBody { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.fieldLabel { display: block; margin: 0 0 6px; padding: 0; color: var(--color-text); font-size: 13px; font-weight: 600; line-height: 18px; }
+.fieldSelect { position: relative; display: block; }
+
+.fieldSelect select {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 44px 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  outline: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+  appearance: none;
+}
+
+.fieldSelect select:focus-visible { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.fieldSelect > svg {
+  position: absolute;
+  top: 13px;
+  right: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.choice[data-checked='true'] { padding: 9.5px 13.5px; border: 1.5px solid var(--color-action); background: var(--color-action-soft); }
+
+.choice input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-field-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  cursor: pointer;
+  appearance: none;
+}
+
+.choice input:checked { border-color: var(--color-action); background: radial-gradient(circle, var(--color-action) 0 5px, var(--color-surface) 5.5px); }
+.choice input:focus-visible { outline: 2px solid var(--color-action); outline-offset: 2px; }
+.choiceText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.choiceText > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.choiceText > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.columns :global(.ant-checkbox-wrapper) { align-items: center; min-height: 32px; font-size: 14px; line-height: 20px; }
+.columns :global(.ant-checkbox-wrapper > span:last-child) { display: inline-flex; flex: 1 1 auto; align-items: center; }
+.columns :global(.ant-checkbox-inner) { width: 20px; height: 20px; border-width: 1.5px; border-radius: 6px; }
 
 .maskTag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: 8px;
-  color: var(--color-text-muted);
+  margin-left: auto;
+  color: var(--color-text-secondary);
   font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
 }
 
-.fieldLabel {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--color-text);
-  font-size: 13px;
-  font-weight: 600;
-}
+.filtersNote { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.filtersNote > span { white-space: nowrap; }
+.filtersNote strong { color: var(--color-text); font-weight: 600; }
 
-.choices {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
+.privacy { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.privacy > svg { display: block; flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--color-text-secondary); }
+.privacy p { margin: 0; color: var(--color-text); font-size: 13px; line-height: 18px; }
+.privacy strong { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-.choice {
+.fileLine { display: flex; align-items: center; gap: 10px; min-width: 0; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.fileLine > svg { display: block; flex: none; width: 18px; height: 18px; }
+.fileLine strong { color: var(--color-text); font-weight: 600; overflow-wrap: anywhere; }
+
+.dialogFooter {
   display: flex;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
-  min-height: 56px;
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.dialogButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
   border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.choice[data-checked='true'] {
-  border-color: var(--color-action);
-  background: var(--color-action-soft);
-}
+.dialogButton > svg { display: block; flex: none; width: 18px; height: 18px; }
+.dialogPrimary { border-color: var(--color-action); background: var(--color-action); color: #fff; }
+.dialogPrimary:hover:not(:disabled) { background: var(--color-action-hover); }
+.dialogButton:disabled { opacity: 0.45; cursor: not-allowed; }
+.dialogButton[aria-busy='true'] { opacity: 1; cursor: progress; }
+.spin { animation: stats-spin 0.9s linear infinite; }
 
-.choice input {
-  margin-top: 3px;
-  accent-color: var(--color-action);
-}
-
-.choice span {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  color: var(--color-text);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.choice small {
-  color: var(--color-text-muted);
-  font-size: 13px;
-  font-weight: 400;
-}
-
-.columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 16px;
-}
-
-.privacy {
-  display: flex;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--color-sunken);
-  color: var(--color-text);
-  font-size: 13px;
-  line-height: 18px;
-}
-
-.fileLine {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-.fileLine strong {
-  color: var(--color-text);
+@keyframes stats-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── Planshet va telefon ─────────────────────────────────────── */
@@ -736,10 +815,6 @@
   .qualityState {
     justify-self: start;
   }
-
-  .chartRow {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 767.98px) {
@@ -755,15 +830,9 @@
     flex: 1 1 100%;
   }
 
-  .period,
-  .pageFilter {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .maskNote {
-    margin-left: 0;
-  }
+  .pill { width: 100%; }
+  .pillSelect { flex: 1 1 auto; }
+  .toolbarEnd { margin-left: 0; }
 
   .kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -796,4 +865,17 @@
   .choices {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Sarlavha havolasi («Reklama qoidalari ›»). */
+.headLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-action);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
 }

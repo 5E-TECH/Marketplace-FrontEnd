@@ -3,22 +3,23 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { verifyRegisterOtp } from '../../features/sellerAuth/api/sellerAuthApi';
-import { otpCodeDigits, pendingLoading, sellerPhoneRules } from '../../features/sellerAuth/lib/fieldRules';
+import { otpCodeDigits, pendingLoading } from '../../features/sellerAuth/lib/fieldRules';
 import { useCountdown } from '../../features/sellerAuth/lib/useCountdown';
 import { useOtpFlow } from '../../features/sellerAuth/lib/useOtpFlow';
 import { OtpBlockedPanel } from '../../features/sellerAuth/ui/OtpBlockedPanel';
 import { OtpCodeField } from '../../features/sellerAuth/ui/OtpCodeField';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { formatUzPhone, getUzLocalPhone } from '../../shared/lib/phone';
+import { formatUzPhone } from '../../shared/lib/phone';
 import { AuthLayout } from '../../shared/ui/AuthLayout/AuthLayout';
 import { AuthNotice } from '../../shared/ui/AuthLayout/AuthNotice';
-import { PhoneInput } from '../../shared/ui/AuthLayout/PhoneInput';
+import { PhoneInput } from '../../shared/ui/PhoneInput/PhoneInput';
 import formStyles from '../../shared/ui/AuthLayout/authForm.module.css';
 import { ChangePhoneModal } from './components/ChangePhoneModal';
 import { OfferStep } from './components/OfferStep';
 import { RegisterBenefits } from './components/RegisterBenefits';
 import { RegisterSteps } from './components/RegisterSteps';
 import styles from './RegisterPage.module.css';
+import { uzPhoneRules } from '../../shared/lib/phoneRules';
 
 interface OtpValues {
   phone: string;
@@ -126,14 +127,13 @@ export default function RegisterPage() {
                   <Form.Item
                     className={formStyles.field}
                     name="phone"
-                    normalize={(value?: string) => getUzLocalPhone(value ?? '')}
-                    rules={sellerPhoneRules(t)}
+                    rules={uzPhoneRules(t)}
                     validateTrigger={['onBlur', 'onSubmit']}
                     validateStatus={state.phoneError ? 'error' : undefined}
-                    help={state.phoneError ? t('otp.phoneOperator') : undefined}
+                    help={state.phoneError ? t('phone.operator') : undefined}
                     extra={state.notice?.kind === 'exists' || state.notice?.kind === 'sendFailed' ? undefined : t('register.phoneHint')}
                   >
-                    <PhoneInput id={PHONE_ID} autoFocus />
+                    <PhoneInput size="large" id={PHONE_ID} autoFocus />
                   </Form.Item>
                 </div>
 

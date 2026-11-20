@@ -1,13 +1,14 @@
 import { Button, Form } from 'antd';
 import { useState } from 'react';
 import type { OtpFailure } from '../../../features/sellerAuth/api/sellerAuthApi';
-import { pendingLoading, sellerPhoneRules } from '../../../features/sellerAuth/lib/fieldRules';
+import { pendingLoading } from '../../../features/sellerAuth/lib/fieldRules';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
-import { formatUzPhone, getUzLocalPhone } from '../../../shared/lib/phone';
-import { PhoneInput } from '../../../shared/ui/AuthLayout/PhoneInput';
+import { formatUzPhone } from '../../../shared/lib/phone';
+import { PhoneInput } from '../../../shared/ui/PhoneInput/PhoneInput';
 import { SheetModal } from '../../../shared/ui/SheetModal/SheetModal';
 import formStyles from '../../../shared/ui/AuthLayout/authForm.module.css';
 import styles from '../RegisterPage.module.css';
+import { uzPhoneRules } from '../../../shared/lib/phoneRules';
 
 interface ChangePhoneModalProps {
   open: boolean;
@@ -36,7 +37,7 @@ export function ChangePhoneModal({ open, currentPhone, requestCode, onDone, onCa
       failure.kind === 'alreadyRegistered'
         ? t('register.existsTitle')
         : failure.kind === 'operator'
-          ? t('otp.phoneOperator')
+          ? t('phone.operator')
           : t('otp.sendFailedText');
     form.setFields([{ name: 'phone', errors: [error] }]);
   };
@@ -64,12 +65,11 @@ export function ChangePhoneModal({ open, currentPhone, requestCode, onDone, onCa
           className={formStyles.field}
           label={t('register.changeNew')}
           name="phone"
-          normalize={(value?: string) => getUzLocalPhone(value ?? '')}
-          rules={sellerPhoneRules(t)}
+          rules={uzPhoneRules(t)}
           validateTrigger={['onBlur', 'onSubmit']}
           extra={t('register.changeNewHint')}
         >
-          <PhoneInput autoFocus />
+          <PhoneInput size="large" autoFocus />
         </Form.Item>
         <div className={styles.modalActions}>
           <Button className={formStyles.secondary} onClick={() => { form.resetFields(); onCancel(); }}>{t('register.cancel')}</Button>

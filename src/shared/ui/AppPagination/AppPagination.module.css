@@ -34,7 +34,7 @@
 .pagination :global(.ant-pagination-item),
 .pagination :global(.ant-pagination-prev .ant-pagination-item-link),
 .pagination :global(.ant-pagination-next .ant-pagination-item-link) {
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }
@@ -52,13 +52,13 @@
 }
 
 .pagination :global(.ant-pagination-item-active) {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--color-action);
+  border-color: var(--color-action);
 }
 
 .pagination :global(.ant-pagination-item-active a),
 .pagination :global(.ant-pagination-item-active:hover a) {
-  color: var(--color-black);
+  color: #fff;
   font-weight: 800;
 }
 

@@ -20,7 +20,7 @@
 .picker {
   width: 100%;
   min-height: 42px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   border-color: var(--color-border);
   border-radius: var(--radius-md);
 }
@@ -35,7 +35,7 @@
 
 .picker :global(.ant-picker-input > input::placeholder),
 .picker :global(.ant-picker-suffix) {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 @container content (max-width: 575px) {

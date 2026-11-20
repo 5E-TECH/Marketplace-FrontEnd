@@ -1,10 +1,10 @@
-import { Button, Form, Input, type FormInstance } from 'antd';
+import { Button, Form, type FormInstance } from 'antd';
 import { CircleAlert, TriangleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
-import { getUzLocalPhone } from '../../../../shared/lib/phone';
 import styles from '../../../../shared/ui/AuthLayout/authForm.module.css';
+import { PhoneInput } from '../../../../shared/ui/PhoneInput/PhoneInput';
 
 export interface LoginFormValues {
   phone: string;
@@ -51,22 +51,12 @@ export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange, role
         className={styles.field}
         label={t('auth.phone')}
         name="phone"
-        normalize={(value?: string) => getUzLocalPhone(value ?? '')}
         rules={[
           { required: true, message: t('auth.phoneRequired') },
           { pattern: PHONE_NUMBER_PATTERN, message: t('auth.phoneNineDigits') },
         ]}
       >
-        <Input
-          className={styles.phone}
-          prefix={<span className={styles.phonePrefix}>+998</span>}
-          type="tel"
-          inputMode="numeric"
-          // maxLength yo'q: u joylangan "+998 90 …" ni normalize'dan oldin kesib qo'yadi; 9 raqam chegarasini normalize ta'minlaydi.
-          autoComplete="tel-national"
-          spellCheck={false}
-          placeholder="90 123 45 67"
-        />
+        <PhoneInput size="large" />
       </Form.Item>
 
       <Form.Item

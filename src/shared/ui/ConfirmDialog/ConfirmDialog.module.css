@@ -35,7 +35,7 @@
 
 .modal :global(.ant-modal-close:hover) {
   color: var(--color-text);
-  background: var(--color-surface-hover);
+  background: var(--color-row-hover);
 }
 
 .modal :global(.ant-modal-footer) {

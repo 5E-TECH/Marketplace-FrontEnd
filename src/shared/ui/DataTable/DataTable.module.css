@@ -22,18 +22,18 @@
 .table :global(.ant-checkbox-inner) {
   width: 18px;
   height: 18px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   border-color: var(--color-border-hover);
   border-radius: 5px;
 }
 
 .table :global(.ant-checkbox-checked .ant-checkbox-inner) {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--color-action);
+  border-color: var(--color-action);
 }
 
 .table :global(.ant-table-row-selected > .ant-table-cell) {
-  background: var(--color-accent-soft) !important;
+  background: var(--color-action-soft) !important;
 }
 
 @container content (max-width: 575px) {

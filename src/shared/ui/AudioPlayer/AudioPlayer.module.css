@@ -1,0 +1,227 @@
+/* Audio pleyer (komponentlar-E §22): ijro 52 (ko'k doira), ±10 s 44, tezlik pill 40; chiziq 24 (planshet/telefon 44). */
+.player {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.headIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.headIcon > svg, .speed > svg { display: block; width: 18px; height: 18px; }
+.headText { display: flex; flex-direction: column; min-width: 0; }
+.title { font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.subtitle { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+.speed {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 40px;
+  margin-left: auto;
+  padding: 0 38px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.speed label { margin-right: 6px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+
+.speed select {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  appearance: none;
+}
+
+.speed:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.speed > svg { position: absolute; top: 11px; right: 14px; width: 16px; height: 16px; color: var(--color-text-secondary); pointer-events: none; }
+
+.track { position: relative; flex: 1 1 auto; min-width: 60px; height: 24px; }
+.rail, .fill { position: absolute; top: 10px; left: 0; height: 4px; border-radius: 999px; }
+.rail { right: 0; background: var(--color-border); }
+.fill { background: var(--color-action); }
+
+.thumb {
+  position: absolute;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--color-action);
+  box-shadow: 0 1px 2px rgb(16 23 51 / 6%);
+}
+
+.range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.track:focus-within .thumb { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.buttons { display: flex; align-items: center; gap: 10px; }
+
+.skip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.skip > svg { display: block; width: 20px; height: 20px; }
+
+.play {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-action);
+  color: #fff;
+  cursor: pointer;
+}
+
+.play > svg { display: block; width: 22px; height: 22px; }
+.play:disabled, .skip:disabled { opacity: 0.45; cursor: not-allowed; }
+.timer { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.timerNow { font-size: 20px; font-weight: 600; line-height: 28px; font-variant-numeric: tabular-nums; }
+.timerTotal { color: var(--color-text-secondary); font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+
+.notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  list-style: none;
+}
+
+.notes li { display: inline-flex; align-items: center; gap: 6px; }
+.notes svg { display: block; flex: none; width: 16px; height: 16px; }
+.status { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* Holat qatori: yuklanmadi / o'chirilgan / topilmadi. */
+.problem { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-height: 36px; }
+
+.problemIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.problemIcon > svg { display: block; width: 18px; height: 18px; }
+.problem[data-tone='neutral'] .problemIcon { background: var(--color-sunken); color: var(--color-text-secondary); }
+.problemText { flex: 1 1 160px; min-width: 0; color: var(--color-danger); font-size: 13px; font-weight: 600; line-height: 18px; }
+.problem[data-tone='neutral'] .problemText { color: var(--color-text-secondary); }
+
+.retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.retry > svg { display: block; width: 16px; height: 16px; }
+.spin { animation: audio-spin 0.9s linear infinite; }
+
+/* Ixcham: lid tarixi qatorida — tugma 36 (chegarali), chiziq va vaqt. */
+.compact { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 36px; }
+
+.compactPlay {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--color-action);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-action);
+  cursor: pointer;
+}
+
+.compactPlay > svg { display: block; width: 16px; height: 16px; }
+.compactTime { flex: none; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+@media (pointer: coarse) {
+  .track { height: 44px; }
+  .rail, .fill { top: 20px; }
+  .thumb { top: 15px; }
+  .speed { height: 44px; }
+  .speed > svg { top: 13px; }
+  .compactPlay { width: 44px; height: 44px; }
+}
+
+@keyframes audio-spin {
+  to { transform: rotate(360deg); }
+}

@@ -6,16 +6,19 @@
  */
 const uz = {
   'session.expiredTitle': 'Sessiya tugadi',
-  'session.expiredText': 'Xavfsizlik uchun tizim sizni chiqardi. Parol bilan shu yerda qayta kiring — ish yo‘qolmaydi.',
+  'session.expiredText': 'Xavfsizlik uchun tizim sizni chiqardi. Parol bilan shu yerda qayta kiring.',
   'session.panel': 'Panel: {name}',
   'session.signIn': 'Kirish',
   'session.logout': 'Chiqish',
   'session.restored': 'Qayta kirdingiz. Sahifa va kiritganlaringiz joyida.',
 
-  'connection.offline': 'Internet aloqasi yo‘q. Kiritganlaringiz sahifada saqlanib turadi; aloqa tiklangach yuboring.',
+  'connection.offlineTitle': 'Internet aloqasi yo‘q.',
+  'connection.offline': 'Kiritganlaringiz sahifada saqlanib turadi; aloqa tiklangach yuboring.',
   'connection.since': '{time} dan beri',
-  'connection.restored': 'Aloqa tiklandi. Ma’lumot yangilandi.',
-  'connection.liveStopped': 'Ma’lumot yangilanmayapti. Jonli ulanish uzildi, qayta ulanmoqda. Ekrandagi ma’lumot eskirgan bo‘lishi mumkin.',
+  'connection.restoredTitle': 'Aloqa tiklandi.',
+  'connection.restored': 'Ma’lumot yangilandi.',
+  'connection.liveStoppedTitle': 'Ma’lumot yangilanmayapti.',
+  'connection.liveStopped': 'Jonli ulanish uzildi, qayta ulanmoqda. Ekrandagi ma’lumot eskirgan bo‘lishi mumkin.',
   'connection.lastUpdated': 'Oxirgi yangilanish: {time}',
   'connection.refresh': 'Yangilash',
   'live.realtime': 'Real vaqtda yangilanadi',
@@ -24,7 +27,8 @@ const uz = {
   'loadError.text': 'Internet uzildi yoki tizim javob bermadi. Kiritilgan ma’lumot o‘zgarmagan — faqat bu blok ochilmadi.',
   'loadError.retry': 'Qayta urinish',
   'loadError.autoRetry': 'Sahifa 60 soniyada o‘zi qayta urinadi',
-  'loadError.lastSuccess': 'oxirgi muvaffaqiyatli yangilanish: {time}',
+  'loadError.blockText': 'Tizim javob bermadi. Sahifaning qolgan bloklari ishlayapti. 60 soniyadan keyin o‘zi qayta urinadi.',
+  'loadError.lastSuccessLabel': 'oxirgi muvaffaqiyatli yangilanish:',
   'loadError.code': 'Xato raqami: {code}',
   'loadError.copyCode': 'Xato raqamini nusxalash',
   'loadError.copied': 'Xato raqami nusxalandi',
@@ -32,7 +36,6 @@ const uz = {
   'loadError.rateText': 'Tizim qisqa vaqtda juda ko‘p so‘rovni qabul qilmaydi. {seconds} soniyadan keyin qayta urinib ko‘ring.',
   'loadError.rateRetryIn': 'Qayta urinish · {seconds}',
 
-  'export.csv': 'Yuklab olish (CSV)',
   'export.done': 'Fayl yuklab olindi: {name} · {rows} ta qator',
   'export.failed': 'Faylni tayyorlab bo‘lmadi. Qayta urinib ko‘ring.',
 
@@ -58,14 +61,11 @@ const uz = {
   'operator.stateFailed': 'Holatni o‘zgartirib bo‘lmadi',
 
   'affiliateHome.todayTitle': 'Bugun',
-  'affiliateHome.asOf': '{date} · {time} holatiga',
   'affiliateHome.clicksHint': 'sahifalarga o‘tishlar',
   'affiliateHome.leadsHint': 'arizalar',
   'affiliateHome.confirmedHint': 'operator tasdiqlagan buyurtmalar',
   'affiliateHome.deliveredHint': 'mijoz olib, pulini to‘lagan',
   'affiliateHome.incomeHint': 'faqat mijoz to‘lagan buyurtma uchun',
-  'affiliateHome.weekTitle': 'Oxirgi 7 kun',
-  'affiliateHome.weekHint': 'Har son o‘z kunida. Daromad — yetkazilgan kun bo‘yicha.',
   'affiliateHome.sum': '{amount} so‘m',
 } as const;
 
@@ -73,16 +73,19 @@ type FoundationTranslationKey = keyof typeof uz;
 
 const ru: Record<FoundationTranslationKey, string> = {
   'session.expiredTitle': 'Сессия завершена',
-  'session.expiredText': 'В целях безопасности система вас вышла. Войдите здесь же по паролю — работа не потеряется.',
+  'session.expiredText': 'В целях безопасности система вас вышла. Войдите здесь же по паролю.',
   'session.panel': 'Раздел: {name}',
   'session.signIn': 'Войти',
   'session.logout': 'Выйти',
   'session.restored': 'Вы снова вошли. Страница и введённые данные на месте.',
 
-  'connection.offline': 'Нет подключения к интернету. Введённое сохраняется на странице; отправьте после восстановления связи.',
+  'connection.offlineTitle': 'Нет подключения к интернету.',
+  'connection.offline': 'Введённое сохраняется на странице; отправьте после восстановления связи.',
   'connection.since': 'с {time}',
-  'connection.restored': 'Связь восстановлена. Данные обновлены.',
-  'connection.liveStopped': 'Данные не обновляются. Живое подключение прервано, идёт переподключение. Данные на экране могут быть устаревшими.',
+  'connection.restoredTitle': 'Связь восстановлена.',
+  'connection.restored': 'Данные обновлены.',
+  'connection.liveStoppedTitle': 'Данные не обновляются.',
+  'connection.liveStopped': 'Живое подключение прервано, идёт переподключение. Данные на экране могут быть устаревшими.',
   'connection.lastUpdated': 'Последнее обновление: {time}',
   'connection.refresh': 'Обновить',
   'live.realtime': 'Обновляется в реальном времени',
@@ -91,7 +94,8 @@ const ru: Record<FoundationTranslationKey, string> = {
   'loadError.text': 'Пропал интернет или система не ответила. Введённые данные не изменились — не открылся только этот блок.',
   'loadError.retry': 'Повторить',
   'loadError.autoRetry': 'Страница сама повторит через 60 секунд',
-  'loadError.lastSuccess': 'последнее успешное обновление: {time}',
+  'loadError.blockText': 'Система не ответила. Остальные блоки страницы работают. Повторим сами через 60 секунд.',
+  'loadError.lastSuccessLabel': 'последнее успешное обновление:',
   'loadError.code': 'Номер ошибки: {code}',
   'loadError.copyCode': 'Скопировать номер ошибки',
   'loadError.copied': 'Номер ошибки скопирован',
@@ -99,7 +103,6 @@ const ru: Record<FoundationTranslationKey, string> = {
   'loadError.rateText': 'Система не принимает слишком много запросов за короткое время. Повторите через {seconds} с.',
   'loadError.rateRetryIn': 'Повторить · {seconds}',
 
-  'export.csv': 'Скачать (CSV)',
   'export.done': 'Файл скачан: {name} · строк: {rows}',
   'export.failed': 'Не удалось подготовить файл. Попробуйте ещё раз.',
 
@@ -125,29 +128,29 @@ const ru: Record<FoundationTranslationKey, string> = {
   'operator.stateFailed': 'Не удалось изменить статус',
 
   'affiliateHome.todayTitle': 'Сегодня',
-  'affiliateHome.asOf': '{date} · на {time}',
   'affiliateHome.clicksHint': 'переходы на страницы',
   'affiliateHome.leadsHint': 'заявки',
   'affiliateHome.confirmedHint': 'подтверждённые оператором заказы',
   'affiliateHome.deliveredHint': 'клиент получил и оплатил',
   'affiliateHome.incomeHint': 'только за оплаченные заказы',
-  'affiliateHome.weekTitle': 'Последние 7 дней',
-  'affiliateHome.weekHint': 'Каждое число — в свой день. Доход — по дню доставки.',
   'affiliateHome.sum': '{amount} сум',
 };
 
 const en: Record<FoundationTranslationKey, string> = {
   'session.expiredTitle': 'Session ended',
-  'session.expiredText': 'For security, the system signed you out. Sign in again right here with your password — your work is kept.',
+  'session.expiredText': 'For security, the system signed you out. Sign in again right here with your password.',
   'session.panel': 'Section: {name}',
   'session.signIn': 'Sign in',
   'session.logout': 'Sign out',
   'session.restored': 'You are signed in again. The page and your input are kept.',
 
-  'connection.offline': 'No internet connection. Your input stays on the page; send it once the connection is back.',
+  'connection.offlineTitle': 'No internet connection.',
+  'connection.offline': 'Your input stays on the page; send it once the connection is back.',
   'connection.since': 'since {time}',
-  'connection.restored': 'Connection restored. Data refreshed.',
-  'connection.liveStopped': 'Data is not updating. The live connection dropped and is reconnecting. Data on screen may be outdated.',
+  'connection.restoredTitle': 'Connection restored.',
+  'connection.restored': 'Data refreshed.',
+  'connection.liveStoppedTitle': 'Data is not updating.',
+  'connection.liveStopped': 'The live connection dropped and is reconnecting. Data on screen may be outdated.',
   'connection.lastUpdated': 'Last updated: {time}',
   'connection.refresh': 'Refresh',
   'live.realtime': 'Updates in real time',
@@ -156,7 +159,8 @@ const en: Record<FoundationTranslationKey, string> = {
   'loadError.text': 'The internet dropped or the system did not respond. Your data has not changed — only this block did not open.',
   'loadError.retry': 'Try again',
   'loadError.autoRetry': 'The page retries on its own in 60 seconds',
-  'loadError.lastSuccess': 'last successful update: {time}',
+  'loadError.blockText': 'The system did not respond. The rest of the page works. It retries on its own in 60 seconds.',
+  'loadError.lastSuccessLabel': 'last successful update:',
   'loadError.code': 'Error number: {code}',
   'loadError.copyCode': 'Copy error number',
   'loadError.copied': 'Error number copied',
@@ -164,7 +168,6 @@ const en: Record<FoundationTranslationKey, string> = {
   'loadError.rateText': 'The system does not accept too many requests in a short time. Try again in {seconds} s.',
   'loadError.rateRetryIn': 'Try again · {seconds}',
 
-  'export.csv': 'Download (CSV)',
   'export.done': 'File downloaded: {name} · {rows} rows',
   'export.failed': 'Could not prepare the file. Please try again.',
 
@@ -190,14 +193,11 @@ const en: Record<FoundationTranslationKey, string> = {
   'operator.stateFailed': 'Could not change the status',
 
   'affiliateHome.todayTitle': 'Today',
-  'affiliateHome.asOf': '{date} · as of {time}',
   'affiliateHome.clicksHint': 'visits to your pages',
   'affiliateHome.leadsHint': 'requests',
   'affiliateHome.confirmedHint': 'orders confirmed by an operator',
   'affiliateHome.deliveredHint': 'received and paid by the customer',
   'affiliateHome.incomeHint': 'only for orders the customer paid',
-  'affiliateHome.weekTitle': 'Last 7 days',
-  'affiliateHome.weekHint': 'Each number is on its own day. Income is by delivery day.',
   'affiliateHome.sum': '{amount} UZS',
 };
 

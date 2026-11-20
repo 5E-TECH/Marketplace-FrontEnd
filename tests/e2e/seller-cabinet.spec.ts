@@ -94,7 +94,7 @@ test('oferta yangi versiyasi: banner → «Oferta va roziliklar» → o‘qib qa
   await expect(page.getByText('1.1-versiya qabul qilindi')).toBeVisible();
   // Tarixda ikki versiya: yangisi joriy, eskisi «Eski».
   const history = page.getByRole('region', { name: 'Versiyalar tarixi' });
-  await expect(history.locator('tbody tr.ant-table-row')).toHaveCount(2);
+  await expect(history.locator('tbody tr')).toHaveCount(2);
   await expect(history).toContainText('Eski');
 
   await page.getByRole('link', { name: 'Bosh sahifa' }).click();
@@ -145,7 +145,10 @@ test('JShShIR: yo‘riqnoma oynasi, hujjat yuklanishi va to‘xtatish, xato va q
   expect((await submit).postDataJSON()).toMatchObject({ pinfl: '30101195600018', documentId: expect.stringMatching(/^doc-/) });
   const status = page.getByRole('region', { name: 'Maqomingiz tekshirilmoqda' });
   await expect(status).toBeVisible();
-  await expect(status).toContainText('maqom.pdf — yopiq fayl');
+  // Ma'lumotnoma alohida «Hujjat» kartasida (sotuvchi-jshshir), qulf belgisi — yopiq fayl.
+  const document = page.getByRole('region', { name: 'Hujjat' });
+  await expect(document).toContainText('maqom.pdf');
+  await expect(document.getByLabel('yopiq fayl')).toBeVisible();
 });
 
 test('JShShIR: yuklashni to‘xtatish faylni olib tashlaydi', async ({ page }) => {
@@ -214,6 +217,8 @@ test('sessiya tugadi → sotuvchi joyida SMS kod bilan qayta kiradi, sahifa saql
   await loginSeller(page);
   await page.goto('/profile');
   await expect(pageTitle(page)).toHaveText('Profil');
+  // Profil yuklanib bo'lgach sessiya tugaydi (aks holda profil so'rovining o'zi 401 olib, sahifa xato bilan qoladi).
+  await expect(page.getByRole('button', { name: 'Tahrirlash' })).toBeVisible();
 
   const expire = (route: import('@playwright/test').Route) =>
     route.fulfill({ status: 401, json: { statusCode: 401, errorCode: 'UNAUTHENTICATED', message: 'Sessiya tugagan' } });
@@ -226,7 +231,7 @@ test('sessiya tugadi → sotuvchi joyida SMS kod bilan qayta kiradi, sahifa saql
 
   const dialog = page.getByTestId('session-expired');
   await expect(dialog).toBeVisible({ timeout: 20_000 });
-  await expect(dialog).toContainText('+998 90 000 00 01 raqamiga SMS kod olib');
+  await expect(dialog).toContainText('Kod +998 90 000 00 01 raqamiga yuboriladi.');
   await expect(dialog.getByLabel('Parol')).toHaveCount(0);
   await page.unroute('**/api/v1/affiliate/**', expire);
   await page.unroute('**/api/v1/auth/refresh', expire);

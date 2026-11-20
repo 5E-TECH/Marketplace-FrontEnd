@@ -4,13 +4,13 @@ import { clock, dayLabel, rejectLabel, statusLabel } from '../../features/operat
 import { CALLBACK_GRACE_MINUTES, clampToCallWindow, duplicateCandidate, REMINDER_MINUTES, tashkentMoment, tashkentParts } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../features/operator/lib/useNow';
 import type { LeadCard, LeadRejectReason, LeadResultInput } from '../../features/operator/model/operatorTypes';
-import { LeadStatusChip } from '../../features/operator/ui/OperatorChip';
 import { DialogCancel, DialogHint, DialogPrimary, OperatorDialog } from '../../features/operator/ui/OperatorDialog';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { addDays } from '../../shared/lib/tashkentTime';
 import type { DialogChoice } from './resultChoices';
 import styles from './ResultDialog.module.css';
+import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 
 type DateChoice = 'today' | 'tomorrow' | 'other';
 
@@ -137,9 +137,9 @@ function DialogBody({ card, choice, saving, error, onSubmit, onClose }: ResultDi
           <span>{card.product.name} · {t('opw.requestAt')} {clock(card.createdAt)}</span>
         </span>
         <span className={styles.flow}>
-          <LeadStatusChip status={card.status} />
+          <StatusBadge family="lead" code={card.status} titlePrefix={t('opw.statusTitle')} />
           <ArrowRight size={16} aria-hidden />
-          <LeadStatusChip status={meta.target} />
+          <StatusBadge family="lead" code={meta.target} titlePrefix={t('opw.statusTitle')} />
         </span>
       </div>
 
@@ -254,7 +254,7 @@ function DialogBody({ card, choice, saving, error, onSubmit, onClose }: ResultDi
                   <strong>{t('opw.duplicateLead', { id: candidate.id, date: dayLabel(candidate.createdAt) })}</strong>
                   <span>{candidate.productName}</span>
                 </div>
-                <LeadStatusChip status={candidate.status} />
+                <StatusBadge family="lead" code={candidate.status} titlePrefix={t('opw.statusTitle')} />
               </div>
             </div>
             <div className={styles.summary}>

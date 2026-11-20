@@ -47,8 +47,19 @@ const shot = async (page: Page, name: string) => {
   if (process.env.E2E_SHOTS_DIR) await page.screenshot({ path: `${process.env.E2E_SHOTS_DIR}/${name}.png`, fullPage: true });
 };
 
-/** «Kesim» segmenti: antd radio inputi ko'rinmas — yorlig'i bosiladi. */
-const cutOption = (page: Page, name: string) => page.locator('.ant-segmented-item', { hasText: new RegExp(`^${name}$`) });
+/** «Kesim» segmenti (sotuvchi-statistika): radio tugmalar. */
+const cutOption = (page: Page, name: string) => page.getByRole('radiogroup', { name: 'Kesim' }).getByRole('radio', { name, exact: true });
+/** «Eksport ▾» → «CSV» (sotuvchi-statistika eksport menyusi). */
+async function openExport(page: Page) {
+  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await page.getByRole('menuitem', { name: /^CSV/ }).click();
+}
+/** Pill-tanlov (native select): variant matni boshlanishi bo'yicha. */
+async function pickOption(page: Page, name: string, text: RegExp) {
+  const select = page.getByRole('combobox', { name });
+  const value = await select.locator('option', { hasText: text }).first().getAttribute('value');
+  await select.selectOption(value ?? '');
+}
 
 async function openStats(page: Page) {
   await loginSeller(page);
@@ -90,7 +101,7 @@ test('TC1: davr, kesim va sahifa filtri; raqamlar BE-28 bilan bir xil; kunlik CS
   await shot(page, 'stats-1440-day');
 
   // Kunlik CSV: sarlavha, 7 kun va jami qatori — sahifadagi raqamlar bilan bir xil.
-  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await openExport(page);
   const dialog = page.getByRole('dialog', { name: /Eksport — Statistika/ });
   await expect(dialog.getByTestId('stats-export-file')).toContainText(/statistika_\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{4}\.csv · 8 ta qator/);
   await shot(page, 'stats-1440-export');
@@ -105,15 +116,13 @@ test('TC1: davr, kesim va sahifa filtri; raqamlar BE-28 bilan bir xil; kunlik CS
 
   // Davr: «Bugun» — so'rov from = to.
   const todayResponse = statsResponse(page, (url) => url.searchParams.get('from') === url.searchParams.get('to') && url.searchParams.get('groupBy') === 'DAY');
-  await page.getByRole('combobox', { name: 'Davr' }).click();
-  await page.getByRole('option', { name: /^Bugun \(/ }).click();
+  await pickOption(page, 'Davr:', /^Bugun \(/);
   await expectFunnel(page, (await statsBody(await todayResponse)).totals);
   await expect(page).toHaveURL(/period=today/);
 
   // Sahifa filtri: p3v9tx — natija va sifat faqat shu sahifa bo'yicha.
   const filtered = statsResponse(page, (url) => url.searchParams.get('streamId') === '332');
-  await page.getByRole('combobox', { name: 'Sahifa' }).click();
-  await page.getByRole('option', { name: /^p3v9tx/ }).click();
+  await pickOption(page, 'Sahifa:', /^p3v9tx/);
   const filteredBody = await statsBody(await filtered);
   await expectFunnel(page, filteredBody.totals);
   await expect(page.getByTestId('stats-quality').locator('[data-stream]')).toHaveCount(1);
@@ -121,13 +130,13 @@ test('TC1: davr, kesim va sahifa filtri; raqamlar BE-28 bilan bir xil; kunlik CS
 
   // Filtrlar faylga ham qo'llanadi: kunlik CSV jami — p3v9tx natijasi, lidlar CSV — faqat p3v9tx lidlari.
   const f = filteredBody.totals;
-  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await openExport(page);
   await expect(dialog).toContainText('Sahifa — p3v9tx');
   const dailyFiltered = await download(page, () => dialog.getByRole('button', { name: 'Eksport qilish' }).click());
   expect(dailyFiltered.text.trimEnd().split('\r\n').at(-1)).toBe(
     `Jami;${f.clicks};${f.leads};${f.validLeads};${f.confirmed};${f.delivered};${f.refused};${f.incomeHold + f.incomeAvailable};${f.incomeHold};${f.incomeAvailable}`,
   );
-  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await openExport(page);
   await dialog.getByRole('radio', { name: /^Lidlar/ }).check();
   const leadsFiltered = await download(page, () => dialog.getByRole('button', { name: 'Eksport qilish' }).click());
   const leadRows = leadsFiltered.text.trimEnd().split('\r\n').slice(1);
@@ -187,7 +196,7 @@ test('holatlar: API xatosi — «Qayta urinish» bilan tiklanadi; davrda ma’lu
 
 test('TC2: lidlar CSV da mijoz faqat ****4567; to‘liq raqam sahifada ham, faylda ham yo‘q', async ({ page }) => {
   const week = await openStats(page);
-  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await openExport(page);
   const dialog = page.getByRole('dialog', { name: /Eksport — Statistika/ });
   await dialog.getByRole('radio', { name: /^Lidlar/ }).check();
   await expect(dialog.getByTestId('stats-export-file')).toContainText(`lidlar_`);
@@ -270,7 +279,7 @@ test('planshet (768) va telefon (390): toshish yo‘q; telefonda eksport oynasi 
   await expect(page.getByTestId('stats-by-day')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await shot(page, 'stats-390-day');
-  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  await openExport(page);
   const dialog = page.getByRole('dialog', { name: /Eksport — Statistika/ });
   await expect(dialog).toBeVisible();
   const sheet = page.locator('.ant-modal').filter({ hasText: 'Eksport — Statistika' });

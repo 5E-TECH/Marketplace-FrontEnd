@@ -94,7 +94,7 @@
 .box[data-tone='warning'] { background: var(--color-warning-soft); }
 .box[data-tone='warning'] > svg,
 .box[data-tone='warning'] strong { color: var(--color-warning); }
-.box[data-tone='danger'] { background: var(--color-error-soft); }
+.box[data-tone='danger'] { background: var(--color-danger-soft); }
 .box[data-tone='danger'] > svg,
 .box[data-tone='danger'] strong { color: var(--color-danger); }
 

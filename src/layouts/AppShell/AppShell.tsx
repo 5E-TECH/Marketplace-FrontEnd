@@ -1,3 +1,4 @@
+import { shortPersonName } from '../../shared/lib/personName';
 import { App, Drawer } from 'antd';
 import { MonitorSmartphone, RefreshCw } from 'lucide-react';
 import { Suspense, useState } from 'react';
@@ -15,7 +16,7 @@ import { OperatorBookingsClock, OperatorStateSwitch } from '../../features/opera
 import { ConnectionBanner } from '../../shared/ui/ConnectionBanner/ConnectionBanner';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { formatUzPhone } from '../../shared/lib/phone';
-import { PageStatusContext, PageTitleContext, type PageStatus } from '../../shared/ui/PageHeader/pageTitle';
+import { PageHeaderSlotContext, PageStatusContext, PageTitleContext, type PageStatus } from '../../shared/ui/PageHeader/pageTitle';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import { DrawerNav, SideNav, WarehouseRail } from './NavMenu';
 import { TopBar, UserMenu, type ShellLayout } from './TopBar';
@@ -61,6 +62,7 @@ export default function AppShell() {
   const layout = useShellLayout(shell?.variant);
   const [pageTitle, setPageTitle] = useState<string | null>(null);
   const [pageStatus, setPageStatus] = useState<PageStatus | null>(null);
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   // Panel qaysi manzilda ochilgan bo'lsa, faqat o'sha yerda ochiq: boshqa sahifaga o'tganda o'zi yopiladi.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
 
@@ -119,7 +121,13 @@ export default function AppShell() {
           title={title}
           back={back}
           onMenuOpen={usesDrawer ? () => setDrawerPath(pathname) : undefined}
-          afterTitle={user.role === 'OPERATOR_LEAD' ? <OperatorStateSwitch /> : pageStatus ? <PageStatusLine status={pageStatus} /> : undefined}
+          afterTitle={user.role === 'OPERATOR_LEAD' ? <OperatorStateSwitch /> : (
+            <>
+              {/* Sahifa boshqaruvi (desktop): «Davr:» pilli va hokazo — `usePageHeaderSlot`. */}
+              {layout === 'desktop' ? <span ref={setHeaderSlot} className={styles.headerSlot} /> : null}
+              {pageStatus ? <PageStatusLine status={pageStatus} /> : null}
+            </>
+          )}
           beforeTools={user.role === 'OPERATOR_LEAD' ? <OperatorBookingsClock /> : undefined}
           bell={
             <NotificationBell
@@ -132,7 +140,7 @@ export default function AppShell() {
           user={
             <UserMenu
               // Yangi sotuvchida ism yo'q (ro'yxat faqat telefon bilan, FE-04) — Profilda kiritadi.
-              name={user.name.trim() || formatUzPhone(user.phone)}
+              name={user.name.trim() && user.role !== 'WHOLESALER' ? shortPersonName(user.name) : user.name.trim() || formatUzPhone(user.phone)}
               roleLabel={t(ROLE_LABEL_KEYS[user.role])}
               touch={touch}
               profilePath={shell.profilePath}
@@ -145,12 +153,14 @@ export default function AppShell() {
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>
             <PageStatusContext value={setPageStatus}>
-              {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}
-              {/* Telefonda yuqori qator 56 px — sahifa holati mazmun tepasida. */}
-              {layout === 'phone' && pageStatus ? <PageStatusLine status={pageStatus} /> : null}
-              <Suspense fallback={<PageLoader compact />}>
-                <Outlet />
-              </Suspense>
+              <PageHeaderSlotContext value={layout === 'desktop' ? headerSlot : null}>
+                {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}
+                {/* Telefonda yuqori qator 56 px — sahifa holati mazmun tepasida. */}
+                {layout === 'phone' && pageStatus ? <PageStatusLine status={pageStatus} /> : null}
+                <Suspense fallback={<PageLoader compact />}>
+                  <Outlet />
+                </Suspense>
+              </PageHeaderSlotContext>
             </PageStatusContext>
           </PageTitleContext>
         </main>

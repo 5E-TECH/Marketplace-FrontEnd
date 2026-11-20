@@ -1,5 +1,5 @@
 import { LockKeyhole, LogOut, MonitorSmartphone, UserRound } from 'lucide-react';
-import { App, Button, Card, List, Tag, Typography } from 'antd';
+import { App, Button, Card, List, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import styles from './SettingsPage.module.css';
@@ -7,6 +7,7 @@ import { useAuthSessionsQuery, useRevokeAuthSessionMutation } from '../../featur
 import { ContentState } from '../../shared/ui/ContentState/ContentState';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { formatDateTime } from '../../shared/lib/date';
+import { Badge } from '../../shared/ui/Badge/Badge';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function SettingsPage() {
       </div>
     </Card>
     <Card className={styles.settingsCard} title={<><MonitorSmartphone /> Faol sessiyalar</>}>
-      {sessions.isPending ? <ContentState state="loading" /> : sessions.isError ? <ContentState state="error" description={getApiErrorMessage(sessions.error)} onAction={() => void sessions.refetch()} /> : <List dataSource={sessions.data} locale={{ emptyText: 'Faol sessiyalar topilmadi' }} renderItem={(session) => <List.Item actions={session.current ? [<Tag key="current" color="success">Joriy qurilma</Tag>] : [<Button key="revoke" danger type="text" icon={<LogOut size={16} />} loading={revoke.isPending && revoke.variables === session.id} onClick={() => revoke.mutate(session.id, { onSuccess: () => void message.success('Sessiya yopildi'), onError: (error) => void message.error(getApiErrorMessage(error)) })}>Sessiyani yopish</Button>]}><List.Item.Meta avatar={<span className={styles.deviceIcon}><MonitorSmartphone /></span>} title={session.userAgent} description={`${session.ipAddress} · ${formatDateTime(session.lastUsedAt ?? session.createdAt)}`} /></List.Item>} />}
+      {sessions.isPending ? <ContentState state="loading" /> : sessions.isError ? <ContentState state="error" description={getApiErrorMessage(sessions.error)} onAction={() => void sessions.refetch()} /> : <List dataSource={sessions.data} locale={{ emptyText: 'Faol sessiyalar topilmadi' }} renderItem={(session) => <List.Item actions={session.current ? [<Badge key="current" tone="success">Joriy qurilma</Badge>] : [<Button key="revoke" danger type="text" icon={<LogOut size={16} />} loading={revoke.isPending && revoke.variables === session.id} onClick={() => revoke.mutate(session.id, { onSuccess: () => void message.success('Sessiya yopildi'), onError: (error) => void message.error(getApiErrorMessage(error)) })}>Sessiyani yopish</Button>]}><List.Item.Meta avatar={<span className={styles.deviceIcon}><MonitorSmartphone /></span>} title={session.userAgent} description={`${session.ipAddress} · ${formatDateTime(session.lastUsedAt ?? session.createdAt)}`} /></List.Item>} />}
     </Card>
   </>;
 }

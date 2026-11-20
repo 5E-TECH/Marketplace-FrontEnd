@@ -25,7 +25,7 @@ import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
 import { FilterPanel } from '../../shared/ui/FilterPanel/FilterPanel';
 import { IconActionButton } from '../../shared/ui/IconActionButton/IconActionButton';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
-import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { FilterSelect } from '../../shared/ui/FilterPanel/FilterSelect';
@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
         dataIndex: 'blocked',
         width: 120,
         render: (value: boolean, row) => (
-          <StatusTag status={value ? 'BLOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'} />
+          <StatusBadge family="user" code={value ? 'BLOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'} />
         ),
       },
       {

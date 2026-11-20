@@ -1,0 +1,252 @@
+/*
+ * sotuvchi-profil, sotuvchi-jshshir, sotuvchi-oferta (E uslubi) — taxtadagi inline stillar aynan:
+ * ikki ustun (2 1 560 / 1 1 340), karta 20 / 16, qatorli ro'yxat (yorliq 168), chip 24, tugmalar 44.
+ */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.cols { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; }
+.colMain { display: flex; flex: 2 1 560px; flex-direction: column; gap: 20px; min-width: 0; }
+.colSide { display: flex; flex: 1 1 340px; flex-direction: column; gap: 20px; min-width: 0; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.card[data-gap='4'] { gap: 4px; }
+.card[data-gap='8'] { gap: 8px; }
+.card[data-gap='10'] { gap: 10px; }
+.card[data-gap='12'] { gap: 12px; }
+.card[data-gap='14'] { gap: 14px; }
+
+.sectionHead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }
+.sectionHead > div { flex: 1 1 240px; min-width: 0; }
+.h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.lead { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.note { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.small { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 18px; }
+
+/* Hujjat sarlavhasi: 40 px belgi qutisi, sarlavha 18/28. */
+.docHead { display: flex; align-items: flex-start; gap: 12px; }
+
+.docIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+}
+
+.docIcon > svg { display: block; width: 18px; height: 18px; }
+.docText { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; }
+.docTitle { margin: 0; font-size: 18px; font-weight: 700; line-height: 28px; }
+.docLead { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px 0 8px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.chip > svg { display: block; flex: none; width: 14px; height: 14px; }
+.chip[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
+.chip[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
+.chip[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
+.chip[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
+.chip[data-tone='neutral'] { box-shadow: inset 0 0 0 1px var(--color-border); }
+
+/* Qatorli ro'yxat: yorliq 168 px chapda, qiymat va izoh o'ngda; qatorlar orasi chiziq. */
+.rows { margin: 0; }
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  min-height: 60px;
+  padding: 10px 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row:last-child { border-bottom: 0; }
+
+.rowLabel {
+  flex: 0 0 168px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.rowValue { display: flex; flex: 1 1 300px; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-width: 0; margin: 0; }
+.rowMain { display: flex; flex: 1 1 220px; flex-direction: column; gap: 2px; min-width: 0; }
+.val { font-size: 14px; font-weight: 600; line-height: 21px; font-variant-numeric: tabular-nums; }
+.sub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.placeholder { color: var(--color-text-secondary); font-weight: 600; }
+
+/* Ustma-ust qatorlar (Asosiy shartlar, Yo'riqnoma): sarlavha 13/600, matn 13/19. */
+.stack { margin: 0; }
+.stack > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-top: 1px solid var(--color-border); }
+.stack > div:first-child { border-top: 0; }
+.stack dt { font-size: 13px; font-weight: 600; line-height: 18px; }
+.stack dd { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; font-variant-numeric: tabular-nums; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn > svg { display: block; flex: none; width: 18px; height: 18px; }
+.btn:hover:not(:disabled) { border-color: var(--color-border-hover); color: var(--color-text); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn[aria-busy='true'] { opacity: 1; cursor: progress; }
+.btnPrimary { border-color: var(--color-action); background: var(--color-action); color: #fff; }
+.btnPrimary:hover:not(:disabled) { border-color: var(--color-action-hover); background: var(--color-action-hover); color: #fff; }
+.btnDanger { border-color: var(--color-danger); color: var(--color-danger); }
+.btnDanger:hover:not(:disabled) { border-color: var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger); }
+.btnBlock { width: 100%; }
+
+.btnSmall {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.btnSmall > svg { width: 16px; height: 16px; }
+
+/* Matnli tugma (jadvaldagi «O‘qish», havolalar): ko'k, ramkasiz. */
+.textBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-action);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.textBtn > svg { display: block; flex: none; width: 16px; height: 16px; }
+.textBtn:hover { background: var(--color-action-soft); color: var(--color-action); }
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-action);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.link > svg { display: block; flex: none; width: 16px; height: 16px; }
+
+/* Jadval (komponentlar-E §17): sarlavha och fon, katta harf; qator 52. */
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; min-width: 640px; border-collapse: separate; border-spacing: 0; }
+.table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.table th {
+  height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; text-align: right; }
+
+.table td {
+  height: 52px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  line-height: 21px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.table td:last-child { text-align: right; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.strong { font-weight: 600; }
+.secondary { color: var(--color-text-secondary); }
+
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-warning-soft);
+}
+
+.spin { animation: spin 0.9s linear infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

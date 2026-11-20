@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import type { components } from '../../../generated/api-types';
 import { httpClient } from '../../../shared/api/httpClient';
 import { readDto } from '../../../shared/api/readDto';
+import type { AffiliateBalance } from '../model/affiliateBalance';
 
 /** Sotuvchi kabineti API (BE-25: /affiliate/*). */
 type Schemas = components['schemas'];
@@ -33,6 +34,25 @@ export function useAffiliateStatsQuery(from: string, to: string, groupBy: Affili
     // Sahifa filtri bo'lmasa kalit bosh sahifadagidek — kesh umumiy (FE-04 TC3).
     queryKey: streamId ? ['affiliate', 'stats', from, to, groupBy, streamId] : ['affiliate', 'stats', from, to, groupBy],
     queryFn: ({ signal }) => getAffiliateStats(from, to, signal, groupBy, streamId),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export type { AffiliateBalance } from '../model/affiliateBalance';
+
+/**
+ * Balans (sotuvchi-bosh «Mavjud» kartasi va menyu cho'ntagi). DIQQAT: backendda hali yo'q (BE-23) —
+ * shakl taklif, `contract/pending-endpoints.json` da; hozir mock bilan ishlaydi.
+ */
+export async function getAffiliateBalance(signal?: AbortSignal): Promise<AffiliateBalance> {
+  const { data } = await httpClient.get<unknown>('/affiliate/balance', { signal });
+  return readDto<AffiliateBalance>(data, ['available', 'held']);
+}
+
+export function useAffiliateBalanceQuery() {
+  return useQuery({
+    queryKey: ['affiliate', 'balance'],
+    queryFn: ({ signal }) => getAffiliateBalance(signal),
     staleTime: 5 * 60_000,
   });
 }
@@ -99,4 +119,32 @@ export async function fetchAllAffiliateLeads(
     page += 1;
   } while (page <= totalPages && page <= LEADS_EXPORT_MAX_PAGES);
   return { items, total, truncated: items.length < total };
+}
+
+/**
+ * Bir nechta sahifa bo'yicha statistika («Mahsulot» filtri): har sahifa — alohida so'rov (kalit
+ * `useAffiliateStatsQuery` bilan bir xil, kesh umumiy), natija `mergeStats` bilan yig'iladi.
+ * `streamIds` bo'sh — filtrsiz bitta so'rov.
+ */
+export function useAffiliateStatsForStreams(from: string, to: string, groupBy: AffiliateStatsGroupBy, streamIds: readonly string[], merge: (list: AffiliateStats[]) => AffiliateStats) {
+  const ids: (string | undefined)[] = streamIds.length ? [...streamIds] : [undefined];
+  return useQueries({
+    queries: ids.map((streamId) => ({
+      queryKey: streamId ? ['affiliate', 'stats', from, to, groupBy, streamId] : ['affiliate', 'stats', from, to, groupBy],
+      queryFn: ({ signal }: { signal: AbortSignal }) => getAffiliateStats(from, to, signal, groupBy, streamId),
+      staleTime: 5 * 60_000,
+    })),
+    combine: (results) => {
+      const failed = results.find((result) => result.isError);
+      const ready = results.every((result) => result.data);
+      return {
+        data: ready ? (results.length === 1 ? results[0].data : merge(results.map((result) => result.data as AffiliateStats))) : undefined,
+        isError: Boolean(failed),
+        isPending: results.some((result) => result.isPending),
+        error: failed?.error ?? null,
+        dataUpdatedAt: Math.min(...results.map((result) => result.dataUpdatedAt)),
+        refetch: () => Promise.all(results.map((result) => result.refetch())),
+      };
+    },
+  });
 }

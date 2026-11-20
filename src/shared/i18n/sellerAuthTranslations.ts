@@ -3,8 +3,8 @@
  * umumiy-kirish (§1), sotuvchi-royxat (§1–4), manbalar/p-s1.md.
  */
 const uz = {
-  'otp.phoneFormat': 'Raqamni to‘liq kiriting: 9 ta raqam, masalan 90 123 45 67',
-  'otp.phoneOperator': 'Bu raqam O‘zbekiston mobil operatoriga tegishli emas',
+  'phone.format': 'Raqamni to‘liq kiriting: 9 ta raqam, masalan 90 123 45 67',
+  'phone.operator': 'Bu raqam O‘zbekiston mobil operatoriga tegishli emas',
   'otp.getCode': 'Kod olish',
   'otp.sending': 'Kod yuborilmoqda…',
   'otp.rules': 'Kod 5 daqiqa amal qiladi. 3 marta xato kiritilsa, 15 daqiqa kutasiz.',
@@ -38,7 +38,9 @@ const uz = {
   'otp.resentTitle': 'Yangi kod yuborildi',
   'otp.resentText': 'Oldingi kod endi ishlamaydi. Yangi kod 5 daqiqa amal qiladi.',
 
-  'session.expiredTextSms': 'Xavfsizlik uchun tizim sizni chiqardi. {phone} raqamiga SMS kod olib, shu yerda qayta kiring — ish yo‘qolmaydi.',
+  'session.expiredTextSms': 'Xavfsizlik uchun tizim sizni chiqardi. SMS kod bilan shu yerda qayta kiring.',
+  'session.smsSent': 'Kod {phone} raqamiga yuborildi.',
+  'session.smsWillSend': 'Kod {phone} raqamiga yuboriladi.',
   'sellerLogin.who': 'Kim sifatida kirasiz',
   'sellerLogin.phoneHint': 'Shu raqamga 6 xonali SMS kod yuboramiz.',
   'sellerLogin.serverText': 'Kod yuborilmadi. Internet aloqasini tekshirib, qayta urinib ko‘ring — kiritgan raqamingiz saqlandi.',
@@ -123,8 +125,8 @@ const uz = {
 type SellerAuthTranslationKey = keyof typeof uz;
 
 const ru: Record<SellerAuthTranslationKey, string> = {
-  'otp.phoneFormat': 'Введите номер полностью: 9 цифр, например 90 123 45 67',
-  'otp.phoneOperator': 'Номер не относится к мобильному оператору Узбекистана',
+  'phone.format': 'Введите номер полностью: 9 цифр, например 90 123 45 67',
+  'phone.operator': 'Номер не относится к мобильному оператору Узбекистана',
   'otp.getCode': 'Получить код',
   'otp.sending': 'Код отправляется…',
   'otp.rules': 'Код действует 5 минут. После 3 ошибок нужно подождать 15 минут.',
@@ -158,7 +160,9 @@ const ru: Record<SellerAuthTranslationKey, string> = {
   'otp.resentTitle': 'Новый код отправлен',
   'otp.resentText': 'Предыдущий код больше не работает. Новый код действует 5 минут.',
 
-  'session.expiredTextSms': 'В целях безопасности система вас вышла. Получите SMS-код на {phone} и войдите здесь же — работа не потеряется.',
+  'session.expiredTextSms': 'В целях безопасности система вас вышла. Войдите здесь же по SMS-коду.',
+  'session.smsSent': 'Код отправлен на номер {phone}.',
+  'session.smsWillSend': 'Код будет отправлен на номер {phone}.',
   'sellerLogin.who': 'Как вы входите',
   'sellerLogin.phoneHint': 'Отправим на этот номер SMS-код из 6 цифр.',
   'sellerLogin.serverText': 'Код не отправлен. Проверьте интернет и попробуйте снова — введённый номер сохранён.',
@@ -241,8 +245,8 @@ const ru: Record<SellerAuthTranslationKey, string> = {
 };
 
 const en: Record<SellerAuthTranslationKey, string> = {
-  'otp.phoneFormat': 'Enter the full number: 9 digits, e.g. 90 123 45 67',
-  'otp.phoneOperator': 'This number does not belong to an Uzbek mobile operator',
+  'phone.format': 'Enter the full number: 9 digits, e.g. 90 123 45 67',
+  'phone.operator': 'This number does not belong to an Uzbek mobile operator',
   'otp.getCode': 'Get code',
   'otp.sending': 'Sending the code…',
   'otp.rules': 'The code is valid for 5 minutes. After 3 wrong attempts you wait 15 minutes.',
@@ -276,7 +280,9 @@ const en: Record<SellerAuthTranslationKey, string> = {
   'otp.resentTitle': 'New code sent',
   'otp.resentText': 'The previous code no longer works. The new code is valid for 5 minutes.',
 
-  'session.expiredTextSms': 'For security the system signed you out. Get an SMS code to {phone} and sign in here — your work is kept.',
+  'session.expiredTextSms': 'For security the system signed you out. Sign in again right here with an SMS code.',
+  'session.smsSent': 'The code was sent to {phone}.',
+  'session.smsWillSend': 'The code will be sent to {phone}.',
   'sellerLogin.who': 'How you sign in',
   'sellerLogin.phoneHint': 'We send a 6-digit SMS code to this number.',
   'sellerLogin.serverText': 'The code was not sent. Check the internet and try again — your number is kept.',

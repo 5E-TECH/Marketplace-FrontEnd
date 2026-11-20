@@ -1,14 +1,12 @@
 import { Table } from 'antd';
-import { ChartColumn, Table2 } from 'lucide-react';
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useState } from 'react';
 import type { AffiliateStats, AffiliateStatsRow } from '../../../features/affiliate/api/affiliateApi';
-import { buildDailyStatsCsv } from '../../../features/affiliate/lib/statsCsv';
 import { statsDays, statsIncome } from '../../../features/affiliate/lib/statsSummary';
-import { saveCsv } from '../../../shared/api/download';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { formatCsvDate } from '../../../shared/lib/csv';
 import { addDays } from '../../../shared/lib/tashkentTime';
-import { ExportButton } from '../../../shared/ui/ExportButton/ExportButton';
+import { ChartViewToggle, type ChartView } from '../../../shared/ui/Chart/ChartViewToggle';
+import { LoadError } from '../../../shared/ui/LoadError/LoadError';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
 import styles from '../AffiliateHomePage.module.css';
 import { IncomeChart } from './IncomeChart';
@@ -17,15 +15,15 @@ interface RevenueByDayProps {
   stats: AffiliateStats | undefined;
   loading: boolean;
   failed: boolean;
+  error: unknown;
+  onRetry: () => void;
   from: string;
   to: string;
 }
 
-type View = 'chart' | 'table';
-
 const VIEW_KEY = 'elchi_home_revenue_view';
 
-function readView(): View {
+function readView(): ChartView {
   try {
     return localStorage.getItem(VIEW_KEY) === 'table' ? 'table' : 'chart';
   } catch {
@@ -33,10 +31,10 @@ function readView(): View {
   }
 }
 
-/** «Daromad kunlar bo‘yicha» (sotuvchi-bosh): oxirgi 7 kun — grafik yoki jadval, CSV eksport (FE-02 TC3). */
-export function RevenueByDay({ stats, loading, failed, from, to }: RevenueByDayProps) {
+/** «Daromad kunlar bo‘yicha» (sotuvchi-bosh): oxirgi 7 kun — grafik yoki jadval. CSV — «Statistika» sahifasida (FE-06). */
+export function RevenueByDay({ stats, loading, failed, error, onRetry, from, to }: RevenueByDayProps) {
   const { t } = useTranslation();
-  const [view, setView] = useState<View>(readView);
+  const [view, setView] = useState<ChartView>(readView);
   const money = (value: number) => t('affiliateHome.sum', { amount: formatMoney(value) });
   const dayKeys = Array.from({ length: 7 }, (_, index) => addDays(from, index));
   const days = statsDays(stats, dayKeys);
@@ -48,7 +46,7 @@ export function RevenueByDay({ stats, loading, failed, from, to }: RevenueByDayP
     { key: 'hold', label: t('sellerHome.hold'), sum: days.reduce((total, day) => total + day.incomeHold, 0), range: dayRange(holdDays) },
   ];
 
-  const changeView = (next: View) => {
+  const changeView = (next: ChartView) => {
     setView(next);
     try {
       localStorage.setItem(VIEW_KEY, next);
@@ -67,21 +65,12 @@ export function RevenueByDay({ stats, loading, failed, from, to }: RevenueByDayP
           </span>
         </div>
         <div className={styles.headActions}>
-          <ViewToggle value={view} onChange={changeView} />
-          <ExportButton
-            disabled={!stats}
-            onExport={() => {
-              if (!stats) throw new Error('Statistika hali yuklanmadi');
-              const { csv, fileName, rows } = buildDailyStatsCsv(stats, from, to, t);
-              saveCsv(csv, fileName);
-              return { fileName, rows };
-            }}
-          />
+          <ChartViewToggle value={view} onChange={changeView} />
         </div>
       </header>
 
       {failed && !stats ? (
-        <p className={styles.muted}>{t('state.error.title')}</p>
+        <LoadError error={error} onRetry={onRetry} />
       ) : stats ? (
         <div className={styles.totalRow}>
           <div className={styles.total}>
@@ -153,45 +142,4 @@ function dayRange(keys: string[]): string {
   const dm = (key: string) => `${key.slice(8, 10)}.${key.slice(5, 7)}`;
   if (first === last) return dm(first);
   return first.slice(5, 7) === last.slice(5, 7) ? `${first.slice(8, 10)}–${dm(last)}` : `${dm(first)}–${dm(last)}`;
-}
-
-const VIEWS: ReadonlyArray<{ value: View; icon: typeof ChartColumn }> = [
-  { value: 'chart', icon: ChartColumn },
-  { value: 'table', icon: Table2 },
-];
-
-/** «Ko‘rinish»: grafik yoki jadval — ikonkali radio guruh (strelkalar bilan almashadi). */
-function ViewToggle({ value, onChange }: { value: View; onChange: (view: View) => void }) {
-  const { t } = useTranslation();
-  const refs = useRef<Array<HTMLButtonElement | null>>([]);
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0;
-    if (!step) return;
-    event.preventDefault();
-    const next = (index + step + VIEWS.length) % VIEWS.length;
-    onChange(VIEWS[next].value);
-    refs.current[next]?.focus();
-  };
-  return (
-    <div role="radiogroup" aria-label={t('sellerHome.view')} className={styles.viewToggle}>
-      {VIEWS.map(({ value: option, icon: Icon }, index) => (
-        <button
-          key={option}
-          ref={(node) => {
-            refs.current[index] = node;
-          }}
-          type="button"
-          role="radio"
-          aria-checked={value === option}
-          aria-label={option === 'chart' ? t('sellerHome.chart') : t('sellerHome.table')}
-          title={option === 'chart' ? t('sellerHome.chart') : t('sellerHome.table')}
-          tabIndex={value === option ? 0 : -1}
-          onClick={() => onChange(option)}
-          onKeyDown={(event) => onKeyDown(event, index)}
-        >
-          <Icon size={18} aria-hidden />
-        </button>
-      ))}
-    </div>
-  );
 }
