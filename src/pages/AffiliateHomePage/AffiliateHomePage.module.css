@@ -52,7 +52,7 @@
 }
 
 .kpiLabel {
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 600;
   line-height: 18px;
@@ -109,7 +109,7 @@
 
 .news {
   display: flex;
-  flex: 1 1 360px;
+  flex: 1 1 420px;
   flex-direction: column;
   min-width: 0;
 }
@@ -146,62 +146,82 @@
   line-height: 20px;
 }
 
-.badge {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--color-action-soft);
-  color: var(--color-action);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 18px;
+/* «Bugungi xabarlar» (sotuvchi-bosh): karta paddingsiz, qatorlar chiziq bilan, pastda info qatori. */
+.news.card { padding: 0; overflow: hidden; }
+
+.newsTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 12px;
 }
 
+.newsTop h2 { margin: 0; color: var(--color-text); font-size: 16px; font-weight: 700; line-height: 24px; }
+.newsPad { padding: 0 20px 20px; }
+
 .newsList {
-  display: flex;
-  flex-direction: column;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .newsList li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.newsList li:first-child {
-  padding-top: 0;
-}
-
-.newsHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.newsHead strong {
-  flex: 1 1 auto;
-  min-width: 0;
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  column-gap: 10px;
+  padding: 12px 20px 14px 14px;
+  border-top: 1px solid var(--color-border);
   color: var(--color-text);
-  font-size: 14px;
-  line-height: 20px;
 }
+
+.newsBody { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.newsHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.newsTime {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.newsProduct { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.newsProductName { min-width: 0; font-size: 14px; font-weight: 600; line-height: 20px; }
+.newsStream { color: var(--color-text-secondary); font-weight: 500; }
+
+.newsAmount {
+  flex: none;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.newsText { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
 
 .unreadDot {
-  flex: none;
+  display: block;
   width: 8px;
   height: 8px;
+  margin-top: 8px;
   border-radius: 999px;
-  background: var(--color-action);
+  background: var(--color-nav);
 }
 
-.news .note {
-  margin-top: auto;
-  padding-top: 12px;
+.newsFoot {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: auto 0 0;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
 }
+
+.newsFoot > svg { flex: none; margin-top: 2px; }
 
 .pageLink {
   display: inline-flex;
@@ -445,8 +465,10 @@
 .chip {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   height: 24px;
   padding: 0 10px;
+  box-sizing: border-box;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
@@ -521,7 +543,8 @@
   background: var(--color-nav);
 }
 
-.swatch[data-series='hold'] {
+.swatch[data-series='hold'],
+.swatch[data-part='held'] {
   background: var(--color-text-faint);
 }
 
@@ -620,4 +643,162 @@
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* Belgili chip (sotuvchi-bosh: «JShShIR tasdiqlangan», holat belgilari) — chapda 8 px. */
+.chip:has(> svg) { padding-left: 8px; }
+.chip > svg { display: block; flex: none; }
+
+/* 1-qator: «Bugun» (3 1 600) va «Mavjud» (1 1 420) yonma-yon (sotuvchi-bosh). */
+.today {
+  display: flex;
+  flex: 3 1 600px;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 20px 24px;
+}
+
+.balance {
+  display: flex;
+  flex: 1 1 420px;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.balanceTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.balanceAmount { display: flex; flex-direction: column; }
+
+.balanceValue {
+  color: var(--color-text);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.balanceValue[data-negative] { color: var(--color-danger); }
+
+.withdraw {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-action);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-action);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.withdraw:hover:not(:disabled) { background: var(--color-action-soft); color: var(--color-action); }
+.withdraw:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.balanceBar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--color-sunken);
+}
+
+.balanceBar > span { display: block; flex: 1 1 0; min-width: 0; border-radius: 4px; background: var(--color-nav); }
+.balanceBar > span[data-part='held'] { background: var(--color-text-faint); }
+
+.balanceLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 18px;
+  list-style: none;
+}
+
+.balanceLegend li { display: flex; align-items: flex-start; gap: 8px; }
+.balanceLegend .swatch { margin-top: 4px; }
+.balanceLegendWide { flex: 1 1 260px; min-width: 0; }
+.strong { font-weight: 600; white-space: nowrap; }
+.nums { font-variant-numeric: tabular-nums; }
+.secondary { color: var(--color-text-secondary); }
+
+.payoutBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-warning);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.payoutBlock > svg { flex: none; margin-top: 2px; }
+
+.payoutRules {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.balanceFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.balanceCardNo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.balanceCardNo > svg { color: var(--color-text-secondary); }
+
+.balanceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  color: var(--color-action);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* Telefon: «Pul yechish» karta ichida to'liq kenglikda (sotuvchi-bosh qoida 15). */
+@container content (max-width: 575px) {
+  .balanceTop .withdraw { width: 100%; }
 }

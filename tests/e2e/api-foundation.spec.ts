@@ -83,10 +83,18 @@ test('TC2: ikkinchi tab ochildi → qayta login so‘ralmaydi; chiqish hamma tab
 
 test('TC3: CSV yuklab olish — fayl nomi, UTF-8 BOM, «;» ajratgich va toast', async ({ page }) => {
   await signIn(page, '900000001');
-  await expect(page.getByRole('list', { name: 'Bugun' }).getByRole('listitem')).toHaveCount(5);
+  // CSV — «Statistika» eksport oynasidan (bosh sahifada eksport yo'q — sotuvchi-bosh).
+  await page.goto('/affiliate/stats');
+  await page.getByTestId('stats-funnel').waitFor();
 
+  await page.getByRole('button', { name: 'Eksport', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: /Eksport — Statistika/ });
+  // «Eksport ▾» menyu bo'lsa (FE-06, sotuvchi-statistika) — avval «CSV».
+  const csv = page.getByRole('menuitem', { name: /^CSV/ });
+  await expect(dialog.or(csv)).toBeVisible();
+  if (await csv.isVisible()) await csv.click();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Yuklab olish (CSV)' }).click();
+  await dialog.getByRole('button', { name: 'Eksport qilish' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^statistika_\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{4}\.csv$/);
 

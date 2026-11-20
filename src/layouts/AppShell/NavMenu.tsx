@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { findNavSection, getNavGroups, prefetchRoute } from '../../app/router/routeAccess';
+import { BalancePocket } from '../../features/affiliate/ui/BalancePocket';
 import type { UserRole } from '../../features/auth/model/authTypes';
 import { BRAND } from '../../shared/config/brand';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -61,6 +62,7 @@ export function SideNav({ role }: { role: UserRole }) {
     <nav className={styles.nav} aria-label={t('shell.mainMenu')}>
       <BrandRow />
       <NavItems role={role} />
+      {role === 'AFFILIATE' ? <BalancePocket /> : null}
     </nav>
   );
 }

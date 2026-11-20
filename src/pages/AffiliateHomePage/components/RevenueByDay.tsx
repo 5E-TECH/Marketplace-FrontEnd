@@ -2,13 +2,11 @@ import { Table } from 'antd';
 import { ChartColumn, Table2 } from 'lucide-react';
 import { useRef, useState, type KeyboardEvent } from 'react';
 import type { AffiliateStats, AffiliateStatsRow } from '../../../features/affiliate/api/affiliateApi';
-import { buildDailyStatsCsv } from '../../../features/affiliate/lib/statsCsv';
 import { statsDays, statsIncome } from '../../../features/affiliate/lib/statsSummary';
-import { saveCsv } from '../../../shared/api/download';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { formatCsvDate } from '../../../shared/lib/csv';
 import { addDays } from '../../../shared/lib/tashkentTime';
-import { ExportButton } from '../../../shared/ui/ExportButton/ExportButton';
+import { LoadError } from '../../../shared/ui/LoadError/LoadError';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
 import styles from '../AffiliateHomePage.module.css';
 import { IncomeChart } from './IncomeChart';
@@ -17,6 +15,8 @@ interface RevenueByDayProps {
   stats: AffiliateStats | undefined;
   loading: boolean;
   failed: boolean;
+  error: unknown;
+  onRetry: () => void;
   from: string;
   to: string;
 }
@@ -33,8 +33,8 @@ function readView(): View {
   }
 }
 
-/** «Daromad kunlar bo‘yicha» (sotuvchi-bosh): oxirgi 7 kun — grafik yoki jadval, CSV eksport (FE-02 TC3). */
-export function RevenueByDay({ stats, loading, failed, from, to }: RevenueByDayProps) {
+/** «Daromad kunlar bo‘yicha» (sotuvchi-bosh): oxirgi 7 kun — grafik yoki jadval. CSV — «Statistika» sahifasida (FE-06). */
+export function RevenueByDay({ stats, loading, failed, error, onRetry, from, to }: RevenueByDayProps) {
   const { t } = useTranslation();
   const [view, setView] = useState<View>(readView);
   const money = (value: number) => t('affiliateHome.sum', { amount: formatMoney(value) });
@@ -68,20 +68,11 @@ export function RevenueByDay({ stats, loading, failed, from, to }: RevenueByDayP
         </div>
         <div className={styles.headActions}>
           <ViewToggle value={view} onChange={changeView} />
-          <ExportButton
-            disabled={!stats}
-            onExport={() => {
-              if (!stats) throw new Error('Statistika hali yuklanmadi');
-              const { csv, fileName, rows } = buildDailyStatsCsv(stats, from, to, t);
-              saveCsv(csv, fileName);
-              return { fileName, rows };
-            }}
-          />
         </div>
       </header>
 
       {failed && !stats ? (
-        <p className={styles.muted}>{t('state.error.title')}</p>
+        <LoadError error={error} onRetry={onRetry} />
       ) : stats ? (
         <div className={styles.totalRow}>
           <div className={styles.total}>

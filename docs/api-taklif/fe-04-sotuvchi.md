@@ -193,9 +193,23 @@ Joriy versiya PDF fayli («PDF yuklab olish»):
 - `Content-Disposition: attachment; filename="sotuvchi-ofertasi-1.0.pdf"`;
 - PDF ni superadmin yuklaydi (hujjat-sotuvchi-oferta, «Hujjat qayerdan ochiladi»).
 
-## 5. Bosh sahifa (mavjud API)
+## 5. Bosh sahifa
 
-Bosh sahifa yangi endpoint talab qilmaydi:
+### `GET /api/v1/affiliate/balance` (faqat `AFFILIATE`) — yangi, BE-23
+
+«Mavjud» kartasi va menyu ostidagi cho‘ntak (sotuvchi-bosh; karkas-E 1.5):
+
+```json
+{ "available": 692500, "held": 302500 }
+```
+
+- `available` — yechib olsa bo‘ladigan pul, so‘m; qaytarilgan buyurtma haqi teskari yozilsa manfiy bo‘ladi;
+- `held` — ushlab turilgan haq (Elchi posilka pulini o‘tkazguncha, odatda 1–2 kun), so‘m.
+
+Pul yechish qoidalari (kuniga 1 marta, kamida 50 000 so‘m, 1% soliq) ekranda matn sifatida; yechish
+so‘rovi va tarixi — FE-07.
+
+Qolgan bloklar mavjud API dan:
 
 - `GET /affiliate/stats?groupBy=DAY` — «Bugun» va 7 kun;
 - `GET /affiliate/stats?groupBy=STREAM` — «Sahifalaringiz — bugun» va daromadning sahifalar bo‘yicha
