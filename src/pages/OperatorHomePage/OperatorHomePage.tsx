@@ -22,7 +22,6 @@ import { clock, durationLabel, outcomeLabel, rejectLabel, statusLabel } from '..
 import { isNoAnswer } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../features/operator/lib/useNow';
 import type { LeadResultAccepted, LeadResultInput, LeadStatus, OperatorAttemptItem } from '../../features/operator/model/operatorTypes';
-import { LeadStatusChip } from '../../features/operator/ui/OperatorChip';
 import { getApiErrorCode, getApiErrorMessage, getApiRequestId } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDate, tashkentDateTime } from '../../shared/lib/tashkentTime';
@@ -33,6 +32,7 @@ import { QueueColumn } from './QueueColumn';
 import type { OrderDraft } from './ResultPanel';
 import { confirmBlocked, RESULT_TILES, type DialogChoice, type ResultChoice } from './resultChoices';
 import styles from './OperatorWorkspace.module.css';
+import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 
 /** Ochiq lid sahifadan chiqib qaytganda ham ochiq turadi — natijasiz yopilmaydi. */
 const ACTIVE_KEY = 'elchi.operator.activeLead';
@@ -468,7 +468,7 @@ function TodayAttempts({ items, total }: { items: OperatorAttemptItem[] | undefi
                       <td className={styles.cellTime}>{clock(item.at)}</td>
                       <td className={styles.cellStrong}>{item.leadId}</td>
                       <td><span className={styles.cellStrong}>{item.customerName}</span><span className={styles.cellSub}>{item.productName}</span></td>
-                      <td><span className={styles.cellResult}><LeadStatusChip status={ATTEMPT_STATUS[item.outcome]} />{detail ? <span>{detail}</span> : null}</span></td>
+                      <td><span className={styles.cellResult}><StatusBadge family="lead" code={ATTEMPT_STATUS[item.outcome]} titlePrefix={t('opw.statusTitle')} />{detail ? <span>{detail}</span> : null}</span></td>
                       <td className={styles.numeric}>{item.durationSeconds != null ? `${String(Math.floor(item.durationSeconds / 60)).padStart(2, '0')}:${String(item.durationSeconds % 60).padStart(2, '0')}` : '—'}</td>
                     </tr>
                   );

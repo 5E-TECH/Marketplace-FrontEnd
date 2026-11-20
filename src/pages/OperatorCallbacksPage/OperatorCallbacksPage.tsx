@@ -7,13 +7,13 @@ import { useOperatorLeadsQuery } from '../../features/operator/api/operatorQueri
 import { clock, dayLabel, durationLabel, outcomeLabel } from '../../features/operator/lib/leadFormat';
 import { REMINDER_MINUTES } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../features/operator/lib/useNow';
-import { OperatorChip } from '../../features/operator/ui/OperatorChip';
 import { notificationPermission } from '../../features/operator/ui/useCallbackReminders';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { addDays, tashkentDate } from '../../shared/lib/tashkentTime';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import styles from './OperatorCallbacksPage.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
 
 type Scheduled = OperatorLead & { callbackAt: string };
 const MINUTE = 60_000;
@@ -171,9 +171,9 @@ function NextCall({ lead, now, onGo }: { lead: Scheduled; now: number; onGo: () 
         <div className={styles.nextTime}>
           <h2 id="callbacks-next-title">{tomorrow ? t('opc.nextTomorrowShort') : t('opc.next')}</h2>
           <span className={styles.bigTime}>{clock(at)}</span>
-          <OperatorChip tone={late ? 'danger' : due ? 'warning' : 'neutral'} icon={Clock}>
+          <Badge tone={late ? 'danger' : due ? 'warning' : 'neutral'} icon={Clock}>
             {late ? t('opc.late', { minutes: Math.floor((now - at) / MINUTE) }) : due ? t('opc.dueNow') : tomorrow ? dayLabel(at) : t('opc.in', { time: durationLabel(at - now, t) })}
-          </OperatorChip>
+          </Badge>
         </div>
         <div className={styles.nextInfo}>
           <p>{lead.customerName} <span>· {lead.id}</span></p>

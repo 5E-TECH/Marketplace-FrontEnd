@@ -30,7 +30,7 @@
 
 .heading span {
   overflow: hidden;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;

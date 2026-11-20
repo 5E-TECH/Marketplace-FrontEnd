@@ -35,7 +35,7 @@
 }
 
 .icon > svg { width: 20px; height: 20px; }
-.icon[data-tone='danger'] { background: var(--color-error-soft); color: var(--color-danger); }
+.icon[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
 .icon[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
 .icon[data-tone='neutral'] { background: var(--color-sunken); color: var(--color-text-secondary); }
 .headText { flex: 1 1 auto; min-width: 0; }

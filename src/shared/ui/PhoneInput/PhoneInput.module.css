@@ -1,0 +1,48 @@
+/* Telefon maydoni (komponentlar-E §19): 44 quti (kirish sahifalarida 52), «+998» — chapda kulrang blok. */
+.input {
+  height: 44px;
+  overflow: hidden;
+  padding-block: 0;
+  padding-left: 0;
+  border-color: var(--color-field-border);
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.input input {
+  height: 42px;
+  font-size: 16px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.large { height: 52px; }
+.large input { height: 50px; }
+
+.input :global(.ant-input-prefix) {
+  align-self: stretch;
+  margin-inline-end: 12px;
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 12px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+/* Faqat o'qish (kod yuborilgach, profil): kulrang, chegara och. */
+.readonly {
+  border-color: var(--color-border) !important;
+  background: var(--color-sunken) !important;
+  box-shadow: none !important;
+}
+
+.readonly .prefix { background: transparent; }

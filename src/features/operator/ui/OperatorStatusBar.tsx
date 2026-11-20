@@ -7,10 +7,10 @@ import { tashkentClock } from '../../../shared/lib/tashkentTime';
 import type { OperatorState } from '../api/operatorApi';
 import { DEFAULT_MAX_BOOKINGS, useOperatorLeadsQuery, useOperatorStateMutation, useOperatorStateQuery } from '../api/operatorQueries';
 import { useNow } from '../lib/useNow';
-import { LeadStatusChip } from './OperatorChip';
 import { DialogCancel, DialogPrimary, OperatorDialog } from './OperatorDialog';
 import { useCallbackReminders } from './useCallbackReminders';
 import styles from './OperatorStatusBar.module.css';
+import { StatusBadge } from '../../../shared/ui/StatusBadge/StatusBadge';
 
 const STATES: ReadonlyArray<{ value: OperatorState; label: 'operator.online' | 'operator.break' | 'operator.offline' }> = [
   { value: 'ONLINE', label: 'operator.online' },
@@ -97,7 +97,7 @@ export function OperatorStateSwitch() {
             {bookings.map((lead) => (
               <li key={lead.id}>
                 <span><b>{lead.customerName} · {lead.id}</b><small>{lead.productName}</small></span>
-                <LeadStatusChip status={lead.status} />
+                <StatusBadge family="lead" code={lead.status} titlePrefix={t('opw.statusTitle')} />
               </li>
             ))}
           </ul>

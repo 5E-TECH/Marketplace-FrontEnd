@@ -23,7 +23,7 @@
 .panel :global(.ant-picker),
 .panel :global(.ant-select-selector) {
   color: var(--color-text);
-  background: var(--color-surface-subtle) !important;
+  background: var(--color-sunken) !important;
   border-color: var(--color-border) !important;
   box-shadow: none !important;
 }
@@ -37,8 +37,8 @@
 .panel :global(.ant-input-affix-wrapper-focused),
 .panel :global(.ant-picker-focused),
 .panel :global(.ant-select-focused .ant-select-selector) {
-  border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 2px var(--color-accent-soft) !important;
+  border-color: var(--color-action) !important;
+  box-shadow: 0 0 0 2px var(--color-action-soft) !important;
 }
 
 .select {

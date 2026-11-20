@@ -39,7 +39,6 @@
   line-height: 16px;
 }
 
-.phone,
 .password {
   height: 52px;
   border-color: var(--color-field-border);
@@ -49,19 +48,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-.phone input,
 .password input {
   font-size: 16px !important;
 }
 
-/* «+998» — chapdagi kulrang blok, o'ngida chiziq. */
-.phone {
-  overflow: hidden;
-  padding-block: 0;
-  padding-left: 0;
-}
-
-.phone input,
 .password input {
   height: 50px;
 }
@@ -70,31 +60,13 @@
   padding-block: 0;
 }
 
-.phone :global(.ant-input-prefix) {
-  align-self: stretch;
-  margin-inline-end: 14px;
-}
-
-.phonePrefix {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: 0 14px;
-  border-right: 1px solid var(--color-border);
-  background: var(--color-sunken);
-  color: var(--color-text-muted);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 24px;
-}
-
 .password {
   letter-spacing: 0.12em;
 }
 
 .password :global(.ant-input-suffix) {
   margin-inline-end: -4px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .warning,
@@ -112,7 +84,7 @@
 }
 
 .danger {
-  background: var(--color-error-soft);
+  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
@@ -157,7 +129,7 @@
   margin: 4px 0 0;
   padding-top: 20px;
   border-top: 1px solid var(--color-border);
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 21px;
 }
@@ -221,7 +193,7 @@
 }
 
 .fieldAside {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   white-space: nowrap;
@@ -239,14 +211,14 @@
 
 .fieldHint {
   margin: 6px 0 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
 
 .field :global(.ant-form-item-extra) {
   margin-top: 6px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
@@ -282,17 +254,6 @@
   text-underline-offset: 2px;
 }
 
-/* Kod yuborilgach raqam o'zgarmaydi — kulrang, faqat o'qish. */
-.phoneReadonly {
-  border-color: var(--color-border) !important;
-  background: var(--color-sunken) !important;
-  box-shadow: none !important;
-}
-
-.phoneReadonly .phonePrefix {
-  background: transparent;
-}
-
 .code {
   height: 52px;
   padding: 0 16px;
@@ -326,7 +287,7 @@
 
 .caption {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   text-align: center;
@@ -339,7 +300,7 @@
   margin: 4px 0 0;
   padding-top: 20px;
   border-top: 1px solid var(--color-border);
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 21px;
 }
@@ -359,7 +320,7 @@
 }
 
 .timerLabel {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 600;
   line-height: 18px;
@@ -375,7 +336,7 @@
 }
 
 .timerPhone {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   font-variant-numeric: tabular-nums;
@@ -405,7 +366,7 @@
   border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -436,7 +397,7 @@
 
 .lead p {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 21px;
 }

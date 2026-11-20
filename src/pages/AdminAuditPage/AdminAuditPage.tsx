@@ -1,4 +1,4 @@
-import { Input, Tag, Typography } from 'antd';
+import { Input, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { useAdminAuditLogsQuery } from '../../features/adminAudit/api/adminAuditQueries';
@@ -18,6 +18,7 @@ import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import { DateRangeFilter } from '../../shared/ui/DateRangeFilter/DateRangeFilter';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import styles from './AdminAuditPage.module.css';
+import { CodeBadge } from '../../shared/ui/Badge/Badge';
 
 export default function AdminAuditPage() {
   const { locale, t } = useTranslation();
@@ -56,7 +57,7 @@ export default function AdminAuditPage() {
     {
       title: t('admin.audit.action'),
       dataIndex: 'action',
-      render: (value: string) => <Tag color="blue">{value}</Tag>,
+      render: (value: string) => <CodeBadge>{value}</CodeBadge>,
     },
     {
       title: t('admin.audit.object'),

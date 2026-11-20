@@ -1,0 +1,157 @@
+/* Tanlov maydoni (komponentlar-E §20, umumiy-komponentlar «2. Viloyat → tuman kaskadi»): 44, matn 16. */
+.wrap { position: relative; }
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: left;
+  cursor: pointer;
+}
+
+select.control { display: block; padding-right: 44px; appearance: none; -webkit-appearance: none; }
+.control[data-empty] { color: var(--color-text-secondary); }
+.control:focus-visible, .control[aria-expanded='true'] { border-color: var(--color-action); outline: 0; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.control[aria-invalid='true'] { border-color: var(--color-danger); }
+
+.control:disabled {
+  border-color: var(--color-border-strong);
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  opacity: 1;
+  -webkit-text-fill-color: currentcolor;
+  cursor: not-allowed;
+}
+
+.control > svg { display: block; flex: none; width: 18px; height: 18px; color: var(--color-text-secondary); }
+.value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.chevron {
+  position: absolute;
+  top: 13px;
+  right: 14px;
+  display: block;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.spinner {
+  display: block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-border-strong);
+  border-top-color: var(--color-nav);
+  border-radius: 999px;
+  animation: select-spin 0.8s linear infinite;
+}
+
+.wrap > .spinner { position: absolute; top: 14px; right: 14px; pointer-events: none; }
+
+/* Ochiluvchi ro'yxat: padding 6, band 36; telefonda varaq ichida band 44. */
+.popover :global(.ant-popover-container) {
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgb(16 23 51 / 16%), 0 2px 6px rgb(16 23 51 / 6%);
+}
+
+.panel { display: flex; flex-direction: column; min-width: 0; }
+.search { position: relative; margin: 0 0 6px; }
+
+.search > svg {
+  position: absolute;
+  top: 9px;
+  left: 12px;
+  display: block;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.search > input {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  padding: 0 12px 0 38px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.search > input:focus { border-color: var(--color-action); outline: 0; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 304px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.list > li {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.list > li > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.list > li[data-active] { background: var(--color-row-hover); }
+.list > li[aria-selected='true'] { background: var(--color-action-soft); font-weight: 600; }
+.list > li > svg { display: block; flex: none; width: 18px; height: 18px; color: var(--color-action); }
+.empty { display: flex; flex-direction: column; gap: 2px; padding: 10px 10px 12px; }
+.empty > strong { font-size: 14px; font-weight: 600; line-height: 20px; }
+.empty > span { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.sheetHead { display: flex; flex-direction: column; gap: 2px; }
+.sheetHint { color: var(--color-text-secondary); font-size: 13px; font-weight: 400; line-height: 18px; }
+.panel[data-sheet] .search { margin-bottom: 8px; }
+.panel[data-sheet] .search > svg { top: 13px; }
+.panel[data-sheet] .search > input { height: 44px; }
+.panel[data-sheet] .list { max-height: none; }
+.panel[data-sheet] .list > li { height: 44px; font-size: 15px; }
+
+@keyframes select-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

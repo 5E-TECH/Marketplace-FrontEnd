@@ -3,16 +3,17 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTokenSignInMutation } from '../../../../features/auth/api/useLoginMutation';
 import { loginWithOtp } from '../../../../features/sellerAuth/api/sellerAuthApi';
-import { otpCodeDigits, pendingLoading, sellerPhoneRules } from '../../../../features/sellerAuth/lib/fieldRules';
+import { otpCodeDigits, pendingLoading } from '../../../../features/sellerAuth/lib/fieldRules';
 import { useCountdown } from '../../../../features/sellerAuth/lib/useCountdown';
 import { useOtpFlow, type OtpFlowState } from '../../../../features/sellerAuth/lib/useOtpFlow';
 import { OtpBlockedPanel } from '../../../../features/sellerAuth/ui/OtpBlockedPanel';
 import { OtpCodeField } from '../../../../features/sellerAuth/ui/OtpCodeField';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
-import { formatUzPhone, getUzLocalPhone } from '../../../../shared/lib/phone';
+import { getUzLocalPhone } from '../../../../shared/lib/phone';
 import { AuthNotice } from '../../../../shared/ui/AuthLayout/AuthNotice';
-import { PhoneInput } from '../../../../shared/ui/AuthLayout/PhoneInput';
+import { PhoneInput } from '../../../../shared/ui/PhoneInput/PhoneInput';
 import styles from '../../../../shared/ui/AuthLayout/authForm.module.css';
+import { uzPhoneRules } from '../../../../shared/lib/phoneRules';
 
 interface SellerLoginValues {
   phone: string;
@@ -122,16 +123,13 @@ export function SellerLoginForm({ roleSwitch, initialPhone }: SellerLoginFormPro
             <Form.Item
               className={styles.field}
               name="phone"
-              normalize={(value?: string) => getUzLocalPhone(value ?? '')}
-              // Kod yuborilgach raqam faqat o'qiladi — «90 123 45 67» ko'rinishida.
-              getValueProps={(value?: string) => ({ value: state.phase === 'code' && value ? formatUzPhone(value).replace(/^\+998 /, '') : value })}
-              rules={state.phase === 'phone' ? sellerPhoneRules(t) : []}
+              rules={state.phase === 'phone' ? uzPhoneRules(t) : []}
               validateTrigger={['onBlur', 'onSubmit']}
               validateStatus={state.phoneError ? 'error' : undefined}
-              help={state.phoneError ? t('otp.phoneOperator') : undefined}
+              help={state.phoneError ? t('phone.operator') : undefined}
               extra={state.phase === 'code' ? t('otp.sentTo') : t('sellerLogin.phoneHint')}
             >
-              <PhoneInput id={PHONE_ID} readOnly={state.phase === 'code'} autoFocus={state.phase === 'phone'} />
+              <PhoneInput size="large" id={PHONE_ID} readOnly={state.phase === 'code'} autoFocus={state.phase === 'phone'} />
             </Form.Item>
           </div>
 

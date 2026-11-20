@@ -73,7 +73,7 @@
 .chip > svg { display: block; flex: none; width: 14px; height: 14px; }
 .chip[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
 .chip[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
-.chip[data-tone='danger'] { background: var(--color-error-soft); color: var(--color-danger); }
+.chip[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
 .chip[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
 .chip[data-tone='neutral'] { box-shadow: inset 0 0 0 1px var(--color-border); }
 
@@ -145,7 +145,7 @@
 .btnPrimary { border-color: var(--color-action); background: var(--color-action); color: #fff; }
 .btnPrimary:hover:not(:disabled) { border-color: var(--color-action-hover); background: var(--color-action-hover); color: #fff; }
 .btnDanger { border-color: var(--color-danger); color: var(--color-danger); }
-.btnDanger:hover:not(:disabled) { border-color: var(--color-danger); background: var(--color-error-soft); color: var(--color-danger); }
+.btnDanger:hover:not(:disabled) { border-color: var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger); }
 .btnBlock { width: 100%; }
 
 .btnSmall {

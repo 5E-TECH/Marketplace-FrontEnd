@@ -22,7 +22,7 @@
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  background: var(--color-error-soft);
+  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
@@ -155,26 +155,6 @@
   line-height: 18px;
   font-variant-numeric: tabular-nums;
 }
-
-.copy {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.copy:hover { background: var(--color-sunken); }
-.copy svg { display: block; width: 14px; height: 14px; }
 
 .rate {
   display: flex;

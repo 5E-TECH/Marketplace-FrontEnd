@@ -3,10 +3,10 @@ import { CircleCheck, ExternalLink, PackageX, TriangleAlert, X } from 'lucide-re
 import { useLeadProductQuery } from '../../features/operator/api/operatorQueries';
 import { sum } from '../../features/operator/lib/leadFormat';
 import type { LeadCard } from '../../features/operator/model/operatorTypes';
-import { OperatorChip } from '../../features/operator/ui/OperatorChip';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import styles from './OperatorWorkspace.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
 
 /**
  * «Mahsulot ma'lumoti» (operator-mahsulot): o'ngdagi panel, modal emas — lid kartasi va natijalar
@@ -64,7 +64,7 @@ export function ProductDrawer({ card, open, onClose }: { card: LeadCard; open: b
             <h3>{t('opw.productStock')}</h3>
             {info.available > 0 ? (
               <p className={styles.stockLine}>
-                <OperatorChip tone="success" icon={CircleCheck}>{t('opw.productInStock')}</OperatorChip>
+                <Badge tone="success" icon={CircleCheck}>{t('opw.productInStock')}</Badge>
                 <span>{t('opw.productAvailableBefore')} <strong>{t('opw.productAvailableCount', { count: info.available })}</strong> {t('opw.productAvailableAfter')}</span>
               </p>
             ) : (

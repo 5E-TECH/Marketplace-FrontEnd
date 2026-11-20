@@ -15,7 +15,7 @@
 .short {
   height: 40px;
   padding: 0 8px 0 10px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }

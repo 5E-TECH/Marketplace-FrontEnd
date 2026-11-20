@@ -138,7 +138,7 @@ test('raqam allaqachon ro‘yxatda → «Bu raqam bilan hisob bor», «Kirishga 
   await expect(page.getByRole('status')).toContainText('+998 90 000 00 01 ro‘yxatdan o‘tgan.');
   await page.getByRole('button', { name: 'Kirishga o‘tish' }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByLabel('Telefon raqami')).toHaveValue('900000001');
+  await expect(page.getByLabel('Telefon raqami')).toHaveValue('90 000 00 01');
 });
 
 test('telefon tekshiruvi: 9 raqam va O‘zbekiston operatori; serverga yuborilmaydi', async ({ page }) => {

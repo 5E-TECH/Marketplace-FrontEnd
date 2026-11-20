@@ -55,9 +55,11 @@ export const appTheme: ThemeConfig = {
       colorPrimaryHover: palette.actionHover,
       colorPrimaryActive: palette.actionHover,
     },
-    Input: { activeShadow: `0 0 0 3px ${palette.focusRing}` },
-    InputNumber: { activeShadow: `0 0 0 3px ${palette.focusRing}` },
-    Select: { activeOutlineColor: palette.focusRing },
+    // Maydon chegarasi #7c859f (komponentlar-E §0; kontrast 3.68 — UI ≥ 3); tugma chegarasi — #c9d1e0.
+    Input: { activeShadow: `0 0 0 3px ${palette.focusRing}`, colorBorder: palette.fieldBorder },
+    InputNumber: { activeShadow: `0 0 0 3px ${palette.focusRing}`, colorBorder: palette.fieldBorder },
+    Select: { activeOutlineColor: palette.focusRing, colorBorder: palette.fieldBorder },
+    DatePicker: { activeShadow: `0 0 0 3px ${palette.focusRing}`, colorBorder: palette.fieldBorder },
     Card: { borderRadiusLG: 16 },
     Table: {
       headerBg: palette.sunken,

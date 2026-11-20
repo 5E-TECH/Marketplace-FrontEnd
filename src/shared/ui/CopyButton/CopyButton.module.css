@@ -1,0 +1,53 @@
+/* Nusxa tugmasi: ikonka (28 / 36) yoki matnli ikkinchi darajali tugma. */
+.icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.icon[data-size='sm'] { width: 28px; height: 28px; border-radius: 8px; }
+.icon:hover { background: var(--color-sunken); }
+.icon > svg { display: block; width: 16px; height: 16px; }
+.icon[data-size='sm'] > svg { width: 14px; height: 14px; }
+.icon[data-copied] { color: var(--color-success); }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button:hover { border-color: var(--color-border-hover); }
+.button > svg { display: block; flex: none; width: 16px; height: 16px; }
+.button[data-copied] > svg { color: var(--color-success); }
+
+@media (pointer: coarse) {
+  .icon, .icon[data-size='sm'] { width: 44px; height: 44px; }
+  .button { height: 44px; }
+}

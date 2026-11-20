@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Input, Tabs, Tag, Typography } from 'antd';
+import { Alert, Button, Checkbox, Input, Tabs, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
@@ -21,6 +21,7 @@ import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
 import { SearchInput } from '../../shared/ui/SearchInput/SearchInput';
 import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
 import styles from './AdminInventoryPage.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
 
 const PAGE_SIZE = 20;
 type InventoryTab = 'stock' | 'movements';
@@ -42,7 +43,7 @@ function useWarehouseStateOptions() {
 function ProductCell({ item }: { item: AdminVariantInfo }) {
   const { t } = useTranslation();
   if (item.catalogMissing) {
-    return <span className={styles.product}><Tag color="orange" bordered={false}>{t('adminOps.catalogMissing')}</Tag><small>#{item.variantId}</small></span>;
+    return <span className={styles.product}><Badge tone="warning">{t('adminOps.catalogMissing')}</Badge><small>#{item.variantId}</small></span>;
   }
   if (!item.productName) {
     return <span className={styles.product}><span className={styles.muted}>{t('adminOps.nameUnavailable')}</span><small>#{item.variantId}</small></span>;
@@ -57,7 +58,7 @@ function ProductCell({ item }: { item: AdminVariantInfo }) {
 
 function WarehouseCell({ name, active }: { name: string; active: boolean }) {
   const { t } = useTranslation();
-  return <span className={styles.warehouse}>{name || '—'}{active ? null : <Tag bordered={false}>{t('adminOps.warehouseInactive')}</Tag>}</span>;
+  return <span className={styles.warehouse}>{name || '—'}{active ? null : <Badge tone="muted">{t('adminOps.warehouseInactive')}</Badge>}</span>;
 }
 
 function CatalogWarnings({ warnings, truncated }: { warnings: AdminCatalogWarning[]; truncated?: boolean }) {
@@ -98,7 +99,7 @@ function StockTab() {
     { title: t('adminOps.inventory.warehouse'), responsive: ['md'], render: (_, item) => <WarehouseCell name={item.warehouseName} active={item.warehouseActive} /> },
     { title: t('adminOps.inventory.onHand'), dataIndex: 'onHand', align: 'right', responsive: ['sm'], render: (value: number) => <span className={styles.number}>{value}</span> },
     { title: t('adminOps.inventory.reserved'), dataIndex: 'reserved', align: 'right', responsive: ['lg'], render: (value: number) => <span className={styles.number}>{value}</span> },
-    { title: t('adminOps.inventory.available'), dataIndex: 'available', align: 'right', render: (value: number, item) => <span className={styles.available}>{value}{value <= item.lowStockThreshold ? <Tag color="warning" bordered={false}>{t('adminOps.inventory.low')}</Tag> : null}</span> },
+    { title: t('adminOps.inventory.available'), dataIndex: 'available', align: 'right', render: (value: number, item) => <span className={styles.available}>{value}{value <= item.lowStockThreshold ? <Badge tone="warning">{t('adminOps.inventory.low')}</Badge> : null}</span> },
     { title: t('adminOps.inventory.threshold'), dataIndex: 'lowStockThreshold', align: 'right', responsive: ['lg'], render: (value: number) => <span className={styles.number}>{value}</span> },
   ];
 
@@ -168,7 +169,7 @@ function MovementsTab() {
     { title: t('adminOps.shop'), dataIndex: 'shopId', width: 90, responsive: ['md'], render: (value: string) => `#${value}` },
     { title: t('adminOps.inventory.product'), render: (_, item) => <ProductCell item={item} /> },
     { title: t('adminOps.inventory.warehouse'), responsive: ['lg'], render: (_, item) => <WarehouseCell name={item.warehouseName} active={item.warehouseActive} /> },
-    { title: t('adminOps.inventory.type'), dataIndex: 'type', render: (value: string) => <Tag bordered={false}>{typeLabel(value)}</Tag> },
+    { title: t('adminOps.inventory.type'), dataIndex: 'type', render: (value: string) => <Badge tone="neutral">{typeLabel(value)}</Badge> },
     { title: t('adminOps.inventory.quantity'), dataIndex: 'quantity', align: 'right', render: (value: number) => <span className={`${styles.number} ${value < 0 ? styles.negative : styles.positive}`}>{value > 0 ? `+${value}` : value}</span> },
     { title: t('adminOps.inventory.after'), align: 'right', responsive: ['sm'], render: (_, item) => <span className={styles.number}>{item.onHandAfter} / {item.reservedAfter}</span> },
     { title: t('adminOps.inventory.reference'), responsive: ['xl'], render: (_, item) => [item.referenceType, item.referenceId ? `#${item.referenceId}` : null].filter(Boolean).join(' ') || '—' },

@@ -13,7 +13,7 @@
 .cardHeader {
   display: flex;
   padding: var(--space-6);
-  background: linear-gradient(120deg, var(--color-accent-soft), transparent 46%);
+  background: linear-gradient(120deg, var(--color-action-soft), transparent 46%);
   border-bottom: 1px solid var(--color-border);
   align-items: center;
   gap: var(--space-3);
@@ -23,8 +23,8 @@
   display: grid;
   width: 44px;
   height: 44px;
-  color: var(--color-accent);
-  background: var(--color-surface-hover);
+  color: var(--color-action);
+  background: var(--color-row-hover);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   place-items: center;
@@ -47,7 +47,7 @@
 
 .cardHeader p {
   margin-top: 3px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: .75rem;
 }
 
@@ -70,7 +70,7 @@
 
 .sectionHeading > svg {
   width: 20px;
-  color: var(--color-accent);
+  color: var(--color-action);
 }
 
 .sectionHeading > div {
@@ -84,7 +84,7 @@
 }
 
 .sectionHeading span {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: .75rem;
 }
 

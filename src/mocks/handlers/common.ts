@@ -1,6 +1,7 @@
 import { http } from 'msw';
 import type { components } from '../../generated/api-types';
 import { db } from '../db';
+import { REGION_TREE } from '../fixtures/regions';
 import { MOCK_USERS } from '../fixtures/users';
 import { API, fail, ok, pageOf } from '../utils';
 import { currentMockUser } from './auth';
@@ -37,13 +38,7 @@ export const commonHandlers = [
     return ok(null);
   }),
 
-  http.get(`${API}/regions/tree`, () => {
-    const tree: Schemas['LeadRegionGroupDto'][] = [
-      { satoCode: '1726', name: 'Toshkent shahri', districts: [{ satoCode: '1726277', name: 'Chilonzor tumani' }, { satoCode: '1726262', name: 'Yunusobod tumani' }] },
-      { satoCode: '1730', name: 'Farg‘ona viloyati', districts: [{ satoCode: '1730412', name: 'Qo‘qon shahri' }, { satoCode: '1730401', name: 'Farg‘ona shahri' }] },
-    ];
-    return ok(tree);
-  }),
+  http.get(`${API}/regions/tree`, () => ok(REGION_TREE)),
 
   http.get(`${API}/admin/leads`, ({ request, cookies }) => {
     const denied = requireUser(request, cookies, ADMIN_ROLES);

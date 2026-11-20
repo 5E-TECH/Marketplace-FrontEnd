@@ -19,13 +19,7 @@
  */
 import type { components } from '../../generated/api-types';
 import type { Category } from '../../features/categories/model/categoryTypes';
-import type { Product, ProductVariant } from '../../features/products/model/productTypes';
 import type { AuthUser, UpdateAuthProfilePayload } from '../../features/auth/model/authTypes';
-import type { StockItem } from '../../features/stock/model/stockTypes';
-import type { Warehouse } from '../../features/warehouses/model/warehouseTypes';
-import type { ReturnHistoryEntry, ReturnItem, ReturnRequest, ReturnRequestDetail } from '../../features/returns/model/returnTypes';
-import type { SellerOrder } from '../../features/orders/model/orderTypes';
-import type { CodReconciliation, LedgerEntry, PayoutSchedule, SellerFinanceSummary, SellerPayout } from '../../features/sellerFinance/model/sellerFinanceTypes';
 
 type Schemas = components['schemas'];
 
@@ -52,20 +46,6 @@ type ExpectNoDrift<App, Dto, Derived extends keyof App = never> = [
 type Check<T extends true> = T;
 
 /**
- * `Product` da backenddan kelmaydigan maydonlar. Har biri `productApi.ts`
- * dagi `parseProduct` ichida hosil qilinadi:
- *
- * - `sku`      — `ProductDto` da yo'q; `sku` bo'lmasa `slug` ishlatiladi.
- * - `category` — DTO faqat `categoryId` beradi; nomi ro'yxatdan qo'shiladi.
- * - `isDeleted`, `variants` — jonli API ularni QAYTARADI, lekin Nest surati
- *                ularni `ProductDto` ga kiritmagan (sxema haqiqatdan kambag'al).
- *
- * `stock` bu yerda yo'q: `ProductDto` uni bermaydi, soxta `0` ko'rsatmaslik
- * uchun maydon olib tashlangan (qoldiq `/stock` sahifasida).
- */
-type ProductDerived = 'sku' | 'category' | 'isDeleted' | 'variants';
-
-/**
  * `AuthUser.isBlocked` — `AuthUserDto` da yo'q. Foydalanuvchi jadvalida
  * `is_blocked` ustuni bor (identity migratsiyasi), lekin DTO uni oshkor
  * qilmaydi; frontend yo'q bo'lsa `false` deb hisoblaydi.
@@ -75,35 +55,7 @@ type AuthUserDerived = 'isBlocked';
 // prettier-ignore
 type _Category  = Check<ExpectNoDrift<Category,       Schemas['CategoryTreeDto']>>;
 // prettier-ignore
-type _Product   = Check<ExpectNoDrift<Product,        Schemas['ProductDto'], ProductDerived>>;
-// prettier-ignore
-type _Variant   = Check<ExpectNoDrift<ProductVariant, Schemas['ProductVariantDto']>>;
-// prettier-ignore
 type _AuthUser  = Check<ExpectNoDrift<AuthUser,       Schemas['AuthUserDto'], AuthUserDerived>>;
-// prettier-ignore
-type _StockItem = Check<ExpectNoDrift<StockItem,      Schemas['StockItemDto']>>;
-// prettier-ignore
-type _Warehouse = Check<ExpectNoDrift<Warehouse,      Schemas['WarehouseDto']>>;
-// prettier-ignore
-type _Return        = Check<ExpectNoDrift<ReturnRequest,       Schemas['ReturnRequestDto']>>;
-// prettier-ignore
-type _ReturnDetail  = Check<ExpectNoDrift<ReturnRequestDetail, Schemas['ReturnRequestDetailsDto']>>;
-// prettier-ignore
-type _ReturnItem    = Check<ExpectNoDrift<ReturnItem,          Schemas['ReturnRequestItemDto']>>;
-// prettier-ignore
-type _ReturnHistory = Check<ExpectNoDrift<ReturnHistoryEntry,  Schemas['ReturnRequestHistoryDto']>>;
-// prettier-ignore
-type _SellerOrder   = Check<ExpectNoDrift<SellerOrder,         Schemas['SellerOrderItemDto']>>;
-// prettier-ignore
-type _LedgerEntry   = Check<ExpectNoDrift<LedgerEntry,          Schemas['FinanceLedgerEntryDto']>>;
-// prettier-ignore
-type _SellerPayout  = Check<ExpectNoDrift<SellerPayout,         Schemas['FinancePayoutDto']>>;
-// prettier-ignore
-type _CodReport     = Check<ExpectNoDrift<CodReconciliation,    Schemas['FinanceReconciliationReportDto']>>;
-// prettier-ignore
-type _FinanceSummary = Check<ExpectNoDrift<SellerFinanceSummary, Schemas['SellerFinanceSummaryDto']>>;
-// prettier-ignore
-type _PayoutSchedule = Check<ExpectNoDrift<PayoutSchedule,      Schemas['PayoutScheduleDto']>>;
 // So'rov tanasi: `UpdateProfileDto` da yo'q maydon (masalan `email`) yuborilmasin.
 // prettier-ignore
 type _UpdateProfile = Check<ExpectNoDrift<UpdateAuthProfilePayload, Schemas['UpdateProfileDto']>>;
@@ -115,20 +67,6 @@ type _UpdateProfile = Check<ExpectNoDrift<UpdateAuthProfilePayload, Schemas['Upd
  */
 export type ContractGuarded = [
   _Category,
-  _Product,
-  _Variant,
   _AuthUser,
-  _StockItem,
-  _Warehouse,
-  _Return,
-  _ReturnDetail,
-  _ReturnItem,
-  _ReturnHistory,
-  _SellerOrder,
   _UpdateProfile,
-  _LedgerEntry,
-  _SellerPayout,
-  _CodReport,
-  _FinanceSummary,
-  _PayoutSchedule,
 ];

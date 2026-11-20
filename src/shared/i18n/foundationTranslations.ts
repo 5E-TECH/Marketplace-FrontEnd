@@ -36,7 +36,6 @@ const uz = {
   'loadError.rateText': 'Tizim qisqa vaqtda juda ko‘p so‘rovni qabul qilmaydi. {seconds} soniyadan keyin qayta urinib ko‘ring.',
   'loadError.rateRetryIn': 'Qayta urinish · {seconds}',
 
-  'export.csv': 'Yuklab olish (CSV)',
   'export.done': 'Fayl yuklab olindi: {name} · {rows} ta qator',
   'export.failed': 'Faylni tayyorlab bo‘lmadi. Qayta urinib ko‘ring.',
 
@@ -62,14 +61,11 @@ const uz = {
   'operator.stateFailed': 'Holatni o‘zgartirib bo‘lmadi',
 
   'affiliateHome.todayTitle': 'Bugun',
-  'affiliateHome.asOf': '{date} · {time} holatiga',
   'affiliateHome.clicksHint': 'sahifalarga o‘tishlar',
   'affiliateHome.leadsHint': 'arizalar',
   'affiliateHome.confirmedHint': 'operator tasdiqlagan buyurtmalar',
   'affiliateHome.deliveredHint': 'mijoz olib, pulini to‘lagan',
   'affiliateHome.incomeHint': 'faqat mijoz to‘lagan buyurtma uchun',
-  'affiliateHome.weekTitle': 'Oxirgi 7 kun',
-  'affiliateHome.weekHint': 'Har son o‘z kunida. Daromad — yetkazilgan kun bo‘yicha.',
   'affiliateHome.sum': '{amount} so‘m',
 } as const;
 
@@ -107,7 +103,6 @@ const ru: Record<FoundationTranslationKey, string> = {
   'loadError.rateText': 'Система не принимает слишком много запросов за короткое время. Повторите через {seconds} с.',
   'loadError.rateRetryIn': 'Повторить · {seconds}',
 
-  'export.csv': 'Скачать (CSV)',
   'export.done': 'Файл скачан: {name} · строк: {rows}',
   'export.failed': 'Не удалось подготовить файл. Попробуйте ещё раз.',
 
@@ -133,14 +128,11 @@ const ru: Record<FoundationTranslationKey, string> = {
   'operator.stateFailed': 'Не удалось изменить статус',
 
   'affiliateHome.todayTitle': 'Сегодня',
-  'affiliateHome.asOf': '{date} · на {time}',
   'affiliateHome.clicksHint': 'переходы на страницы',
   'affiliateHome.leadsHint': 'заявки',
   'affiliateHome.confirmedHint': 'подтверждённые оператором заказы',
   'affiliateHome.deliveredHint': 'клиент получил и оплатил',
   'affiliateHome.incomeHint': 'только за оплаченные заказы',
-  'affiliateHome.weekTitle': 'Последние 7 дней',
-  'affiliateHome.weekHint': 'Каждое число — в свой день. Доход — по дню доставки.',
   'affiliateHome.sum': '{amount} сум',
 };
 
@@ -176,7 +168,6 @@ const en: Record<FoundationTranslationKey, string> = {
   'loadError.rateText': 'The system does not accept too many requests in a short time. Try again in {seconds} s.',
   'loadError.rateRetryIn': 'Try again · {seconds}',
 
-  'export.csv': 'Download (CSV)',
   'export.done': 'File downloaded: {name} · {rows} rows',
   'export.failed': 'Could not prepare the file. Please try again.',
 
@@ -202,14 +193,11 @@ const en: Record<FoundationTranslationKey, string> = {
   'operator.stateFailed': 'Could not change the status',
 
   'affiliateHome.todayTitle': 'Today',
-  'affiliateHome.asOf': '{date} · as of {time}',
   'affiliateHome.clicksHint': 'visits to your pages',
   'affiliateHome.leadsHint': 'requests',
   'affiliateHome.confirmedHint': 'orders confirmed by an operator',
   'affiliateHome.deliveredHint': 'received and paid by the customer',
   'affiliateHome.incomeHint': 'only for orders the customer paid',
-  'affiliateHome.weekTitle': 'Last 7 days',
-  'affiliateHome.weekHint': 'Each number is on its own day. Income is by delivery day.',
   'affiliateHome.sum': '{amount} UZS',
 };
 

@@ -1,0 +1,95 @@
+/*
+ * Manzil (komponentlar-E §20, operator-buyurtma-formasi «Manzil»): sarlavha 13/18 bosh harf, kaskad
+ * 2 ustun oraliq 12 (tor joyda — bitta), ko'cha va xonadon keng joyda yonma-yon (R11), aks holda ustma-ust.
+ */
+.address { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; min-height: 24px; }
+
+.title {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cascade, .street { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.field { min-width: 0; }
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.label { display: block; color: var(--color-text); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+.required { margin-left: 2px; color: var(--color-danger); }
+.note { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; white-space: nowrap; }
+
+.input {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.input::placeholder { color: var(--color-text-faint); }
+.input:focus-visible { border-color: var(--color-action); outline: 0; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.input[aria-invalid='true'] { border-color: var(--color-danger); }
+.hint { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 0;
+  color: var(--color-danger);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.error > svg { display: block; flex: none; width: 14px; height: 14px; margin-top: 1px; }
+
+/* «Qayta urinish» — sm 36; planshet va telefonda 44. */
+.retry {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: -6px 0 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.retry:disabled { cursor: progress; opacity: 0.6; }
+.retry > svg { display: block; flex: none; width: 16px; height: 16px; }
+
+@container (min-width: 380px) {
+  .cascade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@container (min-width: 560px) {
+  .street { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1199.98px) {
+  .retry { height: 44px; }
+}

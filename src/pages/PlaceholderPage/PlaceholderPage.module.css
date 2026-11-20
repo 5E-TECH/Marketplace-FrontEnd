@@ -18,7 +18,7 @@
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   background: var(--color-sunken);
 }
 
@@ -38,7 +38,7 @@
 .text {
   max-width: 380px;
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 21px;
 }

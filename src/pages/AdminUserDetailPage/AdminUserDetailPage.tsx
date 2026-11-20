@@ -40,7 +40,7 @@ import { DetailPage, type DetailPageSection } from '../../shared/ui/DetailPage/D
 import { SelectControl } from '../../shared/ui/FormControls/FormControls';
 import { FormModal } from '../../shared/ui/FormModal/FormModal';
 import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
-import { StatusTag } from '../../shared/ui/StatusTag/StatusTag';
+import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 import styles from './AdminUserDetailPage.module.css';
 
 type Translate = (key: TranslationKey, params?: Record<string, string | number>) => string;
@@ -76,13 +76,13 @@ function getDetailSections(user: AdminUser, locale: string, t: Translate): Detai
           key: 'active',
           icon: <ShieldCheck />,
           label: t('admin.users.activity'),
-          value: <StatusTag status={user.isActive ? 'ACTIVE' : 'INACTIVE'} />,
+          value: <StatusBadge family="user" code={user.isActive ? 'ACTIVE' : 'INACTIVE'} />,
         },
         {
           key: 'blocked',
           icon: <Ban />,
           label: t('admin.users.blockStatus'),
-          value: <StatusTag status={user.blocked ? 'BLOCKED' : 'ACTIVE'} />,
+          value: <StatusBadge family="user" code={user.blocked ? 'BLOCKED' : 'ACTIVE'} />,
         },
         {
           key: 'deleted',
@@ -258,7 +258,7 @@ export default function AdminUserDetailPage() {
           subtitle: user.email || user.phone || t('admin.users.noContact'),
           badges: (
             <>
-              <StatusTag status={user.blocked ? 'BLOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'} />
+              <StatusBadge family="user" code={user.blocked ? 'BLOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'} />
               <span className={styles.role}>{user.role}</span>
             </>
           ),

@@ -65,14 +65,14 @@
 }
 
 .muted {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
 
 .note {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
@@ -136,16 +136,12 @@
   gap: 6px;
 }
 
-.tags :global(.ant-tag) {
-  margin: 0;
-}
-
 .accountMeta {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   text-align: right;
@@ -229,7 +225,7 @@
 }
 
 .fields dt {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -243,7 +239,7 @@
 }
 
 .fields dd.muted {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
 }
@@ -273,7 +269,7 @@
   flex: none;
   width: 20px;
   height: 20px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .inlineTag {
@@ -285,7 +281,7 @@
   margin: 0;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   color: var(--color-text);
   font-size: 14px;
   font-weight: 600;
@@ -303,8 +299,8 @@
 }
 
 .statusCard[data-tone='danger'] {
-  border-color: var(--color-error-soft);
-  background: linear-gradient(var(--color-error-soft), var(--color-surface) 120px);
+  border-color: var(--color-danger-soft);
+  background: linear-gradient(var(--color-danger-soft), var(--color-surface) 120px);
 }
 
 .statusCard[data-tone='warning'] {
@@ -394,13 +390,13 @@
   margin: 0;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   font-size: 14px;
   line-height: 21px;
 }
 
 .taxTable dt {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .taxTable dd {
@@ -435,7 +431,7 @@
 
 .guide dd {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 21px;
 }
@@ -448,7 +444,7 @@
   padding: 20px;
   border: 1px dashed var(--color-border-strong);
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   color: var(--color-text);
   text-align: center;
   cursor: pointer;
@@ -550,7 +546,7 @@
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface-subtle);
+  background: var(--color-sunken);
   color: var(--color-text);
   font-size: 14px;
   line-height: 21px;
@@ -571,8 +567,8 @@
 }
 
 .fileRow[data-state='failed'] {
-  border-color: var(--color-error-soft);
-  background: var(--color-error-soft);
+  border-color: var(--color-danger-soft);
+  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
@@ -623,7 +619,7 @@
 
 .summary dd {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 767.98px) {
@@ -828,7 +824,7 @@
 .heroIcon > svg { display: block; width: 24px; height: 24px; }
 .heroIcon[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
 .heroIcon[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
-.heroIcon[data-tone='danger'] { background: var(--color-error-soft); color: var(--color-danger); }
+.heroIcon[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
 .heroIcon[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
 .heroText { display: flex; flex: 1 1 auto; flex-direction: column; gap: 6px; min-width: 0; }
 .heroChip { align-self: flex-start; }

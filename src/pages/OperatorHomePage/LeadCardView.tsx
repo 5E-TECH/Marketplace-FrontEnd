@@ -5,10 +5,11 @@ import { clock, dayLabel, mmss, outcomeLabel, rejectLabel, sourceMark, statusLab
 import { CALLBACK_GRACE_MINUTES, isNoAnswer, leadKind, scriptSteps } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../features/operator/lib/useNow';
 import type { LeadCard } from '../../features/operator/model/operatorTypes';
-import { LeadStatusChip, OperatorChip } from '../../features/operator/ui/OperatorChip';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import styles from './OperatorWorkspace.module.css';
+import { Badge } from '../../shared/ui/Badge/Badge';
+import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 
 /** Skriptdagi summalar qalin (dizayndagidek): «262 000 so‘m». */
 function withAmounts(text: string) {
@@ -67,22 +68,22 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
         </div>
         <div className={styles.cardMeta}>
           <span className={styles.leadId}>{t('opw.leadNumber', { id: card.id })}</span>
-          <LeadStatusChip status={card.status} />
+          <StatusBadge family="lead" code={card.status} titlePrefix={t('opw.statusTitle')} />
           {left !== null ? (
-            <OperatorChip tone={left <= 60_000 ? 'warning' : 'neutral'} icon={Timer} testId="booking-left" title={t('opw.bookingUntil', { time: clock(card.bookedUntil ?? '') })}>
+            <Badge tone={left <= 60_000 ? 'warning' : 'neutral'} icon={Timer} testId="booking-left" title={t('opw.bookingUntil', { time: clock(card.bookedUntil ?? '') })}>
               {left > 0 ? t('opw.bookingLeft', { time: mmss(left) }) : t('opw.bookingEnded')}
-            </OperatorChip>
+            </Badge>
           ) : null}
           {kind === 'scheduled' && scheduledAt ? (
             <>
-              <OperatorChip tone="info" icon={CalendarClock}>{t('opw.kind.scheduled', { time: clock(scheduledAt) })}</OperatorChip>
-              <OperatorChip tone="neutral" icon={Timer}>{t('opw.scheduledUntil', { time: clock(Date.parse(scheduledAt) + CALLBACK_GRACE_MINUTES * 60_000) })}</OperatorChip>
+              <Badge tone="info" icon={CalendarClock}>{t('opw.kind.scheduled', { time: clock(scheduledAt) })}</Badge>
+              <Badge tone="neutral" icon={Timer}>{t('opw.scheduledUntil', { time: clock(Date.parse(scheduledAt) + CALLBACK_GRACE_MINUTES * 60_000) })}</Badge>
             </>
           ) : null}
-          {kind === 'retry' ? <OperatorChip tone="warning" icon={RotateCcw}>{t('opw.kind.retry', { n: card.attemptsCount + 1 })}</OperatorChip> : null}
-          {kind === 'last' ? <OperatorChip tone="danger" icon={CircleAlert}>{t('opw.kind.last', { n: card.attemptsCount + 1 })}</OperatorChip> : null}
-          {card.source === 'API' ? <OperatorChip tone="neutral" icon={CodeXml}>{t('opw.apiTitle')}</OperatorChip> : null}
-          {card.stockShortage ? <OperatorChip tone="danger" icon={PackageX}>{t('opw.stockTitle')}</OperatorChip> : null}
+          {kind === 'retry' ? <Badge tone="warning" icon={RotateCcw}>{t('opw.kind.retry', { n: card.attemptsCount + 1 })}</Badge> : null}
+          {kind === 'last' ? <Badge tone="danger" icon={CircleAlert}>{t('opw.kind.last', { n: card.attemptsCount + 1 })}</Badge> : null}
+          {card.source === 'API' ? <Badge tone="neutral" icon={CodeXml}>{t('opw.apiTitle')}</Badge> : null}
+          {card.stockShortage ? <Badge tone="danger" icon={PackageX}>{t('opw.stockTitle')}</Badge> : null}
         </div>
       </div>
 
@@ -173,7 +174,7 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
                     <span className={styles.rowDate}>{dayLabel(lead.createdAt)}</span>
                     <span className={styles.rowGrow}>{lead.productName}</span>
                     <span className={styles.rowTail}>
-                      <LeadStatusChip status={lead.status} />
+                      <StatusBadge family="lead" code={lead.status} titlePrefix={t('opw.statusTitle')} />
                       {lead.rejectReason ? <span className={styles.rowTailText}>«{rejectLabel(lead.rejectReason, t)}»</span> : null}
                     </span>
                   </div>
@@ -230,7 +231,7 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
                       : t('opw.historyChanged', { status: statusLabel(entry.toStatus, t), actor: entry.actor })}
                   {entry.note ? <span className={styles.muted}> · {entry.note}</span> : null}
                 </span>
-                <LeadStatusChip status={entry.toStatus} />
+                <StatusBadge family="lead" code={entry.toStatus} titlePrefix={t('opw.statusTitle')} />
               </span>
             </li>
           ))}

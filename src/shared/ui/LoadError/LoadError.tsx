@@ -1,9 +1,9 @@
-import { App } from 'antd';
-import { CircleAlert, CircleX, Copy, Hand, RefreshCw } from 'lucide-react';
+import { CircleAlert, CircleX, Hand, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getApiRequestId, getRetryAfterSeconds } from '../../api/apiError';
 import { useTranslation } from '../../i18n/useTranslation';
 import { tashkentClock } from '../../lib/tashkentTime';
+import { CopyButton } from '../CopyButton/CopyButton';
 import styles from './LoadError.module.css';
 
 const AUTO_RETRY_SECONDS = 60;
@@ -27,7 +27,6 @@ interface LoadErrorProps {
  */
 export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block' }: LoadErrorProps) {
   const { t } = useTranslation();
-  const { message } = App.useApp();
   const retryAfter = getRetryAfterSeconds(error);
   const requestId = getApiRequestId(error);
   const [deadline] = useState(() => Date.now() + (retryAfter ?? AUTO_RETRY_SECONDS) * 1000);
@@ -43,14 +42,6 @@ export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block'
   useEffect(() => {
     if (secondsLeft === 0) onRetry();
   }, [secondsLeft, onRetry]);
-
-  const copyCode = () => {
-    if (!requestId) return;
-    navigator.clipboard.writeText(requestId).then(
-      () => void message.success(t('loadError.copied')),
-      () => undefined,
-    );
-  };
 
   if (retryAfter !== null) {
     const waiting = secondsLeft > 0;
@@ -72,9 +63,7 @@ export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block'
   const code = requestId ? (
     <span className={styles.code}>
       {t('loadError.code', { code: requestId })}
-      <button type="button" className={styles.copy} aria-label={t('loadError.copyCode')} title={t('loadError.copyCode')} onClick={copyCode}>
-        <Copy aria-hidden />
-      </button>
+      <CopyButton text={requestId} size="sm" ariaLabel={t('loadError.copyCode')} successMessage={t('loadError.copied')} />
     </span>
   ) : null;
 

@@ -16,15 +16,15 @@
 }
 
 .userLink:hover {
-  color: var(--color-accent);
+  color: var(--color-action);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .userLink:focus-visible {
-  color: var(--color-accent);
+  color: var(--color-action);
   border-radius: 3px;
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-action);
   outline-offset: 3px;
 }
 

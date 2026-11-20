@@ -6,7 +6,7 @@
 }
 
 .stateLabel {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -30,7 +30,7 @@
   border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -49,7 +49,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--color-text-subtle);
+  background: var(--color-text-faint);
 }
 
 .segment[data-state='ONLINE'] .dot {
@@ -64,7 +64,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   white-space: nowrap;

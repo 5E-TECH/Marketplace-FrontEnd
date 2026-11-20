@@ -1,3 +1,5 @@
+import type { TranslationKey } from '../../../shared/i18n/translations';
+import type { ChartAxisPoint } from '../../../shared/ui/Chart/ChartFrame';
 import type { AffiliateStats, AffiliateStatsRow } from '../api/affiliateApi';
 
 /**
@@ -21,4 +23,14 @@ export function statsForDay(stats: AffiliateStats | undefined, day: string): Aff
 /** `from`…`to` oralig'idagi har kun (bo'sh kun ham) — grafik va jadval uchun, eskisidan yangisiga. */
 export function statsDays(stats: AffiliateStats | undefined, days: readonly string[]): AffiliateStatsRow[] {
   return days.map((day) => statsForDay(stats, day) ?? emptyStatsRow(day));
+}
+
+/** Grafik o'qidagi kun: «08.01» va qisqa hafta kuni yoki «bugun». */
+export function statsAxisPoint(day: string, today: string, t: (key: TranslationKey) => string): ChartAxisPoint {
+  const weekday = new Date(`${day}T00:00:00Z`).getUTCDay();
+  return {
+    key: day,
+    label: `${day.slice(8, 10)}.${day.slice(5, 7)}`,
+    sub: day === today ? t('sellerHome.today') : t(`sellerHome.dayShort${weekday}` as TranslationKey),
+  };
 }

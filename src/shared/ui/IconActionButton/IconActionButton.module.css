@@ -10,15 +10,15 @@
 }
 
 .button:hover:not(:disabled) {
-  color: var(--color-accent) !important;
-  background: var(--color-accent-soft) !important;
+  color: var(--color-action) !important;
+  background: var(--color-action-soft) !important;
 }
 
 .button:global(.ant-btn-dangerous) {
-  color: var(--color-error) !important;
+  color: var(--color-danger) !important;
 }
 
 .button:global(.ant-btn-dangerous):hover:not(:disabled) {
-  color: var(--color-error) !important;
-  background: var(--color-error-soft) !important;
+  color: var(--color-danger) !important;
+  background: var(--color-danger-soft) !important;
 }

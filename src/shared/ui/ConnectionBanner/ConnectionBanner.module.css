@@ -16,7 +16,7 @@
 .banner > svg { display: block; flex: none; width: 20px; height: 20px; }
 .banner p { flex: 1 1 220px; min-width: 0; margin: 0; }
 .banner strong { font-weight: 700; }
-.banner[data-tone='danger'] { background: var(--color-error-soft); }
+.banner[data-tone='danger'] { background: var(--color-danger-soft); }
 .banner[data-tone='danger'] > svg,
 .banner[data-tone='danger'] strong { color: var(--color-danger); }
 .banner[data-tone='warning'] { background: var(--color-warning-soft); }
@@ -63,7 +63,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 18px;
   white-space: nowrap;

@@ -3,8 +3,8 @@
  * umumiy-kirish (§1), sotuvchi-royxat (§1–4), manbalar/p-s1.md.
  */
 const uz = {
-  'otp.phoneFormat': 'Raqamni to‘liq kiriting: 9 ta raqam, masalan 90 123 45 67',
-  'otp.phoneOperator': 'Bu raqam O‘zbekiston mobil operatoriga tegishli emas',
+  'phone.format': 'Raqamni to‘liq kiriting: 9 ta raqam, masalan 90 123 45 67',
+  'phone.operator': 'Bu raqam O‘zbekiston mobil operatoriga tegishli emas',
   'otp.getCode': 'Kod olish',
   'otp.sending': 'Kod yuborilmoqda…',
   'otp.rules': 'Kod 5 daqiqa amal qiladi. 3 marta xato kiritilsa, 15 daqiqa kutasiz.',
@@ -125,8 +125,8 @@ const uz = {
 type SellerAuthTranslationKey = keyof typeof uz;
 
 const ru: Record<SellerAuthTranslationKey, string> = {
-  'otp.phoneFormat': 'Введите номер полностью: 9 цифр, например 90 123 45 67',
-  'otp.phoneOperator': 'Номер не относится к мобильному оператору Узбекистана',
+  'phone.format': 'Введите номер полностью: 9 цифр, например 90 123 45 67',
+  'phone.operator': 'Номер не относится к мобильному оператору Узбекистана',
   'otp.getCode': 'Получить код',
   'otp.sending': 'Код отправляется…',
   'otp.rules': 'Код действует 5 минут. После 3 ошибок нужно подождать 15 минут.',
@@ -245,8 +245,8 @@ const ru: Record<SellerAuthTranslationKey, string> = {
 };
 
 const en: Record<SellerAuthTranslationKey, string> = {
-  'otp.phoneFormat': 'Enter the full number: 9 digits, e.g. 90 123 45 67',
-  'otp.phoneOperator': 'This number does not belong to an Uzbek mobile operator',
+  'phone.format': 'Enter the full number: 9 digits, e.g. 90 123 45 67',
+  'phone.operator': 'This number does not belong to an Uzbek mobile operator',
   'otp.getCode': 'Get code',
   'otp.sending': 'Sending the code…',
   'otp.rules': 'The code is valid for 5 minutes. After 3 wrong attempts you wait 15 minutes.',

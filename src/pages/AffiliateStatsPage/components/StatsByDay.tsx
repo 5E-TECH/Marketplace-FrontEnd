@@ -1,9 +1,10 @@
-import { ChartColumn, Table2 } from 'lucide-react';
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useState } from 'react';
 import type { AffiliateStatsRow } from '../../../features/affiliate/api/affiliateApi';
-import { statsIncome } from '../../../features/affiliate/lib/statsSummary';
+import { statsAxisPoint, statsIncome } from '../../../features/affiliate/lib/statsSummary';
 import type { TranslationKey } from '../../../shared/i18n/translations';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
+import { BarChart, type ChartTone } from '../../../shared/ui/Chart/BarChart';
+import { ChartViewToggle, type ChartView } from '../../../shared/ui/Chart/ChartViewToggle';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
 import { ddmmyyyy, signedMoney } from '../model/statsView';
 import styles from '../AffiliateStatsPage.module.css';
@@ -36,6 +37,12 @@ export function IncomeCell({ row }: { row: AffiliateStatsRow }) {
   );
 }
 
+const SERIES = [
+  { field: 'leads', tone: 'light', label: 'statsCsv.leads', hint: 'sellerStats.byDay.leadsLegend' },
+  { field: 'confirmed', tone: 'mid', label: 'statsCsv.confirmed', hint: 'sellerStats.byDay.confirmedLegend' },
+  { field: 'delivered', tone: 'dark', label: 'statsCsv.delivered', hint: 'sellerStats.byDay.deliveredLegend' },
+] as const satisfies readonly { field: 'leads' | 'confirmed' | 'delivered'; tone: ChartTone; label: TranslationKey; hint: TranslationKey }[];
+
 /**
  * «Kunlar bo'yicha» (sotuvchi-statistika): har kun uch ustun — lidlar, tasdiqlangan, yetkazilgan
  * (har son o'z kunida), legenda jami bilan; jadval — yangisi tepada, «Jami, N kun» qatori bilan.
@@ -44,17 +51,14 @@ export function IncomeCell({ row }: { row: AffiliateStatsRow }) {
 export function StatsByDay({ days, totals, today, asOf, range }: StatsByDayProps) {
   const { t } = useTranslation();
   // «Grafik» — grafik va jadval; «Jadval» — faqat jadval (sotuvchi-statistika, komponentlar-E §23).
-  const [view, setView] = useState<View>('chart');
-  const max = Math.max(1, ...days.flatMap((day) => [day.leads, day.confirmed, day.delivered]));
-  const dense = days.length > 14;
-  // Tepada ustun ustidagi son uchun joy qoladi (eng balandi — 85 %).
-  const height = (value: number) => `${(value / max) * 85}%`;
+  const [view, setView] = useState<ChartView>('chart');
   const newestFirst = [...days].reverse();
-  const series = [
-    { field: 'leads', bar: styles.barLeads, dot: styles.dotLeads, label: 'statsCsv.leads', hint: 'sellerStats.byDay.leadsLegend' },
-    { field: 'confirmed', bar: styles.barConfirmed, dot: styles.dotConfirmed, label: 'statsCsv.confirmed', hint: 'sellerStats.byDay.confirmedLegend' },
-    { field: 'delivered', bar: styles.barDelivered, dot: styles.dotDelivered, label: 'statsCsv.delivered', hint: 'sellerStats.byDay.deliveredLegend' },
-  ] as const satisfies readonly { field: keyof AffiliateStatsRow; label: TranslationKey; hint: TranslationKey; bar: string; dot: string }[];
+  const series = SERIES.map((item) => ({ key: item.field, tone: item.tone, label: t(item.label), hint: t(item.hint), total: totals[item.field] }));
+  const points = days.map((day) => ({
+    ...statsAxisPoint(day.key, today, t),
+    values: { leads: day.leads, confirmed: day.confirmed, delivered: day.delivered },
+  }));
+  const values = points.map((point) => `${point.label}: ${SERIES.map((item) => point.values[item.field]).join(', ')}`).join('; ');
 
   return (
     <section className={styles.card} aria-labelledby="stats-by-day" data-testid="stats-by-day">
@@ -63,43 +67,19 @@ export function StatsByDay({ days, totals, today, asOf, range }: StatsByDayProps
           <h2 id="stats-by-day">{t('sellerStats.byDay.title')}</h2>
           <p className={styles.muted}>{t('sellerStats.byDay.caption')}</p>
         </div>
-        <ViewToggle value={view} onChange={setView} />
+        <ChartViewToggle value={view} onChange={setView} />
       </div>
-      {view === 'table' ? null : <div className={styles.chartRow}>
-        <div
-          className={styles.chart}
-          role="img"
-          aria-label={t('sellerStats.byDay.chartLabel', { leads: totals.leads, confirmed: totals.confirmed, delivered: totals.delivered })}
-        >
-          {days.map((day) => (
-            <div key={day.key} className={styles.chartDay}>
-              {series.map((item) => (
-                <span key={item.field} className={`${styles.bar} ${item.bar}`} style={{ height: height(day[item.field]) }}>
-                  {dense ? null : <span>{day[item.field]}</span>}
-                </span>
-              ))}
-              <span className={styles.chartAxis} aria-hidden>
-                <b>{day.key.slice(8, 10)}.{day.key.slice(5, 7)}</b>
-                {dense ? null : day.key === today ? t('sellerHome.today') : t(`sellerHome.dayShort${weekday(day.key)}` as TranslationKey)}
-              </span>
-            </div>
-          ))}
+      {view === 'table' ? null : (
+        <div className={styles.byDayChart}>
+          <BarChart
+            series={series}
+            points={points}
+            barWidth={18}
+            note={t('sellerStats.byDay.legendNote')}
+            ariaLabel={`${t('sellerStats.byDay.chartLabel', { leads: totals.leads, confirmed: totals.confirmed, delivered: totals.delivered })}. ${values}`}
+          />
         </div>
-        <ul className={styles.chartLegend}>
-          {series.map((item) => (
-            <li key={item.field}>
-              <i className={`${styles.dot} ${item.dot}`} aria-hidden />
-              <strong>{t(item.label)}</strong>
-              <b>{formatMoney(totals[item.field])}</b>
-              <small>{t(item.hint)}</small>
-            </li>
-          ))}
-          <li>
-            <span />
-            <small>{t('sellerStats.byDay.legendNote')}</small>
-          </li>
-        </ul>
-      </div>}
+      )}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <caption>{t('sellerStats.byDay.tableLabel', { range })}</caption>
@@ -149,47 +129,5 @@ export function StatsByDay({ days, totals, today, asOf, range }: StatsByDayProps
         </table>
       </div>
     </section>
-  );
-}
-
-type View = 'chart' | 'table';
-const VIEWS = [
-  { value: 'chart', icon: ChartColumn, label: 'sellerStats.view.chart' },
-  { value: 'table', icon: Table2, label: 'sellerStats.view.table' },
-] as const satisfies readonly { value: View; label: TranslationKey; icon: typeof ChartColumn }[];
-
-/** «Ko‘rinish»: ikonkali almashtirgich (44 / 36), strelkalar bilan. */
-function ViewToggle({ value, onChange }: { value: View; onChange: (view: View) => void }) {
-  const { t } = useTranslation();
-  const refs = useRef<Array<HTMLButtonElement | null>>([]);
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0;
-    if (!step) return;
-    event.preventDefault();
-    const next = (index + step + VIEWS.length) % VIEWS.length;
-    onChange(VIEWS[next].value);
-    refs.current[next]?.focus();
-  };
-  return (
-    <div role="radiogroup" aria-label={t('sellerStats.view.label')} className={styles.viewToggle}>
-      {VIEWS.map(({ value: option, icon: Icon, label }, index) => (
-        <button
-          key={option}
-          ref={(node) => {
-            refs.current[index] = node;
-          }}
-          type="button"
-          role="radio"
-          aria-checked={value === option}
-          aria-label={t(label)}
-          title={t(label)}
-          tabIndex={value === option ? 0 : -1}
-          onClick={() => onChange(option)}
-          onKeyDown={(event) => onKeyDown(event, index)}
-        >
-          <Icon aria-hidden />
-        </button>
-      ))}
-    </div>
   );
 }
