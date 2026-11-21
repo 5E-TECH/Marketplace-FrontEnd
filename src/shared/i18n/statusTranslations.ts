@@ -41,6 +41,13 @@ const uz = {
   'status.stream.STOPPED': 'To‘xtatilgan',
   'status.stream.OUT_OF_STOCK': 'Qoldiq tugagan',
   'status.stream.PAUSED': 'Buyurtma qabul qilmaydi',
+  'status.product.PENDING_REVIEW': 'Ko‘rib chiqilmoqda',
+  'status.product.ACTIVE': 'Faol',
+  'status.product.REJECTED': 'Rad etildi',
+  'status.product.DRAFT': 'Qoralama',
+  'status.product.BLOCKED': 'To‘xtatilgan',
+  'status.product.ARCHIVED': 'Arxivda',
+  'status.product.OUT_OF_STOCK': 'Qoldiq tugagan',
 } as const;
 
 export type StatusTranslationKey = keyof typeof uz;
@@ -85,6 +92,13 @@ const ru: Record<StatusTranslationKey, string> = {
   'status.stream.STOPPED': 'Остановлена',
   'status.stream.OUT_OF_STOCK': 'Нет в наличии',
   'status.stream.PAUSED': 'Не принимает заказы',
+  'status.product.PENDING_REVIEW': 'На проверке',
+  'status.product.ACTIVE': 'Активен',
+  'status.product.REJECTED': 'Отклонён',
+  'status.product.DRAFT': 'Черновик',
+  'status.product.BLOCKED': 'Остановлен',
+  'status.product.ARCHIVED': 'В архиве',
+  'status.product.OUT_OF_STOCK': 'Нет в наличии',
 };
 
 const en: Record<StatusTranslationKey, string> = {
@@ -127,6 +141,13 @@ const en: Record<StatusTranslationKey, string> = {
   'status.stream.STOPPED': 'Stopped',
   'status.stream.OUT_OF_STOCK': 'Out of stock',
   'status.stream.PAUSED': 'Not taking orders',
+  'status.product.PENDING_REVIEW': 'In review',
+  'status.product.ACTIVE': 'Active',
+  'status.product.REJECTED': 'Rejected',
+  'status.product.DRAFT': 'Draft',
+  'status.product.BLOCKED': 'Stopped',
+  'status.product.ARCHIVED': 'Archived',
+  'status.product.OUT_OF_STOCK': 'Out of stock',
 };
 
 export const statusTranslations = { uz, ru, en } as const;

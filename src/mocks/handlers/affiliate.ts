@@ -3,6 +3,7 @@ import type { components } from '../../generated/api-types';
 import { affiliateStatsRow, db } from '../db';
 import { addDays, API, fail, ok, pageOf, seeded, tashkentDate } from '../utils';
 import type { OfferSort } from '../../features/affiliate/model/offerTypes';
+import { sellerOffers } from '../catalog';
 import { EMPTY_ZIP, offerDetail, offerListItem, type MockOffer } from '../fixtures/offers';
 import { isNewMockAccount } from '../fixtures/users';
 import { currentMockUser } from './auth';
@@ -146,18 +147,22 @@ export const affiliateHandlers = [
     return ok(body);
   }),
 
-  // Balans (taklif, BE-23): oxirgi 30 kun daromadi. Ushlab turilgani — oxirgi 2 kundagisi (odatda 1–2 kunda
+  // Balans (BE-23): oxirgi 30 kun daromadi. Ushlab turilgani — oxirgi 2 kundagisi (odatda 1–2 kunda
   // «mavjud»ga o'tadi), eskisi mavjudga qo'shiladi. FE-07 gacha pul yechilmagan.
   http.get(`${API}/affiliate/balance`, ({ request, cookies }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;
-    if (isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' })) return ok({ available: 0, held: 0 });
+    const balance = (hold: number, available: number): Schemas['AffiliateBalanceDto'] => ({
+      hold, available, reserved: 0, withdrawable: Math.max(0, available), minAmount: 50_000, taxPercent: 1,
+      twoApprovalAbove: 5_000_000, selfEmployed: false, blockReason: null,
+    });
+    if (isNewMockAccount(currentMockUser(request, cookies) ?? { phone: '' })) return ok(balance(0, 0));
     const today = tashkentDate();
     const recentFrom = addDays(today, -1);
     const rows = statsRows(addDays(today, -29), today);
     const held = rows.filter((row) => row.key >= recentFrom).reduce((sum, row) => sum + row.incomeHold, 0);
     const all = totals(rows);
-    return ok({ available: all.incomeAvailable + all.incomeHold - held, held });
+    return ok(balance(held, all.incomeAvailable + all.incomeHold - held));
   }),
 
   http.get(`${API}/affiliate/offers`, ({ request, cookies }) => {
@@ -169,7 +174,7 @@ export const affiliateHandlers = [
     const minApproveRate = Number(url.searchParams.get('minApproveRate') ?? '');
     const sort = (url.searchParams.get('sort') ?? 'NEWEST') as OfferSort;
     if (!OFFER_SORT[sort]) return fail(400, 'VALIDATION_ERROR', 'sort noto‘g‘ri');
-    const items = db.offers
+    const items = sellerOffers()
       .filter((offer) => !search || `${offer.name} ${offer.categoryName ?? ''}`.toLocaleLowerCase().includes(search))
       .filter((offer) => !categoryId || offer.categoryId === categoryId)
       .filter((offer) => !url.searchParams.has('minApproveRate') || (offer.approveRate !== null && offer.approveRate >= minApproveRate))
@@ -182,7 +187,7 @@ export const affiliateHandlers = [
   http.get(`${API}/affiliate/offers/:productId`, ({ request, cookies, params }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;
-    const offer = db.offers.find((item) => item.productId === params.productId);
+    const offer = sellerOffers().find((item) => item.productId === params.productId);
     if (!offer) return fail(404, 'NOT_FOUND', 'Offer topilmadi');
     return ok(offerDetail(offer));
   }),
@@ -190,7 +195,7 @@ export const affiliateHandlers = [
   http.get(`${API}/affiliate/offers/:productId/creatives/archive`, ({ request, cookies, params }) => {
     const denied = guard(request, cookies);
     if (denied) return denied;
-    const offer = db.offers.find((item) => item.productId === params.productId);
+    const offer = sellerOffers().find((item) => item.productId === params.productId);
     if (!offer) return fail(404, 'NOT_FOUND', 'Offer topilmadi');
     return new HttpResponse(EMPTY_ZIP, {
       headers: { 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="offer-${offer.productId}-kreativlar.zip"` },
@@ -210,7 +215,7 @@ export const affiliateHandlers = [
     const denied = guard(request, cookies);
     if (denied) return denied;
     const body = (await request.json().catch(() => ({}))) as Partial<Schemas['CreateAffiliateStreamDto']>;
-    const offer = db.offers.find((item) => item.productId === body.productId);
+    const offer = sellerOffers().find((item) => item.productId === body.productId);
     if (!offer) return fail(404, 'NOT_FOUND', 'Offer topilmadi');
     if (offer.stock <= 0) return fail(409, 'CONFLICT', 'Qoldiq yo‘q: bu offerga sahifa ochilmaydi');
     const code = newStreamCode();

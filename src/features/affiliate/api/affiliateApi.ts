@@ -40,13 +40,11 @@ export function useAffiliateStatsQuery(from: string, to: string, groupBy: Affili
 
 export type { AffiliateBalance } from '../model/affiliateBalance';
 
-/**
- * Balans (sotuvchi-bosh «Mavjud» kartasi va menyu cho'ntagi). DIQQAT: backendda hali yo'q (BE-23) —
- * shakl taklif, `contract/pending-endpoints.json` da; hozir mock bilan ishlaydi.
- */
+/** Balans (sotuvchi-bosh «Mavjud» kartasi va menyu cho'ntagi): BE-23 `AffiliateBalanceDto` dan ikki summa. */
 export async function getAffiliateBalance(signal?: AbortSignal): Promise<AffiliateBalance> {
   const { data } = await httpClient.get<unknown>('/affiliate/balance', { signal });
-  return readDto<AffiliateBalance>(data, ['available', 'held']);
+  const dto = readDto<Schemas['AffiliateBalanceDto']>(data, ['available', 'hold']);
+  return { available: dto.available, held: dto.hold };
 }
 
 export function useAffiliateBalanceQuery() {

@@ -195,9 +195,12 @@ Joriy versiya PDF fayli («PDF yuklab olish»):
 
 ## 5. Bosh sahifa
 
-### `GET /api/v1/affiliate/balance` (faqat `AFFILIATE`) — yangi, BE-23
+### `GET /api/v1/affiliate/balance` (faqat `AFFILIATE`) — BE-23 da qo‘shildi (2026-11-21)
 
-«Mavjud» kartasi va menyu ostidagi cho‘ntak (sotuvchi-bosh; karkas-E 1.5):
+> Backend `AffiliateBalanceDto` da ushlab turilgan summa `hold` deb nomlangan (taklifdagi `held` emas);
+> frontend `hold` ni o‘qiydi. Qolgan maydonlar (`reserved`, `withdrawable`, `minAmount`, `blockReason`…) — FE-07.
+
+«Mavjud» kartasi va menyu ostidagi cho‘ntak (sotuvchi-bosh; karkas-E 1.5) — dastlabki taklif:
 
 ```json
 { "available": 692500, "held": 302500 }

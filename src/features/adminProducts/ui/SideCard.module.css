@@ -1,0 +1,27 @@
+/* admin-mahsulot-karta yon bloklari: oq karta, radius 16, padding 20. */
+.card { display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; min-width: 0; }
+.head > div { flex: 1 1 200px; min-width: 0; }
+.head h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.head p { margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.link { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; }
+.link > svg { width: 14px; height: 14px; }
+.link:hover { text-decoration: underline; }
+
+.rows { margin: 0; display: flex; flex-direction: column; }
+.rows > div { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--color-border); }
+.rows > div:last-child { border-bottom: 0; }
+.rows dt { flex: 0 0 auto; max-width: 50%; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+.rows dd { margin: 0; font-size: 14px; line-height: 21px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.rows dd > span { display: block; font-size: 12px; line-height: 16px; font-weight: 400; color: var(--color-text-secondary); }
+
+.caption { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); }
+.conditions { list-style: none; margin: 0; padding: 0; }
+.conditions li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+.conditions li:last-child { border-bottom: 0; }
+.conditions li > svg { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 1px; color: var(--color-danger); }
+.conditions li > svg[data-ok] { color: var(--color-success); }
+.conditions li > span { display: flex; flex-direction: column; min-width: 0; }
+.conditions li > span > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
+.conditions li > span > span:last-child:not(:first-child) { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

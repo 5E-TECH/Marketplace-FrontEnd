@@ -52,8 +52,14 @@ type Check<T extends true> = T;
  */
 type AuthUserDerived = 'isBlocked';
 
+/**
+ * FE-12 taklifi (docs/api-taklif/fe-12-admin-moderatsiya.md, 9-bo'lim): kategoriyaning BAD va «muddat kuzatiladi»
+ * belgilari — backend qo'shguncha ixtiyoriy, kelmasa ota kategoriyadan yoki sukut.
+ */
+type CategoryDerived = 'isBad' | 'expiryTracked';
+
 // prettier-ignore
-type _Category  = Check<ExpectNoDrift<Category,       Schemas['CategoryTreeDto']>>;
+type _Category  = Check<ExpectNoDrift<Category,       Schemas['CategoryTreeDto'], CategoryDerived>>;
 // prettier-ignore
 type _AuthUser  = Check<ExpectNoDrift<AuthUser,       Schemas['AuthUserDto'], AuthUserDerived>>;
 // So'rov tanasi: `UpdateProfileDto` da yo'q maydon (masalan `email`) yuborilmasin.

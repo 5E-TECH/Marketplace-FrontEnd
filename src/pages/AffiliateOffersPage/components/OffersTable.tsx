@@ -4,7 +4,8 @@ import type { AffiliateOffer, OfferSort } from '../../../features/affiliate/api/
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { formatMoney } from '../../../shared/ui/MoneyText/formatMoney';
 import type { CreateState } from '../model/createState';
-import { CreateButton, CreateError, OfferPhoto } from './OfferCard';
+import { OfferPhoto } from '../../../features/affiliate/ui/OfferCardView';
+import { CreateButton, CreateError } from './OfferCard';
 import styles from '../AffiliateOffersPage.module.css';
 
 interface OffersTableProps {

@@ -39,8 +39,11 @@ async function fulfillFromMocks(route: Route): Promise<void> {
   });
 }
 
-/** Butun kontekst (hamma tab) uchun — ikkinchi tab testlari shunga tayanadi. */
-export async function installMockApi(target: Page | BrowserContext): Promise<void> {
-  resetMockDb();
+/**
+ * Butun kontekst (hamma tab) uchun — ikkinchi tab testlari shunga tayanadi. `reset: false` — ikkinchi
+ * kontekst (boshqa rol, masalan admin tasdiqlagach sotuvchi katalogi) o'sha mock bazani ko'radi.
+ */
+export async function installMockApi(target: Page | BrowserContext, { reset = true }: { reset?: boolean } = {}): Promise<void> {
+  if (reset) resetMockDb();
   await target.route('**/api/v1/**', fulfillFromMocks);
 }

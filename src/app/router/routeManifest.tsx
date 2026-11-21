@@ -96,6 +96,8 @@ export const roleShells: Record<UserRole, RoleShell> = {
 
 // Sahifasi hali qurilmagan bandlar: o'z kartasi kelganda shu yerda `load` almashtiriladi.
 const pending = () => import('../../pages/PlaceholderPage/PlaceholderPage');
+const moderation = () => import('../../pages/AdminModerationPage/AdminModerationPage');
+const categories = () => import('../../pages/AdminCategoriesPage/AdminCategoriesPage');
 const profile = () => import('../../pages/ProfilePage/ProfilePage');
 
 export const appRoutes: readonly AppRoute[] = [
@@ -146,11 +148,19 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/wholesaler', load: pending, roles: ['WHOLESALER'], label: 'nav.home' },
 
   // ── Admin va superadmin (2.4, 2.5) ─────────────────────────────────────────
-  { path: '/admin/moderation', load: pending, roles: ADMIN_ROLES, label: 'nav.moderation', navIcon: <ListChecks />, navGroup: 'navGroup.work' },
+  { path: '/admin/moderation', load: moderation, roles: ADMIN_ROLES, label: 'nav.moderation', navIcon: <ListChecks />, navGroup: 'navGroup.work' },
+  // Telefonda navbatdagi mahsulot alohida sahifa (admin-moderatsiya.mobil); «Taqiqlangan tovarlar» — admin-taqiqlangan.
+  { path: '/admin/moderation/banned', load: pending, roles: ADMIN_ROLES, label: 'moderation.banned', section: '/admin/moderation' },
+  { path: '/admin/moderation/:productId', load: moderation, roles: ADMIN_ROLES, label: 'nav.moderation', section: '/admin/moderation' },
   { path: '/admin/leads', load: pending, roles: ADMIN_ROLES, label: 'nav.leads', navIcon: <Inbox />, navGroup: 'navGroup.work' },
   { path: '/admin/orders', load: pending, roles: ADMIN_ROLES, label: 'nav.orders', navIcon: <ShoppingBag />, navGroup: 'navGroup.work' },
-  { path: '/admin/products', load: pending, roles: ADMIN_ROLES, label: 'nav.products', navIcon: <Package />, navGroup: 'navGroup.catalog' },
-  { path: '/admin/categories', load: () => import('../../pages/AdminCategoriesPage/AdminCategoriesPage'), roles: ADMIN_ROLES, label: 'adminNav.categories', navIcon: <FolderTree />, navGroup: 'navGroup.catalog' },
+  { path: '/admin/products', load: () => import('../../pages/AdminProductsPage/AdminProductsPage'), roles: ADMIN_ROLES, label: 'nav.products', navIcon: <Package />, navGroup: 'navGroup.catalog' },
+  // Mahsulot qo'shish (optovik nomidan) — FE-25; mahsulot kartasi — FE-12 (admin-mahsulot-karta).
+  { path: '/admin/products/new', load: pending, roles: ADMIN_ROLES, label: 'products.add', section: '/admin/products' },
+  { path: '/admin/products/:productId', load: () => import('../../pages/AdminProductDetailPage/AdminProductDetailPage'), roles: ADMIN_ROLES, label: 'nav.products', section: '/admin/products' },
+  { path: '/admin/categories', load: categories, roles: ADMIN_ROLES, label: 'adminNav.categories', navIcon: <FolderTree />, navGroup: 'navGroup.catalog' },
+  // Telefonda kategoriya tafsiloti — alohida sahifa («Orqaga»; admin-kategoriyalar holatlar Ph1).
+  { path: '/admin/categories/:categoryId', load: categories, roles: ADMIN_ROLES, label: 'adminNav.categories', section: '/admin/categories' },
   { path: '/admin/inventory', load: () => import('../../pages/AdminInventoryPage/AdminInventoryPage'), roles: ADMIN_ROLES, label: 'nav.stock', navIcon: <Warehouse />, navGroup: 'navGroup.catalog' },
   { path: '/admin/sellers', load: pending, roles: ADMIN_ROLES, label: 'adminNav.sellerList', navIcon: <Store />, navGroup: 'navGroup.partners' },
   { path: '/admin/wholesalers', load: pending, roles: ADMIN_ROLES, label: 'nav.wholesalers', navIcon: <Building2 />, navGroup: 'navGroup.partners' },

@@ -23,7 +23,8 @@ import { CodeBadge } from '../../shared/ui/Badge/Badge';
 export default function AdminAuditPage() {
   const { locale, t } = useTranslation();
   const [actorId, setActorId] = useState('');
-  const [action, setAction] = useState('');
+  // Boshqa sahifadan filtr bilan ochilishi mumkin (kategoriya paneli «To‘liq tarix»: `?action=pricing.policy.update`).
+  const [action, setAction] = useState(() => new URLSearchParams(window.location.search).get('action') ?? '');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);

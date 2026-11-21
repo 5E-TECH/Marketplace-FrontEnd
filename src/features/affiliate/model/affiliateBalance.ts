@@ -1,5 +1,5 @@
 /**
- * Sotuvchi balansi (taklif — docs/api-taklif/fe-04-sotuvchi.md, 5-bo'lim; backendda BE-23, ekran FE-07).
+ * Sotuvchi balansi (BE-23 `GET /affiliate/balance`: `hold` → `held`; to'liq ekran — FE-07).
  * Alohida faylda: mock (`src/mocks`) ham ishlatadi, u esa `httpClient` ni import qilmasligi kerak.
  */
 export interface AffiliateBalance {

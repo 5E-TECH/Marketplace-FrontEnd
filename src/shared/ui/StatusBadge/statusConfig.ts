@@ -1,4 +1,4 @@
-import { Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, Package, TriangleAlert, type LucideIcon } from 'lucide-react';
+import { Archive, Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, Package, Pencil, TriangleAlert, type LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '../../i18n/translations';
 import type { BadgeTone } from '../Badge/Badge';
 
@@ -79,6 +79,16 @@ export const STATUS_FAMILIES = {
     STOPPED: { tone: 'neutral', icon: CirclePause },
     OUT_OF_STOCK: { tone: 'neutral', icon: Package },
     PAUSED: { tone: 'neutral', icon: CirclePause },
+  },
+  /** Mahsulot (BE-07 `ProductStatus`; admin-mahsulotlar): BLOCKED — `isBlocked` («To'xtatilgan»). */
+  product: {
+    PENDING_REVIEW: { tone: 'warning' },
+    ACTIVE: { tone: 'success' },
+    REJECTED: { tone: 'danger' },
+    DRAFT: { tone: 'neutral', icon: Pencil },
+    BLOCKED: { tone: 'neutral', icon: CirclePause },
+    ARCHIVED: { tone: 'neutral', icon: Archive },
+    OUT_OF_STOCK: { tone: 'neutral' },
   },
 } as const satisfies Record<string, Record<string, StatusEntry>>;
 

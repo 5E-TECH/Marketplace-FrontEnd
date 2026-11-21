@@ -1,0 +1,36 @@
+/* admin-offer 3 «Haqni o'zgartirish — qayta hisob, sabab, yangi buyurtmalardan». */
+/* Hozirgi haq va narx, qayta hisob — «nom — qiymat» qatorlari (komponentlar-E qator ro'yxati). */
+.rows, .recalc dl { margin: 0; display: flex; flex-direction: column; }
+.rows > div, .recalc dl > div { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--color-border); }
+.rows > div:last-child, .recalc dl > div:last-child { border-bottom: 0; }
+.rows dt, .recalc dt { flex: 0 0 auto; max-width: 50%; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+.rows dd, .recalc dd { margin: 0; display: flex; flex-direction: column; align-items: flex-end; font-size: 14px; line-height: 21px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.sub { display: block; font-size: 12px; line-height: 16px; font-weight: 400; color: var(--color-text-secondary); }
+.label { display: block; margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.label > span { color: var(--color-danger); }
+.hint { margin: 6px 0 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.caption { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); }
+.recalc { padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.formula { margin: 6px 0 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.error { margin: 8px 0 0; padding: 8px 12px; border-radius: 12px; background: var(--color-danger-soft); color: var(--color-danger); font-size: 13px; line-height: 18px; font-weight: 600; }
+.note { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+.textarea {
+  display: block;
+  width: 100%;
+  height: 72px;
+  margin: 0;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  resize: vertical;
+}
+
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }

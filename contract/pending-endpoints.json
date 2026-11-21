@@ -15,8 +15,12 @@
     {"operation": "GET /api/v1/operator/state", "card": "BE-13", "note": "Operator holati, bronlar soni va holat boshlangan vaqt: sahifa yangilanganda «Oflayn» dan boshlanmasin (docs/api-taklif/fe-08-operator.md)"},
     {"operation": "GET /api/v1/operator/leads/{}/product", "card": "BE-13 / OPT-2", "note": "«Mahsulot ma'lumoti» paneli: tavsif, qoldiq, og'irlik, ikki yetkazish narxi (docs/api-taklif/fe-08-operator.md)"},
     {"operation": "GET /api/v1/operator/attempts", "card": "BE-13", "note": "«Bugungi urinishlarim · oxirgi 10 tasi, jami N» — ish joyi bosh holati (docs/api-taklif/fe-08-operator.md)"},
-    {"operation": "GET /api/v1/affiliate/balance", "card": "BE-23", "note": "Balans: mavjud va ushlab turilgan haq (bosh sahifa kartasi va menyu cho'ntagi; ekran — FE-07)"},
     {"operation": "GET /api/v1/affiliate/offers/{}", "card": "BE-11 / BE-25", "note": "Offer tafsiloti: tavsif, yetkazish rejimi, holat, hamma sotuvchilar natijasi, narx taqsimoti, kreativlar (docs/api-taklif/fe-05-sotuvchi-offer.md)"},
-    {"operation": "GET /api/v1/affiliate/offers/{}/creatives/archive", "card": "BE-11 / BE-08", "note": "«Hammasini yuklab olish»: offer kreativlari bitta ZIP da (docs/api-taklif/fe-05-sotuvchi-offer.md)"}
+    {"operation": "GET /api/v1/affiliate/offers/{}/creatives/archive", "card": "BE-11 / BE-08", "note": "«Hammasini yuklab olish»: offer kreativlari bitta ZIP da (docs/api-taklif/fe-05-sotuvchi-offer.md)"},
+    {"operation": "GET /api/v1/admin/moderation/summary", "card": "BE-27", "note": "Moderatsiya tablari va mahsulot yorliqlari soni: navbatdagi mahsulot va narx, holatlar bo'yicha (docs/api-taklif/fe-12-admin-moderatsiya.md)"},
+    {"operation": "GET /api/v1/admin/products/{}/creatives", "card": "BE-08", "note": "Mahsulot kreativlari tartib bilan (PR #127; docs/api-taklif/fe-12-admin-moderatsiya.md)"},
+    {"operation": "POST /api/v1/admin/products/{}/creatives/upload", "card": "BE-08", "note": "Kreativ yuklash uchun imzolangan POST policy, 15 daqiqa (PR #127)"},
+    {"operation": "POST /api/v1/admin/products/{}/creatives", "card": "BE-08", "note": "Yuklangan faylni kreativ qilib saqlash (PR #127)"},
+    {"operation": "DELETE /api/v1/admin/products/{}/creatives/{}", "card": "BE-08", "note": "Kreativni o'chirish — offerdan chiqadi, fayl ham o'chiriladi (PR #127)"}
   ]
 }

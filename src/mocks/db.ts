@@ -1,4 +1,6 @@
 import type { components } from '../generated/api-types';
+import type { CreativeType, PriceDecision } from '../features/adminProducts/model/adminProductTypes';
+import { mockAdminProducts, mockCategories, mockCategoryPolicies, mockCreatives, mockOfferContents, mockPolicyAudit, mockProductAudit } from './fixtures/adminProducts';
 import { mockOffers } from './fixtures/offers';
 import { resetRegisteredMockAccounts } from './fixtures/users';
 import { resetMockOperator } from './handlers/operator';
@@ -89,9 +91,29 @@ function notifications(): MockNotification[] {
 
 export const MOCK_PRODUCTS = PRODUCTS;
 
+/** Kreativ yuklash (BE-08): policy berilgan, fayl omborga tushganda `uploaded`. */
+export interface MockUpload {
+  productId: string;
+  type: CreativeType;
+  contentType: string;
+  size: number;
+  uploaded: boolean;
+}
+
 function createMockDb() {
+  const offers = mockOffers();
   return {
-    offers: mockOffers(),
+    offers,
+    // Admin (FE-12): mahsulotlar — sotuvchi offerlari ko'rinishining manbai (`handlers/admin.ts` `sellerVisible`).
+    adminProducts: mockAdminProducts(offers),
+    creatives: mockCreatives(offers),
+    offerContents: mockOfferContents(offers),
+    productAudit: mockProductAudit(),
+    priceDecisions: {} as Record<string, PriceDecision[]>,
+    uploads: new Map<string, MockUpload>(),
+    categories: mockCategories(),
+    categoryPolicies: mockCategoryPolicies(),
+    policyAudit: mockPolicyAudit(),
     streams: streams(),
     operator: {
       state: 'OFFLINE' as Schemas['OperatorStateDto']['state'],

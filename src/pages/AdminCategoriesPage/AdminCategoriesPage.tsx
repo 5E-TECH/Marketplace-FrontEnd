@@ -1,170 +1,344 @@
-import { Alert, App, Avatar, Button, Form, Input, InputNumber, Space, Switch, TreeSelect } from 'antd';
-import { ChevronRight, FolderTree, Image, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { App, Dropdown } from 'antd';
+import { ArrowUpDown, FolderTree, MoreHorizontal, Pencil, Plus, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useAdminCategoriesQuery, useCreateCategoryMutation, useDeleteCategoryMutation, useUpdateCategoryMutation } from '../../features/categories/api/categoryQueries';
-import type { Category, CategoryPayload } from '../../features/categories/model/categoryTypes';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useAllAdminProductsQuery } from '../../features/adminProducts/api/adminProductsQueries';
+import { useCurrentUserQuery } from '../../features/auth/api/useCurrentUserQuery';
+import { useCategoryPoliciesQuery, useElchiTariffQuery, useGlobalPolicyQuery } from '../../features/categories/api/categoryPolicyApi';
+import { useAdminCategoriesQuery, useReorderCategoriesMutation } from '../../features/categories/api/categoryQueries';
+import type { Category } from '../../features/categories/model/categoryTypes';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { ConfirmDialog } from '../../shared/ui/ConfirmDialog/ConfirmDialog';
-import { ContentState } from '../../shared/ui/ContentState/ContentState';
-import { EmptyState } from '../../shared/ui/EmptyState/EmptyState';
-import { FormModal } from '../../shared/ui/FormModal/FormModal';
-import { ListToolbar } from '../../shared/ui/ListToolbar/ListToolbar';
-import { PageHeader } from '../../shared/ui/PageHeader/PageHeader';
-import { TablePanel } from '../../shared/ui/TablePanel/TablePanel';
-import { ToolbarButton } from '../../shared/ui/ToolbarButton/ToolbarButton';
+import { useMediaQuery } from '../../shared/lib/useMediaQuery';
+import { LoadError } from '../../shared/ui/LoadError/LoadError';
+import { PageActionBar } from '../../shared/ui/PageActionBar/PageActionBar';
+import { usePageTitle } from '../../shared/ui/PageHeader/pageTitle';
+import { CategoryFormDialog } from './components/CategoryFormDialog';
+import { CategoryPanel } from './components/CategoryPanel';
+import { CategoryPhoneList, CategoryPhoneReorder } from './components/CategoryPhoneList';
+import { CategoryTable } from './components/CategoryTable';
+import { DeleteCategoryDialog } from './components/DeleteCategoryDialog';
+import { applyOrder, categoryRows, flatten, moveInDraft, siblingsOf, type OrderDraft } from './model/categoryRows';
 import styles from './AdminCategoriesPage.module.css';
-import { Badge } from '../../shared/ui/Badge/Badge';
 
-interface CategoryValues { name: string; parentId?: string; iconUrl?: string; sortOrder: number; isActive: boolean }
-interface ParentOption { value: string; title: string; children: ParentOption[] }
+const EXPLAIN = [
+  ['acat.param.markup', 'acat.explain.markup'],
+  ['acat.col.delivery', 'acat.explain.delivery'],
+  ['acat.param.bad', 'acat.explain.bad'],
+  ['acat.param.expiry', 'acat.explain.expiry'],
+] as const;
 
-function flatten(items: Category[]): Category[] {
-  return items.flatMap(item => [item, ...flatten(item.children)]);
-}
+const NONE: ReadonlySet<string> = new Set();
 
-function parentOptions(items: Category[], excluded: Set<string>): ParentOption[] {
-  return items.filter(item => !excluded.has(item.id)).map(item => ({ value: item.id, title: item.name, children: parentOptions(item.children, excluded) }));
-}
-
-function filterTree(items: Category[], search: string): Category[] {
-  return items.flatMap(item => {
-    if (`${item.name} ${item.slug}`.toLowerCase().includes(search)) return [item];
-    const children = filterTree(item.children, search);
-    return children.length ? [{ ...item, children }] : [];
-  });
-}
-
-function payload(values: CategoryValues): CategoryPayload {
-  return { name: values.name.trim(), parentId: values.parentId || null, iconUrl: values.iconUrl?.trim() || null, sortOrder: values.sortOrder, isActive: values.isActive };
-}
-
-interface CategoryTreeProps {
-  items: Category[];
-  collapsed: string[];
-  onToggle: (id: string, expanded: boolean) => void;
-  onAdd: (parentId: string) => void;
-  onEdit: (category: Category) => void;
-  onDelete: (category: Category) => void;
-}
-
-function CategoryTree({ items, collapsed, onToggle, onAdd, onEdit, onDelete }: CategoryTreeProps) {
-  const { t } = useTranslation();
-  return <ul className={styles.treeGroup} role="group">
-    {items.map(category => {
-      const hasChildren = category.children.length > 0;
-      const expanded = hasChildren && !collapsed.includes(category.id);
-      return <li className={styles.treeItem} role="treeitem" aria-expanded={hasChildren ? expanded : undefined} data-category-id={category.id} key={category.id}>
-        <div className={styles.node}>
-          <span className={styles.nodeBranch}>
-            {hasChildren ? <button type="button" className={styles.expandButton} aria-label={t(expanded ? 'admin.categories.hideChildrenAria' : 'admin.categories.showChildrenAria', { name: category.name })} onClick={() => onToggle(category.id, expanded)}><ChevronRight size={16} /></button> : <span className={styles.leafDot} aria-hidden />}
-          </span>
-          <Avatar className={styles.icon} shape="square" size={42} src={category.iconUrl || undefined} icon={<FolderTree size={20} />} />
-          <div className={styles.categoryText}><strong>{category.name}</strong><span>/{category.slug || '—'}</span></div>
-          <div className={styles.nodeMeta}>
-            {hasChildren ? <span className={styles.childCount}>{t('admin.categories.childCount', { count: category.children.length })}</span> : null}
-            <span className={styles.order}><small>{t('admin.common.order')}</small>{category.sortOrder}</span>
-            <Badge tone={category.isActive ? 'success' : 'muted'}>{t(category.isActive ? 'status.active' : 'status.inactive')}</Badge>
-          </div>
-          <Space className={styles.actions} size={2}>
-            <Button type="text" icon={<Plus size={16} />} aria-label={t('admin.categories.addChildAria', { name: category.name })} onClick={() => onAdd(category.id)} />
-            <Button type="text" icon={<Pencil size={16} />} aria-label={t('admin.categories.editAria', { name: category.name })} onClick={() => onEdit(category)} />
-            <Button type="text" danger icon={<Trash2 size={16} />} aria-label={t('admin.categories.deleteAria', { name: category.name })} onClick={() => onDelete(category)} />
-          </Space>
-        </div>
-        {expanded ? <CategoryTree items={category.children} collapsed={collapsed} onToggle={onToggle} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} /> : null}
-      </li>;
-    })}
-  </ul>;
-}
-
+/**
+ * «Kategoriyalar» (FE-12; admin-kategoriyalar): daraxt-jadval — ustama, yetkazish ko'rinishi, BAD, muddat va ular
+ * qayerdan kelgani, tanlangan kategoriya paneli (parametrlar, mahsulotlar, tarix), tartib rejimi (sudrash, ↑ ↓,
+ * saqlash yoki bekor qilish), qo'shish, tahrirlash, o'chirish. Planshetda panel jadval ostida; telefonda — kartalar,
+ * tafsilot alohida sahifa (`/admin/categories/:categoryId`), asosiy amal pastki panelda.
+ */
 export default function AdminCategoriesPage() {
-  const { message } = App.useApp();
   const { t } = useTranslation();
-  const [form] = Form.useForm<CategoryValues>();
-  const [editing, setEditing] = useState<Category | null | undefined>();
-  const [initialValues, setInitialValues] = useState<CategoryValues>();
-  const [deleting, setDeleting] = useState<Category | null>(null);
-  const [saveError, setSaveError] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+  const { notification } = App.useApp();
+  const navigate = useNavigate();
+  const phone = useMediaQuery('(max-width: 767.98px)');
+  const { categoryId } = useParams();
+  const [params] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(NONE);
+  /** Tartib qoralamasi; `null` — tartib rejimi yopiq. */
+  const [draft, setDraft] = useState<OrderDraft | null>(null);
+  const [moved, setMoved] = useState<{ id: string; from: number } | null>(null);
+  const [form, setForm] = useState<{ category: Category | null; parentId: string | null } | null>(null);
+  const [deleting, setDeleting] = useState<Category | null>(null);
   const query = useAdminCategoriesQuery();
-  const create = useCreateCategoryMutation();
-  const update = useUpdateCategoryMutation();
-  const remove = useDeleteCategoryMutation();
+  const saveOrder = useReorderCategoriesMutation();
+  const role = useCurrentUserQuery().data?.role;
+  const products = useAllAdminProductsQuery().data;
   const flat = useMemo(() => flatten(query.data ?? []), [query.data]);
-  const branchIds = flat.filter(item => item.children.length).map(item => item.id);
-  const normalizedSearch = search.trim().toLowerCase();
-  const visibleTree = useMemo(() => filterTree(query.data ?? [], normalizedSearch), [query.data, normalizedSearch]);
-  const excludedParents = useMemo(() => new Set(editing ? flatten([editing]).map(item => item.id) : []), [editing]);
-  const saving = create.isPending || update.isPending;
-  const iconUrl = Form.useWatch('iconUrl', form);
+  const ids = useMemo(() => flat.map((item) => item.id), [flat]);
+  const policies = useCategoryPoliciesQuery(ids);
+  const global = useGlobalPolicyQuery().data;
+  const tariff = useElchiTariffQuery().data;
+  const reorder = draft !== null;
+  const tree = useMemo(() => applyOrder(query.data ?? [], draft), [query.data, draft]);
+  const context = { policies, global, products: products ?? [] };
+  const rows = categoryRows(tree, { ...context, collapsed, search: reorder ? '' : search });
+  const allRows = categoryRows(tree, { ...context, collapsed: NONE, search: '' });
+  const requestedId = categoryId ?? params.get('category');
+  const selected = allRows.find((row) => row.category.id === requestedId) ?? (phone ? undefined : rows[0]);
+  const productsOf = (category: Category) => (products ?? []).filter((product) => product.categoryId === category.id);
+  const placement = phone ? 'top' : 'bottomRight';
 
-  const openForm = (category: Category | null, parentId?: string) => {
-    setSaveError('');
-    setInitialValues(category
-      ? { name: category.name, parentId: category.parentId ?? undefined, iconUrl: category.iconUrl ?? undefined, sortOrder: category.sortOrder, isActive: category.isActive }
-      : { name: '', parentId, iconUrl: undefined, sortOrder: 0, isActive: true });
-    setEditing(category);
+  usePageTitle(phone && categoryId ? selected?.category.name ?? null : null);
+
+  const hrefOf = (category: Category) => `/admin/categories/${encodeURIComponent(category.id)}`;
+  /** Desktop va planshet: tanlov `?category=` da (telefon tafsiloti manzilidan kelinsa ham shu ko'rinishga o'tadi). */
+  const select = (category: Category) => void navigate(`/admin/categories?category=${encodeURIComponent(category.id)}`, { replace: true });
+
+  // ── Tartib ─────────────────────────────────────────────────────────────────
+  const original = (category: Category) => siblingsOf(query.data ?? [], category.parentId).findIndex((item) => item.id === category.id);
+  const changes = draft ? Object.entries(draft).flatMap(([id, sortOrder]) => {
+    const category = flat.find((item) => item.id === id);
+    return category && category.sortOrder !== sortOrder ? [{ id, sortOrder }] : [];
+  }) : [];
+  const movedRow = moved ? allRows.find((row) => row.category.id === moved.id) : undefined;
+  const summary = movedRow && moved && movedRow.position !== moved.from
+    ? t('acat.reorderSummary', { name: movedRow.category.name, from: moved.from + 1, to: movedRow.position + 1 })
+    : changes.length ? t('acat.reorderChanged') : '';
+  const move = (category: Category, to: number) => {
+    if (!draft) return;
+    setMoved((previous) => (previous?.id === category.id ? previous : { id: category.id, from: original(category) }));
+    setDraft(moveInDraft(tree, draft, category, to));
   };
-  return <div className={styles.page}>
-    <PageHeader title={t('admin.categories.title')} description={t('admin.categories.description')} extra={<Button type="primary" icon={<Plus size={18} />} disabled={!query.data} onClick={() => openForm(null)}>{t('admin.categories.add')}</Button>} />
-    {query.isPending ? <ContentState state="loading" /> : query.isError ? <ContentState state="error" title={t('admin.categories.loadError')} description={getApiErrorMessage(query.error)} onAction={() => void query.refetch()} /> : <>
-      <div className={styles.overview}>
-        <span className={styles.overviewIcon}><FolderTree size={25} /></span>
-        <div className={styles.overviewCopy}><strong>{t('admin.categories.tree')}</strong><span>{t('admin.categories.treeHint')}</span></div>
-        <div className={styles.stats}><span><b>{query.data.length}</b>{t('admin.categories.roots')}</span><span><b>{flat.filter(item => item.isActive).length}</b>{t('status.active')}</span><span><b>{flat.filter(item => !item.isActive).length}</b>{t('status.inactive')}</span></div>
+  const closeReorder = () => { setDraft(null); setMoved(null); };
+  const submitOrder = () => saveOrder.mutate(changes, {
+    onSuccess: () => { closeReorder(); notification.success({ title: t('acat.reorderSaved'), placement, duration: 3 }); },
+    onError: (error) => notification.error({ title: t('acat.reorderError'), description: getApiErrorMessage(error), placement }),
+  });
+  const reorderBanner = (
+    <div className={styles.reorderNote} role="note">
+      <ArrowUpDown aria-hidden />
+      <div>
+        <p>{t('acat.reorder')}</p>
+        <p>{t(phone ? 'acat.reorderHintPhone' : 'acat.reorderHint')}</p>
       </div>
-      <TablePanel title={t('admin.categories.tree')} caption={t('pagination.total', { total: flat.length })}>
-        <ListToolbar
-          className={styles.toolbar}
-          value={search}
-          placeholder={t('admin.categories.search')}
-          onChange={setSearch}
-          actions={branchIds.length ? <ToolbarButton icon={<Layers size={16} />} disabled={Boolean(normalizedSearch)} onClick={() => setCollapsed(collapsed.length ? [] : branchIds)}>{t(collapsed.length ? 'admin.categories.expand' : 'admin.categories.collapse')}</ToolbarButton> : undefined}
+    </div>
+  );
+
+  // ── Amallar ────────────────────────────────────────────────────────────────
+  const openForm = (category: Category | null, parentId: string | null = null) => setForm({ category, parentId });
+  const openDelete = (category: Category) => setDeleting(category);
+  const toggle = (category: Category, expanded: boolean) => setCollapsed((previous) => {
+    const next = new Set(previous);
+    if (expanded) next.add(category.id);
+    else next.delete(category.id);
+    return next;
+  });
+
+  const dialogs = (
+    <>
+      {form ? (
+        <CategoryFormDialog
+          key={form.category && policies.get(form.category.id) ? 'ready' : 'loading'}
+          category={form.category}
+          parentId={form.parentId}
+          tree={query.data ?? []}
+          layer={form.category ? policies.get(form.category.id) : undefined}
+          global={global}
+          tariff={tariff}
+          canEditPolicy={role === 'SUPERADMIN'}
+          phone={phone}
+          onClose={() => setForm(null)}
+          onSaved={(category, created) => {
+            setForm(null);
+            setSearch('');
+            notification.success({ title: t(created ? 'acat.added' : 'acat.saved', { name: category.name }), placement, duration: 3 });
+            if (!phone) select(category);
+          }}
         />
-        <div className={styles.treeViewport} aria-busy={query.isFetching}>
-          {visibleTree.length ? <div className={styles.graphScroller} data-testid="category-tree-scroll">
-            <div className={styles.graph} role="tree" aria-label={t('admin.categories.tree')}>
-              <div className={styles.rootNode} data-testid="category-tree-root">
-                <span><FolderTree size={23} /></span>
-                <div><strong>{t('admin.categories.allCategories')}</strong><small>{t('pagination.total', { total: flat.length })}</small></div>
-              </div>
-              <CategoryTree items={visibleTree} collapsed={normalizedSearch ? [] : collapsed} onToggle={(id, expanded) => setCollapsed(previous => expanded ? [...previous, id] : previous.filter(item => item !== id))} onAdd={parentId => openForm(null, parentId)} onEdit={openForm} onDelete={category => { setDeleteError(''); setDeleting(category); }} />
-            </div>
-          </div> : <EmptyState compact title={t(normalizedSearch ? 'admin.categories.noResults' : 'admin.categories.empty')} description={t(normalizedSearch ? 'admin.categories.noResultsHint' : 'admin.categories.emptyDescription')} />}
+      ) : null}
+      {deleting ? (
+        <DeleteCategoryDialog
+          category={deleting}
+          parent={flat.find((item) => item.id === deleting.parentId) ?? null}
+          products={products ? productsOf(deleting) : undefined}
+          onClose={() => setDeleting(null)}
+          onDeleted={(category) => {
+            setDeleting(null);
+            notification.success({ title: t('acat.deleted', { name: category.name }), placement, duration: 3 });
+            if (phone && categoryId) void navigate('/admin/categories', { replace: true });
+          }}
+        />
+      ) : null}
+    </>
+  );
+
+  const searchBox = (
+    <span className={styles.search}>
+      <Search aria-hidden />
+      <input type="search" value={search} placeholder={t('acat.search')} aria-label={t('acat.search')} onChange={(event) => setSearch(event.target.value)} />
+    </span>
+  );
+  const counts = t('acat.counts', { categories: flat.length, products: products?.length ?? 0 });
+  const legend = (
+    <p className={styles.legend}>
+      <span className={styles.wideOnly}>{t('acat.legend')}</span>
+      <span className={styles.compactOnly}>{t('acat.legendCompact')}</span>
+    </p>
+  );
+  const explain = (
+    <section className={styles.explain}>
+      <h2>{t('acat.explainTitle')}</h2>
+      <p className={styles.explainHint}>{t('acat.explainHint')}</p>
+      <dl>
+        {EXPLAIN.map(([term, text]) => (
+          <div key={term}>
+            <dt>{t(term)}</dt>
+            <dd>{t(text)}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+
+  const state = () => {
+    if (query.isPending) return <div className={styles.skeleton} aria-busy="true" data-testid="categories-loading" />;
+    if (query.isError) return <LoadError error={query.error} onRetry={() => void query.refetch()} title={t('acat.loadError')} />;
+    if (!flat.length) {
+      return (
+        <section className={styles.empty}>
+          <span className={styles.emptyIcon}><FolderTree aria-hidden /></span>
+          <p className={styles.emptyTitle}>{t('acat.empty')}</p>
+          <p>{t('acat.emptyText')}</p>
+          {phone ? null : <button type="button" className={styles.primary} onClick={() => openForm(null)}><Plus aria-hidden />{t('acat.add')}</button>}
+        </section>
+      );
+    }
+    if (!rows.length) {
+      return (
+        <section className={styles.empty}>
+          <p className={styles.emptyTitle}>{t('acat.noResults')}</p>
+          <p>{t('acat.noResultsText')}</p>
+          <button type="button" className={styles.secondary} onClick={() => setSearch('')}>{t('acat.clearSearch')}</button>
+        </section>
+      );
+    }
+    return null;
+  };
+
+  // ── Telefon ────────────────────────────────────────────────────────────────
+  if (phone) {
+    if (categoryId) {
+      if (!selected) {
+        return (
+          <div className={styles.page}>
+            {state() ?? (
+              <section className={styles.empty}>
+                <p className={styles.emptyTitle}>{t('acat.notFound')}</p>
+                <Link to="/admin/categories" className={styles.link}>{t('acat.back')}</Link>
+              </section>
+            )}
+          </div>
+        );
+      }
+      return (
+        <div className={styles.page}>
+          <CategoryPanel
+            row={selected}
+            products={productsOf(selected.category)}
+            phone
+            onEdit={() => openForm(selected.category)}
+            onAddChild={() => openForm(null, selected.category.id)}
+            onDelete={() => openDelete(selected.category)}
+          />
+          <PageActionBar>
+            <button type="button" className={styles.barPrimary} onClick={() => openForm(selected.category)}><Pencil aria-hidden />{t('acat.edit')}</button>
+          </PageActionBar>
+          {dialogs}
         </div>
-      </TablePanel>
-    </>}
-    <FormModal<CategoryValues> title={t(editing ? 'admin.categories.edit' : 'admin.categories.new')} open={editing !== undefined} form={form} initialValues={initialValues} loading={saving} onCancel={() => setEditing(undefined)} onSubmit={values => {
-      if (saving) return;
-      setSaveError('');
-      const options = {
-        onSuccess: () => { setEditing(undefined); setSearch(''); setCollapsed([]); void message.success(t('admin.categories.saved')); },
-        onError: (error: Error) => {
-          const errorText = getApiErrorMessage(error);
-          setSaveError(errorText);
-          if (/slug/i.test(errorText)) form.setFields([{ name: 'name', errors: [errorText] }]);
-        },
-      };
-      if (editing) update.mutate({ id: editing.id, payload: payload(values) }, options); else create.mutate(payload(values), options);
-    }}>
-      <div className={styles.formIntro}><FolderTree size={22} /><p>{t('admin.categories.formHint')}</p></div>
-      {saveError ? <Alert className={styles.alert} type="error" showIcon title={saveError} /> : null}
-      <Form.Item name="name" label={t('admin.common.name')} extra={t('admin.categories.slugHint')} rules={[{ required: true, whitespace: true, message: t('admin.categories.nameRequired') }, { max: 255 }]}><Input autoFocus maxLength={255} disabled={saving} /></Form.Item>
-      <Form.Item name="parentId" label={t('admin.categories.parent')}><TreeSelect allowClear showSearch={{ treeNodeFilterProp: 'title' }} treeDefaultExpandAll treeData={parentOptions(query.data ?? [], excludedParents)} placeholder={t('admin.categories.rootPlaceholder')} disabled={saving} /></Form.Item>
-      <Form.Item name="iconUrl" label={t('admin.categories.iconUrl')} rules={[{ type: 'url' }, { max: 500 }]}><Input prefix={<Image size={16} />} placeholder="https://…" disabled={saving} /></Form.Item>
-      <div className={styles.formBottom}>
-        <div className={styles.iconPreview}><Avatar shape="square" size={48} src={iconUrl || undefined} icon={<FolderTree size={24} />} /><span>{t('admin.categories.iconPreview')}</span></div>
-        <Form.Item name="sortOrder" label={t('admin.categories.orderNumber')} rules={[{ required: true }]}><InputNumber min={0} max={2147483647} precision={0} disabled={saving} /></Form.Item>
-        <Form.Item name="isActive" label={t('status.active')} valuePropName="checked"><Switch disabled={saving} /></Form.Item>
+      );
+    }
+    if (reorder) {
+      return (
+        <div className={styles.page}>
+          {reorderBanner}
+          <CategoryPhoneReorder rows={rows} moved={moved} onMove={move} />
+          {summary ? <p className={styles.legend} role="status">{summary}</p> : null}
+          <PageActionBar>
+            <button type="button" className={styles.barSecondary} disabled={saveOrder.isPending} onClick={closeReorder}>{t('acat.cancel')}</button>
+            <button type="button" className={styles.barPrimary} disabled={!changes.length || saveOrder.isPending} onClick={submitOrder}>{t(saveOrder.isPending ? 'moderation.saving' : 'acat.reorderSave')}</button>
+          </PageActionBar>
+        </div>
+      );
+    }
+    return (
+      <div className={styles.page}>
+        {searchBox}
+        {flat.length ? (
+          <div className={styles.phoneCounts}>
+            <p>{counts}</p>
+            <Dropdown trigger={['click']} placement="bottomRight" menu={{ items: [{ key: 'reorder', icon: <ArrowUpDown aria-hidden />, label: t('acat.reorder') }], onClick: () => setDraft({}) }}>
+              <button type="button" className={styles.moreBordered} aria-label={t('acat.moreActions')} title={t('acat.moreActions')}><MoreHorizontal aria-hidden /></button>
+            </Dropdown>
+          </div>
+        ) : null}
+        {state() ?? (
+          <>
+            <CategoryPhoneList rows={rows} global={global} hrefOf={hrefOf} />
+            {legend}
+            {explain}
+          </>
+        )}
+        <PageActionBar>
+          <button type="button" className={styles.barPrimary} disabled={!query.data} onClick={() => openForm(null)}><Plus aria-hidden />{t('acat.add')}</button>
+        </PageActionBar>
+        {dialogs}
       </div>
-    </FormModal>
-    <ConfirmDialog open={Boolean(deleting)} title={t('admin.categories.deleteTitle')} description={<><p><strong>{deleting?.name}</strong></p><p>{t('admin.categories.deleteDescription')}</p>{deleteError ? <Alert type="error" showIcon title={deleteError} /> : null}</>} confirmText={t('common.delete')} danger loading={remove.isPending} onCancel={() => { if (!remove.isPending) setDeleting(null); }} onConfirm={() => {
-      if (!deleting || remove.isPending) return;
-      setDeleteError('');
-      remove.mutate(deleting.id, { onSuccess: () => { setDeleting(null); void message.success(t('admin.categories.deleted')); }, onError: error => setDeleteError(getApiErrorMessage(error)) });
-    }} />
-  </div>;
+    );
+  }
+
+  // ── Desktop va planshet ────────────────────────────────────────────────────
+  const empty = state();
+  return (
+    <div className={styles.page}>
+      <div className={styles.toolbar}>
+        {searchBox}
+        <span className={`${styles.counts} ${styles.wideOnly}`}>{counts}</span>
+        {flat.length ? (
+          <span className={styles.toolbarActions}>
+            <button type="button" className={styles.secondary} aria-pressed={reorder} onClick={() => (reorder ? closeReorder() : setDraft({}))}>
+              <ArrowUpDown aria-hidden />{t('acat.reorder')}
+            </button>
+            <button type="button" className={styles.primary} disabled={reorder} onClick={() => openForm(null)}><Plus aria-hidden />{t('acat.add')}</button>
+          </span>
+        ) : null}
+      </div>
+      {empty ?? (
+        <div className={styles.layout}>
+          <div className={styles.mainColumn}>
+            <section className={styles.tableCard} aria-label={t(reorder ? 'acat.reorder' : 'acat.tree')}>
+              {reorder ? reorderBanner : null}
+              <CategoryTable
+                rows={rows}
+                global={global}
+                selectedId={reorder ? null : selected?.category.id ?? null}
+                reorder={reorder}
+                onSelect={select}
+                onToggle={toggle}
+                onEdit={(category) => openForm(category)}
+                onAddChild={(category) => openForm(null, category.id)}
+                onDelete={openDelete}
+                onMove={move}
+              />
+              {reorder ? (
+                <div className={styles.reorderFooter}>
+                  <p role="status">{summary}</p>
+                  <button type="button" className={styles.secondary} disabled={saveOrder.isPending} onClick={closeReorder}>{t('acat.cancel')}</button>
+                  <button type="button" className={styles.primary} disabled={!changes.length || saveOrder.isPending} onClick={submitOrder}>{t(saveOrder.isPending ? 'moderation.saving' : 'acat.reorderSave')}</button>
+                </div>
+              ) : (
+                <p className={`${styles.tableFooter} ${styles.compactOnly}`}>
+                  {selected ? t('acat.countsSelected', { counts, name: selected.category.name }) : counts}
+                </p>
+              )}
+            </section>
+            {legend}
+            {explain}
+          </div>
+          {reorder ? null : <div className={styles.sideColumn}>
+            {selected ? (
+              <CategoryPanel
+                row={selected}
+                products={productsOf(selected.category)}
+                onEdit={() => openForm(selected.category)}
+                onAddChild={() => openForm(null, selected.category.id)}
+                onDelete={() => openDelete(selected.category)}
+              />
+            ) : <p className={styles.note}>{t('acat.emptySelect')}</p>}
+          </div>}
+        </div>
+      )}
+      {dialogs}
+    </div>
+  );
 }
