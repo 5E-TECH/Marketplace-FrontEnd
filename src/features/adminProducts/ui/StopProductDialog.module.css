@@ -1,0 +1,40 @@
+/* admin-mahsulotlar 3 «To'xtatish — sabab majburiy». */
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.labelRow label { font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.labelRow label > span { color: var(--color-danger); }
+
+.textarea {
+  display: block;
+  width: 100%;
+  height: 96px;
+  margin: 0;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  resize: vertical;
+}
+
+.textarea::placeholder { color: var(--color-text-faint); }
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }
+.hint { margin: 6px 0 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.caption { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); }
+.effects { list-style: none; margin: 0; padding: 0; }
+.effects li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+.effects li:last-child { border-bottom: 0; }
+.effects li > svg { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 1px; }
+.effects svg[data-tone='danger'] { color: var(--color-danger); }
+.effects svg[data-tone='success'] { color: var(--color-success); }
+.effects li > span { display: flex; flex-direction: column; min-width: 0; }
+.effects li > span > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
+.effects li > span > span:last-child { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.link { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; }
+.link > svg { width: 14px; height: 14px; }
+.link:hover { text-decoration: underline; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

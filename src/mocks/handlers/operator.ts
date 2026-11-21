@@ -97,6 +97,7 @@ function makeLead(seed: Seed): LeadCard {
     rejectReason: null,
     callScript: script(seed.name, product.name, product.salePrice),
     stockShortage: seed.stockShortage ?? false,
+    blacklistRejections: null,
     attemptsCount: attempts.length,
     bookedUntil: seed.bookedUntil ?? null,
     nextAttemptAt: seed.nextAttemptAt ?? null,
@@ -106,6 +107,12 @@ function makeLead(seed: Seed): LeadCard {
     previousLeads: seed.previousLeads ?? [],
     createdAt: created,
   };
+}
+
+/** Admin offer sozlamasida yozilgan skript (FE-12 TC3, `PUT /admin/offer-content`) — bo'lmasa namuna skript. */
+function withOfferScript(lead: LeadCard): LeadCard {
+  const script = db.offerContents[lead.product.id]?.callScript;
+  return script ? { ...lead, callScript: script } : lead;
 }
 
 interface OperatorStore {
@@ -368,7 +375,7 @@ export const operatorHandlers = [
     const booked: LeadCard = { ...withStatus(lead, 'BOOKED', shortName(user?.name), null), bookedUntil: ahead(BOOKING_MINUTES) };
     current().leads.set(lead.id, booked);
     current().owned.add(lead.id);
-    return ok(booked);
+    return ok(withOfferScript(booked));
   }),
 
   http.get(`${API}/operator/leads/:id`, ({ request, cookies, params }) => {
@@ -376,7 +383,7 @@ export const operatorHandlers = [
     if (denied) return denied;
     sweep();
     const lead = mine().find((item) => item.id === String(params.id));
-    return lead ? ok(lead) : fail(404, 'NOT_FOUND', 'Lid topilmadi yoki bron muddati tugagan');
+    return lead ? ok(withOfferScript(lead)) : fail(404, 'NOT_FOUND', 'Lid topilmadi yoki bron muddati tugagan');
   }),
 
   // Taklif (BE-13 / OPT-2): «Mahsulot ma'lumoti» paneli.

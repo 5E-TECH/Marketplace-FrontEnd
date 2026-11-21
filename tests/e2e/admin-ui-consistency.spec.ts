@@ -40,8 +40,7 @@ test('kategoriya va audit shared panelda, menyu va audit matni oâ€˜qiladigan oâ€
     body: JSON.stringify({ data: [{ id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null, iconUrl: null, sortOrder: 0, isActive: true, children: [] }] }),
   }));
   await page.goto('/admin/categories');
-  const categoryPanel = page.getByText('Jami 1 ta', { exact: true }).locator('xpath=ancestor::section[1]');
-  await expect(categoryPanel.getByRole('tree')).toBeVisible();
+  await expect(page.getByTestId('category-table').getByText('Elektronika', { exact: true })).toBeVisible();
 
   await page.route('**/api/v1/admin/audit**', (route) => route.fulfill({
     status: 200,

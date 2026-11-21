@@ -37,6 +37,7 @@
 }
 
 .icon > svg { width: 20px; height: 20px; }
+.icon[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); }
 .icon[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
 .icon[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
 .icon[data-tone='neutral'] { background: var(--color-sunken); color: var(--color-text-secondary); }
@@ -104,6 +105,8 @@
 .primary:hover:not(:disabled) { background: var(--color-action-hover); }
 .primary:disabled { opacity: 0.45; cursor: not-allowed; }
 .primary[aria-busy='true'] { opacity: 1; cursor: progress; }
+.primary[data-danger] { background: var(--color-danger); }
+.primary[data-danger]:hover:not(:disabled) { background: color-mix(in srgb, var(--color-danger) 88%, #000); }
 
 .kbd {
   display: inline-flex;
@@ -122,6 +125,28 @@
   line-height: 16px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.handle { display: none; }
+
+/* Telefon — pastdan varaq (komponentlar-E §32, R7): tutqich 40 × 4 32 px tasmada, sarlavha 18/24 ikonkasiz,
+   yopish 44; sarlavha va tugmalar qotgan, mazmun aylanadi; tugmalar teng (uzun yozuv qisqarmaydi). */
+@media (max-width: 767.98px) {
+  .root :global(.ant-modal) :global(.ant-modal-container) { padding-top: 0; }
+  .root :global(.ant-modal-body) { display: flex; flex-direction: column; overflow: hidden; }
+  .dialog { flex: 1 1 auto; min-height: 0; }
+  .handle { display: flex; align-items: center; justify-content: center; height: 32px; flex: none; margin-bottom: -16px; }
+  .handle > span { display: block; width: 40px; height: 4px; border-radius: 999px; background: var(--color-border-strong); }
+  .head { gap: 8px; margin-right: -10px; }
+  .head .icon { display: none; }
+  .headText { padding-top: 10px; }
+  .headText h3 { font-size: 18px; line-height: 24px; }
+  .close { width: 44px; height: 44px; flex-basis: 44px; border-radius: 12px; }
+  .close > svg { width: 20px; height: 20px; }
+  .body { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -16px; padding: 4px 16px 4px; }
+  .footer { flex: none; gap: 12px; margin: 0 -16px; padding: 12px 16px 0; }
+  .footer > .button { flex: 1 1 0; min-width: max-content; }
+  .footerHint { flex: 1 1 100%; margin-right: 0; }
 }
 
 .spin { animation: spin 0.9s linear infinite; }

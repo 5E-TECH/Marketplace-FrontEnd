@@ -9,7 +9,7 @@ interface DialogProps {
   title: string;
   description?: ReactNode;
   icon: ReactNode;
-  tone?: 'action' | 'danger' | 'warning' | 'neutral';
+  tone?: 'action' | 'success' | 'danger' | 'warning' | 'neutral';
   width?: number;
   /** Saqlanmoqda — yopilmaydi (operator-natija 15). */
   locked?: boolean;
@@ -21,7 +21,8 @@ interface DialogProps {
 
 /**
  * Oyna (komponentlar-E §32; operator-natija, sotuvchi-offer oynalari): ikonka doirasi, sarlavha, izoh
- * va yopish; pastda chiziq va tugmalar. Desktopda markazda, telefonda pastdan varaq.
+ * va yopish; pastda chiziq va tugmalar. Desktopda markazda, telefonda pastdan varaq (R7): tutqich, sarlavha
+ * 18/24 ikonkasiz, yopish 44, mazmun aylanadi, tugmalar teng kenglikda.
  */
 export function Dialog({ open, title, description, icon, tone = 'action', width = 480, locked = false, onClose, footer, children, testId }: DialogProps) {
   const { t } = useTranslation();
@@ -39,6 +40,7 @@ export function Dialog({ open, title, description, icon, tone = 'action', width 
       rootClassName={styles.root}
     >
       <div className={styles.dialog} data-testid={testId}>
+        <div className={styles.handle} aria-hidden><span /></div>
         <div className={styles.head}>
           <span className={styles.icon} data-tone={tone} aria-hidden>{icon}</span>
           <div className={styles.headText}>
@@ -64,20 +66,22 @@ export function DialogCancel({ onClick, disabled, children }: { onClick: () => v
   return <button type="button" className={`${styles.button} ${styles.secondary}`} onClick={onClick} disabled={disabled}>{children}</button>;
 }
 
-/** Asosiy tugma: «Saqlanmoqda…» aylanuvchi ikonka bilan; yoqilganda Ctrl+Enter belgisi. */
-export function DialogPrimary({ onClick, disabled, saving, savingLabel, icon, shortcut = true, children }: {
+/** Asosiy tugma: «Saqlanmoqda…» aylanuvchi ikonka bilan; yoqilganda Ctrl+Enter belgisi. `danger` — qizil (rad etish). */
+export function DialogPrimary({ onClick, disabled, saving, savingLabel, icon, shortcut = true, danger = false, children }: {
   onClick: () => void;
   disabled?: boolean;
   saving?: boolean;
   savingLabel?: string;
   icon?: ReactNode;
   shortcut?: boolean;
+  danger?: boolean;
   children: ReactNode;
 }) {
   return (
     <button
       type="button"
       className={`${styles.button} ${styles.primary}`}
+      data-danger={danger || undefined}
       onClick={onClick}
       disabled={disabled || saving}
       aria-busy={saving || undefined}

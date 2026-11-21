@@ -18,7 +18,7 @@ const requireUser = (request: Request, cookies: Record<string, string>, roles?: 
   return null;
 };
 
-/** Bildirishnomalar, viloyatlar va hozir ulangan admin sahifalari (Kategoriyalar, Qoldiq, Audit, Foydalanuvchilar). */
+/** Bildirishnomalar, viloyatlar va admin lidlar/foydalanuvchilar ro'yxati (kategoriyalar, qoldiq, audit — `admin.ts`). */
 export const commonHandlers = [
   http.get(`${API}/notifications`, ({ request, cookies }) => {
     const denied = requireUser(request, cookies);
@@ -66,22 +66,4 @@ export const commonHandlers = [
   }),
   // Ochiq kategoriyalar daraxti (offerlar filtri «Kategoriya»).
   http.get(`${API}/categories`, () => ok(OFFER_CATEGORIES)),
-  http.get(`${API}/admin/categories`, ({ request, cookies }) => {
-    const denied = requireUser(request, cookies, ADMIN_ROLES);
-    if (denied) return denied;
-    return ok([
-      { id: '1', name: 'Elektronika', slug: 'elektronika', parentId: null, iconUrl: null, sortOrder: 0, isActive: true, children: [] },
-      { id: '2', name: 'Oshxona', slug: 'oshxona', parentId: null, iconUrl: null, sortOrder: 1, isActive: true, children: [] },
-    ]);
-  }),
-  http.get(`${API}/admin/inventory/:kind`, ({ request, cookies }) => {
-    const denied = requireUser(request, cookies, ADMIN_ROLES);
-    if (denied) return denied;
-    return ok({ items: [], total: 0, page: 1, limit: 20, totalPages: 1, warnings: [], searchTruncated: false });
-  }),
-  http.get(`${API}/admin/audit`, ({ request, cookies }) => {
-    const denied = requireUser(request, cookies, ADMIN_ROLES);
-    if (denied) return denied;
-    return ok({ items: [], total: 0, page: 1, limit: 20, totalPages: 1 });
-  }),
 ];

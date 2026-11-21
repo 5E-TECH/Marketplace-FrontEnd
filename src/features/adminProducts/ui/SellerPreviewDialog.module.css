@@ -1,0 +1,37 @@
+/* admin-mahsulotlar 3 «Sotuvchi sifatida ko'rish»: chapda offer kartasi, o'ngda shartlar. */
+.layout { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.card { flex: 0 1 300px; min-width: 260px; }
+.why { flex: 1 1 0; min-width: 240px; display: flex; flex-direction: column; gap: 12px; }
+.caption { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); }
+.why ul { list-style: none; margin: 0; padding: 0; }
+.why li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+.why li:last-child { border-bottom: 0; }
+.why li > svg { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 1px; color: var(--color-danger); }
+.why li > svg[data-ok] { color: var(--color-success); }
+.why li > span { display: flex; flex-direction: column; min-width: 0; }
+.why li > span > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
+.why li > span > span:last-child { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+.create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-action);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.create > svg { width: 18px; height: 18px; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

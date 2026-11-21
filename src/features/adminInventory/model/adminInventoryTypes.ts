@@ -5,6 +5,8 @@ export interface AdminStockListParams {
   page: number;
   limit: number;
   shopId?: string;
+  /** Bitta mahsulot (admin mahsulot kartasidagi «Qoldiq», FE-12). */
+  productId?: string;
   search?: string;
   /** true — faqat faol, false — faqat o‘chirilgan omborlar; berilmasa hammasi. */
   warehouseActive?: boolean;

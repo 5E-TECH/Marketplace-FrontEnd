@@ -1,0 +1,67 @@
+/* admin-offer «Kreativlar kutubxonasi»: 4:5 kataklar (105 × 131) va «Kreativlar» yorlig'idagi ro'yxat. */
+.grid { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px; }
+.grid > li { display: flex; flex-direction: column; gap: 8px; width: 106px; }
+.tile { position: relative; display: block; }
+.tileOpen { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.thumb { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 4 / 5; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-sunken); color: var(--color-text-secondary); overflow: hidden; }
+.thumb > svg { width: 22px; height: 22px; }
+.thumb > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.thumb[data-small] { width: 44px; height: 56px; flex: 0 0 44px; aspect-ratio: auto; border-radius: 8px; }
+.thumb[data-small] > svg { width: 16px; height: 16px; }
+.tileMenu { position: absolute; top: 6px; right: 6px; }
+
+.menuButton { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); color: var(--color-text-secondary); cursor: pointer; }
+.menuButton > svg { width: 16px; height: 16px; }
+.menuButton:hover { color: var(--color-text); border-color: var(--color-border-strong); }
+.tileLabel { display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
+.tileLabel strong { font-size: 13px; line-height: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tileLabel span { color: var(--color-text-secondary); }
+
+.tableWrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 12px; }
+.table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; line-height: 21px; }
+.table th { height: 44px; padding: 0 12px; background: var(--color-sunken); border-bottom: 1px solid var(--color-border); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); text-align: left; }
+.table td { padding: 8px 12px; border-bottom: 1px solid var(--color-border); vertical-align: middle; font-variant-numeric: tabular-nums; }
+.table tr:last-child td { border-bottom: 0; }
+.rowPreview { display: flex; align-items: center; gap: 12px; }
+.rowPreview > span:last-child { display: flex; flex-direction: column; }
+.rowPreview strong { font-weight: 600; }
+.rowPreview > span:last-child > span { font-size: 13px; color: var(--color-text-secondary); }
+.actions { width: 56px; text-align: right; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.uploadPrimary, .uploadSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.uploadPrimary { background: var(--color-action); color: #fff; }
+.uploadPrimary:hover { background: var(--color-action-hover); }
+.uploadSecondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.uploadPrimary > svg, .uploadSecondary > svg { width: 18px; height: 18px; }
+
+/* Telefon «Kreativlar» yorlig'i (holatlar Ph6): kartalar ro'yxati. */
+.cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.cards > li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.cards > li:last-child { border-bottom: 0; }
+.cardText { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.cardText > strong { font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text); }
+
+/* Telefon (admin-offer.mobil): kataklar uchtadan, kenglik bo'yicha. */
+@container content (max-width: 575px) {
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .grid > li { width: auto; min-width: 0; }
+}

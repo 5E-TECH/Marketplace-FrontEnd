@@ -1,0 +1,127 @@
+/* admin-moderatsiya «Mahsulot — optovik yuborgan ma'lumot»: bo'limlar orasi 32 (telefonda 28). */
+.sections { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.title { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.title > span { font-weight: 500; color: var(--color-text-secondary); }
+.title[data-gap] { margin-bottom: 10px; }
+.title[data-gap='12'] { margin-bottom: 12px; }
+.muted { margin: 12px 0 0; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+
+/* Rasm va video: 4:5 kataklar, desktopda teng ulush, telefonda suriladi (44%). */
+.media { list-style: none; margin: 12px 0 0; padding: 0; display: flex; gap: 10px; }
+.media > li { flex: 1 1 0; min-width: 0; max-width: 33%; display: flex; flex-direction: column; gap: 6px; }
+.media[data-phone] { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.media[data-phone] > li { flex: 0 0 44%; max-width: none; scroll-snap-align: start; }
+
+.tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-row-hover);
+}
+
+.tile > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.placeholder { position: absolute; left: 10px; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 2px; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.placeholder > span:first-child { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.placeholder svg { width: 14px; height: 14px; flex: 0 0 14px; }
+
+.chip {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tileLabel { font-size: 12px; line-height: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.warning { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-warning-soft); }
+.warning > svg { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 1px; color: var(--color-warning); }
+.warning > div { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.warning p { margin: 0; font-size: 14px; line-height: 21px; }
+.warning .warningTitle { font-weight: 700; color: var(--color-warning); }
+.inlineLink { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; }
+.inlineLink:hover { text-decoration: underline; }
+
+.description { margin: 0; padding: 12px 16px; border-radius: 12px; background: var(--color-sunken); font-size: 14px; line-height: 22px; white-space: pre-line; }
+
+/* Ma'lumotlar: nomi chapda, qiymat o'ngda, izoh pastda; qatorlar orasida chiziq. */
+.details { margin: 0; border-top: 1px solid var(--color-border); }
+.details > div { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.details dt { flex: 1 1 150px; min-width: 0; font-size: 14px; line-height: 21px; font-weight: 400; }
+.details dd { margin: 0 0 0 auto; font-size: 14px; line-height: 21px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.details .hint { flex: 1 1 100%; margin: 2px 0 0; font-size: 12px; line-height: 18px; font-weight: 400; text-align: left; color: var(--color-text-secondary); }
+
+.priceLink { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; }
+.priceLink > svg { width: 16px; height: 16px; }
+.priceLink:hover { text-decoration: underline; }
+
+/* Sertifikat fayli: ikonka 36, nomi, «Ochish» 36, yuklab olish 36. Telefonda tugmalar pastki qatorda. */
+.file { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 56px; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
+.fileIcon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-nav); }
+.fileIcon > svg { width: 18px; height: 18px; }
+.fileName { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.fileName > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere; }
+.fileName > span:last-child { font-size: 12px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.fileActions { display: flex; align-items: center; gap: 12px; }
+.file[data-phone] .fileActions { flex: 1 1 100%; gap: 8px; }
+.file[data-phone] .openButton { flex: 1 1 auto; height: 44px; }
+.file[data-phone] .iconButton { width: 44px; height: 44px; border: 1px solid var(--color-border-strong); }
+
+.openButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.openButton > svg { width: 16px; height: 16px; }
+.openButton:hover { border-color: var(--color-border-hover); }
+
+.iconButton { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: none; box-sizing: border-box; border-radius: 10px; color: var(--color-text-secondary); }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+
+.certificateBody { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin-top: 16px; }
+.sheet { flex: 0 0 168px; width: 168px; aspect-ratio: 210 / 297; box-sizing: border-box; padding: 16px 14px; border: 1px solid var(--color-border-strong); border-radius: 6px; background: var(--color-surface); display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.sheet > span:first-child { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.sheet > span:first-child svg { width: 14px; height: 14px; flex: 0 0 14px; }
+.sheet > span:nth-child(2) { margin-top: -8px; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.line { display: block; height: 8px; border-radius: 4px; background: var(--color-border); }
+.checkText { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.checkText > p { margin: 0; font-size: 14px; line-height: 21px; font-weight: 600; }
+.checkText > ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 21px; }
+
+/* Planshet (admin-moderatsiya.planshet): kataklar qatori 540 gacha. */
+@container content (max-width: 919.98px) {
+  .media:not([data-phone]) { max-width: 540px; }
+}
+
+@container content (max-width: 575px) {
+  .sections { gap: 28px; }
+}
