@@ -1,0 +1,8 @@
+/* admin-postavka «P-0114 arizasini bekor qilish»: dalillar bloki, sabab, qoida. */
+.facts { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.facts > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.facts dt { flex: none; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.facts dd { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.label { display: block; margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.required { color: var(--color-danger); }
+.rule { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }

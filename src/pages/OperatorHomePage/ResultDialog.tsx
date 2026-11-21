@@ -2,7 +2,7 @@ import { ArrowRight, Calendar, CalendarClock, Check, CircleX, Clock, GitMerge, P
 import { useState, type KeyboardEvent } from 'react';
 import { clock, dayLabel, rejectLabel, statusLabel } from '../../features/operator/lib/leadFormat';
 import { CALLBACK_GRACE_MINUTES, clampToCallWindow, duplicateCandidate, REMINDER_MINUTES, tashkentMoment, tashkentParts } from '../../features/operator/lib/leadRules';
-import { useNow } from '../../features/operator/lib/useNow';
+import { useNow } from '../../shared/lib/useNow';
 import type { LeadCard, LeadRejectReason, LeadResultInput } from '../../features/operator/model/operatorTypes';
 import { DialogCancel, DialogHint, DialogPrimary, Dialog } from '../../shared/ui/Dialog/Dialog';
 import type { TranslationKey } from '../../shared/i18n/translations';

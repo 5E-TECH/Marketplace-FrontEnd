@@ -1,0 +1,210 @@
+/* ombor-qabul (№209): skan maydoni, qabul kartasi, farq akti, skan jurnali, kutilayotgan postavkalar. */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.card { display: flex; flex-direction: column; gap: 16px; padding: 20px; box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; min-width: 0; }
+.card[data-tight] { gap: 8px; }
+.cardHead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 16px; min-width: 0; }
+.cardTitle { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 240px; }
+.cardTitle h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.cardTitle > span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+/* Karta ichida to'g'ridan-to'g'ri (ustun flex): asos balandlikka aylanmasin. */
+.card > .cardTitle { flex: none; }
+.cardHead > .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* ── Skan ── */
+.scan { gap: 10px; }
+.scanRow { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; }
+.scanRow > :first-child { flex: 1 1 320px; min-width: 0; }
+.modeField { display: flex; flex-direction: column; gap: 6px; }
+.modeLabel { font-size: 13px; line-height: 18px; font-weight: 600; }
+.modes { display: inline-flex; align-items: center; gap: 2px; height: 52px; padding: 3px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-sunken); }
+.mode { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--color-text-secondary); font-family: inherit; font-size: 15px; line-height: 22px; font-weight: 500; white-space: nowrap; cursor: pointer; }
+.mode > svg { width: 18px; height: 18px; }
+.mode[data-kind='accept'] > svg { color: var(--color-success); }
+.mode[data-kind='defect'] > svg { color: var(--color-danger); }
+.mode[aria-checked='true'] { border-color: var(--color-border-strong); background: var(--color-surface); box-shadow: 0 1px 2px rgb(16 23 51 / 6%); color: var(--color-text); font-weight: 600; }
+.mode[data-kind='defect'][aria-checked='true'] { border-color: var(--color-danger); color: var(--color-danger); }
+.hint { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+
+.notice { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; }
+.notice[data-tone='warning'] { background: var(--color-warning-soft); }
+.notice[data-tone='info'] { background: var(--color-sunken); border: 1px solid var(--color-border); }
+.notice[data-tone='success'] { background: var(--color-success-soft); }
+.noticeBody { flex: 1 1 260px; min-width: 0; display: flex; gap: 10px; }
+.noticeBody > svg { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 1px; }
+.notice[data-tone='warning'] .noticeBody > svg, .notice[data-tone='warning'] strong { color: var(--color-warning); }
+.notice[data-tone='info'] .noticeBody > svg { color: var(--color-text-secondary); }
+.notice[data-tone='success'] .noticeBody > svg, .notice[data-tone='success'] strong { color: var(--color-success); }
+.noticeBody p { margin: 0; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.noticeBody strong { display: block; font-weight: 700; }
+.muted { color: var(--color-text-secondary); }
+
+/* ── Ikki ustun: 1024 da yonma-yon, tor joyda bitta (dizayndagi tartib bilan). ── */
+.columns { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.main { flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.aside { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Sanoq ── */
+.counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin: 0; padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); border: 1px solid var(--color-border); }
+.count { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.countLabel { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary); }
+.countValue { margin: 0; font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.countValue[data-tone='warning'] { color: var(--color-warning); }
+.countNote { font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.swatch { display: block; width: 10px; height: 10px; flex: 0 0 10px; border-radius: 3px; }
+.swatch[data-kind='accepted'] { background: var(--color-nav); }
+.swatch[data-kind='defect'] { background: var(--color-danger); }
+
+.progress { display: flex; flex-direction: column; gap: 8px; }
+.progressHead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.progressHead > span:first-child { font-size: 14px; line-height: 20px; color: var(--color-text-secondary); }
+.progressHead strong { font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.progressHead > span:last-child { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.progressHead > span[data-tone='warning'] { color: var(--color-warning); font-weight: 600; }
+.bar { display: flex; gap: 2px; min-width: 0; }
+.bar > span { display: block; min-width: 8px; height: 12px; border-radius: 4px; }
+.bar > [data-kind='accepted'] { background: var(--color-nav); }
+.bar > [data-kind='defect'] { background: var(--color-danger); }
+.bar > [data-kind='surplus'] { background: var(--color-warning); }
+.bar > [data-kind='rest'] { background: var(--color-border); }
+
+.facts { margin: 0; padding: 14px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.facts > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; min-width: 0; }
+.facts dt { flex: none; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); }
+.facts dd { margin: 0; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.factsAction { display: flex; justify-content: flex-end; }
+
+/* ── Farq akti ── */
+.scroll { position: relative; overflow-x: auto; min-width: 0; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); white-space: nowrap; text-align: left; }
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+.table td { padding: 0 14px; box-sizing: border-box; font-size: 14px; line-height: 21px; white-space: nowrap; text-align: left; height: 56px; border-bottom: 1px solid var(--color-border); font-variant-numeric: tabular-nums; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table .num { text-align: right; }
+.diffNegative { color: var(--color-danger); font-weight: 700; }
+.diffPositive { color: var(--color-warning); font-weight: 700; }
+.stack { display: flex; flex-direction: column; min-width: 0; }
+.stack > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
+.stack > span:last-child:not(:first-child) { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+/* Telefon: akt sonlari 2×2 va «Farq» qatori (ombor-qabul.mobil). */
+.actPhone { display: flex; flex-direction: column; gap: 10px; }
+.actGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; }
+.actGrid > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+.actGrid > div:nth-child(odd):not(.actDiff) { border-right: 1px solid var(--color-border); }
+.actGrid > div > span { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); }
+.actGrid > div > strong { font-size: 18px; line-height: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.actGrid > .actDiff { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; border-bottom: 0; }
+.actGrid > .actDiff[data-negative] { background: var(--color-danger-soft); color: var(--color-danger); }
+.actGrid > .actDiff[data-negative] > span { color: var(--color-danger); }
+.countText { display: flex; flex-direction: column; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pair p { margin: 0; font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; }
+.pair p:first-child { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.pair p + p { margin-top: 2px; }
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.label { font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.optional { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.textarea { display: block; width: 100%; height: 72px; margin: 0; padding: 10px 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 16px; line-height: 22px; resize: vertical; }
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.actFooter { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.actFooter > p { margin: 0; flex: 1 1 240px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+.primary, .secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 0; height: 44px; padding: 0 18px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; text-decoration: none; cursor: pointer; }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); color: #fff; }
+.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.primary[data-size='large'] { height: 52px; padding: 0 20px; font-size: 15px; line-height: 22px; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.secondary:hover { border-color: var(--color-border-hover); color: var(--color-text); }
+.primary > svg, .secondary > svg { width: 18px; height: 18px; }
+.block { width: 100%; }
+.barPrimary { flex: 1 1 auto; height: 52px; font-size: 15px; }
+
+/* ── Skan jurnali ── */
+.journal { list-style: none; margin: 0; padding: 0; }
+.journal > li { display: flex; align-items: flex-start; gap: 12px; min-height: 56px; padding: 10px 0; box-sizing: border-box; border-bottom: 1px solid var(--color-border); }
+.journal > li:last-child { border-bottom: 0; }
+.journalTime { flex: 0 0 40px; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.journalBody { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.journalTitle { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; font-weight: 600; }
+.journalTitle > svg { width: 16px; height: 16px; flex: none; color: var(--color-text-secondary); }
+.journalTitle > svg[data-tone='warning'] { color: var(--color-warning); }
+.journalSub { font-size: 12px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.journalResult { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 20px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--color-text-secondary); }
+.journalResult > svg { width: 14px; height: 14px; }
+.journalResult[data-tone='success'] { color: var(--color-success); }
+.journalResult[data-tone='danger'] { color: var(--color-danger); }
+.journalResult[data-tone='warning'] { color: var(--color-warning); }
+.linkButton { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; margin: 0; height: 44px; padding: 0 8px; box-sizing: border-box; border: 0; border-radius: 12px; background: transparent; color: var(--color-action); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.linkButton > svg { width: 18px; height: 18px; }
+.linkButton:disabled { color: var(--color-text-faint); cursor: not-allowed; }
+.empty { margin: 0; padding: 8px 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+/* ── Kutilayotgan postavkalar (o'ng ustun) ── */
+.queue { list-style: none; margin: 0; padding: 0; }
+.queue > li { border-bottom: 1px solid var(--color-border); }
+.queue > li:last-child { border-bottom: 0; }
+.queueItem { display: flex; flex-direction: column; gap: 2px; width: 100%; min-height: 56px; margin: 0; padding: 10px 0; box-sizing: border-box; border: 0; background: transparent; color: var(--color-text); font-family: inherit; text-align: left; cursor: pointer; }
+.queueItem[aria-current='true'] { margin: 10px 0; padding: 6px 0; border-radius: 4px; background: var(--color-action-soft); box-shadow: 0 0 0 10px var(--color-action-soft); cursor: default; }
+.queue > li:has(.queueItem[aria-current='true']) { border-bottom: 0; }
+.queueTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.queueNumber { font-size: 14px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.queueName { font-size: 14px; line-height: 20px; }
+.queueSub { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.queueCaption { margin: 4px 0 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); }
+
+/* ── Ro'yxat ko'rinishi (qabul boshlanmagan) ── */
+.listHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
+.listTable td { height: 56px; }
+.listTable tbody tr[data-current] > td { background: var(--color-action-soft); }
+.actionCell { text-align: right; width: 1%; }
+.pdf { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-action); text-decoration: none; }
+.pdf > svg { width: 16px; height: 16px; }
+
+.listNote { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--color-info-soft); color: var(--color-info); font-size: 14px; line-height: 21px; font-weight: 600; }
+.emptyBlock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 16px; text-align: center; }
+.emptyBlock > span { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.emptyBlock > span > svg { width: 22px; height: 22px; }
+.emptyBlock > strong { font-size: 16px; line-height: 24px; font-weight: 700; }
+.emptyBlock > p { max-width: 420px; margin: 0 0 8px; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+
+/* Telefon kartalari (ombor-qabul holatlar 6). */
+.waitCards { list-style: none; margin: 0 -16px; padding: 0; }
+.waitCards > li { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-top: 1px solid var(--color-border); }
+.waitCards > li[data-matched] { background: var(--color-action-soft); }
+.waitName { font-size: 15px; line-height: 22px; font-weight: 600; }
+.waitName > span { font-weight: 400; color: var(--color-text-secondary); }
+.waitMeta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.waitMeta > strong { font-size: 15px; line-height: 22px; font-weight: 700; color: var(--color-text); white-space: nowrap; }
+.waitAction > button { width: 100%; height: 44px; }
+
+/* Ikki ustun sig'maganda (520 + 300 + 20): bitta ustun — qabul kartasi, jurnal, farq akti, kutilayotganlar (ombor-qabul.planshet). */
+@container content (max-width: 839.98px) {
+  .columns { display: flex; flex-direction: column; align-items: stretch; }
+  .main, .aside { display: contents; }
+  .receiving { order: 1; }
+  .journalCard { order: 2; }
+  .actCard { order: 3; }
+  .queueCard { order: 4; }
+}
+
+/* Telefon (≤ 575): sanoq qatorlarda, akt sonlari 2×2, yakunlash pastki panelda (ombor-qabul.mobil). */
+@container content (max-width: 575px) {
+  .page, .columns { gap: 12px; }
+  .card { padding: 16px; gap: 14px; }
+  .scan { gap: 10px; }
+  .modeField, .modes { width: 100%; }
+  .mode { flex: 1 1 0; padding: 0 12px; }
+  .counts { display: flex; flex-direction: column; gap: 0; padding: 4px 14px; }
+  .count { flex-direction: row; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+  .count:last-child { border-bottom: 0; }
+  .countLabel { flex: 1 1 auto; align-items: flex-start; gap: 10px; color: var(--color-text); }
+  .countLabel .swatch { margin-top: 5px; }
+  .countText { display: flex; flex-direction: column; font-size: 14px; line-height: 20px; }
+  .countValue { order: 2; font-size: 24px; line-height: 32px; }
+  .pair { grid-template-columns: 1fr; gap: 10px; }
+  .actFooter { padding-top: 0; border-top: 0; }
+}

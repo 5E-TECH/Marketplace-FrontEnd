@@ -94,6 +94,14 @@ export const roleShells: Record<UserRole, RoleShell> = {
   SUPERADMIN: { home: '/admin/moderation', variant: 'panel', area: 'admin', profilePath: '/admin/profile' },
 };
 
+/**
+ * Hujjatlar (A4, chop etish → PDF): karkassiz, lekin kirish va rol tekshiruvi bilan. Menyu va sarlavha yo'q —
+ * sahifa o'z asboblar qatorini chizadi.
+ */
+export const documentRoutes: readonly AppRoute[] = [
+  { path: '/inbound-acts/:shipmentId', load: () => import('../../pages/InboundActPage/InboundActPage'), roles: ['WAREHOUSE', 'ADMIN', 'SUPERADMIN'], label: 'inb.act.title' },
+];
+
 // Sahifasi hali qurilmagan bandlar: o'z kartasi kelganda shu yerda `load` almashtiriladi.
 const pending = () => import('../../pages/PlaceholderPage/PlaceholderPage');
 const moderation = () => import('../../pages/AdminModerationPage/AdminModerationPage');
@@ -130,9 +138,9 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/supervisor/recordings', load: pending, roles: ['SUPERVISOR'], label: 'nav.callRecordings', navIcon: <AudioLines /> },
 
   // ── Omborchi (2.6) ─────────────────────────────────────────────────────────
-  { path: '/warehouse', load: pending, roles: ['WAREHOUSE'], label: 'nav.inbound', navIcon: <PackagePlus />, railLabel: 'rail.inbound' },
+  { path: '/warehouse', load: () => import('../../pages/WarehouseInboundPage/WarehouseInboundPage'), roles: ['WAREHOUSE'], label: 'nav.inbound', navIcon: <PackagePlus />, railLabel: 'rail.inbound' },
   { path: '/warehouse/sku', load: pending, roles: ['WAREHOUSE'], label: 'nav.skuCells', navIcon: <ScanBarcode />, railLabel: 'rail.sku' },
-  { path: '/warehouse/stock', load: pending, roles: ['WAREHOUSE'], label: 'nav.stock', navIcon: <Warehouse />, railLabel: 'rail.stock' },
+  { path: '/warehouse/stock', load: () => import('../../pages/WarehouseStockPage/WarehouseStockPage'), roles: ['WAREHOUSE'], label: 'nav.stock', navIcon: <Warehouse />, railLabel: 'rail.stock' },
   { path: '/warehouse/picking', load: pending, roles: ['WAREHOUSE'], label: 'nav.pickPack', navIcon: <PackageCheck />, railLabel: 'rail.pick' },
   { path: '/warehouse/handover', load: pending, roles: ['WAREHOUSE'], label: 'nav.handover', navIcon: <Truck />, railLabel: 'rail.handover' },
   { path: '/warehouse/returns', load: pending, roles: ['WAREHOUSE'], label: 'nav.returnsSorting', navIcon: <Undo2 />, railLabel: 'rail.returns' },
@@ -163,7 +171,9 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/admin/categories/:categoryId', load: categories, roles: ADMIN_ROLES, label: 'adminNav.categories', section: '/admin/categories' },
   { path: '/admin/inventory', load: () => import('../../pages/AdminInventoryPage/AdminInventoryPage'), roles: ADMIN_ROLES, label: 'nav.stock', navIcon: <Warehouse />, navGroup: 'navGroup.catalog' },
   { path: '/admin/sellers', load: pending, roles: ADMIN_ROLES, label: 'adminNav.sellerList', navIcon: <Store />, navGroup: 'navGroup.partners' },
-  { path: '/admin/wholesalers', load: pending, roles: ADMIN_ROLES, label: 'nav.wholesalers', navIcon: <Building2 />, navGroup: 'navGroup.partners' },
+  // «Optoviklar»: yorliqlar — «Optoviklar» (FE-25) va «Postavkalar» (FE-16, admin-postavka); postavka tafsiloti — ichki sahifa.
+  { path: '/admin/wholesalers', load: () => import('../../pages/AdminWholesalersPage/AdminWholesalersPage'), roles: ADMIN_ROLES, label: 'nav.wholesalers', navIcon: <Building2 />, navGroup: 'navGroup.partners' },
+  { path: '/admin/wholesalers/shipments/:shipmentId', load: () => import('../../pages/AdminShipmentPage/AdminShipmentPage'), roles: ADMIN_ROLES, label: 'nav.wholesalers', section: '/admin/wholesalers' },
   { path: '/admin/recordings', load: pending, roles: ADMIN_ROLES, label: 'nav.callRecordings', navIcon: <AudioLines />, navGroup: 'navGroup.control' },
   { path: '/admin/audit-logs', load: () => import('../../pages/AdminAuditPage/AdminAuditPage'), roles: ADMIN_ROLES, label: 'nav.auditJournal', navIcon: <History />, navGroup: 'navGroup.control' },
   { path: '/admin/users', load: () => import('../../pages/AdminUsersPage/AdminUsersPage'), roles: ADMIN_ROLES, label: 'adminNav.users', navIcon: <Users />, navGroup: 'navGroup.system' },

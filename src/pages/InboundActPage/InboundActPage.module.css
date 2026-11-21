@@ -1,0 +1,101 @@
+/* hujjat-qabul-akti: A4 varaq 794 × 1123 (96 dpi), ichki chet 57 px; ekranda kulrang fon ustida, chop etishda faqat varaq. */
+.screen { min-height: 100vh; padding: 16px 16px 40px; box-sizing: border-box; background: var(--color-bg); color: var(--color-text); }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; max-width: 794px; margin: 0 auto 16px; }
+.toolbarEnd { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.toolbarHint { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.back { display: inline-flex; align-items: center; gap: 4px; height: 44px; margin: 0; padding: 0 12px 0 8px; border: 0; border-radius: 12px; background: transparent; color: var(--color-text); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.back > svg { width: 18px; height: 18px; }
+.back:hover { background: var(--color-sunken); }
+.primary { display: inline-flex; align-items: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; border: 0; border-radius: 12px; background: var(--color-action); color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.primary > svg { width: 18px; height: 18px; }
+.primary:hover { background: var(--color-action-hover); }
+.notReady { max-width: 794px; margin: 40px auto; text-align: center; font-size: 15px; color: var(--color-text-secondary); }
+
+.frame { width: 794px; margin: 0 auto; }
+.sheet { width: 794px; height: 1123px; box-sizing: border-box; padding: 57px; background: #fff; color: #101733; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; line-height: 18px; box-shadow: 0 1px 3px rgb(16 23 51 / 12%); }
+.sheet p { margin: 0; }
+.content { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; padding-bottom: 16px; }
+.muted { color: #4b5575; }
+.nums { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.issuer { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.issuer > img { display: block; width: 36px; height: 36px; border-radius: 8px; flex: none; }
+.issuer > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.brand { font-size: 16px; line-height: 22px; font-weight: 700; }
+.small { font-size: 12px; line-height: 16px; font-weight: 400; }
+.actNumber { display: flex; gap: 14px; align-items: flex-start; flex: none; }
+.actNumber > div { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.label { font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.06em; color: #4b5575; }
+.number { font-size: 22px; line-height: 28px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.actNumber .small { font-weight: 500; font-variant-numeric: tabular-nums; }
+.qr { padding: 0 !important; border-radius: 0 !important; }
+.rule { height: 2px; flex: none; margin: 14px 0; background: #101733; }
+
+.titleRow { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.titleRow h1 { margin: 0; font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.titleRow p { margin-top: 2px; font-size: 13px; line-height: 18px; font-weight: 500; color: #4b5575; }
+.stamp { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; box-sizing: border-box; border: 1.5px solid #101733; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; }
+
+.parties { width: 100%; margin-top: 14px; border-collapse: collapse; }
+.parties th { width: 168px; padding: 7px 12px; box-sizing: border-box; border: 1px solid #c9d1e0; background: #f0f3f9; font-size: 12px; line-height: 16px; font-weight: 600; color: #4b5575; text-align: left; vertical-align: top; }
+.parties td { padding: 7px 12px; border: 1px solid #c9d1e0; font-size: 13px; line-height: 18px; vertical-align: top; overflow-wrap: anywhere; }
+
+.meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 12px; border-top: 1px solid #c9d1e0; border-bottom: 1px solid #c9d1e0; }
+.meta > div { min-width: 0; padding: 8px 12px; box-sizing: border-box; }
+.meta > div + div { border-left: 1px solid #c9d1e0; }
+.meta p:first-child { font-size: 12px; line-height: 16px; font-weight: 600; color: #4b5575; }
+.meta p:last-child { margin-top: 2px; font-size: 13px; line-height: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.goodsHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 18px; }
+.goodsHead h2, .sectionTitle { margin: 0; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.06em; }
+.goodsHead span { font-size: 12px; line-height: 16px; font-weight: 500; color: #4b5575; }
+.goods { width: 100%; margin-top: 8px; border-collapse: collapse; }
+.goods th { padding: 7px 8px; border-bottom: 1.5px solid #101733; font-size: 12px; line-height: 16px; font-weight: 700; text-align: left; vertical-align: bottom; }
+.goods td { padding: 6px 8px; border-bottom: 1px solid #c9d1e0; font-size: 13px; line-height: 18px; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+.goods tfoot td { padding: 9px 8px; border-top: 1.5px solid #101733; border-bottom: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.goods .num { text-align: right; font-variant-numeric: tabular-nums; }
+.colNo { width: 26px; }
+.colLot { width: 176px; }
+.goods th.num { width: 50px; }
+.strong { display: block; font-weight: 600; }
+.medium { display: block; font-weight: 500; }
+.subline { display: block; font-size: 12px; line-height: 16px; color: #4b5575; }
+.lotLine { display: block; }
+.lotLine + .lotLine { margin-top: 4px; }
+
+.summary { margin-top: 14px; padding: 10px 16px; box-sizing: border-box; border: 1.5px solid #101733; border-radius: 8px; }
+.summaryHead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.summaryTitle { font-size: 15px; line-height: 22px; font-weight: 700; }
+.summaryNote { font-size: 13px; line-height: 18px; font-weight: 600; text-align: right; }
+.words { margin-top: 4px !important; font-size: 12px; line-height: 16px; font-weight: 500; color: #4b5575; }
+.words > span { font-style: italic; font-synthesis: style; }
+.bullets { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: 13px; line-height: 18px; }
+.bullets > li { display: flex; gap: 8px; }
+.bullets strong { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bullets > li > span:first-child { flex: none; width: 5px; height: 5px; margin-top: 7px; border-radius: 999px; background: #101733; }
+
+.twoCols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 16px; }
+.noteBox { margin-top: 6px; padding: 9px 12px; box-sizing: border-box; border: 1px solid #c9d1e0; border-radius: 8px; font-size: 13px; line-height: 18px; }
+.sendText { margin-top: 6px !important; font-size: 13px; line-height: 18px; font-weight: 500; }
+
+.signatures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: auto; padding-top: 18px; }
+.signature { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.signName { font-size: 13px; line-height: 18px; font-weight: 600; }
+.signRow { display: flex; gap: 14px; align-items: flex-end; }
+.signRow > div:first-child { flex: 1 1 auto; min-width: 0; }
+.signLine { height: 30px; border-bottom: 1px solid #101733; }
+.signCaption { margin-top: 3px !important; font-size: 12px; line-height: 16px; font-weight: 500; color: #4b5575; }
+.signCaption + .signCaption { margin-top: 6px !important; }
+.seal { width: 80px; height: 80px; flex: none; box-sizing: border-box; border: 1.5px dashed #c9d1e0; border-radius: 999px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; line-height: 16px; color: #4b5575; }
+
+.footer { flex: none; padding-top: 8px; border-top: 1px solid #c9d1e0; display: flex; justify-content: space-between; gap: 16px; font-size: 12px; line-height: 16px; color: #4b5575; font-variant-numeric: tabular-nums; }
+
+@page { size: A4; margin: 0; }
+
+@media print {
+  .screen { min-height: 0; padding: 0; background: #fff; }
+  .toolbar { display: none; }
+  .frame { width: auto; margin: 0; zoom: 1 !important; }
+  .sheet { width: 210mm; height: 297mm; box-shadow: none; }
+}

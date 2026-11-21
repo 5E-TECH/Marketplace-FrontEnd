@@ -6,7 +6,7 @@ import type { OperatorLead } from '../../features/operator/api/operatorApi';
 import { useOperatorLeadsQuery } from '../../features/operator/api/operatorQueries';
 import { clock, dayLabel, durationLabel, outcomeLabel } from '../../features/operator/lib/leadFormat';
 import { REMINDER_MINUTES } from '../../features/operator/lib/leadRules';
-import { useNow } from '../../features/operator/lib/useNow';
+import { useNow } from '../../shared/lib/useNow';
 import { notificationPermission } from '../../features/operator/ui/useCallbackReminders';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';

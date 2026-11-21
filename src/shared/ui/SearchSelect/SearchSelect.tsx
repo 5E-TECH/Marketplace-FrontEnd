@@ -1,5 +1,5 @@
 import { Popover } from 'antd';
-import { Check, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Lock, Search } from 'lucide-react';
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useMediaQuery } from '../../lib/useMediaQuery';
@@ -9,6 +9,10 @@ import styles from './SearchSelect.module.css';
 export interface SelectOption {
   value: string;
   label: string;
+  /** Ikkinchi qator: «4780012345677 · mavjud 120» (admin-postavka mahsuloti). Faqat qidiruvli ro'yxatda. */
+  description?: string;
+  /** Tanlab bo'lmaydi — qulf belgisi va sababi (`description`) bilan ko'rinadi. */
+  disabled?: boolean;
 }
 
 interface SearchSelectProps {
@@ -104,6 +108,7 @@ function Combobox({
     if (refocus) trigger.current?.focus();
   };
   const choose = (option: SelectOption) => {
+    if (option.disabled) return;
     onChange(option.value);
     show(false, true);
   };
@@ -151,11 +156,19 @@ function Combobox({
                 id={optionId(index)}
                 role="option"
                 aria-selected={current}
+                aria-disabled={option.disabled || undefined}
                 data-active={index === active || undefined}
+                data-described={option.description ? true : undefined}
                 onMouseEnter={() => setActive(index)}
                 onClick={() => choose(option)}
               >
-                <span>{option.label}</span>
+                {option.disabled ? <Lock className={styles.lock} aria-hidden /> : null}
+                {option.description ? (
+                  <span className={styles.option}>
+                    <span>{option.label}</span>
+                    <span className={styles.description}>{option.description}</span>
+                  </span>
+                ) : <span>{option.label}</span>}
                 {current ? <Check aria-hidden /> : null}
               </li>
             );

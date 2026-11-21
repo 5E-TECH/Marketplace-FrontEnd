@@ -13,6 +13,8 @@ import { selectAuthUser, selectSessionExpired } from '../../features/auth/model/
 import { SessionExpiredDialog } from '../../features/auth/ui/SessionExpiredDialog/SessionExpiredDialog';
 import { NotificationBell } from '../../features/notifications/ui/NotificationBell/NotificationBell';
 import { OperatorBookingsClock, OperatorStateSwitch } from '../../features/operator/ui/OperatorStatusBar';
+import { useScanQueueStatus } from '../../features/warehouse/lib/scanQueueStatus';
+import { WarehouseTopStatus } from '../../features/warehouse/ui/WarehouseTopStatus';
 import { ConnectionBanner } from '../../shared/ui/ConnectionBanner/ConnectionBanner';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { formatUzPhone } from '../../shared/lib/phone';
@@ -57,6 +59,7 @@ export default function AppShell() {
   const user = useAppSelector(selectAuthUser);
   const sessionExpired = useAppSelector(selectSessionExpired);
   const currentUserQuery = useCurrentUserQuery();
+  const scanQueue = useScanQueueStatus();
   const logoutMutation = useLogoutMutation();
   const shell = user ? getRoleShell(user.role) : null;
   const layout = useShellLayout(shell?.variant);
@@ -128,7 +131,7 @@ export default function AppShell() {
               {pageStatus ? <PageStatusLine status={pageStatus} /> : null}
             </>
           )}
-          beforeTools={user.role === 'OPERATOR_LEAD' ? <OperatorBookingsClock /> : undefined}
+          beforeTools={user.role === 'OPERATOR_LEAD' ? <OperatorBookingsClock /> : user.role === 'WAREHOUSE' ? <WarehouseTopStatus /> : undefined}
           bell={
             <NotificationBell
               role={user.role}
@@ -148,7 +151,7 @@ export default function AppShell() {
             />
           }
         />
-        <ConnectionBanner />
+        <ConnectionBanner scanQueue={user.role === 'WAREHOUSE' ? scanQueue : undefined} />
         {sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>

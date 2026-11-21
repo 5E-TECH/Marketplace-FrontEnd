@@ -1,0 +1,53 @@
+/* admin-postavka holatlar 4: «Qabul akti · P-0098» — yo'l, sonlar, tafsilot; telefonda ikki karta (R8). */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.card { display: flex; flex-direction: column; gap: 16px; padding: 20px; box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; row-gap: 6px; min-width: 0; }
+.title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; min-width: 0; }
+.title h2, .cardTitle { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; white-space: nowrap; }
+.title > span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.headEnd { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pdf { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; }
+.pdf > svg { width: 16px; height: 16px; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-start; }
+.steps > li { flex: 1 1 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.marker { display: flex; align-items: center; }
+.dot { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: none; box-sizing: border-box; border-radius: 999px; border: 2px solid var(--color-border-strong); background: var(--color-surface); color: #fff; }
+.dot > svg { width: 16px; height: 16px; }
+.steps > li[data-done] .dot { border: 0; background: var(--color-nav); }
+.line { flex: 1 1 auto; height: 2px; margin: 0 8px; border-radius: 2px; background: var(--color-border-strong); }
+.steps > li[data-done] .line { background: var(--color-nav); }
+.steps > li:last-child .line { display: none; }
+.stepText { display: flex; flex-direction: column; padding-right: 8px; }
+.stepText > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
+.stepText > span:last-child:not(:first-child) { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+/* Telefon: tik yo'l (holatlar 6). */
+.steps[data-vertical] { flex-direction: column; }
+.steps[data-vertical] > li { flex-direction: row; gap: 12px; min-height: 55px; }
+.steps[data-vertical] .marker { flex-direction: column; align-self: stretch; }
+.steps[data-vertical] .line { width: 2px; height: auto; margin: 4px 0; }
+
+.numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; min-width: 0; }
+.numbers > div { display: flex; flex-direction: column; gap: 2px; }
+.numbers > div > span { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary); }
+.numbers strong { font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.numbers strong > span { font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; color: var(--color-text-secondary); }
+
+.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; min-width: 0; }
+.details > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.details > div > span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.details strong { font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.note { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+.dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.dl dt { flex: none; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); }
+.dl dd { margin: 0; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+@container content (max-width: 575px) {
+  .page { gap: 12px; }
+  .card { padding: 16px; gap: 14px; }
+  .numbers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .numbers strong { font-size: 24px; line-height: 30px; }
+}

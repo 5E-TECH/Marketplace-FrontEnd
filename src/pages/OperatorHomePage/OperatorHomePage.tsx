@@ -20,7 +20,7 @@ import {
 } from '../../features/operator/api/operatorQueries';
 import { clock, durationLabel, outcomeLabel, rejectLabel, statusLabel } from '../../features/operator/lib/leadFormat';
 import { isNoAnswer } from '../../features/operator/lib/leadRules';
-import { useNow } from '../../features/operator/lib/useNow';
+import { useNow } from '../../shared/lib/useNow';
 import type { LeadResultAccepted, LeadResultInput, LeadStatus, OperatorAttemptItem } from '../../features/operator/model/operatorTypes';
 import { getApiErrorCode, getApiErrorMessage, getApiRequestId } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';

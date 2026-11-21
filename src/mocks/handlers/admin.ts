@@ -7,6 +7,7 @@ import { categorySlug, SLUG_PATTERN } from '../../features/categories/lib/catego
 import { categoryTree, GLOBAL_POLICY, MOCK_SHOP, mockDelivery, mockPricing, TARIFF, type MockAdminProduct, type MockCategory } from '../fixtures/adminProducts';
 import { API, fail, ok, pageOf } from '../utils';
 import { currentMockUser } from './auth';
+import { warehouseStockRows } from './warehouse';
 
 /**
  * Admin: mahsulotlar, moderatsiya, offer sozlash (FE-12). Qoidalar backenddagidek (BE-07 `product.service.ts`,
@@ -188,7 +189,7 @@ export const adminHandlers = [
     const { denied } = guard(request, cookies);
     if (denied) return denied;
     const wholesaler: Schemas['WholesalerDto'] = {
-      id: MOCK_SHOP.id, name: MOCK_SHOP.name, slug: 'namuna-savdo', status: 'ACTIVE', legalType: 'LEGAL_ENTITY', tin: '301234567', bankName: 'Asaka bank',
+      id: MOCK_SHOP.id, name: MOCK_SHOP.name, slug: 'namuna-savdo', status: 'ACTIVE', legalType: 'LEGAL_ENTITY', tin: '307418562', bankName: 'Asaka bank',
       bankAccount: '20208000900123456001', bankMfo: '00873', contractNumber: 'K-2027/014', contractDate: '2027-01-05', phone: '+998712000002',
       address: 'Toshkent sh., Chilonzor t., 7-mavze', description: null, ownerUserId: 'U-0002', createdAt: '2027-01-05T05:00:00.000Z',
     };
@@ -486,11 +487,16 @@ export const adminHandlers = [
     return ok(pageOf(items, url, 50));
   }),
 
-  // Mahsulot kartasidagi «Qoldiq» (FE-12): bitta ombor, offerdagi sonlar; boshqa so'rovlar — bo'sh ro'yxat.
+  // Mahsulot kartasidagi «Qoldiq» (FE-12): bitta ombor, offerdagi sonlar. Mahsulotsiz `stock` — omborchi va admin
+  // «Qoldiq» sahifasi (FE-16, BE-16: ADMIN, WAREHOUSE, SUPERADMIN); harakatlar — bo'sh ro'yxat.
   http.get(`${API}/admin/inventory/:kind`, ({ request, cookies, params }) => {
+    const url = new URL(request.url);
+    const user = currentMockUser(request, cookies);
+    if (params.kind === 'stock' && !url.searchParams.get('productId') && user && ['ADMIN', 'SUPERADMIN', 'WAREHOUSE'].includes(user.role)) {
+      return ok({ ...pageOf(warehouseStockRows(), url, 100), warnings: [], searchTruncated: false });
+    }
     const { denied } = guard(request, cookies);
     if (denied) return denied;
-    const url = new URL(request.url);
     const product = params.kind === 'stock' ? findProduct(url.searchParams.get('productId')) : undefined;
     const rows = product?.stock ? [{
       shopId: product.shopId, warehouseId: '1', warehouseName: 'Toshkent ombori', warehouseActive: true, variantId: `${product.id}01`,

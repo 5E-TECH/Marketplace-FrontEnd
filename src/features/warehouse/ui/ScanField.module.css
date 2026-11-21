@@ -1,0 +1,72 @@
+/* ombor-qabul «Shtrix-kod»: 52 px maydon, chapda 22 px skaner belgisi (16 px ichkarida). */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.label {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.control {
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  top: 15px;
+  left: 16px;
+  width: 22px;
+  height: 22px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  margin: 0;
+  padding: 0 16px 0 50px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.input:focus {
+  border-color: var(--color-action);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+.input:disabled {
+  background: var(--color-sunken);
+  cursor: not-allowed;
+}
