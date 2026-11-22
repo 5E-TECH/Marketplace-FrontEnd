@@ -119,6 +119,16 @@ export function isTimeoutError(error: unknown): boolean {
 }
 
 /**
+ * Aloqa xatosi: javob kelmadi (internet yo'q, timeout) yoki server 5xx — so'rovni keyin qayta yuborish mumkin
+ * (ombor skan navbati, umumiy-aloqa-uzildi). 4xx — qayta yuborilmaydi.
+ */
+export function isConnectionError(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+  const status = error.response?.status;
+  return !status || status >= 500 || isTimeoutError(error);
+}
+
+/**
  * «Xato raqami» (umumiy-xato-yuklanish): backend har xatoga `requestId` beradi —
  * foydalanuvchi uni yordamga aytadi, server logidan aynan shu so'rov topiladi.
  */

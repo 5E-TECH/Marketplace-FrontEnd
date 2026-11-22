@@ -2,7 +2,7 @@ import { ChevronRight, CircleAlert, CircleX, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { OperatorLead, OperatorStats } from '../../features/operator/api/operatorApi';
 import { clock, mmss, outcomeLabel } from '../../features/operator/lib/leadFormat';
-import { useNow } from '../../features/operator/lib/useNow';
+import { useNow } from '../../shared/lib/useNow';
 import type { OperatorQueueSummary } from '../../features/operator/model/operatorTypes';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDate } from '../../shared/lib/tashkentTime';

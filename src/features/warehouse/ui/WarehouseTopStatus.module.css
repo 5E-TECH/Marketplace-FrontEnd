@@ -1,0 +1,50 @@
+/* karkas-E 1.7 «Omborchi»: 14/20, ikkinchi darajali rang; qiymat 600 va asosiy rang. */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scanner,
+.clock {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.scanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.scanner strong,
+.clock strong {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.clock strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  display: block;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-warning);
+}
+
+.scanner[data-ready='true'] .dot {
+  background: var(--color-success);
+}
+
+/* 768 px yuqori qatori — vaqtsiz (karkas-E 5.5). */
+@media (max-width: 1023.98px) {
+  .clock {
+    display: none;
+  }
+}

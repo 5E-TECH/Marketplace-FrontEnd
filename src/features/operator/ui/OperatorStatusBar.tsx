@@ -6,7 +6,7 @@ import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { tashkentClock } from '../../../shared/lib/tashkentTime';
 import type { OperatorState } from '../api/operatorApi';
 import { DEFAULT_MAX_BOOKINGS, useOperatorLeadsQuery, useOperatorStateMutation, useOperatorStateQuery } from '../api/operatorQueries';
-import { useNow } from '../lib/useNow';
+import { useNow } from '../../../shared/lib/useNow';
 import { DialogCancel, DialogPrimary, Dialog } from '../../../shared/ui/Dialog/Dialog';
 import { useCallbackReminders } from './useCallbackReminders';
 import styles from './OperatorStatusBar.module.css';

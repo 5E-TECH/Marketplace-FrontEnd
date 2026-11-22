@@ -3,7 +3,7 @@ import { CalendarClock, ChevronDown, ChevronUp, CircleAlert, CodeXml, Ellipsis, 
 import { useState } from 'react';
 import { clock, dayLabel, mmss, outcomeLabel, rejectLabel, sourceMark, statusLabel, sum } from '../../features/operator/lib/leadFormat';
 import { CALLBACK_GRACE_MINUTES, isNoAnswer, leadKind, scriptSteps } from '../../features/operator/lib/leadRules';
-import { useNow } from '../../features/operator/lib/useNow';
+import { useNow } from '../../shared/lib/useNow';
 import type { LeadCard } from '../../features/operator/model/operatorTypes';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';

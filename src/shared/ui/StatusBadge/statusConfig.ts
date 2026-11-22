@@ -90,6 +90,14 @@ export const STATUS_FAMILIES = {
     ARCHIVED: { tone: 'neutral', icon: Archive },
     OUT_OF_STOCK: { tone: 'neutral' },
   },
+  /** Postavka (T4 inbound_shipment, admin-postavka «Ariza yo‘li»). */
+  shipment: {
+    DECLARED: { tone: 'info' },
+    IN_TRANSIT: { tone: 'warning' },
+    RECEIVED: { tone: 'success' },
+    DISCREPANCY: { tone: 'danger' },
+    CANCELLED: { tone: 'danger' },
+  },
 } as const satisfies Record<string, Record<string, StatusEntry>>;
 
 export type StatusFamily = keyof typeof STATUS_FAMILIES;

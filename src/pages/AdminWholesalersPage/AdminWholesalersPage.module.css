@@ -1,0 +1,213 @@
+/* admin-postavka (№148): Optoviklar → «Postavkalar» — e'lon formasi, tanlangan optovik, ariza yo'li, ro'yxat. */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── Yorliqlar (pill + son) ── */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  flex: none;
+  margin: 0;
+  padding: 0 8px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tab:hover { border-color: var(--color-border-strong); color: var(--color-text-secondary); }
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tab[aria-selected='true'] .count { background: var(--color-surface); color: var(--color-action); }
+
+/* ── Forma va o'ng ustun ── */
+.top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.formColumn { flex: 1 1 600px; min-width: 0; display: flex; flex-direction: column; }
+.side { flex: 1 1 320px; max-width: 400px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+.card, .form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  min-width: 0;
+}
+
+.cardHead { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; min-width: 0; }
+.cardHead h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; white-space: nowrap; }
+.cardSub { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+.field { min-width: 0; }
+/* Forma tanlovlari dizaynda 14/21 (sana maydoni — 16). */
+.field select, .field [role='combobox'] { font-size: 14px; line-height: 21px; }
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.label { font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.required { color: var(--color-danger); }
+.optional { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.hint { margin: 6px 0 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-danger); }
+.error > svg { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 1px; }
+.contractLink { display: inline-flex; align-items: center; gap: 2px; margin-top: 12px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; }
+.contractLink > svg { width: 14px; height: 14px; }
+
+.rows { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 12px; background: var(--color-row-hover); border: 1px solid var(--color-border); }
+.rows[data-disabled] { opacity: 0.6; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 44px; gap: 12px; align-items: start; }
+.removeCell { padding-top: 24px; }
+
+.qty { display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); }
+.qty:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.qty[aria-invalid='true'] { border-color: var(--color-danger); }
+.qty > input { flex: 1 1 auto; min-width: 0; height: 100%; margin: 0; padding: 0 14px; border: 0; outline: 0; background: transparent; font-family: inherit; font-size: 14px; line-height: 21px; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.qty > input:disabled { cursor: not-allowed; }
+.qty > span { flex: none; padding: 0 14px 0 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text-secondary); }
+
+.iconButton { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 12px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover:not(:disabled) { background: var(--color-sunken); color: var(--color-text); }
+.iconButton:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 0; height: 36px; padding: 0 6px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.link > svg { width: 16px; height: 16px; }
+.link:disabled { color: var(--color-text-faint); cursor: not-allowed; }
+
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+.textInput { display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); }
+.textInput:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.textInput > input { flex: 1 1 auto; min-width: 0; height: 100%; margin: 0; padding: 0 14px; border: 0; outline: 0; background: transparent; font-family: inherit; font-size: 14px; line-height: 21px; color: var(--color-text); }
+
+.dateInput { height: 44px; }
+
+.rules { padding: 14px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); min-width: 0; }
+.rules p { margin: 0; display: flex; gap: 8px; font-size: 13px; line-height: 18px; }
+.rules p + p { margin-top: 8px; }
+.rules svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--color-text-secondary); }
+.rules strong { font-weight: 600; }
+.muted { color: var(--color-text-secondary); }
+
+.formFooter { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.formFooter > span { flex: 1 1 240px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-action);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primary > svg { width: 18px; height: 18px; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); color: #fff; }
+.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.secondary > svg { width: 18px; height: 18px; }
+.secondary:hover { border-color: var(--color-border-hover); }
+
+/* ── Tanlangan optovik ── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.facts { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.facts > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; min-width: 0; }
+.facts dt { flex: none; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); }
+.facts dd { margin: 0; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.note { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.more { display: inline-flex; align-items: center; gap: 2px; min-height: 24px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; }
+.more > svg { width: 14px; height: 14px; }
+
+/* ── Ariza yo'li ── */
+.flow { list-style: none; margin: -10px 0 0; padding: 0; }
+.flow > li { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.flow > li:last-child { border-bottom: 0; }
+.flow > li > span:last-child { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+/* Planshet (≤ 919): forma to'liq kenglikda, o'ng ustun ikki karta yonma-yon. */
+@container content (max-width: 919.98px) {
+  .side { flex-direction: row; flex-basis: 100%; max-width: none; }
+  .side > * { flex: 1 1 0; }
+}
+
+/* Telefon (≤ 575): hammasi bir ustun; mahsulot qatori — mahsulot, keyin miqdor va o'chirish. */
+@container content (max-width: 575px) {
+  .page { gap: 16px; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+  .tab { height: 44px; }
+  .top, .side { gap: 12px; }
+  .side { flex-direction: column; }
+  .card, .form { padding: 16px; gap: 14px; }
+  .rows { padding: 12px; }
+  .row { grid-template-columns: minmax(0, 1fr) 44px; }
+  .row > .productField { grid-column: 1 / -1; }
+  .removeCell { padding-top: 24px; }
+  .pair { grid-template-columns: 1fr; gap: 14px; }
+  .formFooter { flex-direction: column; align-items: stretch; }
+  .formFooter > span { flex: none; }
+  .formFooter > .primary { height: 52px; font-size: 15px; }
+}

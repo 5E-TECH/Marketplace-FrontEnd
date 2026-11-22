@@ -1,0 +1,112 @@
+/* admin-postavka «Postavkalar»: desktop jadval 10 ustun; planshetda sana raqam ostida, kiritdi va akt — tafsilotda; telefonda kartalar. */
+.section { display: flex; flex-direction: column; gap: 16px; padding: 20px; box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; min-width: 0; }
+.head h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; white-space: nowrap; }
+.headSub { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.tab { display: inline-flex; align-items: center; gap: 8px; height: 40px; flex: none; margin: 0; padding: 0 8px 0 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.tab:hover { border-color: var(--color-border-strong); }
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tab[aria-selected='true'] .count { background: var(--color-surface); color: var(--color-action); }
+
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.search { position: relative; flex: 0 1 300px; min-width: 0; }
+.search > svg { position: absolute; left: 14px; top: 11px; width: 18px; height: 18px; color: var(--color-text-secondary); pointer-events: none; }
+.search > input { display: block; width: 100%; height: 40px; margin: 0; padding: 0 16px 0 42px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; }
+.search > input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.body { display: flex; flex-direction: column; min-width: 0; }
+.scroll { overflow-x: auto; min-width: 0; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); white-space: nowrap; text-align: left; }
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+.table td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; white-space: nowrap; text-align: left; font-variant-numeric: tabular-nums; }
+.table tbody tr { cursor: pointer; }
+.table tbody tr:hover > td { background: var(--color-row-hover); }
+.table tbody tr[data-new] > td { background: var(--color-action-soft); }
+.table th.num, .table td.num { text-align: right; }
+.table td.num[data-alert] { color: var(--color-danger); font-weight: 600; }
+.table th.actions, .table td.actions { width: 48px; padding: 0 8px 0 4px; text-align: right; }
+.number { display: block; font-weight: 600; }
+.stack { display: flex; flex-direction: column; }
+.strong { font-size: 14px; line-height: 20px; font-weight: 600; }
+.medium { font-size: 14px; line-height: 20px; font-weight: 500; }
+.sub { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.narrow { display: none; }
+.pdf { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; }
+.pdf > svg { width: 16px; height: 16px; }
+.pdf:hover { text-decoration: underline; }
+.iconButton { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: none; margin: 0; padding: 0; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+
+.footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 16px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+.skeleton { display: flex; flex-direction: column; gap: 8px; }
+.skeleton > span { display: block; height: 52px; border-radius: 10px; background: var(--color-sunken); }
+.loading { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.spinner { width: 16px; height: 16px; box-sizing: border-box; border: 2px solid var(--color-border-strong); border-top-color: var(--color-text-secondary); border-radius: 999px; animation: spin 0.8s linear infinite; }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 24px; text-align: center; }
+.emptyIcon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.emptyIcon > svg { width: 22px; height: 22px; }
+.empty h3 { margin: 4px 0 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.empty p { max-width: 420px; margin: 0 0 8px; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+
+.primary, .secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover { background: var(--color-action-hover); }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.primary > svg, .secondary > svg { width: 18px; height: 18px; }
+
+/* Filtr varag'i (telefon, R4). */
+.sheet { display: flex; flex-direction: column; gap: 6px; }
+.sheetLabel { margin-top: 10px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.sheetLabel:first-child { margin-top: 0; }
+.sheetNote { margin: 12px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+/* Planshet: sana raqam ostida; «Kelish sanasi», «Kiritdi», «Qabul akti» — tafsilotda. */
+@container content (max-width: 919.98px) {
+  .wide { display: none; }
+  .narrow { display: block; }
+  .table td .narrow { display: block; }
+  .tab { height: 44px; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .search { flex: 1 1 300px; }
+}
+
+/* Telefon: kartasiz bo'lim, qidiruv va «Filtrlar», ro'yxat kartalari. */
+@container content (max-width: 575px) {
+  .section { gap: 12px; margin: 0 -16px; padding: 0 16px; background: transparent; border: 0; border-radius: 0; }
+  .head { column-gap: 10px; }
+  .head h2 { white-space: normal; }
+  .tabs { margin: 0 -16px; padding: 0 16px; }
+  .phoneFilters { display: flex; gap: 8px; min-width: 0; }
+  .phoneFilters .search { flex: 1 1 auto; }
+  .phoneFilters .search > svg { top: 13px; }
+  .phoneFilters .search > input { height: 44px; border-radius: 12px; font-size: 16px; }
+  .filtersButton { display: inline-flex; align-items: center; gap: 8px; height: 44px; flex: none; margin: 0; padding: 0 12px 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; cursor: pointer; }
+  .filtersButton > svg { width: 18px; height: 18px; }
+  .body { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; }
+  .cards { list-style: none; margin: 0; padding: 0; }
+  .cards > li { border-bottom: 1px solid var(--color-border); }
+  .cards > li[data-new] { background: var(--color-action-soft); }
+  .card { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; color: var(--color-text); text-decoration: none; }
+  .cardTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+  .cardNumber { min-width: 0; font-size: 15px; line-height: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cardProduct { font-size: 15px; line-height: 22px; font-weight: 600; }
+  .cardProduct > span { font-weight: 400; color: var(--color-text-secondary); }
+  .cardBottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; min-width: 0; }
+  .cardQty { flex: none; display: flex; flex-direction: column; align-items: flex-end; font-size: 15px; line-height: 22px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cardQty > span { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); }
+  .cardResult { font-size: 13px; line-height: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .footer { justify-content: center; padding: 12px 16px; text-align: center; }
+  .empty { padding: 32px 16px; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }

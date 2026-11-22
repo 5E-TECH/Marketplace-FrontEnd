@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 /**
- * Bitta umumiy soniya ticker'i: bron sanog'i, «23 daqiqadan keyin», eslatmalar.
+ * Bitta umumiy soniya ticker'i: bron sanog'i, «23 daqiqadan keyin», eslatmalar, ombor soati.
  * Har komponent o'z `setInterval` ini ochmaydi — sahifada bitta taymer.
  */
 let now = Date.now();

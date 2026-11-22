@@ -6,7 +6,7 @@ import { PublicOnlyRoute } from '../../features/auth/ui/PublicOnlyRoute/PublicOn
 import { SeoManager } from '../../shared/seo/SeoManager';
 import { useAppSelector } from '../store/hooks';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
-import { appRoutes } from './routeManifest';
+import { appRoutes, documentRoutes } from './routeManifest';
 import { getRoleHome } from './routeAccess';
 import { RequireRole } from './RequireRole';
 
@@ -19,7 +19,7 @@ const SharedUiTestPage = import.meta.env.DEV
   : null;
 
 // Har sahifa uchun bitta lazy komponent: preload (`prefetchRoute`) bilan bir xil import.
-const pages = new Map(appRoutes.map((route) => [route.path, lazy(route.load)]));
+const pages = new Map([...appRoutes, ...documentRoutes].map((route) => [route.path, lazy(route.load)]));
 
 /** `/` — rolning o'z bosh sahifasi. */
 function RoleHomeRedirect() {
@@ -43,6 +43,10 @@ export function AppRouter() {
 
           {/* Kirmagan foydalanuvchi har qanday manzildan login'ga; kirgani — panel ichida 404. */}
           <Route element={<ProtectedRoute />}>
+            {documentRoutes.map((route) => {
+              const Page = pages.get(route.path);
+              return Page ? <Route key={route.path} path={route.path} element={<RequireRole route={route}><Page /></RequireRole>} /> : null;
+            })}
             <Route element={<AppShell />}>
               <Route index element={<RoleHomeRedirect />} />
               {appRoutes.map((route) => {

@@ -14,6 +14,8 @@
 }
 
 .pill:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.pill[data-icon] { padding-left: 14px; }
+.icon { flex: none; width: 16px; height: 16px; margin-right: 8px; color: var(--color-text-secondary); }
 .label { margin-right: 6px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
 
 .select {

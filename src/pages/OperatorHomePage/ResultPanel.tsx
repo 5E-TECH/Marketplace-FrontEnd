@@ -1,7 +1,7 @@
 import { Check, ChevronDown, ChevronRight, CircleAlert, Lock, MessageSquareText, Minus, Plus } from 'lucide-react';
 import { clock, dayLabel, dayOffset } from '../../features/operator/lib/leadFormat';
 import { closesAsNoContact, isNoAnswer, MAX_ATTEMPTS, nextRetryAt, noContactDeadline } from '../../features/operator/lib/leadRules';
-import { useNow } from '../../features/operator/lib/useNow';
+import { useNow } from '../../shared/lib/useNow';
 import type { LeadCard, LeadProductInfo, WhereDeliver } from '../../features/operator/model/operatorTypes';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
