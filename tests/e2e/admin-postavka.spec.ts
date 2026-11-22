@@ -4,9 +4,9 @@ import { openStaffLogin } from './support/auth';
 import { installMockApi } from './support/mockApi';
 
 /**
- * FE-16 (admin-postavka): Optoviklar → «Postavkalar» — optovik nomidan e'lon (TC1 ning birinchi qadami),
- * shartnomasiz optovik va tasdiqlanmagan mahsulot, forma xatolari, ro'yxat (holat tablari, qidiruv),
- * bekor qilish (faqat «E'lon qilindi»), postavka tafsiloti va telefon kartalari.
+ * FE-16 (admin-postavka, BE-17): Optoviklar → «Postavkalar» — optovik nomidan e'lon (TC1 ning birinchi qadami),
+ * bitta postavkada bir nechta mahsulot, shartnomasiz optovik va tasdiqlanmagan mahsulot, forma xatolari,
+ * ro'yxat (holat tablari, qidiruv, «Kiritdi»), postavka tafsiloti va telefon kartalari.
  */
 test.beforeEach(async ({ context }) => {
   await installMockApi(context);
@@ -37,7 +37,7 @@ test('TC1 (admin): optovik nomidan 100 dona e’lon — ro‘yxat tepasida «E�
   await openShipments(page);
   await expect(page.getByTestId('wholesaler-summary')).toContainText('3 postavka · 210 dona');
   await pickProduct(page, 'Simsiz quloqchinlar');
-  await expect(form(page)).toContainText('4780012345677 · omborda 128, sotuvga tayyor 120 · yaroqlilik muddati kuzatilmaydi');
+  await expect(form(page)).toContainText('Omborda 128, sotuvga tayyor 120 · yaroqlilik muddati kuzatilmaydi');
   await form(page).getByLabel(/Miqdor/).fill('100');
   await form(page).getByRole('button', { name: 'Arizani saqlash' }).click();
 
@@ -48,10 +48,10 @@ test('TC1 (admin): optovik nomidan 100 dona e’lon — ro‘yxat tepasida «E�
   await expect(row(page, '114')).toContainText('admin, nomidan');
   await expect(page.getByTestId('wholesaler-summary')).toContainText('4 postavka · 310 dona');
   const created = db.inbound.shipments.find((item) => item.id === '114');
-  expect(created).toMatchObject({ status: 'DECLARED', declared: 100, createdBy: { role: 'ADMIN' } });
+  expect(created).toMatchObject({ status: 'DECLARED', wholesalerId: '7', declaredByRole: 'ADMIN', items: [{ productId: '501', declaredQty: 100 }] });
 });
 
-test('ikki qator — ikki postavka; xatolar: mahsulot, miqdor, takror mahsulot', async ({ page }) => {
+test('ikki qator — bitta postavka, ikki mahsulot; xatolar: mahsulot, miqdor, takror mahsulot', async ({ page }) => {
   await openShipments(page);
   await form(page).getByRole('button', { name: 'Arizani saqlash' }).click();
   await expect(form(page)).toContainText('Mahsulotni tanlang');
@@ -67,9 +67,10 @@ test('ikki qator — ikki postavka; xatolar: mahsulot, miqdor, takror mahsulot',
 
   await pickProduct(page, 'Elektr choynak');
   await form(page).getByRole('button', { name: 'Arizani saqlash' }).click();
-  await expect(page.getByText('P-0114, P-0115 e’lon qilindi')).toBeVisible();
-  await expect(row(page, '114')).toContainText('Oshxona tarozisi');
-  await expect(row(page, '115')).toContainText('Elektr choynak');
+  await expect(page.getByText('P-0114 e’lon qilindi')).toBeVisible();
+  await expect(row(page, '114')).toContainText('Oshxona tarozisi +1');
+  await expect(row(page, '114')).toContainText('15');
+  expect(db.inbound.shipments.find((item) => item.id === '114')?.items.map((item) => [item.productName, item.declaredQty])).toEqual([['Oshxona tarozisi', 10], ['Elektr choynak', 5]]);
 });
 
 test('shartnomasiz optovik — xato, mahsulot qatori o‘chiq; tasdiqlanmagan mahsulot tanlanmaydi', async ({ page }) => {
@@ -86,7 +87,7 @@ test('shartnomasiz optovik — xato, mahsulot qatori o‘chiq; tasdiqlanmagan ma
   await expect(form(page).getByRole('button', { name: 'Arizani saqlash' })).toBeDisabled();
 });
 
-test('ro‘yxat: holat tablari, qidiruv, kiritdi filtri; bekor qilish faqat «E’lon qilindi»', async ({ page }) => {
+test('ro‘yxat: holat tablari, qidiruv, kiritdi filtri; amallar — postavka va akt (bekor qilish BE-17 da yo‘q)', async ({ page }) => {
   await openShipments(page);
   const list = page.getByTestId('shipment-list');
   await expect(list.getByRole('tab', { name: /Hammasi/ })).toContainText('9');
@@ -101,22 +102,13 @@ test('ro‘yxat: holat tablari, qidiruv, kiritdi filtri; bekor qilish faqat «E�
   await expect(list.locator('tbody tr')).toHaveCount(5);
   await list.getByLabel('Kiritdi:').selectOption({ label: 'Barchasi' });
 
-  // Qabuli boshlangan P-0112 — bekor qilinmaydi.
-  await page.getByRole('button', { name: 'P-0112 amallari' }).click();
-  await expect(page.locator('li[role="menuitem"]:visible', { hasText: 'Arizani bekor qilish' })).toHaveAttribute('aria-disabled', 'true');
-  await page.keyboard.press('Escape');
-  await expect(page.locator('li[role="menuitem"]:visible')).toHaveCount(0);
-
+  // Qabul qilinmagan postavkada akt hali yo'q.
   await page.getByRole('button', { name: 'P-0111 amallari' }).click();
-  await page.locator('li[role="menuitem"]:visible', { hasText: 'Arizani bekor qilish' }).click();
-  const dialog = page.getByTestId('cancel-shipment');
-  await expect(dialog).toContainText('Oshxona tarozisi · 50 dona');
-  await expect(dialog.getByRole('button', { name: 'Arizani bekor qilish' })).toBeDisabled();
-  await dialog.getByRole('combobox', { name: /Sabab/ }).selectOption({ label: 'Xato kiritildi' });
-  await dialog.getByRole('button', { name: 'Arizani bekor qilish' }).click();
-  await expect(page.getByText('P-0111 bekor qilindi')).toBeVisible();
-  await expect(row(page, '111')).toContainText('Bekor qilindi');
-  await expect(list.getByRole('tab', { name: /Bekor qilindi/ })).toContainText('1');
+  await expect(page.locator('li[role="menuitem"]:visible', { hasText: 'Qabul akti (PDF)' })).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.locator('li[role="menuitem"]:visible', { hasText: 'Arizani bekor qilish' })).toHaveCount(0);
+  await page.locator('li[role="menuitem"]:visible', { hasText: 'Postavkani ochish' }).click();
+  await expect(page).toHaveURL(/\/admin\/wholesalers\/shipments\/111$/);
+  await expect(page.getByTestId('admin-shipment')).toContainText('Akt qabul yakunlangach chiqadi.');
 });
 
 test('tafsilot: qabul akti — yo‘l, sonlar, omborchi izohi va PDF', async ({ page }) => {

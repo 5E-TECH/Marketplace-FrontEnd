@@ -66,16 +66,23 @@ test('foydalanuvchi tugmasi rol nomini ko‘rsatadi, menyudagi Profil profil sah
 test('til foydalanuvchi menyusidan almashtiriladi: menyu va sarlavha shu tilda', async ({ page }) => {
   await installAuthenticatedSession(page);
   await page.goto('/affiliate');
-  await page.getByTestId('user-menu-button').click();
   // Ichki menyu hover bilan ochiladi; sahifa ma'lumoti shu payt kelib qayta chizilsa hover yo'qolishi mumkin.
+  // antd ichki menyuni avval eski joyda chizib, keyin «Til» yoniga suradi: shu payt bosilsa sichqoncha
+  // «Profil» ustiga tushib, menyu yopiladi — shuning uchun ichki menyu «Til» bilan ustma-ust turmaguncha kutamiz;
+  // menyu baribir yopilsa yoki bosish yo'qolsa, ochish va bosish qaytadan.
+  const language = page.getByRole('menuitem', { name: /^Til/ });
   const russian = page.getByRole('menuitem', { name: 'Русский' });
   await expect(async () => {
-    await page.getByRole('menuitem', { name: /^Til/ }).hover();
+    if (!(await language.isVisible())) await page.getByTestId('user-menu-button').click();
+    await language.hover();
     await expect(russian).toBeVisible({ timeout: 1_000 });
-  }).toPass({ timeout: 10_000 });
-  await russian.click();
+    const [item, parent] = await Promise.all([russian.boundingBox(), language.boundingBox()]);
+    expect(item !== null && parent !== null && (item.x + item.width <= parent.x || item.x >= parent.x + parent.width)).toBe(true);
+    await russian.click({ timeout: 2_000 });
+    // Yopilayotgan menyuga tushgan bosish yo'qolishi mumkin — natija shu yerda tekshiriladi.
+    await expect(pageTitle(page)).toHaveText('Главная', { timeout: 1_500 });
+  }).toPass({ timeout: 20_000 });
 
-  await expect(pageTitle(page)).toHaveText('Главная');
   await expect(page.getByRole('navigation', { name: 'Главное меню' }).getByRole('link', { name: 'Офферы' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Язык: русский' })).toHaveText('RU');
 });

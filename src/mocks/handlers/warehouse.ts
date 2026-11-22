@@ -1,384 +1,265 @@
 import { http } from 'msw';
-import { daysLeft, isSellableExpiry, MIN_SHELF_DAYS } from '../../features/inbound/lib/expiry';
-import {
-  AWAITING_STATUSES,
-  SHIPMENT_STATUSES,
-  type InboundShipment,
-  type LotState,
-  type ScanMode,
-  type StockLot,
-  type ShipmentActor,
-  type ShipmentAuthorRole,
-  type ShipmentScan,
-  type ShipmentStatus,
-} from '../../features/inbound/model/inboundTypes';
+import { saleUntil } from '../../features/inbound/lib/expiry';
+import { SHIPMENT_STATUSES, type ShipmentAuthorRole } from '../../features/inbound/model/inboundTypes';
 import { db } from '../db';
-import type { MockInbound, MockSku } from '../fixtures/inbound';
-
-type MockLotAction = MockInbound['lotActions'][string];
+import type { MockLot, MockShipment, MockShipmentItem } from '../fixtures/inbound';
+import { samplePdf } from '../samplePdf';
 import { API, fail, ok, pageOf, tashkentDate } from '../utils';
 import { currentMockUser } from './auth';
 
 /**
- * Ombor: postavka e'loni va qabuli (FE-16). Backendda BE-17 da quriladi — qoidalar taklifdagidek
- * (docs/api-taklif/fe-16-ombor.md): e'lonni admin yoki omborchi optovik nomidan ochadi (shartnoma va
- * tasdiqlangan mahsulot shart), qabul skan bilan (takror — idempotencyKey), muddatli tovarda partiya,
- * yakunlashda qoldiqqa faqat qabul qilingan son, 60 kundan kam qolgan partiya «mavjud»ga qo'shilmaydi.
+ * Ombor: postavka e'loni va qabuli (FE-16) — BE-17 (PR #132) qoidalari: e'lonni omborchi, admin yoki superadmin
+ * optovik nomidan ochadi (mahsulot shu optovikniki, CPA, faol); qabul — faqat omborchi va superadmin, hamma qator
+ * bitta so'rovda; qoldiqqa yaroqli soni (kelgan − brak); muddat kiritilsa — partiya, sotuvdan chiqish = muddat − 60
+ * kun; farq yoki brak — DISCREPANCY; takroriy qabul — o'sha natija. Taklif maydonlari — docs/api-taklif/fe-16-ombor.md.
  */
 const STAFF_ROLES = ['ADMIN', 'SUPERADMIN', 'WAREHOUSE'];
+const ID = /^[1-9]\d{0,18}$/;
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const CELL = /^[A-Za-z0-9][A-Za-z0-9-]{0,31}$/;
 
-function guard(request: Request, cookies: Record<string, string>): { denied: Response; actor?: undefined } | { denied: null; actor: ShipmentActor } {
+function guard(request: Request, cookies: Record<string, string>, roles = STAFF_ROLES) {
   const user = currentMockUser(request, cookies);
-  if (!user) return { denied: fail(401, 'UNAUTHENTICATED', 'Sessiya tugagan') };
-  if (!STAFF_ROLES.includes(user.role)) return { denied: fail(403, 'FORBIDDEN', 'Bu bo‘lim ombor va admin uchun') };
-  return { denied: null, actor: { name: user.name, role: user.role as ShipmentAuthorRole } };
+  if (!user) return { denied: fail(401, 'UNAUTHENTICATED', 'Sessiya tugagan'), user: null };
+  if (!roles.includes(user.role)) return { denied: fail(403, 'FORBIDDEN', 'Bu amal sizning rolingizga ruxsat etilmagan'), user: null };
+  return { denied: null, user };
 }
 
 const inbound = () => db.inbound;
 const findShipment = (id: unknown) => inbound().shipments.find((item) => item.id === String(id));
-const skuByBarcode = (barcode: string) => inbound().skus.find((item) => item.barcode === barcode);
-const skuByVariant = (variantId: string) => inbound().skus.find((item) => item.variantId === variantId);
-const isCompleted = (shipment: InboundShipment) => shipment.completedAt !== null;
-const now = () => new Date().toISOString();
-
-function counts(items: readonly InboundShipment[]) {
-  const result = { ALL: items.length } as Record<ShipmentStatus | 'ALL', number>;
-  SHIPMENT_STATUSES.forEach((status) => { result[status] = items.filter((item) => item.status === status).length; });
-  return result;
-}
-
-function listFilter(url: URL) {
-  const params = url.searchParams;
-  const search = params.get('search')?.trim().toLowerCase() ?? '';
-  return (item: InboundShipment) =>
-    (!params.get('wholesalerId') || item.wholesaler.id === params.get('wholesalerId')) &&
-    (!params.get('authorRole') || (params.get('authorRole') === 'WHOLESALER') === (item.createdBy.role === 'WHOLESALER')) &&
-    (!params.get('expectedFrom') || item.expectedAt >= String(params.get('expectedFrom'))) &&
-    (!params.get('expectedTo') || item.expectedAt <= String(params.get('expectedTo'))) &&
-    (!params.get('completedOn') || (item.completedAt !== null && tashkentDate(Date.parse(item.completedAt)) === params.get('completedOn'))) &&
-    (!search || [item.number, item.sku.name, item.sku.barcode ?? '', item.wholesaler.name].some((value) => value.toLowerCase().includes(search)));
-}
-
-const SORTS: Record<string, (a: InboundShipment, b: InboundShipment) => number> = {
-  '-createdAt': (a, b) => b.createdAt.localeCompare(a.createdAt),
-  expectedAt: (a, b) => a.expectedAt.localeCompare(b.expectedAt) || a.createdAt.localeCompare(b.createdAt),
-  '-completedAt': (a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''),
-};
-
-/** Optovik kartasi va forma uchun: SKU lar, ombordagi son va kutilayotgan postavkalar. */
-function wholesalerView(id: string) {
-  const data = inbound();
-  const wholesaler = data.wholesalers.find((item) => item.id === id);
-  if (!wholesaler) return null;
-  const skus = data.skus.filter((item) => item.wholesalerId === id);
-  const awaiting = data.shipments.filter((item) => item.wholesaler.id === id && AWAITING_STATUSES.includes(item.status));
-  return {
-    id: wholesaler.id, name: wholesaler.name, tin: wholesaler.tin, status: wholesaler.status, contractSigned: wholesaler.contractSigned,
-    contractNumber: wholesaler.contractNumber, contractDate: wholesaler.contractDate,
-    cabinet: wholesaler.cabinetSeenMinutesAgo === null ? null : { lastSeenAt: new Date(Date.now() - wholesaler.cabinetSeenMinutesAgo * 60_000).toISOString() },
-    onHand: skus.reduce((sum, item) => sum + item.onHand, 0),
-    awaiting: { shipments: awaiting.length, quantity: awaiting.reduce((sum, item) => sum + item.declared, 0) },
-    products: skus.map((item) => ({
-      productId: item.productId, variantId: item.variantId, name: item.name, barcode: item.barcode, expiryTracked: item.expiryTracked,
-      categoryName: item.categoryName, cell: item.cell, status: item.status, reviewSince: item.reviewSince,
-      onHand: item.onHand, available: Math.max(0, item.onHand - item.reserved - item.blocked),
-    })),
+/** Mahsulot SKU si: FE-16 fixture'ida yo'q bo'lsa — admin mahsulotidan (Namuna Savdo) yaratiladi. */
+function skuOf(productId: string) {
+  const found = inbound().skus.find((item) => item.productId === productId);
+  if (found) return found;
+  const product = db.adminProducts.find((item) => item.id === productId);
+  if (!product) return undefined;
+  const created = {
+    productId, variantId: `${productId}01`, name: product.name, barcode: `4780012${productId}000`, cell: null, wholesalerId: product.shopId,
+    status: product.status === 'ACTIVE' && product.cpaEnabled ? 'ACTIVE' as const : 'PENDING_REVIEW' as const, expiryTracked: product.isBad,
+    onHand: 0, reserved: 0, defect: 0, reservedTomorrow: 0,
   };
+  inbound().skus.push(created);
+  return created;
+}
+/** JSON qiymati — satr yoki son bo'lsa matn, aks holda bo'sh. */
+const text = (value: unknown) => (typeof value === 'string' || typeof value === 'number' ? String(value) : '');
+
+/** Sotuvdan chiqqan (sotuv oxiri o'tgan) partiya «mavjud»ga kirmaydi. */
+const isBlocked = (lot: MockLot, today = tashkentDate()) => saleUntil(lot.expiryDate) < today;
+const lotDto = (lot: MockLot) => ({ ...lot, sellableUntil: saleUntil(lot.expiryDate), blocked: isBlocked(lot) });
+const blockedOf = (variantId: string) => inbound().lots.filter((lot) => lot.variantId === variantId && isBlocked(lot)).reduce((sum, lot) => sum + lot.quantity, 0);
+
+/** Optovik (BE-07 `WholesalerDto`): omborchi ham o'qiydi — taklif (arizasiz postavka). */
+export function wholesalerDtos() {
+  return inbound().wholesalers.map((item) => ({
+    id: item.id, name: item.name, slug: `optovik-${item.id}`, status: item.status, legalType: 'LEGAL_ENTITY', tin: item.tin,
+    bankName: 'Asaka bank', bankAccount: '20208000900123456001', bankMfo: '00873', contractNumber: item.contractNumber, contractDate: item.contractDate,
+    phone: '+998712000002', address: 'Toshkent sh.', description: null, ownerUserId: item.ownerUserId, createdAt: '2027-01-05T05:00:00.000Z',
+  }));
 }
 
-function nextNumber() {
-  return Math.max(0, ...inbound().shipments.map((item) => Number(item.id))) + 1;
+/** Admin mahsulotlari ro'yxatiga qo'shimcha: boshqa optoviklarning (Namuna Farm) SKU lari — `shopId` bo'yicha. */
+export function inboundProductRecords(shopId: string) {
+  return inbound().skus.filter((item) => item.wholesalerId === shopId).map((item) => ({
+    id: item.productId, shopId: item.wholesalerId, name: item.name, status: item.status, isBlocked: false, cpaEnabled: true,
+    approvedPrice: null, isBad: item.expiryTracked, expiryTracked: item.expiryTracked, images: [], createdAt: '2027-01-05T05:00:00.000Z',
+  }));
 }
 
-function journal(shipment: InboundShipment) {
-  return (inbound().scans[shipment.id] ??= []);
-}
-
-/** Bir xil idempotencyKey — saqlangan javob (tarmoq uzilib, qayta yuborilgan so'rov ikki marta yozilmaydi). */
-function replay(key: unknown) {
-  return typeof key === 'string' && key ? inbound().replies.get(key) : undefined;
-}
-
-function remember<T>(key: unknown, value: T): T {
-  if (typeof key === 'string' && key) inbound().replies.set(key, value);
-  return value;
-}
-
-/** Yakunlash: qoldiqqa faqat qabul qilingan; brak alohida; muddati yaqin partiya «mavjud»ga qo'shilmaydi. */
-function settleStock(shipment: InboundShipment) {
-  const target = skuByVariant(shipment.sku.variantId);
-  if (!target) return;
-  target.onHand += shipment.accepted;
-  target.defect += shipment.defect;
-  target.blocked += shipment.lots.filter((lot) => !lot.sellable).reduce((sum, lot) => sum + lot.quantity, 0);
-}
-
-
-/** Ombordagi partiyalar: yakunlangan muddatli postavkalardan; holat — bugungi sanaga ko'ra va amallardan. */
-function stockLots(): StockLot[] {
-  const today = tashkentDate();
+/** `GET /admin/inventory/stock` — omborchi ko'rinishi (BE-16, BE-17 `cell`, `blocked`) + taklif maydonlari. */
+export function warehouseStockRows(shopId?: string | null) {
   const data = inbound();
-  const lots: StockLot[] = [];
-  data.shipments.filter((item) => item.completedAt && item.sku.expiryTracked).forEach((shipment) => {
-    shipment.lots.filter((lot) => lot.expiresAt && lot.quantity > 0).forEach((lot) => {
-      const expiresAt = lot.expiresAt ?? today;
-      const action = data.lotActions[lot.id] as MockLotAction | undefined;
-      const left = daysLeft(expiresAt, today);
-      const state: LotState = action?.state ?? (left < 0 ? 'EXPIRED' : left < MIN_SHELF_DAYS ? 'BLOCKED' : 'ON_SALE');
-      lots.push({
-        id: lot.id, number: lot.number, state, quantity: action ? lot.quantity - (action.state === 'WRITTEN_OFF' ? action.quantity : 0) : lot.quantity, expiresAt,
-        sku: shipment.sku, wholesaler: shipment.wholesaler, sharesCellWith: null,
-        notifiedAt: state === 'ON_SALE' ? null : shipment.completedAt,
-      });
-    });
-  });
-  // Bir yacheykada (SKU yacheykasi) sotuvdagi va sotuvdan chiqarilgan partiya — ogohlantirish uchun.
-  lots.forEach((lot) => {
-    if (lot.state !== 'BLOCKED') return;
-    const neighbour = lots.find((other) => other.sku.variantId === lot.sku.variantId && other.state === 'ON_SALE');
-    lot.sharesCellWith = neighbour?.number ?? null;
-  });
-  return lots.filter((lot) => lot.quantity > 0 && lot.state !== 'WRITTEN_OFF').sort((a, b) => a.expiresAt.localeCompare(b.expiresAt));
-}
-
-/** `GET /admin/inventory/stock` — omborchi ko'rinishi (BE-16 + taklif maydonlari). */
-export function warehouseStockRows() {
-  const data = inbound();
-  return data.skus.filter((item) => item.onHand > 0 || item.defect > 0).map((item) => {
-    const wholesaler = data.wholesalers.find((entry) => entry.id === item.wholesalerId);
-    const done = data.shipments.filter((shipment) => shipment.completedAt && shipment.sku.variantId === item.variantId)
-      .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
-    const lots = item.expiryTracked
-      ? stockLots().filter((lot) => lot.sku.variantId === item.variantId).map((lot) => ({ number: lot.number, expiresAt: lot.expiresAt, sellable: lot.state === 'ON_SALE' }))
-      : done.slice(0, 2).reverse().map((shipment) => ({ number: shipment.number, expiresAt: null, sellable: true }));
+  return data.skus.filter((item) => (item.onHand > 0 || item.defect > 0) && (!shopId || item.wholesalerId === shopId)).map((item) => {
+    const blocked = blockedOf(item.variantId);
     return {
-      shopId: item.wholesalerId, shopName: wholesaler?.name ?? null, warehouseId: '1', warehouseName: 'Toshkent ombori', warehouseActive: true,
-      variantId: item.variantId, productName: item.name, variantName: null, sku: item.barcode, catalogMissing: false,
-      barcode: item.barcode, cell: item.cell, onHand: item.onHand, reserved: item.reserved,
-      available: Math.max(0, item.onHand - item.reserved - item.blocked), defect: item.defect, lowStockThreshold: 5,
-      reservedToday: item.reserved - item.reservedTomorrow, reservedTomorrow: item.reservedTomorrow, lots,
+      shopId: item.wholesalerId, shopName: data.wholesalers.find((entry) => entry.id === item.wholesalerId)?.name ?? null,
+      warehouseId: '1', warehouseName: 'Toshkent ombori', warehouseActive: true, variantId: item.variantId, productId: item.productId,
+      productName: item.name, variantName: null, sku: `SKU-${item.productId}`, catalogMissing: false, barcode: item.barcode, cell: item.cell,
+      onHand: item.onHand, reserved: item.reserved, available: Math.max(0, item.onHand - item.reserved - blocked), blocked, lowStockThreshold: 5,
+      defect: item.defect, reservedToday: item.reserved - item.reservedTomorrow, reservedTomorrow: item.reservedTomorrow,
     };
   });
 }
 
-export const warehouseHandlers = [
-  http.get(`${API}/warehouse/wholesalers`, ({ request, cookies }) => {
-    const { denied } = guard(request, cookies);
-    return denied ?? ok({ items: inbound().wholesalers.map((item) => wholesalerView(item.id)) });
-  }),
+function nextId() {
+  return Math.max(0, ...inbound().shipments.map((item) => Number(item.id))) + 1;
+}
 
-  http.get(`${API}/warehouse/inbound-shipments`, ({ request, cookies }) => {
+export const warehouseHandlers = [
+  http.get(`${API}/admin/inventory/shipments`, ({ request, cookies }) => {
     const { denied } = guard(request, cookies);
     if (denied) return denied;
     const url = new URL(request.url);
-    const statuses = (url.searchParams.get('status') ?? '').split(',').filter(Boolean);
-    const filtered = inbound().shipments.filter(listFilter(url));
-    const items = filtered.filter((item) => !statuses.length || statuses.includes(item.status)).sort(SORTS[url.searchParams.get('sort') ?? ''] ?? SORTS['-createdAt']);
-    return ok({ ...pageOf(items, url), counts: counts(filtered) });
+    const status = url.searchParams.get('status');
+    const wholesalerId = url.searchParams.get('wholesalerId');
+    if (status && !SHIPMENT_STATUSES.some((item) => item === status)) return fail(400, 'VALIDATION_ERROR', 'status noto‘g‘ri');
+    const items = inbound().shipments
+      .filter((item) => (!status || item.status === status) && (!wholesalerId || item.wholesalerId === wholesalerId))
+      .sort((a, b) => Number(b.id) - Number(a.id));
+    const { items: list, total, page, limit } = pageOf(items, url, 20);
+    return ok({ items: list, total, page, limit });
   }),
 
-  http.post(`${API}/warehouse/inbound-shipments`, async ({ request, cookies }) => {
-    const { denied, actor } = guard(request, cookies);
-    if (denied) return denied;
-    const body = (await request.json().catch(() => ({}))) as { wholesalerId?: unknown; expectedAt?: unknown; note?: unknown; waybillNumber?: unknown; items?: unknown; idempotencyKey?: unknown };
-    const replayed = replay(body.idempotencyKey);
-    if (replayed) return ok(replayed, 201);
-    const wholesaler = inbound().wholesalers.find((item) => item.id === String(body.wholesalerId));
-    if (!wholesaler) return fail(404, 'NOT_FOUND', 'Optovik topilmadi');
-    if (!wholesaler.contractSigned) return fail(409, 'CONTRACT_REQUIRED', 'Shartnoma yuklanmagan — bu optovik uchun ariza kiritib bo‘lmaydi');
-    const expectedAt = typeof body.expectedAt === 'string' ? body.expectedAt : '';
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(expectedAt) || expectedAt < tashkentDate()) return fail(400, 'VALIDATION_ERROR', 'Kelish sanasi bugun yoki keyin bo‘lsin');
-    const rows = Array.isArray(body.items) ? (body.items as { variantId?: unknown; quantity?: unknown }[]) : [];
-    if (!rows.length) return fail(400, 'VALIDATION_ERROR', 'Kamida bitta mahsulot kiriting');
-    for (const row of rows) {
-      const target = skuByVariant(String(row.variantId));
-      if (!target || target.wholesalerId !== wholesaler.id) return fail(400, 'VALIDATION_ERROR', 'Mahsulot bu optovikniki emas');
-      if (target.status !== 'ACTIVE') return fail(409, 'PRODUCT_NOT_APPROVED', `${target.name} tasdiqlanmagan — postavka qilib bo‘lmaydi`);
-      if (!Number.isInteger(row.quantity) || Number(row.quantity) < 1 || Number(row.quantity) > 100_000) return fail(400, 'VALIDATION_ERROR', 'Miqdor 1 dan 100 000 gacha');
-    }
-    const created = rows.map((row) => {
-      const number = nextNumber();
-      const target = skuByVariant(String(row.variantId)) as MockSku;
-      const shipment: InboundShipment = {
-        id: String(number), number: `P-${String(number).padStart(4, '0')}`, status: 'DECLARED',
-        wholesaler: { id: wholesaler.id, name: wholesaler.name, tin: wholesaler.tin },
-        sku: { productId: target.productId, variantId: target.variantId, name: target.name, barcode: target.barcode, expiryTracked: target.expiryTracked, categoryName: target.categoryName, cell: target.cell },
-        declared: Number(row.quantity), accepted: 0, defect: 0, expectedAt,
-        note: typeof body.note === 'string' && body.note.trim() ? body.note.trim() : null,
-        waybillNumber: typeof body.waybillNumber === 'string' && body.waybillNumber.trim() ? body.waybillNumber.trim() : null,
-        createdAt: now(), createdBy: actor, inTransitAt: null, receivingStartedAt: null, completedAt: null, completedBy: null,
-        actNote: null, cancelledAt: null, cancelReason: null, lots: [],
-      };
-      inbound().shipments.push(shipment);
-      return shipment;
-    });
-    return ok(remember(body.idempotencyKey, { items: created }), 201);
-  }),
-
-  http.get(`${API}/warehouse/inbound-shipments/:id`, ({ request, cookies, params }) => {
+  http.get(`${API}/admin/inventory/shipments/:id`, ({ request, cookies, params }) => {
     const { denied } = guard(request, cookies);
     if (denied) return denied;
     const shipment = findShipment(params.id);
     return shipment ? ok(shipment) : fail(404, 'NOT_FOUND', 'Postavka topilmadi');
   }),
 
-  http.post(`${API}/warehouse/inbound-shipments/:id/cancel`, async ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
+  http.post(`${API}/admin/inventory/shipments`, async ({ request, cookies }) => {
+    const { denied, user } = guard(request, cookies);
     if (denied) return denied;
-    const shipment = findShipment(params.id);
-    if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    const { reason } = (await request.json().catch(() => ({}))) as { reason?: unknown };
-    if (typeof reason !== 'string' || !reason.trim()) return fail(400, 'VALIDATION_ERROR', 'Sababni tanlang');
-    if (shipment.status !== 'DECLARED' || shipment.receivingStartedAt) return fail(409, 'INVALID_STATE', 'Faqat «E’lon qilindi» holatidagi, qabuli boshlanmagan ariza bekor qilinadi');
-    Object.assign(shipment, { status: 'CANCELLED', cancelledAt: now(), cancelReason: reason.trim() });
-    return ok(shipment);
-  }),
-
-  http.post(`${API}/warehouse/inbound-shipments/:id/receiving`, ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
-    if (denied) return denied;
-    const shipment = findShipment(params.id);
-    if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    if (!AWAITING_STATUSES.includes(shipment.status)) return fail(409, 'INVALID_STATE', 'Bu postavka qabul kutmayapti');
-    shipment.receivingStartedAt ??= now();
-    return ok(shipment);
-  }),
-
-  http.get(`${API}/warehouse/inbound-shipments/:id/scans`, ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
-    if (denied) return denied;
-    const shipment = findShipment(params.id);
-    if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    const list = journal(shipment);
-    return ok({ items: [...list].reverse().slice(0, 50), total: list.length });
-  }),
-
-  http.post(`${API}/warehouse/inbound-shipments/:id/scans`, async ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
-    if (denied) return denied;
-    const shipment = findShipment(params.id);
-    if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    const body = (await request.json().catch(() => ({}))) as { barcode?: unknown; mode?: unknown; lotId?: unknown; scannedAt?: unknown; idempotencyKey?: unknown };
-    const replayed = replay(body.idempotencyKey);
-    if (replayed) return ok(replayed);
-    if (!shipment.receivingStartedAt || isCompleted(shipment) || !AWAITING_STATUSES.includes(shipment.status)) return fail(409, 'INVALID_STATE', 'Qabul boshlanmagan yoki yakunlangan');
-    const barcode = typeof body.barcode === 'string' ? body.barcode.trim() : '';
-    if (!barcode) return fail(400, 'VALIDATION_ERROR', 'Shtrix-kod bo‘sh');
-    const mode: ScanMode = body.mode === 'DEFECT' ? 'DEFECT' : 'ACCEPT';
-    const at = typeof body.scannedAt === 'string' && !Number.isNaN(Date.parse(body.scannedAt)) ? body.scannedAt : now();
-    const list = journal(shipment);
-    const base = { id: `S-${shipment.id}-${list.length + 1}`, at, barcode, mode };
-    const owner = skuByBarcode(barcode);
-    let scan: ShipmentScan;
-    if (!owner) scan = { ...base, result: 'UNKNOWN', total: null, productName: null, lotNumber: null };
-    else if (owner.variantId !== shipment.sku.variantId) scan = { ...base, result: 'FOREIGN', total: null, productName: owner.name, lotNumber: null };
-    else {
-      const lot = shipment.sku.expiryTracked ? shipment.lots.find((item) => item.id === body.lotId) : shipment.lots[0];
-      if (shipment.sku.expiryTracked && !lot) return fail(409, 'LOT_REQUIRED', 'Avval partiya va yaroqlilik muddatini kiriting');
-      if (mode === 'ACCEPT') {
-        shipment.accepted += 1;
-        if (lot) lot.quantity += 1;
-        else shipment.lots.push({ id: `L-${shipment.id}`, number: shipment.number, expiresAt: null, quantity: 1, sellable: true });
-      } else shipment.defect += 1;
-      scan = { ...base, result: mode === 'ACCEPT' ? 'ACCEPTED' : 'DEFECT', total: mode === 'ACCEPT' ? shipment.accepted : shipment.defect, productName: null, lotNumber: lot?.number ?? shipment.number };
+    const body = (await request.json().catch(() => ({}))) as { wholesalerId?: unknown; expectedAt?: unknown; note?: unknown; items?: unknown };
+    const wholesaler = inbound().wholesalers.find((item) => item.id === text(body.wholesalerId));
+    if (!wholesaler) return fail(400, 'VALIDATION_ERROR', 'Optovik topilmadi');
+    const expectedAt = typeof body.expectedAt === 'string' ? body.expectedAt : '';
+    if (!DAY.test(expectedAt)) return fail(400, 'VALIDATION_ERROR', 'expectedAt YYYY-MM-DD bo‘lishi kerak');
+    const rows = Array.isArray(body.items) ? (body.items as { productId?: unknown; quantity?: unknown }[]) : [];
+    if (!rows.length) return fail(400, 'VALIDATION_ERROR', 'Kamida bitta mahsulot kerak');
+    if (new Set(rows.map((row) => text(row.productId))).size !== rows.length) return fail(400, 'VALIDATION_ERROR', 'Mahsulot takrorlangan');
+    for (const row of rows) {
+      if (!Number.isSafeInteger(row.quantity) || Number(row.quantity) < 1) return fail(400, 'VALIDATION_ERROR', 'Soni musbat butun son bo‘lishi kerak');
+      const product = skuOf(text(row.productId));
+      if (!product || product.status !== 'ACTIVE') return fail(400, 'VALIDATION_ERROR', `Mahsulot ${text(row.productId)} topilmadi yoki faol varianti yo‘q`);
+      if (product.wholesalerId !== wholesaler.id) return fail(400, 'VALIDATION_ERROR', `Mahsulot ${product.productId} boshqa optovikniki`);
     }
-    list.push(scan);
-    return ok(remember(body.idempotencyKey, { scan, shipment: structuredClone(shipment) }));
+    const id = String(nextId());
+    const created: MockShipment = {
+      id, number: `P-${id.padStart(4, '0')}`, wholesalerId: wholesaler.id, wholesalerName: wholesaler.name, status: 'DECLARED', expectedAt,
+      note: typeof body.note === 'string' && body.note.trim() ? body.note.trim() : null,
+      declaredBy: user.id, declaredByName: user.name, declaredByRole: user.role as ShipmentAuthorRole,
+      receivedBy: null, receivedByName: null, receivedAt: null, receiveComment: null, createdAt: new Date().toISOString(),
+      items: rows.map((row, index): MockShipmentItem => {
+        const product = skuOf(text(row.productId));
+        return {
+          id: `${id}${index + 1}`, productId: text(row.productId), productName: product?.name ?? '', variantId: product?.variantId ?? '', sku: `SKU-${text(row.productId)}`,
+          barcode: product?.barcode ?? null, declaredQty: Number(row.quantity), receivedQty: null, defectiveQty: null, batch: null, expiryDate: null, cell: null,
+          expiryTracked: product?.expiryTracked ?? false,
+        };
+      }),
+    };
+    inbound().shipments.unshift(created);
+    return ok(created, 201);
   }),
 
-  http.delete(`${API}/warehouse/inbound-shipments/:id/scans/:scanId`, ({ request, cookies, params }) => {
+  http.post(`${API}/admin/inventory/shipments/:id/in-transit`, ({ request, cookies, params }) => {
     const { denied } = guard(request, cookies);
     if (denied) return denied;
     const shipment = findShipment(params.id);
     if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    if (isCompleted(shipment)) return fail(409, 'INVALID_STATE', 'Qabul yakunlangach skanlar o‘zgarmaydi');
-    const list = journal(shipment);
-    const last = [...list].reverse().find((item) => item.result === 'ACCEPTED' || item.result === 'DEFECT');
-    if (!last || last.id !== params.scanId) return fail(409, 'NOT_LAST_SCAN', 'Faqat oxirgi hisoblangan skan bekor qilinadi');
-    list.splice(list.indexOf(last), 1);
-    if (last.result === 'ACCEPTED') {
-      shipment.accepted -= 1;
-      const lot = shipment.lots.find((item) => item.number === last.lotNumber) ?? shipment.lots[0];
-      if (lot) lot.quantity = Math.max(0, lot.quantity - 1);
-    } else shipment.defect -= 1;
+    if (shipment.status !== 'DECLARED' && shipment.status !== 'IN_TRANSIT') return fail(409, 'CONFLICT', `Postavka holati ${shipment.status}`);
+    shipment.status = 'IN_TRANSIT';
     return ok(shipment);
   }),
 
-  http.post(`${API}/warehouse/inbound-shipments/:id/lots`, async ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
+  http.post(`${API}/admin/inventory/shipments/:id/receive`, async ({ request, cookies, params }) => {
+    const { denied, user } = guard(request, cookies, ['WAREHOUSE', 'SUPERADMIN']);
     if (denied) return denied;
     const shipment = findShipment(params.id);
     if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    if (!shipment.sku.expiryTracked) return fail(409, 'INVALID_STATE', 'Bu mahsulotda muddat kuzatilmaydi');
-    const { number, expiresAt } = (await request.json().catch(() => ({}))) as { number?: unknown; expiresAt?: unknown };
-    if (typeof expiresAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(expiresAt)) return fail(400, 'VALIDATION_ERROR', 'Muddatni kiriting: bu toifadagi tovar faqat muddat bilan qabul qilinadi');
-    if (daysLeft(expiresAt, tashkentDate()) < 0) return fail(400, 'VALIDATION_ERROR', 'Muddati o‘tgan tovar qabul qilinmaydi');
-    const lotNumber = typeof number === 'string' && number.trim() ? number.trim() : `${shipment.number}-${shipment.lots.length + 1}`;
-    if (shipment.lots.some((lot) => lot.number === lotNumber)) return fail(409, 'DUPLICATE_LOT', 'Bu partiya raqami bor');
-    shipment.lots.push({ id: `L-${shipment.id}-${shipment.lots.length + 1}`, number: lotNumber, expiresAt, quantity: 0, sellable: isSellableExpiry(expiresAt, tashkentDate()) });
-    return ok(shipment, 201);
-  }),
-
-  http.post(`${API}/warehouse/inbound-shipments/:id/complete`, async ({ request, cookies, params }) => {
-    const { denied, actor } = guard(request, cookies);
-    if (denied) return denied;
-    const shipment = findShipment(params.id);
-    if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
-    if (isCompleted(shipment)) return ok(shipment);
-    if (!shipment.receivingStartedAt) return fail(409, 'INVALID_STATE', 'Qabul boshlanmagan');
-    const { note, confirmShortage } = (await request.json().catch(() => ({}))) as { note?: unknown; confirmShortage?: unknown };
-    const counted = shipment.accepted + shipment.defect;
-    if (!counted) return fail(409, 'NOTHING_COUNTED', 'Hali hech narsa sanalmagan');
-    if (counted < shipment.declared && confirmShortage !== true) return fail(409, 'SHORTAGE_NOT_CONFIRMED', `${shipment.declared - counted} dona kam: qayta sanang yoki kam deb yakunlang`);
-    const exact = shipment.accepted === shipment.declared && shipment.defect === 0;
-    Object.assign(shipment, {
-      status: exact ? 'RECEIVED' : 'DISCREPANCY', completedAt: now(), completedBy: actor,
-      actNote: typeof note === 'string' && note.trim() ? note.trim() : null,
-    });
-    settleStock(shipment);
-    return ok(shipment);
-  }),
-  http.get(`${API}/warehouse/lots`, ({ request, cookies }) => {
-    const { denied } = guard(request, cookies);
-    if (denied) return denied;
-    const url = new URL(request.url);
-    const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
-    const all = stockLots().filter((lot) =>
-      (!url.searchParams.get('wholesalerId') || lot.wholesaler.id === url.searchParams.get('wholesalerId')) &&
-      (!search || [lot.number, lot.sku.name, lot.sku.barcode ?? ''].some((value) => value.toLowerCase().includes(search))));
-    const state = url.searchParams.get('state');
-    const untracked = inbound().skus.filter((item) => !item.expiryTracked && item.status === 'ACTIVE').map((item) => ({ variantId: item.variantId, name: item.name }));
-    return ok({
-      items: state ? all.filter((lot) => lot.state === state) : all,
-      counts: { ALL: all.length, APPROACHING: all.filter((lot) => lot.state === 'APPROACHING').length, BLOCKED: all.filter((lot) => lot.state === 'BLOCKED').length, EXPIRED: all.filter((lot) => lot.state === 'EXPIRED').length },
-      rules: { minShelfDays: MIN_SHELF_DAYS, notifyDays: null },
-      untracked,
-    });
-  }),
-
-  http.post(`${API}/warehouse/lots/:id/:action`, async ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
-    if (denied) return denied;
-    const lot = stockLots().find((item) => item.id === String(params.id));
-    if (!lot) return fail(404, 'NOT_FOUND', 'Partiya topilmadi');
-    const body = (await request.json().catch(() => ({}))) as { quantity?: unknown; reason?: unknown; note?: unknown };
-    const quantity = Number(body.quantity);
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > lot.quantity) return fail(400, 'VALIDATION_ERROR', `Ko‘pi bilan ${lot.quantity} dona — partiyada shuncha bor`);
-    if (params.action === 'write-off') {
-      if (typeof body.note !== 'string' || !body.note.trim()) return fail(400, 'VALIDATION_ERROR', 'Izoh majburiy');
-      inbound().lotActions[lot.id] = { state: 'WRITTEN_OFF', quantity };
-      const target = skuByVariant(lot.sku.variantId);
-      if (target) {
-        target.onHand = Math.max(0, target.onHand - quantity);
-        target.blocked = Math.max(0, target.blocked - (lot.state === 'BLOCKED' ? quantity : 0));
+    // Takroriy yuborish — o'sha natija.
+    if (shipment.status === 'RECEIVED' || shipment.status === 'DISCREPANCY') return ok(shipment);
+    const body = (await request.json().catch(() => ({}))) as { items?: unknown; comment?: unknown };
+    const lines = Array.isArray(body.items) ? (body.items as Record<string, unknown>[]) : [];
+    const seen = new Set<string>();
+    for (const line of lines) {
+      const itemId = text(line.itemId);
+      if (!shipment.items.some((item) => item.id === itemId) || seen.has(itemId)) return fail(400, 'VALIDATION_ERROR', `Postavka qatori noto‘g‘ri: ${itemId}`);
+      seen.add(itemId);
+      const received = line.receivedQty;
+      const defect = line.defectiveQty;
+      if (!Number.isSafeInteger(received) || !Number.isSafeInteger(defect) || Number(received) < 0 || Number(defect) < 0 || Number(defect) > Number(received)) {
+        return fail(400, 'VALIDATION_ERROR', 'Qabul va brak soni: butun, 0 dan katta, brak ≤ qabul');
       }
-      return ok({ ...lot, state: 'WRITTEN_OFF', quantity: lot.quantity - quantity });
+      if (!CELL.test(text(line.cell))) return fail(400, 'VALIDATION_ERROR', 'Yacheyka manzili kerak (masalan B-02-1)');
+      if (line.expiryDate !== undefined && !DAY.test(text(line.expiryDate))) return fail(400, 'VALIDATION_ERROR', 'expiryDate YYYY-MM-DD bo‘lishi kerak');
     }
-    if (params.action === 'return') {
-      if (lot.state !== 'EXPIRED' && lot.state !== 'BLOCKED') return fail(409, 'INVALID_STATE', 'Faqat sotuvdan chiqarilgan yoki muddati o‘tgan partiya qaytariladi');
-      inbound().lotActions[lot.id] = { state: 'RETURNING', quantity };
-      return ok({ ...lot, state: 'RETURNING' });
+    if (seen.size !== shipment.items.length) return fail(400, 'VALIDATION_ERROR', 'Postavkaning hamma qatori qabul qilinishi kerak');
+    let discrepancy = false;
+    for (const line of lines) {
+      const item = shipment.items.find((row) => row.id === text(line.itemId));
+      if (!item) continue;
+      const received = Number(line.receivedQty);
+      const defect = Number(line.defectiveQty);
+      const good = received - defect;
+      if (received !== item.declaredQty || defect > 0) discrepancy = true;
+      Object.assign(item, {
+        receivedQty: received, defectiveQty: defect, cell: text(line.cell),
+        batch: typeof line.batch === 'string' && line.batch.trim() ? line.batch.trim() : null,
+        expiryDate: typeof line.expiryDate === 'string' ? line.expiryDate : null,
+      });
+      const stock = skuOf(item.productId);
+      if (stock) {
+        stock.onHand += good;
+        stock.defect += defect;
+        stock.cell = item.cell;
+      }
+      if (good > 0 && item.expiryDate) {
+        inbound().lots.push({ id: `${item.id}0`, variantId: item.variantId, sku: item.sku, productName: item.productName, batch: item.batch, expiryDate: item.expiryDate, quantity: good });
+      }
     }
-    return fail(404, 'NOT_FOUND', 'Amal topilmadi');
+    Object.assign(shipment, {
+      status: discrepancy ? 'DISCREPANCY' : 'RECEIVED', receivedBy: user.id, receivedByName: user.name, receivedAt: new Date().toISOString(),
+      receiveComment: typeof body.comment === 'string' && body.comment.trim() ? body.comment.trim() : null,
+    });
+    return ok(shipment);
+  }),
+
+  // Server tuzadigan PDF — mockda kichik namuna fayl.
+  http.get(`${API}/admin/inventory/shipments/:id/act.pdf`, ({ request, cookies, params }) => {
+    const { denied } = guard(request, cookies);
+    if (denied) return denied;
+    const shipment = findShipment(params.id);
+    if (!shipment) return fail(404, 'NOT_FOUND', 'Postavka topilmadi');
+    if (shipment.status !== 'RECEIVED' && shipment.status !== 'DISCREPANCY') return fail(409, 'CONFLICT', 'Akt qabuldan keyin tuziladi');
+    const lines = shipment.items.map((item) => `${item.productName}: ${item.declaredQty} / ${(item.receivedQty ?? 0) - (item.defectiveQty ?? 0)} / ${item.defectiveQty ?? 0}`);
+    return new Response(samplePdf([`Qabul akti ${shipment.number}`, ...lines]).buffer as ArrayBuffer, {
+      headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="qabul-akti-${shipment.number}.pdf"` },
+    });
+  }),
+
+  http.get(`${API}/admin/inventory/lots`, ({ request, cookies }) => {
+    const { denied } = guard(request, cookies);
+    if (denied) return denied;
+    const state = new URL(request.url).searchParams.get('state') ?? 'ALL';
+    const today = tashkentDate();
+    const lots = inbound().lots
+      .filter((lot) => lot.quantity > 0 && (state === 'ALL' || (state === 'BLOCKED') === isBlocked(lot, today)))
+      .sort((a, b) => a.expiryDate.localeCompare(b.expiryDate))
+      .map(lotDto);
+    return ok(lots);
+  }),
+
+  // BE-16 tuzatish; BE-17: partiyadan hisobdan chiqarish — `lotId` (sotuvdan chiqqan partiya bo'lsa majburiy).
+  http.post(`${API}/admin/inventory/adjust`, async ({ request, cookies }) => {
+    const { denied } = guard(request, cookies);
+    if (denied) return denied;
+    const body = (await request.json().catch(() => ({}))) as { variantId?: unknown; delta?: unknown; reason?: unknown; lotId?: unknown; idempotencyKey?: unknown };
+    const key = typeof body.idempotencyKey === 'string' ? body.idempotencyKey : '';
+    if (key && inbound().replies.has(key)) return ok(inbound().replies.get(key));
+    const delta = Number(body.delta);
+    if (!Number.isSafeInteger(delta) || delta === 0) return fail(400, 'VALIDATION_ERROR', 'delta noldan farqli bo‘lishi kerak');
+    if (typeof body.reason !== 'string' || !body.reason.trim()) return fail(400, 'VALIDATION_ERROR', 'Sabab kerak');
+    const stock = inbound().skus.find((item) => item.variantId === text(body.variantId));
+    if (!stock) return fail(404, 'NOT_FOUND', 'Qoldiq topilmadi');
+    const lot = body.lotId === undefined ? undefined : inbound().lots.find((item) => item.id === text(body.lotId) && item.variantId === stock.variantId);
+    if (body.lotId !== undefined && (!ID.test(text(body.lotId)) || !lot)) return fail(400, 'VALIDATION_ERROR', 'Partiya topilmadi');
+    if (delta < 0 && lot && -delta > lot.quantity) return fail(400, 'VALIDATION_ERROR', `Partiyada ${lot.quantity} dona bor`);
+    if (stock.onHand + delta < stock.reserved) return fail(409, 'CONFLICT', 'Qoldiq band qilingandan kam bo‘lmaydi');
+    stock.onHand += delta;
+    if (lot) lot.quantity += delta;
+    const result = { variantId: stock.variantId, warehouseId: '1', onHand: stock.onHand, reserved: stock.reserved, available: Math.max(0, stock.onHand - stock.reserved - blockedOf(stock.variantId)) };
+    if (key) inbound().replies.set(key, result);
+    return ok(result);
   }),
 ];
+
+/** Testlar uchun: qabul qilingan partiya — qoldiqqa qo'shiladi; muddatiga 60 kundan kam qolgan bo'lsa «mavjud»ga kirmaydi. */
+export function seedLot(productId: string, quantity: number, expiryDate: string, batch: string | null = null) {
+  const stock = skuOf(productId);
+  if (!stock) return;
+  stock.onHand += quantity;
+  inbound().lots.push({ id: String(900 + inbound().lots.length), variantId: stock.variantId, sku: `SKU-${productId}`, productName: stock.name, batch, expiryDate, quantity });
+}
+

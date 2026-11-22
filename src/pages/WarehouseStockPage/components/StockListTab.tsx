@@ -2,8 +2,11 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { ArrowRight, ChevronRight, Search, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useShipmentsQuery } from '../../../features/inbound/api/inboundQueries';
-import { AWAITING_STATUSES, type WarehouseStockRow } from '../../../features/inbound/model/inboundTypes';
+import { useAwaitingShipments } from '../../../features/inbound/api/inboundQueries';
+import { isSellableExpiry } from '../../../features/inbound/lib/expiry';
+import { shipmentTitle } from '../../../features/inbound/lib/shipmentLabels';
+import type { StockLot, WarehouseStockRow } from '../../../features/inbound/model/inboundTypes';
+import { startedDrafts } from '../../../features/inbound/model/receivingDraft';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { addDays, tashkentClock, tashkentDate } from '../../../shared/lib/tashkentTime';
 import { isoToDots } from '../../../shared/ui/DateInput/dateInput';
@@ -14,19 +17,28 @@ import styles from '../WarehouseStockPage.module.css';
 
 type Chip = 'zero' | 'soon' | 'reserved';
 
+interface StockListTabProps {
+  query: UseQueryResult<WarehouseStockRow[]>;
+  /** Partiyalar (OMB-3) — SKU qatorida raqam va muddat. */
+  lots: readonly StockLot[];
+  phone: boolean;
+}
+
 /** «Ro'yxat» (ombor-qoldiq): omborda / band / mavjud / brak, «mavjud 0» ogohlantirishi, SKU jadvali, band va kirim. */
-export function StockListTab({ query, phone }: { query: UseQueryResult<WarehouseStockRow[]>; phone: boolean }) {
+export function StockListTab({ query, lots, phone }: StockListTabProps) {
   const { t } = useTranslation();
   const today = tashkentDate();
-  const awaiting = useShipmentsQuery({ page: 1, limit: 100, status: AWAITING_STATUSES, sort: 'expectedAt' }).data?.items ?? [];
+  const awaiting = useAwaitingShipments().items;
+  const started = useMemo(() => startedDrafts(), []);
   const rows = useMemo(() => query.data ?? [], [query.data]);
   const [search, setSearch] = useState('');
   const [wholesaler, setWholesaler] = useState('');
   const [expiry, setExpiry] = useState('');
   const [chip, setChip] = useState<Chip | null>(null);
 
-  const soon = (row: WarehouseStockRow) => row.lots.some((lot) => !lot.sellable);
-  const tracked = (row: WarehouseStockRow) => row.lots.some((lot) => lot.expiresAt);
+  const lotsOf = (row: WarehouseStockRow) => lots.filter((lot) => lot.variantId === row.variantId);
+  const soon = (row: WarehouseStockRow) => row.blocked > 0;
+  const tracked = (row: WarehouseStockRow) => lotsOf(row).length > 0;
   const chipTest: Record<Chip, (row: WarehouseStockRow) => boolean> = { zero: (row) => row.available === 0, soon, reserved: (row) => row.reserved > 0 };
   const words = search.trim().toLowerCase();
   const visible = rows.filter((row) =>
@@ -37,7 +49,7 @@ export function StockListTab({ query, phone }: { query: UseQueryResult<Warehouse
   const sum = (key: 'onHand' | 'reserved' | 'available' | 'defect' | 'reservedToday' | 'reservedTomorrow', list = rows) => list.reduce((total, row) => total + row[key], 0);
   const cells = new Set(rows.map((row) => row.cell).filter(Boolean)).size;
   const zero = rows.find((row) => row.available === 0 && row.onHand > 0);
-  const zeroIncoming = zero ? awaiting.find((item) => item.sku.variantId === zero.variantId) : undefined;
+  const zeroIncoming = zero ? awaiting.find((item) => item.items.some((line) => line.variantId === zero.variantId)) : undefined;
   const wholesalers = [...new Set(rows.map((row) => row.wholesalerName).filter((name): name is string => Boolean(name)))];
   const reservedRows = rows.filter((row) => row.reserved > 0);
   const incomingQuantity = awaiting.reduce((total, item) => total + item.declared, 0);
@@ -52,11 +64,12 @@ export function StockListTab({ query, phone }: { query: UseQueryResult<Warehouse
     { label: t('inb.stock.defect'), value: sum('defect'), sub: t('inb.stock.defectSub') },
   ];
   const lotCell = (row: WarehouseStockRow) => {
-    const blocked = row.lots.filter((lot) => !lot.sellable).length;
+    const list = lotsOf(row);
+    const blocked = list.filter((lot) => !isSellableExpiry(lot.expiryDate, today)).length;
     return (
       <span className={styles.stack}>
-        <span className={styles.medium}>{row.lots.map((lot) => lot.number).join(' · ') || '—'}</span>
-        <span className={styles.sub}>{tracked(row) ? [row.lots.map((lot) => isoToDots(lot.expiresAt)).join(' · '), blocked ? t('inb.stock.blockedPart', { count: blocked }) : null].filter(Boolean).join(' · ') : t('inb.stock.noExpiry')}</span>
+        <span className={styles.medium}>{list.map((lot) => lot.batch ?? `#${lot.id}`).join(' · ') || '—'}</span>
+        <span className={styles.sub}>{list.length ? [list.map((lot) => isoToDots(lot.expiryDate)).join(' · '), blocked ? t('inb.stock.blockedPart', { count: blocked }) : null].filter(Boolean).join(' · ') : t('inb.stock.noExpiry')}</span>
       </span>
     );
   };
@@ -203,10 +216,10 @@ export function StockListTab({ query, phone }: { query: UseQueryResult<Warehouse
               {awaiting.map((item) => (
                 <li key={item.id}>
                   <span className={styles.stack}>
-                    <span className={styles.strong}>{item.number} · {item.sku.name}</span>
+                    <span className={styles.strong}>{item.number} · {shipmentTitle(t, item)}</span>
                     <span className={styles.sub}>
-                      {item.receivingStartedAt
-                        ? t('inb.stock.incomingCounting', { count: item.declared, accepted: item.accepted, defect: item.defect })
+                      {started.has(item.id)
+                        ? t('inb.stock.incomingCounting', { count: item.declared })
                         : item.expectedAt === today
                           ? t('inb.stock.incomingToday', { count: item.declared })
                           : t('inb.stock.incomingDate', { count: item.declared, date: item.expectedAt === addDays(today, 1) ? `${t('inb.wait.tomorrow')}, ${isoToDots(item.expectedAt)}` : isoToDots(item.expectedAt) })}
@@ -214,7 +227,7 @@ export function StockListTab({ query, phone }: { query: UseQueryResult<Warehouse
                   </span>
                   <span className={styles.badgeStack}>
                     <StatusBadge family="shipment" code={item.status} />
-                    {item.receivingStartedAt ? <span className={styles.sub}>{t('inb.stock.counting')}</span> : null}
+                    {started.has(item.id) ? <span className={styles.sub}>{t('inb.stock.counting')}</span> : null}
                   </span>
                 </li>
               ))}

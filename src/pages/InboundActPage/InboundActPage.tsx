@@ -1,15 +1,19 @@
-import { QRCode } from 'antd';
-import { ChevronLeft, Download } from 'lucide-react';
+import { App, QRCode } from 'antd';
+import { ChevronLeft, Download, Printer } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useAppSelector } from '../../app/store/hooks';
+import { selectAuthUser } from '../../features/auth/model/authSlice';
+import { downloadShipmentAct } from '../../features/inbound/api/inboundApi';
 import { useInboundWholesalersQuery, useShipmentQuery } from '../../features/inbound/api/inboundQueries';
+import { isSellableExpiry } from '../../features/inbound/lib/expiry';
 import { capitalize, uzNumberWords } from '../../features/inbound/lib/numberWords';
 import { shipmentTally } from '../../features/inbound/lib/scanRules';
-import { inboundActPath } from '../../features/inbound/lib/shipmentLabels';
+import { inboundActPath, personName, wholesalerLabel } from '../../features/inbound/lib/shipmentLabels';
+import { getApiErrorMessage } from '../../shared/api/apiError';
 import { BRAND } from '../../shared/config/brand';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { shortPersonName } from '../../shared/lib/personName';
-import { tashkentDateTime, tashkentDay } from '../../shared/lib/tashkentTime';
+import { tashkentDate, tashkentDateTime, tashkentDay } from '../../shared/lib/tashkentTime';
 import { isoToDots } from '../../shared/ui/DateInput/dateInput';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
@@ -31,16 +35,20 @@ function useSheetScale() {
 }
 
 /**
- * Postavka qabul akti (hujjat-qabul-akti; FE-16 TC1): A4 varaq, «PDF yuklab olish» — brauzerning chop etish oynasi
- * («PDF sifatida saqlash»). Optovikka avtomatik yuborilmaydi — PDF qo'lda yuboriladi (FE-16, BE-17).
+ * Postavka qabul akti (hujjat-qabul-akti; FE-16 TC1): A4 varaq ekranda; «PDF yuklab olish» — server tuzgan akt
+ * (BE-17 `act.pdf`), «Chop etish» — shu varaq. Optovikka avtomatik yuborilmaydi — PDF qo'lda yuboriladi.
  * Sonlar postavkadagi bilan bir xil: «Aktdagi son tizim bilan mos».
  */
 export default function InboundActPage() {
   const { t, language } = useTranslation();
+  const { notification } = App.useApp();
   const { shipmentId } = useParams();
+  const user = useAppSelector(selectAuthUser);
   const query = useShipmentQuery(shipmentId);
-  const wholesalers = useInboundWholesalersQuery();
+  // Optovik rekvizitlari (STIR, shartnoma) — admin ro'yxatidan; omborchiga ochilishi — taklif (fe-16 §4).
+  const wholesalers = useInboundWholesalersQuery(user?.role !== 'WAREHOUSE');
   const scale = useSheetScale();
+  const [downloading, setDownloading] = useState(false);
   const shipment = query.data;
 
   useEffect(() => {
@@ -56,21 +64,29 @@ export default function InboundActPage() {
   if (query.isPending) return <PageLoader />;
   if (!shipment) return <div className={styles.screen}><LoadError error={query.error} onRetry={() => void query.refetch()} title={t('inb.detail.notFound')} /></div>;
 
+  const download = () => {
+    setDownloading(true);
+    downloadShipmentAct(shipment.id, `${t('inb.act.fileName', { number: shipment.number })}.pdf`)
+      .catch((error: unknown) => notification.error({ title: t('inb.act.pdfError'), description: getApiErrorMessage(error) }))
+      .finally(() => setDownloading(false));
+  };
+
   const toolbar = (
     <div className={styles.toolbar}>
       <button type="button" className={styles.back} onClick={() => (window.history.length > 1 ? window.history.back() : window.close())}>
         <ChevronLeft aria-hidden />{t('inb.act.back')}
       </button>
-      {shipment.completedAt ? (
+      {shipment.receivedAt ? (
         <span className={styles.toolbarEnd}>
           <span className={styles.toolbarHint}>{t('inb.act.pdfHint')}</span>
-          <button type="button" className={styles.primary} onClick={() => window.print()}><Download aria-hidden />{t('inb.act.pdf')}</button>
+          <button type="button" className={styles.secondary} onClick={() => window.print()}><Printer aria-hidden />{t('inb.act.print')}</button>
+          <button type="button" className={styles.primary} disabled={downloading} onClick={download}><Download aria-hidden />{t('inb.act.pdf')}</button>
         </span>
       ) : null}
     </div>
   );
 
-  if (!shipment.completedAt) {
+  if (!shipment.receivedAt) {
     return (
       <div className={styles.screen}>
         {toolbar}
@@ -83,10 +99,11 @@ export default function InboundActPage() {
   const tally = shipmentTally(counts);
   const exact = shipment.status === 'RECEIVED';
   const wholesaler = wholesalers.data?.find((item) => item.id === shipment.wholesaler.id);
-  const completedAt = shipment.completedAt;
-  const receiver = shortPersonName(shipment.completedBy?.name ?? '');
-  const lots = shipment.lots.filter((lot) => lot.expiresAt);
-  const blocked = lots.filter((lot) => !lot.sellable).reduce((sum, lot) => sum + lot.quantity, 0);
+  const receivedAt = shipment.receivedAt;
+  const receivedOn = tashkentDate(Date.parse(receivedAt));
+  const receiver = personName(shipment.receivedBy);
+  // Muddatiga qabul kunida 60 kundan kam qolgan partiya — qoldiqda, lekin sotuvga chiqmaydi.
+  const blocked = shipment.items.filter((item) => item.expiryDate && !isSellableExpiry(item.expiryDate, receivedOn)).reduce((sum, item) => sum + item.accepted, 0);
   const allDefect = tally.diff === -counts.defect && !tally.shortage && !tally.surplus;
   const parts = allDefect
     ? t('inb.act.diffAllDefect')
@@ -124,7 +141,7 @@ export default function InboundActPage() {
                 <div>
                   <p className={styles.label}>{t('inb.act.number')}</p>
                   <p className={styles.number}>{shipment.number}</p>
-                  <p className={styles.small}>{tashkentDay(completedAt)}</p>
+                  <p className={styles.small}>{tashkentDay(receivedAt)}</p>
                 </div>
                 <QRCode
                   value={`${window.location.origin}${inboundActPath(shipment.id)}`}
@@ -148,7 +165,7 @@ export default function InboundActPage() {
             </div>
             <table className={styles.parties}>
               <tbody>
-                <tr><th>{t('inb.act.consignor')}</th><td>{shipment.wholesaler.name}{shipment.wholesaler.tin ? <> · {t('inb.act.tin')} <span className={styles.nums}>{shipment.wholesaler.tin}</span></> : null}</td></tr>
+                <tr><th>{t('inb.act.consignor')}</th><td>{wholesalerLabel(t, shipment)}{wholesaler?.tin ? <> · {t('inb.act.tin')} <span className={styles.nums}>{wholesaler.tin}</span></> : null}</td></tr>
                 <tr><th>{t('inb.act.commissioner')}</th><td><span className={styles.muted}>{t('inb.act.legal')}</span> · {t('inb.act.tin')} <span className={styles.muted}>{t('inb.act.tinPlaceholder')}</span></td></tr>
                 <tr>
                   <th>{t('inb.act.basis')}</th>
@@ -162,7 +179,7 @@ export default function InboundActPage() {
             <div className={styles.meta}>
               <div><p>{t('inb.act.request')}</p><p>{shipment.number}</p></div>
               <div><p>{t('inb.act.expected')}</p><p>{isoToDots(shipment.expectedAt)}</p></div>
-              <div><p>{t('inb.act.completed')}</p><p>{tashkentDateTime(completedAt)}</p></div>
+              <div><p>{t('inb.act.completed')}</p><p>{tashkentDateTime(receivedAt)}</p></div>
               <div><p>{t('inb.act.receivedBy')}</p><p>{t('inb.act.receivedByValue', { name: receiver })}</p></div>
             </div>
             <div className={styles.goodsHead}>
@@ -182,30 +199,28 @@ export default function InboundActPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>
-                    <span className={styles.strong}>{shipment.sku.name}</span>
-                    <span className={styles.subline}>{t('inb.act.skuLine', { barcode: shipment.sku.barcode ?? '—', cell: shipment.sku.cell ?? '—' })}</span>
-                  </td>
-                  <td>
-                    {lots.length ? lots.map((lot) => (
-                      <span key={lot.id} className={styles.lotLine}>
-                        <span className={styles.medium}>{lot.number}</span>
-                        <span className={styles.subline}>{t(lot.sellable ? 'inb.act.expiry' : 'inb.act.expiryBlocked', { date: isoToDots(lot.expiresAt) })}</span>
-                      </span>
-                    )) : (
-                      <>
-                        <span className={styles.medium}>{shipment.lots[0]?.number ?? shipment.number}</span>
-                        <span className={styles.subline}>{t('inb.act.noExpiry', { category: shipment.sku.categoryName ?? '—' })}</span>
-                      </>
-                    )}
-                  </td>
-                  <td className={styles.num}>{counts.declared}</td>
-                  <td className={styles.num}>{counts.accepted}</td>
-                  <td className={styles.num}>{counts.defect}</td>
-                  <td className={styles.num}>{signed(tally.diff)}</td>
-                </tr>
+                {shipment.items.map((item, index) => {
+                  const sellable = !item.expiryDate || isSellableExpiry(item.expiryDate, receivedOn);
+                  return (
+                    <tr key={item.id}>
+                      <td>{index + 1}</td>
+                      <td>
+                        <span className={styles.strong}>{item.productName}</span>
+                        <span className={styles.subline}>{t('inb.act.skuLine', { barcode: item.barcode ?? '—', cell: item.cell ?? '—' })}</span>
+                      </td>
+                      <td>
+                        <span className={styles.medium}>{item.batch ?? shipment.number}</span>
+                        <span className={styles.subline}>
+                          {item.expiryDate ? t(sellable ? 'inb.act.expiry' : 'inb.act.expiryBlocked', { date: isoToDots(item.expiryDate) }) : t('inb.act.noExpiry')}
+                        </span>
+                      </td>
+                      <td className={styles.num}>{item.declared}</td>
+                      <td className={styles.num}>{item.accepted}</td>
+                      <td className={styles.num}>{item.defect}</td>
+                      <td className={styles.num}>{signed(item.accepted - item.declared)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
               <tfoot>
                 <tr>
@@ -234,7 +249,7 @@ export default function InboundActPage() {
             <div className={styles.twoCols}>
               <div>
                 <h2 className={styles.sectionTitle}>{t('inb.act.note')}</h2>
-                <div className={styles.noteBox}>{shipment.actNote ? `«${shipment.actNote}»` : '—'}</div>
+                <div className={styles.noteBox}>{shipment.receiveComment ? `«${shipment.receiveComment}»` : '—'}</div>
               </div>
               <div>
                 <h2 className={styles.sectionTitle}>{t('inb.act.sendTitle')}</h2>
@@ -243,7 +258,7 @@ export default function InboundActPage() {
             </div>
             <div className={styles.signatures}>
               {[
-                { title: t('inb.act.signWarehouse'), name: t('inb.act.receivedByValue', { name: receiver }), date: t('inb.act.date', { date: tashkentDay(completedAt) }) },
+                { title: t('inb.act.signWarehouse'), name: t('inb.act.receivedByValue', { name: receiver }), date: t('inb.act.date', { date: tashkentDay(receivedAt) }) },
                 { title: t('inb.act.signWholesaler'), name: <span className={styles.muted}>{t('inb.act.fio')}</span>, date: t('inb.act.dateBlank') },
               ].map((item) => (
                 <div key={item.title} className={styles.signature}>
@@ -263,7 +278,7 @@ export default function InboundActPage() {
           </div>
           <footer className={styles.footer}>
             <span>{t('inb.act.footer', { number: shipment.number })}</span>
-            <span>{t('inb.act.created', { date: tashkentDateTime(completedAt), name: receiver })}</span>
+            <span>{t('inb.act.created', { date: tashkentDateTime(receivedAt), name: receiver })}</span>
           </footer>
         </article>
       </div>

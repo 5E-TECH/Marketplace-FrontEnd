@@ -2,10 +2,10 @@ import { App, Button } from 'antd';
 import { ChevronRight, CircleX, Clock, FileText, MapPin, PackagePlus, Plus, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDeclareShipmentsMutation } from '../../../features/inbound/api/inboundQueries';
+import { useDeclareShipmentMutation, useWholesalerProductsQuery } from '../../../features/inbound/api/inboundQueries';
+import { adminShipmentPath, shipmentTitle } from '../../../features/inbound/lib/shipmentLabels';
 import type { InboundProductOption, InboundShipment, InboundWholesaler } from '../../../features/inbound/model/inboundTypes';
 import { getApiErrorMessage } from '../../../shared/api/apiError';
-import { createIdempotencyKey } from '../../../shared/api/requestOptions';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { useMediaQuery } from '../../../shared/lib/useMediaQuery';
 import { tashkentDate } from '../../../shared/lib/tashkentTime';
@@ -16,7 +16,7 @@ import styles from '../AdminWholesalersPage.module.css';
 
 interface Row {
   key: number;
-  variantId: string;
+  productId: string;
   quantity: string;
 }
 
@@ -25,37 +25,38 @@ interface DeclareFormProps {
   wholesaler: InboundWholesaler | null;
   onWholesalerChange: (id: string) => void;
   /** Saqlandi: ro'yxatda belgilash va «Arizani ochish». */
-  onDeclared: (shipments: InboundShipment[]) => void;
+  onDeclared: (shipment: InboundShipment) => void;
 }
 
 const MAX_QUANTITY = 100_000;
 let rowKey = 0;
-const emptyRow = (): Row => ({ key: (rowKey += 1), variantId: '', quantity: '' });
+const emptyRow = (): Row => ({ key: (rowKey += 1), productId: '', quantity: '' });
+/** BE-17: postavka faqat tasdiqlangan CPA mahsulotiga. */
+const deliverable = (product: InboundProductOption) => product.status === 'ACTIVE' && product.cpaEnabled;
 
-/** «Yangi postavka arizasi · optovik nomidan» (admin-postavka; OMB-1, BE-17): har qator — alohida postavka. */
+/** «Yangi postavka arizasi · optovik nomidan» (admin-postavka; OMB-1, BE-17): bitta postavka, bir nechta mahsulot qatori. */
 export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDeclared }: DeclareFormProps) {
   const { t } = useTranslation();
   const { notification } = App.useApp();
   const navigate = useNavigate();
   const phone = useMediaQuery('(max-width: 767.98px)');
-  const declare = useDeclareShipmentsMutation();
+  const declare = useDeclareShipmentMutation();
+  const productsQuery = useWholesalerProductsQuery(wholesaler?.contractSigned ? wholesaler.id : null);
   const id = useId();
   const today = tashkentDate();
   const [rows, setRows] = useState<Row[]>(() => [emptyRow()]);
   const [expectedAt, setExpectedAt] = useState<string | null>(today);
   const [note, setNote] = useState('');
   const [touched, setTouched] = useState(false);
-  // Bitta arizaga bitta kalit: tarmoq uzilib qayta bosilsa, server ikkinchi postavka ochmaydi.
-  const [idempotencyKey, setIdempotencyKey] = useState(createIdempotencyKey);
 
   const locked = !wholesaler?.contractSigned;
-  const products = wholesaler?.products ?? [];
-  const approved = products.filter((item) => item.status === 'ACTIVE');
-  const productOf = (variantId: string) => products.find((item) => item.variantId === variantId);
+  const products = productsQuery.data ?? [];
+  const approved = products.filter(deliverable);
+  const productOf = (productId: string) => products.find((item) => item.productId === productId);
 
   const productError = (row: Row, index: number) => {
-    if (!row.variantId) return 'product';
-    return rows.findIndex((other) => other.variantId === row.variantId) !== index ? 'duplicate' : null;
+    if (!row.productId) return 'product';
+    return rows.findIndex((other) => other.productId === row.productId) !== index ? 'duplicate' : null;
   };
   const quantityInvalid = (row: Row) => {
     const quantity = Number(row.quantity);
@@ -65,17 +66,14 @@ export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDec
   const invalid = !wholesaler || locked || dateInvalid || rows.some((row, index) => productError(row, index) || quantityInvalid(row));
 
   const option = (product: InboundProductOption) => {
-    const ok = product.status === 'ACTIVE';
+    const ok = deliverable(product);
     const description = ok
-      ? t('inb.form.productOption', { barcode: product.barcode ?? '—', count: product.available })
-      : product.status === 'PENDING_REVIEW' && product.reviewSince
-        ? t('inb.form.inReview', { date: isoToDots(product.reviewSince) })
-        : t('inb.form.notApproved');
-    return { value: product.variantId, label: product.name, description, disabled: !ok };
+      ? t('inb.form.productOption', { onHand: product.onHand, count: product.available })
+      : t(product.status === 'PENDING_REVIEW' ? 'inb.form.inReview' : product.status === 'ACTIVE' ? 'inb.form.noCpa' : 'inb.form.notApproved');
+    return { value: product.productId, label: product.name, description, disabled: !ok };
   };
 
   const productHint = (product: InboundProductOption) => t('inb.form.productHint', {
-    barcode: product.barcode ?? '—',
     onHand: product.onHand,
     available: product.available,
     expiry: t(product.expiryTracked ? 'inb.form.expiryTracked' : 'inb.form.expiryNotTracked'),
@@ -84,8 +82,8 @@ export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDec
   const wholesalerHint = (item: InboundWholesaler) => [
     phone && item.tin ? t('inb.form.tin', { tin: item.tin }) : null,
     t('inb.form.contractSigned'),
-    t('inb.form.approvedCount', { count: item.products.filter((product) => product.status === 'ACTIVE').length }),
-    t(item.cabinet ? 'inb.form.cabinetActive' : 'inb.form.noCabinet'),
+    productsQuery.data ? t('inb.form.approvedCount', { count: approved.length }) : null,
+    t(item.hasCabinet ? 'inb.form.cabinetActive' : 'inb.form.noCabinet'),
   ].filter(Boolean).join(' · ');
 
   const update = (key: number, patch: Partial<Row>) => setRows((list) => list.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -99,31 +97,26 @@ export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDec
         wholesalerId: wholesaler.id,
         expectedAt,
         note: note.trim() || undefined,
-        items: rows.map((row) => ({ variantId: row.variantId, quantity: Number(row.quantity) })),
-        idempotencyKey,
+        items: rows.map((row) => ({ productId: row.productId, quantity: Number(row.quantity) })),
       },
       {
         onSuccess: (created) => {
-          const first = created[0];
-          const key = `declared-${first?.id ?? ''}`;
+          const key = `declared-${created.id}`;
           notification.success({
             key,
-            title: created.length > 1 ? t('inb.form.savedMany', { numbers: created.map((item) => item.number).join(', ') }) : t('inb.form.saved', { number: first?.number ?? '' }),
-            description: created.length > 1
-              ? t('inb.form.savedManyText', { count: created.length, date: isoToDots(expectedAt) })
-              : t('inb.form.savedText', { product: first?.sku.name ?? '', count: first?.declared ?? 0, date: isoToDots(expectedAt) }),
+            title: t('inb.form.saved', { number: created.number }),
+            description: t('inb.form.savedText', { product: shipmentTitle(t, created), count: created.declared, date: isoToDots(expectedAt) }),
             placement: phone ? 'top' : 'bottomRight',
             duration: 6,
-            actions: first ? (
-              <Button size="small" onClick={() => { notification.destroy(key); void navigate(`/admin/wholesalers/shipments/${encodeURIComponent(first.id)}`); }}>
+            actions: (
+              <Button size="small" onClick={() => { notification.destroy(key); void navigate(adminShipmentPath(created.id)); }}>
                 {t('inb.form.openShipment')}
               </Button>
-            ) : undefined,
+            ),
           });
           setRows([emptyRow()]);
           setNote('');
           setTouched(false);
-          setIdempotencyKey(createIdempotencyKey());
           onDeclared(created);
         },
         onError: (error) => notification.error({ title: t('inb.form.saveError'), description: getApiErrorMessage(error), placement: phone ? 'top' : 'bottomRight' }),
@@ -163,7 +156,7 @@ export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDec
 
       <div className={styles.rows} data-disabled={locked || undefined}>
         {rows.map((row, index) => {
-          const product = productOf(row.variantId);
+          const product = productOf(row.productId);
           const error = touched ? productError(row, index) : null;
           const quantityError = touched && quantityInvalid(row);
           return (
@@ -177,13 +170,13 @@ export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDec
                   label={t('inb.form.product')}
                   sheetHint={wholesaler ? t('inb.form.productSheetHint', { name: wholesaler.name }) : undefined}
                   searchLabel={t('inb.form.productSearch')}
-                  value={row.variantId || null}
+                  value={row.productId || null}
                   placeholder={t(locked ? 'inb.form.pickWholesalerFirst' : 'inb.form.productPlaceholder')}
                   searchable
                   disabled={locked}
                   invalid={error === 'product' || error === 'duplicate'}
                   options={products.map(option)}
-                  onChange={(variantId) => update(row.key, { variantId })}
+                  onChange={(productId) => update(row.key, { productId })}
                 />
                 {error === 'product' ? <p className={styles.error}><CircleX aria-hidden />{t('inb.form.errProduct')}</p> : null}
                 {error === 'duplicate' ? <p className={styles.error}><CircleX aria-hidden />{t('inb.form.errDuplicate')}</p> : null}

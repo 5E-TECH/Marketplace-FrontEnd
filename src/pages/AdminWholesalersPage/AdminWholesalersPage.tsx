@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useInboundWholesalersQuery, useShipmentsQuery } from '../../features/inbound/api/inboundQueries';
+import { useInboundWholesalersQuery, useShipmentCounts } from '../../features/inbound/api/inboundQueries';
 import type { InboundShipment } from '../../features/inbound/model/inboundTypes';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
@@ -23,7 +23,7 @@ export default function AdminWholesalersPage() {
   const [params, setParams] = useSearchParams();
   const tab: Tab = params.get('tab') === 'wholesalers' ? 'wholesalers' : 'shipments';
   const wholesalersQuery = useInboundWholesalersQuery();
-  const counts = useShipmentsQuery({ page: 1, limit: 1 }).data?.counts;
+  const counts = useShipmentCounts();
   const wholesalers = useMemo(() => wholesalersQuery.data ?? [], [wholesalersQuery.data]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [highlight, setHighlight] = useState<string[]>([]);
@@ -51,7 +51,7 @@ export default function AdminWholesalersPage() {
     );
   }
 
-  const onDeclared = (created: InboundShipment[]) => setHighlight(created.map((item) => item.id));
+  const onDeclared = (created: InboundShipment) => setHighlight([created.id]);
   const focusForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     formRef.current?.querySelector<HTMLElement>('select, button[role="combobox"]')?.focus({ preventScroll: true });

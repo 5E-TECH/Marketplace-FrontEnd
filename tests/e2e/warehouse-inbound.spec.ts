@@ -5,10 +5,11 @@ import { openStaffLogin } from './support/auth';
 import { installMockApi } from './support/mockApi';
 
 /**
- * FE-16 (ombor-qabul, hujjat-qabul-akti): omborchi postavkani skaner bilan qabul qiladi.
- * TC1 — admin e'lon qilgan 100 dona: 98 qabul + 2 brak → farq akti (PDF sahifa), sonlar tizim bilan mos;
+ * FE-16 (ombor-qabul, hujjat-qabul-akti; BE-17): omborchi postavkani skaner bilan qabul qiladi. Sanoq brauzerda,
+ * «Qabulni yakunlash» bitta `receive` so'rovi bilan yuboriladi.
+ * TC1 — admin e'lon qilgan 100 dona: 98 qabul + 2 brak → farq akti (PDF), sonlar tizim bilan mos;
  * TC2 — noma'lum shtrix-kod → ogohlantirish; TC3 — bir xil skan tez 2 marta → bitta;
- * TC4 — muddatiga 50 kun qolgan partiya «Sotuvdan chiqarilgan», «mavjud»ga qo'shilmaydi.
+ * TC4 — muddatiga 50 kun qolgan partiya «Sotuvdan chiqarilgan», qoldiqda, lekin «mavjud»ga qo'shilmaydi.
  * Skaner klaviatura emulyatsiyasi: kod maydonga yoziladi va Enter.
  */
 const QUL = '4780012345677';
@@ -23,7 +24,8 @@ async function login(page: Page, phone: string, home: RegExp) {
   await expect(page).toHaveURL(home);
 }
 
-const openWarehouse = (page: Page) => login(page, '900000005', /\/warehouse$/);
+const openWarehouse = (page: Page) => login(page, '900000005', /\/warehouse/);
+const accepted = (page: Page) => page.locator('[data-count="accepted"] dd');
 
 /** Bir xil kodni ketma-ket sanash uchun vaqt oldinga suriladi (takror oralig'i 1 s). */
 async function scanMany(page: Page, code: string, times: number, clock: { now: number }) {
@@ -41,11 +43,19 @@ async function scan(page: Page, code: string) {
   await page.getByTestId('scan-field').press('Enter');
 }
 
-/** P-0112 qabulda emas: sahifa ro'yxat ko'rinishida ochiladi. */
-function resetP0112() {
-  const p112 = db.inbound.shipments.find((item) => item.id === '112');
-  if (p112) Object.assign(p112, { receivingStartedAt: null, accepted: 0, defect: 0, lots: [] });
-  db.inbound.scans['112'] = [];
+/** Shu qurilmada boshlangan P-0112 qabuli (ombor-qabul namunasi): 98 qabul, 2 brak, jurnal — 102 ta skan. */
+async function seedP0112(context: BrowserContext) {
+  const at = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
+  const entry = (key: string, minutes: number, kind: string, total: number | null, barcode = QUL) => ({
+    key, at: at(minutes), barcode, kind, itemId: kind === 'UNKNOWN' ? null : '1121', total, productName: kind === 'UNKNOWN' ? null : 'Simsiz quloqchinlar', otherShipment: null,
+  });
+  const draft = {
+    shipmentId: '112', startedAt: at(45), counts: { 1121: { accepted: 98, defect: 2 } }, lots: {}, cells: {}, note: '', journalTotal: 102,
+    journal: [entry('s5', 0.4, 'ACCEPTED', 98), entry('s4', 1.2, 'UNKNOWN', null, '4600000017822'), entry('s3', 1.5, 'ACCEPTED', 97), entry('s2', 3, 'DEFECT', 2), entry('s1', 32, 'DEFECT', 1)],
+  };
+  await context.addInitScript(({ key, value }) => {
+    if (!window.localStorage.getItem(key)) window.localStorage.setItem(key, value);
+  }, { key: 'elchi.inbound.receiving.112', value: JSON.stringify(draft) });
 }
 
 test.beforeEach(async ({ context }) => {
@@ -64,14 +74,14 @@ test('TC1: admin 100 dona e’lon qildi → omborchi 98 qabul, 2 brak → farq a
   await expect(page.getByText('P-0114 e’lon qilindi')).toBeVisible();
 
   // Omborchi — alohida brauzer konteksti, mock baza o'sha.
-  const warehouse: BrowserContext = await browser.newContext();
+  const warehouse: BrowserContext = await browser.newContext({ acceptDownloads: true });
   await installMockApi(warehouse, { reset: false });
   const wh = await warehouse.newPage();
   const clock = { now: Date.now() };
   await wh.clock.setFixedTime(clock.now);
   await openWarehouse(wh);
-  // P-0112 qabulda — o'ng ustundagi navbatdan P-0114 ochiladi.
-  await wh.getByRole('button', { name: 'P-0114 qabulini ochish' }).click();
+  await expect(wh.getByTestId('inbound-page')).toHaveAttribute('data-view', 'list');
+  await wh.getByTestId('awaiting-list').getByRole('button', { name: 'P-0114 qabulini boshlash' }).click();
   await expect(wh.getByTestId('inbound-page')).toHaveAttribute('data-shipment-id', '114');
 
   await scanMany(wh, QUL, 98, clock);
@@ -83,10 +93,11 @@ test('TC1: admin 100 dona e’lon qildi → omborchi 98 qabul, 2 brak → farq a
     await expect(wh.getByRole('radio', { name: 'Qabul' })).toHaveAttribute('aria-checked', 'true');
   }
   await expect(wh.getByTestId('receiving-counted')).toHaveText('100 / 100');
-  await expect(wh.locator('[data-count="accepted"] dd')).toHaveText('98');
+  await expect(accepted(wh)).toHaveText('98');
   await expect(wh.locator('[data-count="defect"] dd')).toHaveText('2');
   await expect(wh.getByTestId('act-card')).toContainText('−2');
-  await expect(wh.getByTestId('act-card').getByRole('button', { name: 'Qabulni yakunlash' })).toBeEnabled();
+  // Hali serverga yuborilmagan — sanoq brauzerda.
+  expect(db.inbound.shipments.find((item) => item.id === '114')?.status).toBe('DECLARED');
 
   await wh.getByTestId('act-card').getByLabel('Aktga izoh').fill('2 ta qutida quloqchin korpusi singan');
   await wh.getByTestId('act-card').getByRole('button', { name: 'Qabulni yakunlash' }).click();
@@ -98,12 +109,13 @@ test('TC1: admin 100 dona e’lon qildi → omborchi 98 qabul, 2 brak → farq a
   await expect(wh.getByTestId('inbound-page')).toHaveAttribute('data-view', 'list');
   await expect(wh.getByTestId('done-list').locator('tr[data-shipment-id="114"]')).toContainText('100 · 98 · 2');
 
+  // BE-17 `receive`: kelgan 100 (brak bilan), brak 2, yacheyka; holat — «Farq bor».
   const saved = db.inbound.shipments.find((item) => item.id === '114');
-  expect(saved).toMatchObject({ status: 'DISCREPANCY', declared: 100, accepted: 98, defect: 2, actNote: '2 ta qutida quloqchin korpusi singan' });
-
+  expect(saved).toMatchObject({ status: 'DISCREPANCY', receiveComment: '2 ta qutida quloqchin korpusi singan', items: [{ receivedQty: 100, defectiveQty: 2, cell: 'B-02-1' }] });
+  expect(await wh.evaluate(() => window.localStorage.getItem('elchi.inbound.receiving.114'))).toBeNull();
   await expect(wh.getByTestId('done-list').locator('tr[data-shipment-id="114"]').getByRole('link', { name: 'PDF' })).toHaveAttribute('href', '/inbound-acts/114');
 
-  // Akt: toastdagi «Aktni ochish» — yangi tabda A4 sahifa; sonlar postavkadagi bilan bir xil.
+  // Akt: toastdagi «Aktni ochish» — yangi tabda A4 sahifa; sonlar postavkadagi bilan bir xil; PDF — serverdan.
   const [act] = await Promise.all([warehouse.waitForEvent('page'), wh.getByRole('button', { name: 'Aktni ochish' }).click()]);
   await expect(act).toHaveURL(/\/inbound-acts\/114$/);
   const sheet = act.getByTestId('inbound-act');
@@ -113,36 +125,38 @@ test('TC1: admin 100 dona e’lon qildi → omborchi 98 qabul, 2 brak → farq a
   await expect(sheet).toContainText('Farq: −2 dona — hammasi brak');
   await expect(sheet).toContainText('Yuz dona e’lon qilingan, to‘qson sakkiz dona qabul qilingan, ikki dona brak.');
   await expect(sheet).toContainText('«2 ta qutida quloqchin korpusi singan»');
-  await expect(act.getByRole('button', { name: 'PDF yuklab olish' })).toBeVisible();
+  await expect(act.getByRole('button', { name: 'Chop etish' })).toBeVisible();
+  const [download] = await Promise.all([act.waitForEvent('download'), act.getByRole('button', { name: 'PDF yuklab olish' }).click()]);
+  expect(download.suggestedFilename()).toBe('qabul-akti-P-0114.pdf');
   await warehouse.close();
 });
 
-test('TC2: noma’lum shtrix-kod — maydon qizil, ogohlantirish, jurnalda «Yozilmadi», son o‘zgarmaydi', async ({ page }) => {
+test('TC2: noma’lum shtrix-kod — maydon qizil, ogohlantirish, jurnalda «Yozilmadi», son o‘zgarmaydi', async ({ page, context }) => {
+  await seedP0112(context);
   await openWarehouse(page);
   await expect(page.getByTestId('inbound-page')).toHaveAttribute('data-shipment-id', '112');
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('98');
+  await expect(accepted(page)).toHaveText('98');
   await scan(page, '4600000017899');
   const problem = page.getByTestId('scan-problem');
   await expect(problem).toContainText('Noma’lum kod — yozilmadi');
-  await expect(problem).toContainText('4600000017899 hech bir SKUda yo‘q. Qabul soni o‘zgarmadi: 98.');
+  await expect(problem).toContainText('4600000017899 bu postavkada ham, kutilayotgan postavkalarda ham yo‘q. Qabul soni o‘zgarmadi: 98.');
   await expect(page.getByTestId('scan-field')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByTestId('scan-journal').locator('li').first()).toContainText('Yozilmadi');
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('98');
+  await expect(accepted(page)).toHaveText('98');
 
-  // Boshqa mahsulot kodi — bu postavkada yo'q.
+  // Boshqa kutilayotgan postavkaning mahsuloti — qaysi postavka ekani aytiladi.
   await scan(page, '4780012345684');
   await expect(problem).toContainText('Boshqa mahsulot — yozilmadi');
-  await expect(problem).toContainText('Oshxona tarozisi, bu postavkada yo‘q');
+  await expect(problem).toContainText('Oshxona tarozisi, P-0111 postavkasiniki, bu postavkada yo‘q');
 
   // Keyingi to'g'ri skan — ogohlantirish yo'qoladi, son ortadi.
   await page.waitForTimeout(1_050);
   await scan(page, QUL);
   await expect(problem).toBeHidden();
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('99');
+  await expect(accepted(page)).toHaveText('99');
 });
 
 test('TC3: bir xil skan ikki marta tez — bitta hisoblanadi, jurnalda «Takroriy skan»', async ({ page }) => {
-  resetP0112();
   const clock = { now: Date.now() };
   await page.clock.setFixedTime(clock.now);
   await openWarehouse(page);
@@ -150,19 +164,19 @@ test('TC3: bir xil skan ikki marta tez — bitta hisoblanadi, jurnalda «Takrori
   // Birinchi skan — mos postavka (P-0112) qabuli o'zi ochiladi va shu skan yoziladi.
   await scan(page, QUL);
   await expect(page.getByTestId('inbound-page')).toHaveAttribute('data-shipment-id', '112');
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('1');
+  await expect(accepted(page)).toHaveText('1');
   // 300 ms dan keyin xuddi shu kod — takror.
   clock.now += 300;
   await page.clock.setFixedTime(clock.now);
   await scan(page, QUL);
   await expect(page.getByTestId('scan-duplicate')).toContainText('Takroriy skan — bitta hisoblandi');
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('1');
+  await expect(accepted(page)).toHaveText('1');
   await expect(page.getByTestId('scan-journal').locator('li').first()).toContainText('Takroriy skan');
-  await expect.poll(() => db.inbound.shipments.find((item) => item.id === '112')?.accepted).toBe(1);
-  // Oraliqdan keyin — yangi tovar.
+  // Oraliqdan keyin — yangi tovar. Sanoq shu qurilmada saqlanadi.
   await scanMany(page, QUL, 1, clock);
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('2');
-  await expect.poll(() => db.inbound.scans['112'].filter((item) => item.result === 'ACCEPTED').length).toBe(2);
+  await expect(accepted(page)).toHaveText('2');
+  const draft = await page.evaluate(() => JSON.parse(window.localStorage.getItem('elchi.inbound.receiving.112') ?? '{}') as { counts?: unknown; journalTotal?: number });
+  expect(draft).toMatchObject({ counts: { 1121: { accepted: 2, defect: 0 } }, journalTotal: 3 });
 });
 
 test('TC4: muddatiga 50 kun qolgan partiya — «Sotuvdan chiqarilgan», qoldiqqa kiradi, «mavjud»ga kirmaydi', async ({ page }) => {
@@ -170,14 +184,16 @@ test('TC4: muddatiga 50 kun qolgan partiya — «Sotuvdan chiqarilgan», qoldiqq
   const today = tashkentDate();
   await openWarehouse(page);
   // Arizasiz yuk: omborchi optovik nomidan ochadi (karta: WAREHOUSE ham DECLARED ochadi).
-  await page.getByTestId('queue-card').getByRole('button', { name: 'Arizasiz postavka' }).click();
+  await page.getByTestId('awaiting-list').getByRole('button', { name: 'Arizasiz postavka' }).click();
   const undeclared = page.getByTestId('undeclared-dialog');
   await undeclared.getByRole('combobox', { name: /Optovik/ }).selectOption({ label: 'Namuna Farm MChJ' });
   await undeclared.getByRole('combobox', { name: /Mahsulot/ }).selectOption({ label: 'Vitamin kompleksi' });
   await undeclared.getByLabel(/Taxminiy miqdor/).fill('4');
+  await undeclared.getByLabel('Yuk xati raqami').fill('YX-118');
   await undeclared.getByRole('button', { name: 'Arizani saqlash' }).click();
   await expect(page.getByText('P-0114 e’lon qilindi')).toBeVisible();
-  await page.getByRole('button', { name: 'P-0114 qabulini ochish' }).click();
+  expect(db.inbound.shipments.find((item) => item.id === '114')).toMatchObject({ wholesalerId: '8', declaredByRole: 'WAREHOUSE', note: 'Yuk xati: YX-118.' });
+  await page.getByTestId('awaiting-list').getByRole('button', { name: 'P-0114 qabulini boshlash' }).click();
   await expect(page.getByTestId('inbound-page')).toHaveAttribute('data-shipment-id', '114');
 
   // Birinchi skan — partiya va muddat so'raladi.
@@ -188,42 +204,37 @@ test('TC4: muddatiga 50 kun qolgan partiya — «Sotuvdan chiqarilgan», qoldiqq
   await expect(lot).toContainText('Vitamin kompleksi · birinchi skan');
   await lot.getByRole('button', { name: 'Saqlash' }).click();
   await expect(lot).toContainText('Muddatni kiriting: bu toifadagi tovar faqat muddat bilan qabul qilinadi.');
-  const longExpiry = addDays(today, 259).split('-').reverse().join('.');
-  await lot.getByLabel(/Yaroqlilik muddati/).fill(longExpiry);
-  await lot.getByRole('button', { name: 'Saqlash' }).click();
-  await expect(lot).toBeHidden();
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('1');
-  await scanMany(page, VITAMIN, 1, clock);
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('2');
-
-  // Qadoqda boshqa sana: 50 kun qolgan.
-  await page.getByRole('button', { name: 'Yangi partiya' }).click();
-  await expect(lot).toContainText('qadoqda boshqa sana');
   await lot.getByLabel(/Yaroqlilik muddati/).fill(addDays(today, 50).split('-').reverse().join('.'));
   await expect(lot).toContainText('50 kun qoladi — partiya sotuvga chiqmaydi');
   await expect(lot).toContainText('Qoldiqqa kiradi, sotuvga chiqmaydi');
   await lot.getByRole('button', { name: 'Saqlash' }).click();
   await expect(lot).toBeHidden();
-  await scanMany(page, VITAMIN, 2, clock);
+  await expect(accepted(page)).toHaveText('1');
+  await scanMany(page, VITAMIN, 3, clock);
   await expect(page.getByTestId('receiving-counted')).toHaveText('4 / 4');
-  const lots = page.getByTestId('lots-table');
-  await expect(lots.locator('tr[data-lot="P-0114-1"]')).toContainText('Sotuvda');
-  await expect(lots.locator('tr[data-lot="P-0114-2"]')).toContainText('Sotuvdan chiqarilgan');
-  await expect(lots.locator('tr[data-lot="P-0114-2"]')).toContainText('50 kun');
-  await expect(page.getByTestId('lot-blocked')).toContainText('P-0114-2 sotuvga chiqmaydi');
+  const facts = page.getByTestId('receiving-facts');
+  await expect(facts).toContainText('P-0114-1');
+  await expect(facts).toContainText('50 kun · Sotuvdan chiqarilgan');
+  await expect(page.getByTestId('lot-blocked')).toContainText('P-0114-1 sotuvga chiqmaydi');
 
+  // Yangi SKU — yacheyka qoldiqda yo'q: yakunlashda so'raladi.
   await page.getByTestId('act-card').getByRole('button', { name: 'Qabulni yakunlash' }).click();
   const finish = page.getByTestId('finish-dialog');
   await expect(finish).toContainText('Farq yo‘q');
   await finish.getByRole('button', { name: 'Yakunlash', exact: true }).click();
+  await expect(finish).toContainText('Yacheykani kiriting');
+  await finish.getByLabel('Vitamin kompleksi — yacheyka').fill('c-03-2');
+  await finish.getByRole('button', { name: 'Yakunlash', exact: true }).click();
   await expect(page.getByText('P-0114 yakunlandi')).toBeVisible();
 
-  // Qoldiq: 4 dona omborda, 2 tasi sotuvdan chiqarilgan — «mavjud» 2.
-  const vitamin = db.inbound.skus.find((item) => item.variantId === '51101');
-  expect(vitamin).toMatchObject({ onHand: 4, blocked: 2 });
+  // Qoldiq: 4 dona omborda, partiya sotuvdan chiqarilgan — «mavjud» 0.
+  expect(db.inbound.shipments.find((item) => item.id === '114')?.items[0]).toMatchObject({ receivedQty: 4, defectiveQty: 0, batch: 'P-0114-1', expiryDate: addDays(today, 50), cell: 'C-03-2' });
+  expect(db.inbound.skus.find((item) => item.variantId === '51101')).toMatchObject({ onHand: 4, cell: 'C-03-2' });
+  expect(db.inbound.lots).toEqual([expect.objectContaining({ variantId: '51101', quantity: 4, expiryDate: addDays(today, 50) })]);
 });
 
-test('oxirgi skanni bekor qilish; arizasiz postavka — kutilayotgan postavka taklifi', async ({ page }) => {
+test('oxirgi skanni bekor qilish; arizasiz postavka — kutilayotgan postavka taklifi', async ({ page, context }) => {
+  await seedP0112(context);
   await openWarehouse(page);
   await page.getByRole('button', { name: 'Oxirgi skanni bekor qilish' }).click();
   const undo = page.getByTestId('undo-scan');
@@ -231,8 +242,12 @@ test('oxirgi skanni bekor qilish; arizasiz postavka — kutilayotgan postavka ta
   await expect(undo).toContainText('100 / 100 → 99 / 100');
   await undo.getByRole('button', { name: 'Skanni bekor qilish' }).click();
   await expect(page.getByText('Skan bekor qilindi')).toBeVisible();
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('97');
+  await expect(accepted(page)).toHaveText('97');
   await expect(page.getByTestId('receiving-counted')).toHaveText('99 / 100');
+  // Keyingi bekor qilish — noma'lum kod emas, undan oldingi hisoblangan skan («Qabul 97»).
+  await page.getByRole('button', { name: 'Oxirgi skanni bekor qilish' }).click();
+  await expect(undo).toContainText('97 → 96');
+  await undo.getByRole('button', { name: 'Ortga' }).click();
 
   await page.getByTestId('queue-card').getByRole('button', { name: 'Arizasiz postavka' }).click();
   const undeclared = page.getByTestId('undeclared-dialog');
@@ -242,41 +257,31 @@ test('oxirgi skanni bekor qilish; arizasiz postavka — kutilayotgan postavka ta
   await expect(page.getByTestId('inbound-page')).toHaveAttribute('data-shipment-id', '113');
 });
 
-test('aloqa uzildi: skanlar navbatda, sanoq davom etadi, yakunlash yopiq; tiklanganda o‘zi yuboriladi', async ({ page, context }) => {
+test('aloqa uzildi: sanoq shu qurilmada davom etadi, yakunlash yopiq; sahifa yangilansa ham saqlanadi', async ({ page, context }) => {
+  await seedP0112(context);
   await openWarehouse(page);
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('98');
-  await page.getByRole('button', { name: 'Oxirgi skanni bekor qilish' }).click();
-  await page.getByTestId('undo-scan').getByRole('button', { name: 'Skanni bekor qilish' }).click();
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('97');
+  await expect(accepted(page)).toHaveText('98');
 
   await context.setOffline(true);
   const clock = { now: Date.now() };
   await page.clock.setFixedTime(clock.now);
   await scanMany(page, QUL, 1, clock);
   await scan(page, '4600000017822');
-  await scanMany(page, QUL, 1, clock);
-  const banner = page.getByTestId('connection-banner');
-  await expect(banner).toHaveAttribute('data-state', 'scan-queue');
-  await expect(banner).toContainText('3 ta skan yuborilmadi.');
-  await expect(banner).toContainText('navbatda: 3');
-  // Sanoq brauzerda davom etadi; jurnalda «Navbatda»; yakunlash navbat bo'shaguncha yopiq.
-  await expect(page.locator('[data-count="accepted"] dd')).toHaveText('99');
-  await expect(page.getByTestId('scan-journal').getByText('Navbatda')).toHaveCount(3);
-  await expect(page.getByTestId('act-card')).toContainText('Navbatdagi 3 ta skan yuborilmaguncha qabulni yakunlab bo‘lmaydi');
+  await expect(page.getByTestId('connection-banner')).toHaveAttribute('data-state', 'offline');
+  await expect(accepted(page)).toHaveText('99');
+  await expect(page.getByTestId('act-card')).toContainText('Aloqa yo‘q: sanoq shu qurilmada saqlanmoqda.');
   await expect(page.getByTestId('act-card').getByRole('button', { name: 'Qabulni yakunlash' })).toBeDisabled();
-  expect(db.inbound.shipments.find((item) => item.id === '112')?.accepted).toBe(97);
 
   await context.setOffline(false);
-  await expect(banner).toHaveAttribute('data-state', 'scan-queue-sent');
-  await expect(banner).toContainText('Aloqa tiklandi. Navbatdagi 3 ta skan yuborildi.');
-  await expect(page.getByTestId('scan-journal').getByText('Navbatda')).toHaveCount(0);
-  await expect(page.getByTestId('scan-journal').locator('li').first()).toContainText('Qabul 99');
   await expect(page.getByTestId('act-card').getByRole('button', { name: 'Qabulni yakunlash' })).toBeEnabled();
-  await expect.poll(() => db.inbound.shipments.find((item) => item.id === '112')?.accepted).toBe(99);
-  await expect(banner).toBeHidden({ timeout: 6_000 });
+  await page.reload();
+  await expect(page.getByTestId('inbound-page')).toHaveAttribute('data-shipment-id', '112');
+  await expect(accepted(page)).toHaveText('99');
+  await expect(page.getByTestId('scan-journal')).toContainText('P-0112 · 104 ta skan');
 });
 
-test('telefon: skan kartasida skaner holati, sanoq qatorlarda, «Qabulni yakunlash» pastki panelda', async ({ page }) => {
+test('telefon: skan kartasida skaner holati, sanoq qatorlarda, «Qabulni yakunlash» pastki panelda', async ({ page, context }) => {
+  await seedP0112(context);
   await page.setViewportSize({ width: 390, height: 844 });
   await openWarehouse(page);
   await expect(page.getByTestId('scan-card').getByTestId('scanner-status')).toContainText('Skaner: tayyor');
@@ -284,4 +289,13 @@ test('telefon: skan kartasida skaner holati, sanoq qatorlarda, «Qabulni yakunla
   await expect(page.getByRole('button', { name: 'Qabulni yakunlash' })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test('arizasiz postavka: omborchiga optoviklar ro‘yxati yopiq bo‘lsa (BE-17, 403) — oynada xato, jim bo‘sh emas', async ({ page }) => {
+  await page.route('**/api/v1/admin/wholesalers*', (route) => route.fulfill({
+    status: 403, contentType: 'application/json', body: JSON.stringify({ statusCode: 403, code: 'FORBIDDEN', message: 'Ruxsat yo‘q' }),
+  }));
+  await openWarehouse(page);
+  await page.getByTestId('awaiting-list').getByRole('button', { name: 'Arizasiz postavka' }).click();
+  await expect(page.getByTestId('undeclared-dialog').getByRole('alert')).toContainText('Optovik va mahsulotlar ro‘yxati yuklanmadi');
 });

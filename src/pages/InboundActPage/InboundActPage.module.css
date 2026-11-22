@@ -9,6 +9,10 @@
 .primary { display: inline-flex; align-items: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; border: 0; border-radius: 12px; background: var(--color-action); color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .primary > svg { width: 18px; height: 18px; }
 .primary:hover { background: var(--color-action-hover); }
+.primary:disabled { opacity: 0.6; cursor: default; }
+.secondary { display: inline-flex; align-items: center; gap: 8px; height: 44px; margin: 0; padding: 0 16px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.secondary > svg { width: 18px; height: 18px; }
+.secondary:hover { background: var(--color-sunken); }
 .notReady { max-width: 794px; margin: 40px auto; text-align: center; font-size: 15px; color: var(--color-text-secondary); }
 
 .frame { width: 794px; margin: 0 auto; }
