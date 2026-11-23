@@ -13,7 +13,6 @@ import { selectAuthUser, selectSessionExpired } from '../../features/auth/model/
 import { SessionExpiredDialog } from '../../features/auth/ui/SessionExpiredDialog/SessionExpiredDialog';
 import { NotificationBell } from '../../features/notifications/ui/NotificationBell/NotificationBell';
 import { OperatorBookingsClock, OperatorStateSwitch } from '../../features/operator/ui/OperatorStatusBar';
-import { useScanQueueStatus } from '../../features/warehouse/lib/scanQueueStatus';
 import { WarehouseTopStatus } from '../../features/warehouse/ui/WarehouseTopStatus';
 import { ConnectionBanner } from '../../shared/ui/ConnectionBanner/ConnectionBanner';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -59,7 +58,6 @@ export default function AppShell() {
   const user = useAppSelector(selectAuthUser);
   const sessionExpired = useAppSelector(selectSessionExpired);
   const currentUserQuery = useCurrentUserQuery();
-  const scanQueue = useScanQueueStatus();
   const logoutMutation = useLogoutMutation();
   const shell = user ? getRoleShell(user.role) : null;
   const layout = useShellLayout(shell?.variant);
@@ -151,7 +149,7 @@ export default function AppShell() {
             />
           }
         />
-        <ConnectionBanner scanQueue={user.role === 'WAREHOUSE' ? scanQueue : undefined} />
+        <ConnectionBanner />
         {sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>

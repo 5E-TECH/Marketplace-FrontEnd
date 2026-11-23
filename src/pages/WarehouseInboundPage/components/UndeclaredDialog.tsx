@@ -1,10 +1,10 @@
 import { App } from 'antd';
 import { FilePlus, Info } from 'lucide-react';
 import { useId, useState } from 'react';
-import { useDeclareShipmentsMutation } from '../../../features/inbound/api/inboundQueries';
-import type { InboundShipment, InboundWholesaler } from '../../../features/inbound/model/inboundTypes';
+import { useDeclareShipmentMutation, useInboundWholesalersQuery, useWholesalerProductsQuery } from '../../../features/inbound/api/inboundQueries';
+import { shipmentTitle } from '../../../features/inbound/lib/shipmentLabels';
+import type { InboundShipment } from '../../../features/inbound/model/inboundTypes';
 import { getApiErrorMessage } from '../../../shared/api/apiError';
-import { createIdempotencyKey } from '../../../shared/api/requestOptions';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { useMediaQuery } from '../../../shared/lib/useMediaQuery';
 import { tashkentClock, tashkentDate } from '../../../shared/lib/tashkentTime';
@@ -14,12 +14,11 @@ import styles from './UndeclaredDialog.module.css';
 
 export interface UndeclaredPreset {
   wholesalerId?: string;
-  variantId?: string;
+  productId?: string;
 }
 
 interface UndeclaredDialogProps {
   preset: UndeclaredPreset | null;
-  wholesalers: readonly InboundWholesaler[];
   awaiting: readonly InboundShipment[];
   onClose: () => void;
   /** Mahsulot kutilayotgan postavkada bor — ariza o'rniga shu postavkaning qabuli. */
@@ -30,47 +29,42 @@ interface UndeclaredDialogProps {
 /**
  * «Arizasiz postavka» (ombor-qabul 5): arizasi yo'q yuk keldi. Karta bo'yicha (FE-16, BE-17: «DECLARED ni
  * WAREHOUSE yoki ADMIN roli optovik nomidan ochadi») omborchi arizani o'zi ochadi — dizayndagi «Adminga
- * yuborish» o'rniga; saqlangach postavka «Kutilayotganlar»ga tushadi.
+ * yuborish» o'rniga; saqlangach postavka «Kutilayotganlar»ga tushadi. Yuk xati raqami izohga yoziladi
+ * (BE-17 da alohida maydon yo'q).
  */
-export function UndeclaredDialog({ preset, wholesalers, awaiting, onClose, onStartExpected, onDeclared }: UndeclaredDialogProps) {
+export function UndeclaredDialog({ preset, awaiting, onClose, onStartExpected, onDeclared }: UndeclaredDialogProps) {
   const { t } = useTranslation();
   const { notification } = App.useApp();
   const phone = useMediaQuery('(max-width: 767.98px)');
-  const declare = useDeclareShipmentsMutation();
+  const declare = useDeclareShipmentMutation();
   const id = useId();
-  const usable = wholesalers.filter((item) => item.contractSigned && item.status === 'ACTIVE');
-  const [wholesalerId, setWholesalerId] = useState<string | null>(preset?.wholesalerId ?? usable[0]?.id ?? null);
-  const [variantId, setVariantId] = useState<string | null>(preset?.variantId ?? null);
+  const wholesalersQuery = useInboundWholesalersQuery(preset !== null);
+  const usable = (wholesalersQuery.data ?? []).filter((item) => item.contractSigned && item.status === 'ACTIVE');
+  const [picked, setPicked] = useState<string | null>(preset?.wholesalerId ?? null);
+  const wholesalerId = picked ?? usable[0]?.id ?? null;
+  const productsQuery = useWholesalerProductsQuery(preset !== null ? wholesalerId : null);
+  const [productId, setProductId] = useState<string | null>(preset?.productId ?? null);
   const [quantity, setQuantity] = useState('');
   const [waybill, setWaybill] = useState('');
   const [note, setNote] = useState('');
   const [touched, setTouched] = useState(false);
-  const [idempotencyKey] = useState(createIdempotencyKey);
-  const wholesaler = usable.find((item) => item.id === wholesalerId) ?? null;
-  const products = (wholesaler?.products ?? []).filter((item) => item.status === 'ACTIVE');
-  const product = products.find((item) => item.variantId === variantId) ?? null;
-  const expected = product ? awaiting.find((item) => item.sku.variantId === product.variantId) ?? null : null;
+  const products = (productsQuery.data ?? []).filter((item) => item.status === 'ACTIVE' && item.cpaEnabled);
+  const product = products.find((item) => item.productId === productId) ?? null;
+  const expected = product ? awaiting.find((item) => item.items.some((line) => line.productId === product.productId)) ?? null : null;
   const amount = Number(quantity);
   const quantityInvalid = !quantity || !Number.isInteger(amount) || amount < 1 || amount > 100_000;
 
   const submit = () => {
     setTouched(true);
-    if (!wholesaler || !product || quantityInvalid || declare.isPending) return;
+    if (!wholesalerId || !product || quantityInvalid || declare.isPending) return;
+    const text = [waybill.trim() ? t('inb.undeclared.waybillNote', { number: waybill.trim() }) : null, note.trim() || null].filter(Boolean).join(' ');
     declare.mutate(
+      { wholesalerId, expectedAt: tashkentDate(), note: text || undefined, items: [{ productId: product.productId, quantity: amount }] },
       {
-        wholesalerId: wholesaler.id,
-        expectedAt: tashkentDate(),
-        note: note.trim() || undefined,
-        waybillNumber: waybill.trim() || undefined,
-        items: [{ variantId: product.variantId, quantity: amount }],
-        idempotencyKey,
-      },
-      {
-        onSuccess: ([created]) => {
-          if (!created) return;
+        onSuccess: (created) => {
           notification.success({
             title: t('inb.undeclared.done', { number: created.number }),
-            description: t('inb.undeclared.doneText', { product: created.sku.name, count: created.declared, time: tashkentClock() }),
+            description: t('inb.undeclared.doneText', { product: shipmentTitle(t, created), count: created.declared, time: tashkentClock() }),
             placement: phone ? 'top' : 'bottomRight',
             duration: 6,
           });
@@ -99,19 +93,23 @@ export function UndeclaredDialog({ preset, wholesalers, awaiting, onClose, onSta
       )}
     >
       <p className={styles.intro}>{t('inb.undeclared.intro')}</p>
+      {/* BE-17 da omborchiga optovik va mahsulot ro'yxati hali yopiq (taklif, fe-16 §4) — jim bo'sh qolmasin. */}
+      {wholesalersQuery.error ?? productsQuery.error ? (
+        <p className={styles.loadError} role="alert">{t('inb.undeclared.loadError', { reason: getApiErrorMessage(wholesalersQuery.error ?? productsQuery.error) })}</p>
+      ) : null}
       <div className={styles.grid}>
         <div>
           <label className={styles.label} htmlFor={`${id}-w`}>{t('inb.form.wholesaler')} <span className={styles.required}>*</span></label>
           <SearchSelect id={`${id}-w`} label={t('inb.form.wholesaler')} value={wholesalerId} placeholder={t('inb.form.wholesalerPlaceholder')} searchable={false}
             options={usable.map((item) => ({ value: item.id, label: item.name }))}
-            onChange={(value) => { setWholesalerId(value); setVariantId(null); }} />
+            onChange={(value) => { setPicked(value); setProductId(null); }} />
         </div>
         <div>
           <label className={styles.label} htmlFor={`${id}-p`}>{t('inb.form.product')} <span className={styles.required}>*</span></label>
-          <SearchSelect id={`${id}-p`} label={t('inb.form.product')} value={variantId} placeholder={t('inb.form.productPlaceholder')} searchable={false}
+          <SearchSelect id={`${id}-p`} label={t('inb.form.product')} value={productId} placeholder={t('inb.form.productPlaceholder')} searchable={false}
             invalid={touched && !product}
-            options={products.map((item) => ({ value: item.variantId, label: item.name }))}
-            onChange={setVariantId} />
+            options={products.map((item) => ({ value: item.productId, label: item.name }))}
+            onChange={setProductId} />
         </div>
       </div>
       {expected ? (

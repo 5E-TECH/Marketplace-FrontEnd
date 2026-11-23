@@ -22,19 +22,11 @@
     {"operation": "POST /api/v1/admin/products/{}/creatives/upload", "card": "BE-08", "note": "Kreativ yuklash uchun imzolangan POST policy, 15 daqiqa (PR #127)"},
     {"operation": "POST /api/v1/admin/products/{}/creatives", "card": "BE-08", "note": "Yuklangan faylni kreativ qilib saqlash (PR #127)"},
     {"operation": "DELETE /api/v1/admin/products/{}/creatives/{}", "card": "BE-08", "note": "Kreativni o'chirish — offerdan chiqadi, fayl ham o'chiriladi (PR #127)"},
-    {"operation": "GET /api/v1/warehouse/wholesalers", "card": "BE-17", "note": "Optoviklar va SKU lari (shartnoma, shtrix-kod, muddat, qoldiq): e'lon formasi, arizasiz postavka"},
-    {"operation": "GET /api/v1/warehouse/inbound-shipments", "card": "BE-17", "note": "Postavkalar ro'yxati: holat, optovik, kiritdi, kelish va yakunlangan sana filtrlari, tablar soni"},
-    {"operation": "POST /api/v1/warehouse/inbound-shipments", "card": "BE-17", "note": "E'lon optovik nomidan (ADMIN yoki WAREHOUSE): har mahsulot qatori — alohida postavka, idempotencyKey"},
-    {"operation": "GET /api/v1/warehouse/inbound-shipments/{}", "card": "BE-17", "note": "Postavka tafsiloti: sonlar, partiyalar, akt maydonlari"},
-    {"operation": "POST /api/v1/warehouse/inbound-shipments/{}/cancel", "card": "BE-17", "note": "Arizani bekor qilish (faqat DECLARED, qabul boshlanmagan), sabab bilan"},
-    {"operation": "POST /api/v1/warehouse/inbound-shipments/{}/receiving", "card": "BE-17", "note": "Qabulni boshlash — «hozir sanalmoqda»"},
-    {"operation": "GET /api/v1/warehouse/inbound-shipments/{}/scans", "card": "BE-17", "note": "Skan jurnali: oxirgi 50 ta va jami"},
-    {"operation": "POST /api/v1/warehouse/inbound-shipments/{}/scans", "card": "BE-17", "note": "Skan (Qabul/Brak), partiya, idempotencyKey — oflayn navbatdan qayta yuborilsa ikki marta yozilmaydi"},
-    {"operation": "DELETE /api/v1/warehouse/inbound-shipments/{}/scans/{}", "card": "BE-17", "note": "Oxirgi hisoblangan skanni bekor qilish"},
-    {"operation": "POST /api/v1/warehouse/inbound-shipments/{}/lots", "card": "BE-17", "note": "Partiya va yaroqlilik muddati (OMB-3): 60 kundan kam — sotuvga chiqmaydi"},
-    {"operation": "POST /api/v1/warehouse/inbound-shipments/{}/complete", "card": "BE-17", "note": "Qabulni yakunlash: RECEIVED yoki DISCREPANCY, akt izohi, kam bo'lsa tasdiq"},
-    {"operation": "GET /api/v1/warehouse/lots", "card": "BE-17", "note": "Partiyalar (stock_lot): holat (sotuvda, yaqinlashmoqda, sotuvdan chiqarilgan, muddati o'tgan), tab sonlari, 60 kun qoidasi, muddatsiz SKU lar"},
-    {"operation": "POST /api/v1/warehouse/lots/{}/write-off", "card": "BE-17", "note": "Partiyani hisobdan chiqarish: miqdor, sabab, izoh majburiy; audit (kim qila oladi — 32-qaror)"},
-    {"operation": "POST /api/v1/warehouse/lots/{}/return", "card": "BE-17 / FE-18", "note": "Partiyani optovikka qaytarishga qo'shish (akt optovikka topshirishda)"}
+    {"operation": "GET /api/v1/admin/inventory/shipments", "card": "BE-17 (PR #132)", "note": "Postavkalar ro'yxati: bitta holat, optovik, sahifa (yangisi tepada)"},
+    {"operation": "POST /api/v1/admin/inventory/shipments", "card": "BE-17 (PR #132)", "note": "E'lon optovik nomidan (WAREHOUSE, ADMIN, SUPERADMIN): bitta postavka, bir nechta mahsulot qatori"},
+    {"operation": "GET /api/v1/admin/inventory/shipments/{}", "card": "BE-17 (PR #132)", "note": "Postavka kartasi: qatorlar, qabul, brak, partiya, yacheyka"},
+    {"operation": "POST /api/v1/admin/inventory/shipments/{}/receive", "card": "BE-17 (PR #132)", "note": "Qabul (WAREHOUSE, SUPERADMIN): hamma qator bir so'rovda — kelgan, brak, partiya, muddat, yacheyka; takror — o'sha natija"},
+    {"operation": "GET /api/v1/admin/inventory/shipments/{}/act.pdf", "card": "BE-17 (PR #132)", "note": "Qabul (farq va brak) akti PDF — optovikka qo'lda"},
+    {"operation": "GET /api/v1/admin/inventory/lots", "card": "BE-17 (PR #132)", "note": "Yaroqlilik partiyalari: muddat, sotuvdan chiqish sanasi (muddat − 60 kun), blocked"}
   ]
 }

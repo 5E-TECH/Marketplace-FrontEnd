@@ -1,8 +1,8 @@
 import { ChevronRight, CircleCheck, CircleMinus, FileCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAwaitingShipments, useWholesalerProductsQuery } from '../../../features/inbound/api/inboundQueries';
 import { SHIPMENT_STATUSES, type InboundWholesaler } from '../../../features/inbound/model/inboundTypes';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
-import { tashkentClock } from '../../../shared/lib/tashkentTime';
 import { Badge } from '../../../shared/ui/Badge/Badge';
 import { StatusBadge } from '../../../shared/ui/StatusBadge/StatusBadge';
 import styles from '../AdminWholesalersPage.module.css';
@@ -17,8 +17,16 @@ export function WholesalerSummary({ wholesaler }: { wholesaler: InboundWholesale
       </section>
     );
   }
-  const approved = wholesaler.products.filter((item) => item.status === 'ACTIVE').length;
-  const seen = wholesaler.cabinet?.lastSeenAt;
+  return <Summary wholesaler={wholesaler} />;
+}
+
+function Summary({ wholesaler }: { wholesaler: InboundWholesaler }) {
+  const { t } = useTranslation();
+  const products = useWholesalerProductsQuery(wholesaler.id).data ?? [];
+  const awaiting = useAwaitingShipments(wholesaler.id).items;
+  const approved = products.filter((item) => item.status === 'ACTIVE' && item.cpaEnabled).length;
+  const onHand = products.reduce((sum, item) => sum + item.onHand, 0);
+  const quantity = awaiting.reduce((sum, item) => sum + item.declared, 0);
   return (
     <section className={styles.card} data-testid="wholesaler-summary">
       <div className={styles.cardHead}>
@@ -35,16 +43,13 @@ export function WholesalerSummary({ wholesaler }: { wholesaler: InboundWholesale
       </div>
       <dl className={styles.facts}>
         <div><dt>{t('inb.summary.approved')}</dt><dd>{t('inb.summary.approvedValue', { count: approved })}</dd></div>
-        <div><dt>{t('inb.summary.onHand')}</dt><dd>{t('inb.pieces', { count: wholesaler.onHand })}</dd></div>
-        <div><dt>{t('inb.summary.awaiting')}</dt><dd>{t('inb.summary.awaitingValue', { shipments: wholesaler.awaiting.shipments, quantity: wholesaler.awaiting.quantity })}</dd></div>
-        <div>
-          <dt>{t('inb.summary.cabinet')}</dt>
-          <dd>{wholesaler.cabinet ? t('inb.summary.cabinetActive', { time: seen ? tashkentClock(Date.parse(seen)) : '—' }) : t('inb.summary.cabinetNone')}</dd>
-        </div>
+        <div><dt>{t('inb.summary.onHand')}</dt><dd>{t('inb.pieces', { count: onHand })}</dd></div>
+        <div><dt>{t('inb.summary.awaiting')}</dt><dd>{t('inb.summary.awaitingValue', { shipments: awaiting.length, quantity })}</dd></div>
+        <div><dt>{t('inb.summary.cabinet')}</dt><dd>{t(wholesaler.hasCabinet ? 'inb.summary.cabinetActive' : 'inb.summary.cabinetNone')}</dd></div>
       </dl>
-      <p className={styles.note}>{t(wholesaler.cabinet ? 'inb.summary.cabinetText' : 'inb.summary.noCabinetText')}</p>
+      <p className={styles.note}>{t(wholesaler.hasCabinet ? 'inb.summary.cabinetText' : 'inb.summary.noCabinetText')}</p>
       <div>
-        <Link className={styles.more} to="/admin/wholesalers">{t('inb.summary.card')}<ChevronRight aria-hidden /></Link>
+        <Link className={styles.more} to="/admin/wholesalers?tab=wholesalers">{t('inb.summary.card')}<ChevronRight aria-hidden /></Link>
       </div>
     </section>
   );

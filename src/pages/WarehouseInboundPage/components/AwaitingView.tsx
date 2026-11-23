@@ -1,5 +1,5 @@
 import { Download, FilePlus, PackagePlus } from 'lucide-react';
-import { inboundActPath } from '../../../features/inbound/lib/shipmentLabels';
+import { inboundActPath, shipmentTitle, wholesalerLabel } from '../../../features/inbound/lib/shipmentLabels';
 import type { InboundShipment } from '../../../features/inbound/model/inboundTypes';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { addDays, tashkentClock } from '../../../shared/lib/tashkentTime';
@@ -14,8 +14,8 @@ interface AwaitingViewProps {
   today: string;
   /** Skan bir nechta postavkaga mos keldi — ular belgilanadi. */
   matched: readonly string[];
-  /** Yaqindagi (birinchi) postavka — asosiy tugma, qolganlari ikkinchi darajali. */
-  starting: string | null;
+  /** Shu qurilmada qabuli boshlangan — «Davom ettirish». */
+  started: ReadonlySet<string>;
   onStart: (shipment: InboundShipment) => void;
   onUndeclared: () => void;
   /** Yangi yakunlangan postavka — «Bugun qabul qilingan»da belgilangan. */
@@ -23,21 +23,21 @@ interface AwaitingViewProps {
 }
 
 /** Qabul boshlanmagan (ombor-qabul holatlar 1): kutilayotgan postavkalar va bugun qabul qilinganlar (akt PDF bilan). */
-export function AwaitingView({ phone, awaiting, done, today, matched, starting, onStart, onUndeclared, lastDone }: AwaitingViewProps) {
+export function AwaitingView({ phone, awaiting, done, today, matched, started, onStart, onUndeclared, lastDone }: AwaitingViewProps) {
   const { t } = useTranslation();
   const quantity = awaiting.reduce((sum, item) => sum + item.declared, 0);
   const when = (shipment: InboundShipment) => (shipment.expectedAt === today ? t('inb.wait.today') : shipment.expectedAt === addDays(today, 1) ? t('inb.wait.tomorrow') : null);
   const totals = done.reduce((sum, item) => ({ declared: sum.declared + item.declared, accepted: sum.accepted + item.accepted, defect: sum.defect + item.defect }), { declared: 0, accepted: 0, defect: 0 });
+  // Yaqindagi (birinchi) postavka — asosiy tugma, qolganlari ikkinchi darajali.
   const startButton = (shipment: InboundShipment, index: number) => (
     <button
       type="button"
       className={index === 0 ? styles.primary : styles.secondary}
-      aria-label={t('inb.wait.startAria', { number: shipment.number })}
-      disabled={starting !== null}
+      aria-label={t(started.has(shipment.id) ? 'inb.wait.continueAria' : 'inb.wait.startAria', { number: shipment.number })}
       onMouseDown={(event) => event.preventDefault()}
       onClick={() => onStart(shipment)}
     >
-      {t('inb.wait.start')}
+      {t(started.has(shipment.id) ? 'inb.wait.continue' : 'inb.wait.start')}
     </button>
   );
   const undeclared = (
@@ -72,7 +72,7 @@ export function AwaitingView({ phone, awaiting, done, today, matched, starting, 
                   <span className={styles.queueNumber}>{shipment.number}</span>
                   <StatusBadge family="shipment" code={shipment.status} />
                 </span>
-                <span className={styles.waitName}>{shipment.sku.name} <span>· {shipment.wholesaler.name}</span></span>
+                <span className={styles.waitName}>{shipmentTitle(t, shipment)} <span>· {wholesalerLabel(t, shipment)}</span></span>
                 <span className={styles.waitMeta}>
                   <span>{[isoToDots(shipment.expectedAt), when(shipment)].filter(Boolean).join(' · ')}</span>
                   <strong>{t('inb.pieces', { count: shipment.declared })}</strong>
@@ -98,7 +98,7 @@ export function AwaitingView({ phone, awaiting, done, today, matched, starting, 
                 {awaiting.map((shipment, index) => (
                   <tr key={shipment.id} data-current={matched.includes(shipment.id) || undefined} data-shipment-id={shipment.id}>
                     <td><strong>{shipment.number}</strong></td>
-                    <td><span className={styles.stack}><span>{shipment.sku.name}</span><span>{shipment.wholesaler.name}</span></span></td>
+                    <td><span className={styles.stack}><span>{shipmentTitle(t, shipment)}</span><span>{wholesalerLabel(t, shipment)}</span></span></td>
                     <td><span className={styles.stack}><span>{isoToDots(shipment.expectedAt)}</span><span>{when(shipment)}</span></span></td>
                     <td className={styles.num}>{shipment.declared}</td>
                     <td><StatusBadge family="shipment" code={shipment.status} /></td>
@@ -124,9 +124,9 @@ export function AwaitingView({ phone, awaiting, done, today, matched, starting, 
                   <span className={styles.queueNumber}>{shipment.number}</span>
                   <StatusBadge family="shipment" code={shipment.status} />
                 </span>
-                <span className={styles.waitName}>{shipment.sku.name}</span>
+                <span className={styles.waitName}>{shipmentTitle(t, shipment)}</span>
                 <span className={styles.waitMeta}>
-                  <span>{t('inb.done.phoneMeta', { time: shipment.completedAt ? tashkentClock(Date.parse(shipment.completedAt)) : '—', declared: shipment.declared, accepted: shipment.accepted, defect: shipment.defect })}</span>
+                  <span>{t('inb.done.phoneMeta', { time: shipment.receivedAt ? tashkentClock(Date.parse(shipment.receivedAt)) : '—', declared: shipment.declared, accepted: shipment.accepted, defect: shipment.defect })}</span>
                   <a className={styles.pdf} href={inboundActPath(shipment.id)} target="_blank" rel="noopener">PDF<Download aria-hidden /></a>
                 </span>
               </li>
@@ -149,8 +149,8 @@ export function AwaitingView({ phone, awaiting, done, today, matched, starting, 
                 {done.map((shipment) => (
                   <tr key={shipment.id} data-current={shipment.id === lastDone || undefined} data-shipment-id={shipment.id}>
                     <td><strong>{shipment.number}</strong></td>
-                    <td>{shipment.sku.name}</td>
-                    <td>{shipment.completedAt ? tashkentClock(Date.parse(shipment.completedAt)) : '—'}</td>
+                    <td>{shipmentTitle(t, shipment)}</td>
+                    <td>{shipment.receivedAt ? tashkentClock(Date.parse(shipment.receivedAt)) : '—'}</td>
                     <td className={styles.num}>{shipment.declared} · {shipment.accepted} · {shipment.defect}</td>
                     <td><StatusBadge family="shipment" code={shipment.status} /></td>
                     <td className={styles.num}><a className={styles.pdf} href={inboundActPath(shipment.id)} target="_blank" rel="noopener">PDF<Download aria-hidden /></a></td>

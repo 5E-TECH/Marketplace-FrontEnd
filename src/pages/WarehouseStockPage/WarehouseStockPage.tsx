@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useLotsQuery, useWarehouseStockQuery } from '../../features/inbound/api/inboundQueries';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
-import { tashkentClock } from '../../shared/lib/tashkentTime';
+import { tashkentClock, tashkentDate } from '../../shared/lib/tashkentTime';
 import { ExpiryTab } from './components/ExpiryTab';
 import { StockListTab } from './components/StockListTab';
 import styles from './WarehouseStockPage.module.css';
@@ -20,9 +20,11 @@ export default function WarehouseStockPage() {
   const [params, setParams] = useSearchParams();
   const tab: Tab = params.get('tab') === 'expiry' ? 'expiry' : 'list';
   const stock = useWarehouseStockQuery();
-  const lots = useLotsQuery({});
+  const lots = useLotsQuery();
   const active = tab === 'list' ? stock : lots;
-  const attention = (lots.data?.counts.BLOCKED ?? 0) + (lots.data?.counts.EXPIRED ?? 0) + (lots.data?.counts.APPROACHING ?? 0);
+  const today = tashkentDate();
+  // Diqqat talab qiladigan partiyalar: sotuvdan chiqarilgan va muddati o'tgan.
+  const attention = (lots.data ?? []).filter((lot) => lot.blocked || lot.expiryDate < today).length;
 
   return (
     <div className={styles.page} data-testid="stock-page" data-tab={tab}>
@@ -43,7 +45,7 @@ export default function WarehouseStockPage() {
           </div>
         )}
       </div>
-      {tab === 'list' ? <StockListTab query={stock} phone={phone} /> : <ExpiryTab phone={phone} onToList={() => setParams({}, { replace: true })} />}
+      {tab === 'list' ? <StockListTab query={stock} lots={lots.data ?? []} phone={phone} /> : <ExpiryTab query={lots} stock={stock.data ?? []} phone={phone} />}
     </div>
   );
 }

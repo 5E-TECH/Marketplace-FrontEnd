@@ -1,5 +1,4 @@
 import { http, HttpResponse } from 'msw';
-import type { components } from '../../generated/api-types';
 import type { CreativeType, ModerationSummary, OfferContent, ProductListTab } from '../../features/adminProducts/model/adminProductTypes';
 import { creativesOf } from '../catalog';
 import { db } from '../db';
@@ -7,20 +6,19 @@ import { categorySlug, SLUG_PATTERN } from '../../features/categories/lib/catego
 import { categoryTree, GLOBAL_POLICY, MOCK_SHOP, mockDelivery, mockPricing, TARIFF, type MockAdminProduct, type MockCategory } from '../fixtures/adminProducts';
 import { API, fail, ok, pageOf } from '../utils';
 import { currentMockUser } from './auth';
-import { warehouseStockRows } from './warehouse';
+import { inboundProductRecords, warehouseStockRows, wholesalerDtos } from './warehouse';
 
 /**
  * Admin: mahsulotlar, moderatsiya, offer sozlash (FE-12). Qoidalar backenddagidek (BE-07 `product.service.ts`,
  * BE-09 `pricing.service.ts`, BE-08 PR #127); taklif qilinganlari — docs/api-taklif/fe-12-admin-moderatsiya.md.
  */
-type Schemas = components['schemas'];
 
 const ADMIN_ROLES = ['ADMIN', 'SUPERADMIN'];
 
-const guard = (request: Request, cookies: Record<string, string>) => {
+const guard = (request: Request, cookies: Record<string, string>, roles = ADMIN_ROLES) => {
   const user = currentMockUser(request, cookies);
   if (!user) return { denied: fail(401, 'UNAUTHENTICATED', 'Sessiya tugagan'), actor: '' };
-  if (!ADMIN_ROLES.includes(user.role)) return { denied: fail(403, 'FORBIDDEN', 'Bu bo‘lim admin uchun'), actor: '' };
+  if (!roles.includes(user.role)) return { denied: fail(403, 'FORBIDDEN', 'Bu bo‘lim admin uchun'), actor: '' };
   return { denied: null, actor: user.name };
 };
 
@@ -185,15 +183,10 @@ export const adminHandlers = [
     return denied ?? ok([{ id: '1', ...TARIFF, effectiveFrom: '2026-11-01T00:00:00.000+05:00', isDeleted: false }]);
   }),
 
+  // Optoviklar (BE-07) — FE-16 fixture'idan; omborchi ham o'qiydi (taklif: arizasiz postavka, fe-16 §4).
   http.get(`${API}/admin/wholesalers`, ({ request, cookies }) => {
-    const { denied } = guard(request, cookies);
-    if (denied) return denied;
-    const wholesaler: Schemas['WholesalerDto'] = {
-      id: MOCK_SHOP.id, name: MOCK_SHOP.name, slug: 'namuna-savdo', status: 'ACTIVE', legalType: 'LEGAL_ENTITY', tin: '307418562', bankName: 'Asaka bank',
-      bankAccount: '20208000900123456001', bankMfo: '00873', contractNumber: 'K-2027/014', contractDate: '2027-01-05', phone: '+998712000002',
-      address: 'Toshkent sh., Chilonzor t., 7-mavze', description: null, ownerUserId: 'U-0002', createdAt: '2027-01-05T05:00:00.000Z',
-    };
-    return ok(pageOf([wholesaler], new URL(request.url)));
+    const { denied } = guard(request, cookies, [...ADMIN_ROLES, 'WAREHOUSE']);
+    return denied ?? ok(pageOf(wholesalerDtos(), new URL(request.url)));
   }),
 
   http.get(`${API}/admin/moderation/summary`, ({ request, cookies }) => {
@@ -202,9 +195,12 @@ export const adminHandlers = [
   }),
 
   http.get(`${API}/admin/products`, ({ request, cookies }) => {
-    const { denied } = guard(request, cookies);
+    const { denied } = guard(request, cookies, [...ADMIN_ROLES, 'WAREHOUSE']);
     if (denied) return denied;
     const url = new URL(request.url);
+    // Boshqa optovik (FE-16 fixture'i: Namuna Farm, Barakat) — o'z SKU lari.
+    const shopId = url.searchParams.get('shopId');
+    if (shopId && shopId !== MOCK_SHOP.id) return ok(pageOf(inboundProductRecords(shopId), url));
     const status = url.searchParams.get('status');
     const blocked = url.searchParams.get('blocked');
     const search = url.searchParams.get('search')?.trim().toLocaleLowerCase() ?? '';
@@ -493,7 +489,7 @@ export const adminHandlers = [
     const url = new URL(request.url);
     const user = currentMockUser(request, cookies);
     if (params.kind === 'stock' && !url.searchParams.get('productId') && user && ['ADMIN', 'SUPERADMIN', 'WAREHOUSE'].includes(user.role)) {
-      return ok({ ...pageOf(warehouseStockRows(), url, 100), warnings: [], searchTruncated: false });
+      return ok({ ...pageOf(warehouseStockRows(url.searchParams.get('shopId')), url, 100), warnings: [], searchTruncated: false });
     }
     const { denied } = guard(request, cookies);
     if (denied) return denied;

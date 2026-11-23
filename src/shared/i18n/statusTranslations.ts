@@ -52,7 +52,6 @@ const uz = {
   'status.shipment.IN_TRANSIT': 'Yo‘lda',
   'status.shipment.RECEIVED': 'Qabul qilindi',
   'status.shipment.DISCREPANCY': 'Farq bor',
-  'status.shipment.CANCELLED': 'Bekor qilindi',
 } as const;
 
 export type StatusTranslationKey = keyof typeof uz;
@@ -108,7 +107,6 @@ const ru: Record<StatusTranslationKey, string> = {
   'status.shipment.IN_TRANSIT': 'В пути',
   'status.shipment.RECEIVED': 'Принята',
   'status.shipment.DISCREPANCY': 'Есть расхождение',
-  'status.shipment.CANCELLED': 'Отменена',
 };
 
 const en: Record<StatusTranslationKey, string> = {
@@ -162,7 +160,6 @@ const en: Record<StatusTranslationKey, string> = {
   'status.shipment.IN_TRANSIT': 'In transit',
   'status.shipment.RECEIVED': 'Received',
   'status.shipment.DISCREPANCY': 'Discrepancy',
-  'status.shipment.CANCELLED': 'Cancelled',
 };
 
 export const statusTranslations = { uz, ru, en } as const;

@@ -1,6 +1,7 @@
-import { CircleMinus, Clock, FilePlus, RotateCcw, TriangleAlert } from 'lucide-react';
+import { CircleMinus, FilePlus, RotateCcw, TriangleAlert } from 'lucide-react';
+import { shipmentTitle } from '../../../features/inbound/lib/shipmentLabels';
 import type { InboundShipment } from '../../../features/inbound/model/inboundTypes';
-import type { JournalEntry } from '../../../features/inbound/model/useReceiving';
+import type { JournalEntry } from '../../../features/inbound/model/receivingDraft';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { addDays, tashkentClock } from '../../../shared/lib/tashkentTime';
 import { isoToDots } from '../../../shared/ui/DateInput/dateInput';
@@ -13,56 +14,39 @@ interface JournalProps {
   shipment: InboundShipment;
   entries: readonly JournalEntry[];
   total: number;
-  /** Navbat yuborilmayapti — «Navbatda» belgisi (umumiy-aloqa-uzildi 4). */
-  stalled: boolean;
   canUndo: boolean;
   onUndo: () => void;
 }
 
 /** «Skan jurnali» (ombor-qabul): oxirgi skanlar yangisi tepada, natijasi bilan; oxirgi hisoblangan skanni bekor qilish. */
-export function ScanJournal({ shipment, entries, total, stalled, canUndo, onUndo }: JournalProps) {
+export function ScanJournal({ shipment, entries, total, canUndo, onUndo }: JournalProps) {
   const { t } = useTranslation();
-  const product = shipment.sku.name;
   const row = (entry: JournalEntry) => {
-    if (entry.source === 'duplicate') {
-      return {
-        key: entry.key, at: entry.at,
-        title: <><CircleMinus aria-hidden />{t('inb.journal.duplicate')}</>,
-        sub: t('inb.journal.duplicateText', { code: entry.barcode }),
-        result: <span className={styles.journalResult}>—</span>,
-      };
+    switch (entry.kind) {
+      case 'DUPLICATE':
+        return {
+          title: <><CircleMinus aria-hidden />{t('inb.journal.duplicate')}</>,
+          sub: t('inb.journal.duplicateText', { code: entry.barcode }),
+          result: <span className={styles.journalResult}>—</span>,
+        };
+      case 'UNKNOWN':
+      case 'FOREIGN':
+        return {
+          title: <><TriangleAlert aria-hidden data-tone="warning" />{t(entry.kind === 'UNKNOWN' ? 'inb.journal.unknown' : 'inb.journal.foreign')}</>,
+          sub: entry.kind === 'UNKNOWN'
+            ? t('inb.journal.unknownText', { code: entry.barcode })
+            : t('inb.journal.foreignText', { code: entry.barcode, product: entry.productName ?? '', number: entry.otherShipment ?? '' }),
+          result: <span className={styles.journalResult} data-tone="warning">{t('inb.journal.notWritten')}</span>,
+        };
+      default: {
+        const accepted = entry.kind === 'ACCEPTED';
+        return {
+          title: <>{entry.productName}</>,
+          sub: accepted ? entry.barcode : t('inb.journal.defectMode', { code: entry.barcode }),
+          result: <span className={styles.journalResult} data-tone={accepted ? 'success' : 'danger'}>{t(accepted ? 'inb.journal.accepted' : 'inb.journal.defect', { count: entry.total ?? 0 })}</span>,
+        };
+      }
     }
-    if (entry.source === 'queued') {
-      const { scan, kind } = entry;
-      const counted = kind === 'COUNT';
-      const projected = counted ? t(scan.mode === 'ACCEPT' ? 'inb.journal.accepted' : 'inb.journal.defect', { count: entry.total ?? 0 }) : t('inb.journal.notWritten');
-      return {
-        key: scan.key, at: scan.at,
-        title: counted ? <>{product}</> : <><TriangleAlert aria-hidden data-tone="warning" />{t(kind === 'UNKNOWN' ? 'inb.journal.unknown' : 'inb.journal.foreign')}</>,
-        sub: counted
-          ? scan.mode === 'DEFECT' ? t('inb.journal.defectMode', { code: scan.barcode }) : scan.barcode
-          : stalled ? t('inb.journal.queuedUnknown', { code: scan.barcode }) : kind === 'UNKNOWN' ? t('inb.journal.unknownText', { code: scan.barcode }) : t('inb.journal.foreignText', { code: scan.barcode, product: entry.productName ?? '' }),
-        result: stalled
-          ? <span className={styles.journalResult} data-tone="warning" title={counted ? t('inb.journal.queuedTitle', { result: projected }) : t('inb.journal.queuedCheck')}><Clock aria-hidden />{t('inb.journal.queued')}</span>
-          : <span className={styles.journalResult} data-tone={counted ? (scan.mode === 'ACCEPT' ? 'success' : 'danger') : 'warning'}>{projected}</span>,
-      };
-    }
-    const { scan } = entry;
-    if (scan.result === 'UNKNOWN' || scan.result === 'FOREIGN') {
-      return {
-        key: scan.id, at: scan.at,
-        title: <><TriangleAlert aria-hidden data-tone="warning" />{t(scan.result === 'UNKNOWN' ? 'inb.journal.unknown' : 'inb.journal.foreign')}</>,
-        sub: scan.result === 'UNKNOWN' ? t('inb.journal.unknownText', { code: scan.barcode }) : t('inb.journal.foreignText', { code: scan.barcode, product: scan.productName ?? '' }),
-        result: <span className={styles.journalResult} data-tone="warning">{t('inb.journal.notWritten')}</span>,
-      };
-    }
-    const accepted = scan.result === 'ACCEPTED';
-    return {
-      key: scan.id, at: scan.at,
-      title: <>{product}</>,
-      sub: accepted ? scan.barcode : t('inb.journal.defectMode', { code: scan.barcode }),
-      result: <span className={styles.journalResult} data-tone={accepted ? 'success' : 'danger'}>{t(accepted ? 'inb.journal.accepted' : 'inb.journal.defect', { count: scan.total ?? 0 })}</span>,
-    };
   };
 
   return (
@@ -78,8 +62,8 @@ export function ScanJournal({ shipment, entries, total, stalled, canUndo, onUndo
           {entries.slice(0, 5).map((entry) => {
             const item = row(entry);
             return (
-              <li key={item.key}>
-                <span className={styles.journalTime}>{time(item.at)}</span>
+              <li key={entry.key}>
+                <span className={styles.journalTime}>{time(entry.at)}</span>
                 <span className={styles.journalBody}>
                   <span className={styles.journalTitle}>{item.title}</span>
                   <span className={styles.journalSub}>{item.sub}</span>
@@ -101,17 +85,19 @@ interface QueueProps {
   current: InboundShipment | null;
   awaiting: readonly InboundShipment[];
   done: readonly InboundShipment[];
+  /** Shu qurilmada qabuli boshlangan postavkalar. */
+  started: ReadonlySet<string>;
   today: string;
   onOpen: (shipment: InboundShipment) => void;
   onUndeclared: () => void;
 }
 
 /** O'ng ustun «Kutilayotgan postavkalar» (ombor-qabul): joriy postavka belgilangan, bugun qabul qilinganlar, arizasiz postavka. */
-export function QueueCard({ current, awaiting, done, today, onOpen, onUndeclared }: QueueProps) {
+export function QueueCard({ current, awaiting, done, started, today, onOpen, onUndeclared }: QueueProps) {
   const { t } = useTranslation();
   const quantity = awaiting.reduce((sum, item) => sum + item.declared, 0);
   const sub = (shipment: InboundShipment) => {
-    if (shipment.receivingStartedAt) return t('inb.queue.inProgress', { count: shipment.declared });
+    if (started.has(shipment.id)) return t('inb.queue.inProgress', { count: shipment.declared });
     if (shipment.expectedAt === today) return t('inb.queue.today', { count: shipment.declared });
     if (shipment.expectedAt === addDays(today, 1)) return t('inb.queue.tomorrow', { count: shipment.declared, date: isoToDots(shipment.expectedAt) });
     return t('inb.queue.date', { count: shipment.declared, date: isoToDots(shipment.expectedAt) });
@@ -123,7 +109,7 @@ export function QueueCard({ current, awaiting, done, today, onOpen, onUndeclared
         className={styles.queueItem}
         aria-current={isCurrent || undefined}
         aria-label={isCurrent ? undefined : t('inb.queue.open', { number: shipment.number })}
-        disabled={isCurrent || Boolean(shipment.completedAt)}
+        disabled={isCurrent || Boolean(shipment.receivedAt)}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => onOpen(shipment)}
       >
@@ -131,7 +117,7 @@ export function QueueCard({ current, awaiting, done, today, onOpen, onUndeclared
           <span className={styles.queueNumber}>{shipment.number}</span>
           <StatusBadge family="shipment" code={shipment.status} />
         </span>
-        <span className={styles.queueName}>{shipment.sku.name}</span>
+        <span className={styles.queueName}>{shipmentTitle(t, shipment)}</span>
         <span className={styles.queueSub}>{subline}</span>
       </button>
     </li>
@@ -152,7 +138,7 @@ export function QueueCard({ current, awaiting, done, today, onOpen, onUndeclared
           <p className={styles.queueCaption}>{t('inb.queue.doneTitle')}</p>
           <ul className={styles.queue} aria-label={t('inb.done.title')}>
             {done.map((shipment) => item(shipment, t(shipment.status === 'RECEIVED' ? 'inb.queue.doneExact' : 'inb.queue.doneDiff', {
-              accepted: shipment.accepted, declared: shipment.declared, time: shipment.completedAt ? time(shipment.completedAt) : '—',
+              accepted: shipment.accepted, declared: shipment.declared, time: shipment.receivedAt ? time(shipment.receivedAt) : '—',
             })))}
           </ul>
         </>
@@ -161,4 +147,3 @@ export function QueueCard({ current, awaiting, done, today, onOpen, onUndeclared
     </section>
   );
 }
-

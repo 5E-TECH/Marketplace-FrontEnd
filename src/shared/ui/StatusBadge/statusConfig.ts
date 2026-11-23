@@ -96,7 +96,6 @@ export const STATUS_FAMILIES = {
     IN_TRANSIT: { tone: 'warning' },
     RECEIVED: { tone: 'success' },
     DISCREPANCY: { tone: 'danger' },
-    CANCELLED: { tone: 'danger' },
   },
 } as const satisfies Record<string, Record<string, StatusEntry>>;
 

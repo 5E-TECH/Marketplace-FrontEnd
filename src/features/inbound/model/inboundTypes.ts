@@ -1,61 +1,47 @@
 /**
- * Postavka (inbound_shipment) va qabul — FE-16. Backend BE-17 da quriladi; shakl — taklif
- * (docs/api-taklif/fe-16-ombor.md). Alohida faylda: mock (`src/mocks`) ham ishlatadi, u esa
- * `httpClient` ni import qilmasligi kerak.
- *
- * Postavka — bitta optovikning bitta mahsuloti (BE-17: «optovik, mahsulot, son, kelish sanasi»):
- * formada bir nechta qator bo'lsa, har qator alohida postavka bo'ladi.
+ * Postavka (inbound_shipment) va qabul — FE-16. Backend: BE-17 (PR #132, `admin/inventory/shipments`) —
+ * bitta optovik, bir nechta mahsulot qatori; qabul bitta so'rov bilan (har qator: kelgan, brak, partiya, muddat,
+ * yacheyka). Backendda hali yo'q maydonlar — taklif (docs/api-taklif/fe-16-ombor.md), kelmasa ham UI ishlaydi.
+ * Alohida faylda: mock (`src/mocks`) ham ishlatadi, u esa `httpClient` ni import qilmasligi kerak.
  */
 
-/** BE-17 holatlari + bekor qilingan (admin-postavka «Bekor qilindi»). */
-export type ShipmentStatus = 'DECLARED' | 'IN_TRANSIT' | 'RECEIVED' | 'DISCREPANCY' | 'CANCELLED';
-export const SHIPMENT_STATUSES: readonly ShipmentStatus[] = ['DECLARED', 'IN_TRANSIT', 'RECEIVED', 'DISCREPANCY', 'CANCELLED'];
+/** BE-17 holatlari. Bekor qilish backendda yo'q. */
+export type ShipmentStatus = 'DECLARED' | 'IN_TRANSIT' | 'RECEIVED' | 'DISCREPANCY';
+export const SHIPMENT_STATUSES: readonly ShipmentStatus[] = ['DECLARED', 'IN_TRANSIT', 'RECEIVED', 'DISCREPANCY'];
 /** Omborchi kutayotganlar: e'lon qilingan va yo'ldagi. */
 export const AWAITING_STATUSES: readonly ShipmentStatus[] = ['DECLARED', 'IN_TRANSIT'];
-/** Qabul yakunlangan: akt bor. */
+/** Qabul qilingan: akt bor. */
 export const COMPLETED_STATUSES: readonly ShipmentStatus[] = ['RECEIVED', 'DISCREPANCY'];
 
-/** «Kiritdi»: optovik o'zi (kabinet, M2) yoki xodim optovik nomidan. */
+/** «Kiritdi»: optovik o'zi (kabinet — BE-30, M2) yoki xodim optovik nomidan. */
 export type ShipmentAuthorRole = 'WHOLESALER' | 'ADMIN' | 'SUPERADMIN' | 'WAREHOUSE';
 
-export interface ShipmentActor {
-  name: string;
-  role: ShipmentAuthorRole;
-}
-
-/** Optovik (komitent). */
-export interface ShipmentParty {
+/** Xodim: backend faqat ID beradi; ism va rol — taklif (`declaredByName`, `declaredByRole`, `receivedByName`). */
+export interface ShipmentPerson {
   id: string;
-  name: string;
-  /** STIR. */
-  tin: string | null;
+  name: string | null;
+  role: ShipmentAuthorRole | null;
 }
 
-/** Mahsulotning yagona SKU si (CPA mahsulotida bitta variant — BE-07, K4). */
-export interface InboundSku {
+/** Postavka qatori (`InboundShipmentItemDto`): CPA mahsulotining yagona SKU si. */
+export interface ShipmentItem {
+  id: string;
   productId: string;
+  productName: string;
   variantId: string;
-  name: string;
+  sku: string;
   barcode: string | null;
-  /** Kategoriyadan meros: BAD, kosmetika, oziq-ovqat — partiya va muddat so'raladi (OMB-3). */
-  expiryTracked: boolean;
-  /** «kuzatilmaydi — elektronika» dagi kategoriya. */
-  categoryName: string | null;
-  /** SKU yacheykasi: «B-02-1». */
+  declared: number;
+  /** Qabuldan keyin: yaroqli (kelgan − brak) va brak; qabulgacha 0. */
+  accepted: number;
+  defect: number;
+  /** Partiya va yaroqlilik muddati (`YYYY-MM-DD`) — kiritilgan bo'lsa. */
+  batch: string | null;
+  expiryDate: string | null;
+  /** Yacheyka — qabulda yoziladi. */
   cell: string | null;
-}
-
-/** Postavka ichidagi partiya (stock_lot): muddatsiz tovarda bitta — postavka raqami bilan. */
-export interface ShipmentLot {
-  id: string;
-  /** «P-0120-1»; muddatsizda postavka raqami. */
-  number: string;
-  /** `YYYY-MM-DD`; muddat kuzatilmasa `null`. */
-  expiresAt: string | null;
-  /** Shu partiyaga qabul qilingan (yaroqli) son. */
-  quantity: number;
-  /** Server qoidasi: muddatiga 60 kun va undan ko'p — «mavjud»ga qo'shiladi. */
-  sellable: boolean;
+  /** Taklif: muddat so'raladi (BAD, kosmetika, oziq-ovqat — kategoriyadan); kelmasa — ixtiyoriy. */
+  expiryTracked: boolean;
 }
 
 export interface InboundShipment {
@@ -63,31 +49,22 @@ export interface InboundShipment {
   /** «P-0112» — akt raqami ham shu. */
   number: string;
   status: ShipmentStatus;
-  wholesaler: ShipmentParty;
-  sku: InboundSku;
-  /** E'lon qilingan son (ariza). */
-  declared: number;
-  /** Qabul qilingan — sotuvga yaroqli. */
-  accepted: number;
-  /** Brak — qoldiqqa kirmaydi, farq aktiga yoziladi. */
-  defect: number;
+  /** Optovik nomi — taklif (`wholesalerName`); backend faqat ID beradi. */
+  wholesaler: { id: string; name: string | null };
   /** Kelish sanasi, `YYYY-MM-DD` (Toshkent). */
   expectedAt: string;
   note: string | null;
-  /** Yuk xati raqami (arizasiz postavka). */
-  waybillNumber: string | null;
   createdAt: string;
-  createdBy: ShipmentActor;
-  inTransitAt: string | null;
-  /** Qabul boshlangan — «hozir qabulda» / «keldi, hozir sanalmoqda». */
-  receivingStartedAt: string | null;
-  completedAt: string | null;
-  completedBy: ShipmentActor | null;
+  declaredBy: ShipmentPerson;
+  receivedBy: ShipmentPerson | null;
+  receivedAt: string | null;
   /** Omborchi izohi — aktga yoziladi. */
-  actNote: string | null;
-  cancelledAt: string | null;
-  cancelReason: string | null;
-  lots: ShipmentLot[];
+  receiveComment: string | null;
+  items: ShipmentItem[];
+  /** Qatorlar yig'indisi: e'lon, qabul (yaroqli), brak. */
+  declared: number;
+  accepted: number;
+  defect: number;
 }
 
 export interface ShipmentPage {
@@ -95,169 +72,115 @@ export interface ShipmentPage {
   total: number;
   page: number;
   limit: number;
-  totalPages: number;
-  /** Tablar soni — filtrlarsiz (holat bo'yicha) va `ALL`. */
-  counts: Record<ShipmentStatus | 'ALL', number>;
 }
 
+/** Backend filtrlari: bitta holat, optovik, sahifa (yangisi tepada). */
 export interface ShipmentListParams {
   page: number;
   limit: number;
-  /** Bir yoki bir nechta holat (`DECLARED,IN_TRANSIT`). */
-  status?: readonly ShipmentStatus[];
+  status?: ShipmentStatus;
   wholesalerId?: string;
-  authorRole?: 'WHOLESALER' | 'STAFF';
-  expectedFrom?: string;
-  expectedTo?: string;
-  /** Yakunlangan sana (Toshkent) — omborchining «Bugun qabul qilingan». */
-  completedOn?: string;
-  search?: string;
-  /** Sukut `-createdAt` (oxirgi ariza tepada); kutilayotganlar — `expectedAt`. */
-  sort?: '-createdAt' | 'expectedAt' | '-completedAt';
 }
 
-export interface DeclareShipmentsPayload {
+export interface DeclarePayload {
   wholesalerId: string;
   expectedAt: string;
   note?: string;
-  waybillNumber?: string;
-  items: { variantId: string; quantity: number }[];
-  idempotencyKey: string;
+  items: { productId: string; quantity: number }[];
+}
+
+export interface ReceiveLine {
+  itemId: string;
+  /** Kelgan — brak bilan birga. */
+  receivedQty: number;
+  defectiveQty: number;
+  batch?: string;
+  expiryDate?: string;
+  cell: string;
+}
+
+export interface ReceivePayload {
+  items: ReceiveLine[];
+  comment?: string;
 }
 
 /** Skan rejimi: «Qabul» yoki «Brak» (brak tanlansa — faqat keyingi bitta skan). */
 export type ScanMode = 'ACCEPT' | 'DEFECT';
 
-/**
- * Server natijasi. Takroriy skan serverga bormaydi — brauzerda tushib qoladi (TC3).
- * `UNKNOWN` — kod hech bir SKUda yo'q; `FOREIGN` — boshqa mahsulotniki, bu postavkada yo'q.
- */
-export type ScanResult = 'ACCEPTED' | 'DEFECT' | 'UNKNOWN' | 'FOREIGN';
-
-export interface ShipmentScan {
+/** Optovik (`WholesalerDto`): shartnoma bo'lmasa ariza kiritib bo'lmaydi (OPT-1). */
+export interface InboundWholesaler {
   id: string;
-  at: string;
-  barcode: string;
-  mode: ScanMode;
-  result: ScanResult;
-  /** Hisoblangandan keyingi son: «Qabul 98», «Brak 2». */
-  total: number | null;
-  /** FOREIGN: kod qaysi mahsulotniki. */
-  productName: string | null;
-  lotNumber: string | null;
+  name: string;
+  /** STIR. */
+  tin: string | null;
+  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED';
+  contractNumber: string | null;
+  contractDate: string | null;
+  contractSigned: boolean;
+  /** Kabinet egasi bor — optovik arizani o'zi ham beradi (FE-23, M2). */
+  hasCabinet: boolean;
 }
 
-/** Jurnal: oxirgilari (yangisi tepada) va jami skan soni. */
-export interface ShipmentScanPage {
-  items: ShipmentScan[];
-  total: number;
-}
-
-export interface ScanPayload {
-  barcode: string;
-  mode: ScanMode;
-  lotId?: string;
-  scannedAt: string;
-  idempotencyKey: string;
-}
-
-export interface ScanResponse {
-  scan: ShipmentScan;
-  shipment: InboundShipment;
-}
-
-export interface LotPayload {
-  number: string;
-  expiresAt: string;
-}
-
-export interface CompletePayload {
-  note?: string;
-  /** Kam kelgan (sanaldi < e'lon) bo'lsa — ikkinchi qadam «Kam deb yakunlash». */
-  confirmShortage?: boolean;
-}
-
-/** Arizaga tanlanadigan mahsulot (e'lon formasi, arizasiz postavka, skan bo'yicha topish). */
-export interface InboundProductOption extends InboundSku {
+/** E'lon formasidagi mahsulot: `GET /admin/products?shopId=` + qoldiq (`GET /admin/inventory/stock?shopId=`). */
+export interface InboundProductOption {
+  productId: string;
+  name: string;
   status: 'DRAFT' | 'PENDING_REVIEW' | 'ACTIVE' | 'REJECTED' | 'ARCHIVED' | 'OUT_OF_STOCK';
-  /** Moderatsiyada: «Ko'rib chiqilmoqda (13.01.2027 dan)». */
-  reviewSince: string | null;
+  /** BE-17: postavka faqat CPA mahsulotiga. */
+  cpaEnabled: boolean;
+  /** BAD yoki kategoriya bo'yicha muddat kuzatiladi (taklif `expiryTracked`). */
+  expiryTracked: boolean;
   onHand: number;
   available: number;
 }
 
-export interface InboundWholesaler extends ShipmentParty {
-  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED';
-  /** Shartnoma raqami va sanasi bor — yo'q bo'lsa ariza kiritib bo'lmaydi (OPT-1). */
-  contractSigned: boolean;
-  /** Komissiya shartnomasi (BE-07 `contractNumber`, `contractDate`) — aktdagi «Asos». */
-  contractNumber: string | null;
-  contractDate: string | null;
-  /** Optovik kabineti (FE-23, M2): `null` — hali yo'q. */
-  cabinet: { lastSeenAt: string | null } | null;
-  onHand: number;
-  awaiting: { shipments: number; quantity: number };
-  products: InboundProductOption[];
-}
-
 /**
- * Ombordagi partiya (stock_lot, OMB-3) — «Qoldiq → Muddat» (ombor-muddat). Holatni server hisoblaydi:
- * sotuvda, yaqinlashmoqda (xabar oldidan N kun — TZ'da yo'q), sotuvdan chiqarilgan (< 60 kun), muddati o'tgan,
- * optovikka qaytarilmoqda, hisobdan chiqarilgan.
+ * Ombordagi partiya (`StockLotDto`, OMB-3). Holatni brauzer hisoblaydi: muddati o'tgan, sotuvdan chiqarilgan
+ * (60 kundan kam — `blocked`), sotuvda.
  */
-export type LotState = 'ON_SALE' | 'APPROACHING' | 'BLOCKED' | 'EXPIRED' | 'RETURNING' | 'WRITTEN_OFF';
-export const LOT_FILTERS = ['APPROACHING', 'BLOCKED', 'EXPIRED'] as const;
+export type LotState = 'ON_SALE' | 'BLOCKED' | 'EXPIRED';
+export const LOT_FILTERS = ['BLOCKED', 'EXPIRED'] as const;
 export type LotFilter = (typeof LOT_FILTERS)[number];
 
 export interface StockLot {
   id: string;
-  number: string;
-  state: LotState;
-  quantity: number;
+  variantId: string;
+  sku: string;
+  productName: string;
+  batch: string | null;
   /** `YYYY-MM-DD`. */
-  expiresAt: string;
-  sku: InboundSku;
-  wholesaler: ShipmentParty;
-  /** Shu yacheykada turgan boshqa partiya — shtrix-kod bir xil, yig'ishda skaner farqlamaydi. */
-  sharesCellWith: string | null;
-  /** Optovik va adminga xabar ketgan vaqt. */
-  notifiedAt: string | null;
-}
-
-export interface LotsOverview {
-  items: StockLot[];
-  counts: Record<'ALL' | LotFilter, number>;
-  /** 60 kun (OMB-3); xabar oldidan kunlar — TZ'da yo'q, `null`. */
-  rules: { minShelfDays: number; notifyDays: number | null };
-  /** Muddati kuzatilmaydigan SKU lar (elektronika, uy-ro'zg'or…). */
-  untracked: { variantId: string; name: string }[];
-}
-
-export interface LotListParams {
-  state?: LotFilter;
-  wholesalerId?: string;
-  search?: string;
-}
-
-export interface WriteOffPayload {
+  expiryDate: string;
+  /** Muddat − 60 kun: shundan keyin sotilmaydi. */
+  sellableUntil: string;
   quantity: number;
-  reason: 'EXPIRED' | 'DAMAGED' | 'OTHER';
-  note: string;
+  blocked: boolean;
 }
 
-/** «Qoldiq → Ro'yxat» qatori: `GET /admin/inventory/stock` (BE-16) + taklif maydonlari (docs/api-taklif/fe-16-ombor.md §5). */
+/** «Hisobdan chiqarish» — `POST /admin/inventory/adjust` (manfiy, `lotId` bilan). */
+export interface WriteOffPayload {
+  variantId: string;
+  lotId: string;
+  quantity: number;
+  reason: string;
+}
+
+/** «Qoldiq → Ro'yxat» qatori: `GET /admin/inventory/stock` (BE-16, BE-17) + taklif maydonlari (§5). */
 export interface WarehouseStockRow {
   variantId: string;
+  productId: string | null;
   name: string;
+  /** Optovik (`shopId`) va nomi — taklif (`shopName`). */
+  wholesalerId: string | null;
   wholesalerName: string | null;
   barcode: string | null;
   cell: string | null;
   onHand: number;
   reserved: number;
   available: number;
+  /** Sotuvdan chiqqan partiyalardagi son — «mavjud»ga kirmaydi (BE-17). */
+  blocked: number;
+  /** Taklif: brak, bugungi va ertangi to'lqindagi band (FE-17). */
   defect: number;
-  /** Bugungi va ertangi to'lqindagi band (FE-17) — «Band qayerda». */
   reservedToday: number;
   reservedTomorrow: number;
-  lots: { number: string; expiresAt: string | null; sellable: boolean }[];
 }

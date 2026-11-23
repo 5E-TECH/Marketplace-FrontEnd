@@ -1,215 +1,150 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getApiErrorMessage, isConnectionError } from '../../../shared/api/apiError';
 import { createIdempotencyKey } from '../../../shared/api/requestOptions';
-import { useOnlineStatus } from '../../../shared/lib/useOnlineStatus';
-import { reportScanQueue } from '../../warehouse/lib/scanQueueStatus';
-import { postScan } from '../api/inboundApi';
-import { inboundKeys, useShipmentScansQuery } from '../api/inboundQueries';
 import { isDuplicateRead, type ScanRead } from '../lib/scanRules';
-import type { InboundProductOption, InboundShipment, ScanMode, ShipmentScan, ShipmentScanPage } from './inboundTypes';
+import type { InboundShipment, ReceivePayload, ScanMode, ShipmentItem } from './inboundTypes';
+import { emptyDraft, loadDraft, saveDraft, type DraftLot, type JournalEntry, type JournalKind, type ReceivingDraft } from './receivingDraft';
 
-/** Navbatdagi skan: serverga hali yetmagan (yuborilmoqda yoki aloqa yo'q). Brauzerda saqlanadi. */
-export interface QueuedScan {
-  key: string;
-  barcode: string;
-  mode: ScanMode;
-  lotId?: string;
-  at: string;
-}
+export type ScanProblem = { code: string; kind: 'UNKNOWN' | 'FOREIGN'; productName: string | null; otherShipment: string | null };
 
-/** Jurnal qatori: serverdagi skan, navbatdagi yoki brauzerda tushib qolgan takror. */
-export type JournalEntry =
-  | { source: 'server'; scan: ShipmentScan }
-  | { source: 'queued'; scan: QueuedScan; kind: 'COUNT' | 'UNKNOWN' | 'FOREIGN'; total: number | null; productName: string | null }
-  | { source: 'duplicate'; key: string; at: string; barcode: string };
-
-export type ScanProblem = { code: string; kind: 'UNKNOWN' | 'FOREIGN'; productName: string | null };
-
-const RETRY_MS = 4_000;
-const storageKey = (shipmentId: string) => `elchi.inbound.queue.${shipmentId}`;
-
-function loadQueue(shipmentId: string): QueuedScan[] {
-  try {
-    const raw = window.localStorage.getItem(storageKey(shipmentId));
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as QueuedScan[]).filter((item) => item && typeof item.key === 'string' && typeof item.barcode === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveQueue(shipmentId: string, queue: readonly QueuedScan[]) {
-  try {
-    if (queue.length) window.localStorage.setItem(storageKey(shipmentId), JSON.stringify(queue));
-    else window.localStorage.removeItem(storageKey(shipmentId));
-  } catch {
-    // Saqlab bo'lmasa navbat faqat xotirada qoladi — sahifa yopilmasa yetarli.
-  }
+export interface ItemCounts {
+  declared: number;
+  accepted: number;
+  defect: number;
 }
 
 interface ReceivingOptions {
-  /** Hamma SKU lar — kod boshqa mahsulotniki ekanini brauzerda bilish uchun (javobni kutmasdan). */
-  catalog: readonly InboundProductOption[];
-  /** Muddatli tovarda partiya yo'q — oyna ochiladi, skan partiya saqlangach yuboriladi. */
-  onLotRequired: (code: string) => void;
-  onError: (message: string) => void;
+  /** Boshqa kutilayotgan postavkalar — kod boshqa postavkaniki ekanini aytish uchun. */
+  others: readonly InboundShipment[];
+  /** Muddatli tovarda partiya yo'q — oyna ochiladi, kod partiya saqlangach hisoblanadi. */
+  onLotRequired: (item: ShipmentItem, code: string | null) => void;
 }
 
+const entry = (kind: JournalKind, barcode: string, extra: Partial<JournalEntry> = {}): JournalEntry => ({
+  key: createIdempotencyKey(), at: new Date().toISOString(), barcode, kind, itemId: null, total: null, productName: null, otherShipment: null, ...extra,
+});
+
+const log = (current: ReceivingDraft, item: JournalEntry): ReceivingDraft => ({ ...current, journal: [item, ...current.journal], journalTotal: current.journalTotal + 1 });
+
 /**
- * Qabul jarayoni (ombor-qabul; FE-16 TC2, TC3; umumiy-aloqa-uzildi «Ombor — skan navbati»):
+ * Qabul jarayoni (ombor-qabul; FE-16 TC2, TC3). Sanoq brauzerda (BE-17 da skan API yo'q, qabul — bitta so'rov):
  * - takror o'qish (1 s ichida bir xil kod) tashlanadi va jurnalga «Takroriy skan» bo'lib yoziladi;
- * - kod mahsulotniki bo'lmasa — maydon qizil, ogohlantirish, jurnalda «Yozilmadi» (serverga ham yoziladi);
- * - skanlar navbat orqali ketma-ket yuboriladi (idempotencyKey): aloqa uzilsa sanoq brauzerda davom etadi,
- *   navbat `localStorage` da saqlanadi va aloqa tiklanganda o'zi yuboriladi;
- * - «Brak» faqat keyingi bitta skan uchun, keyin «Qabul»ga qaytadi.
+ * - kod postavkada yo'q — maydon qizil, ogohlantirish, jurnalda «Yozilmadi»; boshqa postavkaniki bo'lsa — aytiladi;
+ * - «Brak» faqat keyingi bitta skan uchun, keyin «Qabul»ga qaytadi;
+ * - hammasi qoralamada (`receivingDraft`): aloqa uzilsa ham sanoq davom etadi, yakunlashda yuboriladi.
  */
-export function useReceiving(shipment: InboundShipment, { catalog, onLotRequired, onError }: ReceivingOptions) {
-  const client = useQueryClient();
-  const { online } = useOnlineStatus();
-  const scansQuery = useShipmentScansQuery(shipment.id);
+export function useReceiving(shipment: InboundShipment, { others, onLotRequired }: ReceivingOptions) {
+  const [draft, setDraft] = useState<ReceivingDraft>(() => loadDraft(shipment.id) ?? emptyDraft(shipment.id));
   const [mode, setMode] = useState<ScanMode>('ACCEPT');
-  const [queue, setQueue] = useState<QueuedScan[]>(() => loadQueue(shipment.id));
-  const [duplicates, setDuplicates] = useState<{ key: string; at: string; barcode: string }[]>([]);
   const [problem, setProblem] = useState<ScanProblem | null>(null);
   const [duplicateNotice, setDuplicateNotice] = useState<string | null>(null);
-  const [stalled, setStalled] = useState(false);
-  const [lotId, setLotId] = useState<string | undefined>(() => shipment.lots.filter((lot) => lot.expiresAt).at(-1)?.id);
   const lastRead = useRef<ScanRead | null>(null);
-  const sending = useRef(false);
-  const [retryTick, setRetryTick] = useState(0);
-
-  useEffect(() => saveQueue(shipment.id, queue), [shipment.id, queue]);
-
-  // Karkas banneri: navbat yuborilmayapti (aloqa yo'q yoki server javob bermayapti).
-  const queueStalled = queue.length > 0 && (stalled || !online);
-  useEffect(() => reportScanQueue(queue.length, queueStalled), [queue.length, queueStalled]);
-  useEffect(() => () => reportScanQueue(0, false), []);
-
-  const productOf = useCallback((code: string) => catalog.find((item) => item.barcode === code) ?? null, [catalog]);
-  const ownCode = shipment.sku.barcode;
-
-  const callbacks = useRef({ onError, onLotRequired });
+  const lotRequired = useRef(onLotRequired);
   useEffect(() => {
-    callbacks.current = { onError, onLotRequired };
+    lotRequired.current = onLotRequired;
   });
 
-  /** Serverga ketma-ket: bitta so'rov bir vaqtda, muvaffaqiyatdan keyin keyingisi; aloqa tiklanganda (`online`) davom etadi. */
-  useEffect(() => {
-    const head = queue[0];
-    if (!head || sending.current || !online) return;
-    sending.current = true;
-    postScan({ id: shipment.id, barcode: head.barcode, mode: head.mode, lotId: head.lotId, scannedAt: head.at, idempotencyKey: head.key })
-      .then(({ scan, shipment: next }) => {
-        sending.current = false;
-        client.setQueryData(inboundKeys.shipment(next.id), next);
-        client.setQueryData<ShipmentScanPage>(inboundKeys.scans(next.id), (page) => ({
-          items: [scan, ...(page?.items ?? []).filter((item) => item.id !== scan.id)].slice(0, 50),
-          total: (page?.total ?? 0) + 1,
-        }));
-        setStalled(false);
-        setQueue((list) => list.filter((item) => item.key !== head.key));
-      })
-      .catch((error: unknown) => {
-        sending.current = false;
-        if (isConnectionError(error)) {
-          setStalled(true);
-          window.setTimeout(() => setRetryTick((tick) => tick + 1), RETRY_MS);
-          return;
-        }
-        // Qayta yuborib bo'lmaydigan xato (qabul yakunlangan, partiya kerak): skan tashlanadi.
-        setQueue((list) => list.filter((item) => item.key !== head.key));
-        callbacks.current.onError(getApiErrorMessage(error));
-      });
-  }, [client, queue, online, retryTick, shipment.id]);
+  useEffect(() => saveDraft(draft), [draft]);
 
-  const enqueue = useCallback((code: string, scanMode: ScanMode, lot?: string) => {
-    setQueue((list) => [...list, { key: createIdempotencyKey(), barcode: code, mode: scanMode, lotId: lot, at: new Date().toISOString() }]);
-  }, []);
+  const update = useCallback((change: (current: ReceivingDraft) => ReceivingDraft) => setDraft(change), []);
+
+  const count = useCallback((item: ShipmentItem, scanMode: ScanMode, code: string) => {
+    update((current) => {
+      const previous = current.counts[item.id] ?? { accepted: 0, defect: 0 };
+      const next = scanMode === 'ACCEPT' ? { ...previous, accepted: previous.accepted + 1 } : { ...previous, defect: previous.defect + 1 };
+      return log({ ...current, counts: { ...current.counts, [item.id]: next } }, entry(scanMode === 'ACCEPT' ? 'ACCEPTED' : 'DEFECT', code, {
+        itemId: item.id, productName: item.productName, total: scanMode === 'ACCEPT' ? next.accepted : next.defect,
+      }));
+    });
+    if (scanMode === 'DEFECT') setMode('ACCEPT');
+  }, [update]);
 
   /** Skaner Enter bosdi (yoki qo'lda kiritildi). */
   const scan = useCallback((code: string) => {
     const read = { code, at: Date.now() };
     if (isDuplicateRead(lastRead.current, read)) {
       lastRead.current = read;
-      setDuplicates((list) => [{ key: createIdempotencyKey(), at: new Date(read.at).toISOString(), barcode: code }, ...list]);
+      update((current) => log(current, entry('DUPLICATE', code)));
       setDuplicateNotice(code);
       setProblem(null);
       return;
     }
     lastRead.current = read;
     setDuplicateNotice(null);
-    if (code !== ownCode) {
-      const other = productOf(code);
-      setProblem({ code, kind: other ? 'FOREIGN' : 'UNKNOWN', productName: other?.name ?? null });
-      enqueue(code, mode);
+    const item = shipment.items.find((row) => row.barcode === code);
+    if (!item) {
+      const other = others.flatMap((row) => row.items.map((line) => ({ shipment: row, line }))).find(({ line }) => line.barcode === code);
+      const next: ScanProblem = { code, kind: other ? 'FOREIGN' : 'UNKNOWN', productName: other?.line.productName ?? null, otherShipment: other?.shipment.number ?? null };
+      setProblem(next);
+      update((current) => log(current, entry(next.kind, code, { productName: next.productName, otherShipment: next.otherShipment })));
       return;
     }
     setProblem(null);
-    if (shipment.sku.expiryTracked && !lotId) {
-      callbacks.current.onLotRequired(code);
+    if (item.expiryTracked && !draft.lots[item.id]) {
+      lotRequired.current(item, code);
       return;
     }
-    enqueue(code, mode, shipment.sku.expiryTracked ? lotId : undefined);
-    if (mode === 'DEFECT') setMode('ACCEPT');
-  }, [enqueue, lotId, mode, ownCode, productOf, shipment.sku.expiryTracked]);
+    count(item, mode, code);
+  }, [count, draft.lots, mode, others, shipment.items, update]);
 
-  /** «Nom bo'yicha topish»: kodi o'qilmagan tovar shu postavka mahsuloti — bitta dona joriy rejimda. */
-  const countManual = useCallback(() => {
-    if (!ownCode) return;
+  /** «Nom bo'yicha topish»: kodi o'qilmagan tovar — tanlangan qatorga bitta dona joriy rejimda. */
+  const countManual = useCallback((itemId: string) => {
+    const item = shipment.items.find((row) => row.id === itemId);
+    if (!item) return;
     setProblem(null);
     lastRead.current = null;
-    if (shipment.sku.expiryTracked && !lotId) {
-      callbacks.current.onLotRequired(ownCode);
+    if (item.expiryTracked && !draft.lots[item.id]) {
+      lotRequired.current(item, item.barcode ?? '');
       return;
     }
-    enqueue(ownCode, mode, shipment.sku.expiryTracked ? lotId : undefined);
-    if (mode === 'DEFECT') setMode('ACCEPT');
-  }, [enqueue, lotId, mode, ownCode, shipment.sku.expiryTracked]);
+    count(item, mode, item.barcode ?? '—');
+  }, [count, draft.lots, mode, shipment.items]);
 
-  /** Partiya saqlandi: shu partiyaga yoziladi, kutib turgan birinchi skan yuboriladi. */
-  const lotSaved = useCallback((id: string, pendingCode: string | null) => {
-    setLotId(id);
-    if (pendingCode) {
-      enqueue(pendingCode, mode, id);
-      if (mode === 'DEFECT') setMode('ACCEPT');
-    }
-  }, [enqueue, mode]);
+  /** Partiya saqlandi: kutib turgan kod shu qatorga hisoblanadi. */
+  const lotSaved = useCallback((item: ShipmentItem, lot: DraftLot, pendingCode: string | null) => {
+    update((current) => ({ ...current, lots: { ...current.lots, [item.id]: lot } }));
+    if (pendingCode) count(item, mode, pendingCode);
+  }, [count, mode, update]);
 
-  // Navbatdagi hisoblanadigan skanlar — sanoq kutmasdan davom etadi.
-  const queuedCounts = useMemo(() => {
-    let accepted = 0;
-    let defect = 0;
-    queue.forEach((item) => {
-      if (item.barcode !== ownCode) return;
-      if (item.mode === 'ACCEPT') accepted += 1;
-      else defect += 1;
+  /** Oxirgi hisoblangan skan (takror va noma'lumlar hisobga kirmagan). */
+  const lastCounted = draft.journal.find((item) => item.kind === 'ACCEPTED' || item.kind === 'DEFECT') ?? null;
+
+  const undoLast = useCallback(() => {
+    update((current) => {
+      const target = current.journal.find((item) => item.kind === 'ACCEPTED' || item.kind === 'DEFECT');
+      if (!target?.itemId) return current;
+      const previous = current.counts[target.itemId] ?? { accepted: 0, defect: 0 };
+      const next = target.kind === 'ACCEPTED' ? { ...previous, accepted: Math.max(0, previous.accepted - 1) } : { ...previous, defect: Math.max(0, previous.defect - 1) };
+      return { ...current, counts: { ...current.counts, [target.itemId]: next }, journal: current.journal.filter((item) => item.key !== target.key), journalTotal: Math.max(0, current.journalTotal - 1) };
     });
-    return { accepted, defect };
-  }, [queue, ownCode]);
+  }, [update]);
 
-  const counts = { declared: shipment.declared, accepted: shipment.accepted + queuedCounts.accepted, defect: shipment.defect + queuedCounts.defect };
+  const itemCounts = useCallback((item: ShipmentItem): ItemCounts => ({
+    declared: item.declared, accepted: draft.counts[item.id]?.accepted ?? 0, defect: draft.counts[item.id]?.defect ?? 0,
+  }), [draft.counts]);
 
-  const journal = useMemo<JournalEntry[]>(() => {
-    // Navbatdagi har skan — server sonidan keyingi taxminiy natija («Qabul 98»).
-    let accepted = shipment.accepted;
-    let defect = shipment.defect;
-    const queued: JournalEntry[] = [];
-    for (const item of queue) {
-      const other = item.barcode === ownCode ? null : productOf(item.barcode);
-      const kind = item.barcode === ownCode ? 'COUNT' : other ? 'FOREIGN' : 'UNKNOWN';
-      let total: number | null = null;
-      if (kind === 'COUNT' && item.mode === 'ACCEPT') total = accepted += 1;
-      else if (kind === 'COUNT') total = defect += 1;
-      queued.push({ source: 'queued', scan: item, kind, total, productName: other?.name ?? null });
-    }
-    const server: JournalEntry[] = (scansQuery.data?.items ?? []).map((scan) => ({ source: 'server', scan }));
-    const local: JournalEntry[] = duplicates.map((item) => ({ source: 'duplicate', ...item }));
-    const at = (entry: JournalEntry) => (entry.source === 'duplicate' ? entry.at : entry.scan.at);
-    return [...queued, ...local, ...server].sort((a, b) => at(b).localeCompare(at(a)));
-  }, [duplicates, ownCode, productOf, queue, scansQuery.data, shipment.accepted, shipment.defect]);
+  const counts = useMemo<ItemCounts>(() => shipment.items.reduce(
+    (sum, item) => ({ declared: sum.declared + item.declared, accepted: sum.accepted + (draft.counts[item.id]?.accepted ?? 0), defect: sum.defect + (draft.counts[item.id]?.defect ?? 0) }),
+    { declared: 0, accepted: 0, defect: 0 },
+  ), [draft.counts, shipment.items]);
 
-  const lastCounted = queue.length ? null : scansQuery.data?.items.find((item) => item.result === 'ACCEPTED' || item.result === 'DEFECT') ?? null;
+  /** Yacheyka: qoralamadagi yoki qoldiqdagi (`defaults`). */
+  const cellOf = useCallback((item: ShipmentItem, defaults: Record<string, string | null>) => draft.cells[item.id] ?? item.cell ?? defaults[item.variantId] ?? '', [draft.cells]);
+
+  /** BE-17 `receive`: har qator — kelgan (qabul + brak), brak, partiya, muddat, yacheyka. */
+  const payload = useCallback((defaults: Record<string, string | null>): ReceivePayload => ({
+    items: shipment.items.map((item) => {
+      const value = draft.counts[item.id] ?? { accepted: 0, defect: 0 };
+      const lot = draft.lots[item.id];
+      return {
+        itemId: item.id,
+        receivedQty: value.accepted + value.defect,
+        defectiveQty: value.defect,
+        ...(lot ? { batch: lot.batch, expiryDate: lot.expiryDate } : {}),
+        cell: cellOf(item, defaults).trim(),
+      };
+    }),
+    comment: draft.note.trim() || undefined,
+  }), [cellOf, draft.counts, draft.lots, draft.note, shipment.items]);
 
   return {
     mode,
@@ -217,16 +152,20 @@ export function useReceiving(shipment: InboundShipment, { catalog, onLotRequired
     scan,
     countManual,
     counts,
-    journal,
-    journalTotal: (scansQuery.data?.total ?? 0) + duplicates.length + queue.length,
-    queueSize: queue.length,
-    /** Navbat yuborilmayapti (aloqa yo'q yoki server javob bermayapti). */
-    stalled: queueStalled,
+    itemCounts,
+    journal: draft.journal,
+    journalTotal: draft.journalTotal,
     problem,
     clearProblem: () => setProblem(null),
     duplicateNotice,
-    lotId,
+    lots: draft.lots,
     lotSaved,
     lastCounted,
+    undoLast,
+    note: draft.note,
+    setNote: (note: string) => update((current) => ({ ...current, note })),
+    cellOf,
+    setCell: (itemId: string, cell: string) => update((current) => ({ ...current, cells: { ...current.cells, [itemId]: cell } })),
+    payload,
   };
 }

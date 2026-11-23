@@ -1,35 +1,26 @@
 import { expect, test, type Page } from '@playwright/test';
 import { db } from '../../src/mocks/db';
+import { seedLot } from '../../src/mocks/handlers/warehouse';
 import { addDays, tashkentDate } from '../../src/shared/lib/tashkentTime';
 import { openStaffLogin } from './support/auth';
 import { installMockApi } from './support/mockApi';
 
 /**
  * FE-16 (ombor-qoldiq, ombor-muddat): «Qoldiq» — SKU bo'yicha omborda / band / mavjud / brak va «Muddat» — partiyalar.
- * TC4 davomi: muddatiga 50 kun qolgan partiya omborda turadi, lekin «mavjud»ga kirmaydi. Muddati o'tgan partiya —
- * hisobdan chiqarish (izoh majburiy, partiyadan ko'p emas) yoki optovikka qaytarish.
+ * TC4 davomi: muddatiga 50 kun qolgan partiya omborda turadi, lekin «mavjud»ga kirmaydi (BE-17 `blocked`). Muddati
+ * o'tgan partiya — hisobdan chiqarish (`adjust` + `lotId`; izoh majburiy, partiyadan ko'p emas).
  */
 test.beforeEach(async ({ context }) => {
   await installMockApi(context);
 });
 
-/** Namuna Farm «Vitamin kompleksi» (P-0120): 140 dona — 259 kun, 60 dona — `secondDays` kun. */
+/** Namuna Farm «Vitamin kompleksi» (P-0120): 140 dona — 259 kun, 60 dona — `secondDays` kun; yacheyka C-03-2. */
 function seedVitamin(secondDays: number) {
   const today = tashkentDate();
-  const base = db.inbound.shipments.find((item) => item.id === '110');
-  const sku = db.inbound.skus.find((item) => item.variantId === '51101');
-  if (!base || !sku) throw new Error('fixture');
-  db.inbound.shipments.push({
-    ...structuredClone(base), id: '120', number: 'P-0120', status: 'RECEIVED', declared: 200, accepted: 200, defect: 0,
-    wholesaler: { id: '8', name: 'Namuna Farm MChJ', tin: '307418570' },
-    sku: { productId: sku.productId, variantId: sku.variantId, name: sku.name, barcode: sku.barcode, expiryTracked: true, categoryName: sku.categoryName, cell: sku.cell },
-    expectedAt: today, completedAt: new Date(Date.now() - 60_000).toISOString(),
-    lots: [
-      { id: 'L-120-1', number: 'P-0120-1', expiresAt: addDays(today, 259), quantity: 140, sellable: true },
-      { id: 'L-120-2', number: 'P-0120-2', expiresAt: addDays(today, secondDays), quantity: 60, sellable: false },
-    ],
-  });
-  Object.assign(sku, { onHand: 200, blocked: 60 });
+  seedLot('511', 140, addDays(today, 259), 'P-0120-1');
+  seedLot('511', 60, addDays(today, secondDays), 'P-0120-2');
+  const sku = db.inbound.skus.find((item) => item.productId === '511');
+  if (sku) sku.cell = 'C-03-2';
 }
 
 async function openStock(page: Page, query = '') {

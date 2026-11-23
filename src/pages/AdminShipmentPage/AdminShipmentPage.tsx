@@ -1,10 +1,9 @@
 import { Check, FileText } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useShipmentQuery } from '../../features/inbound/api/inboundQueries';
-import { inboundActPath } from '../../features/inbound/lib/shipmentLabels';
+import { authorLabel, inboundActPath, personName, wholesalerLabel } from '../../features/inbound/lib/shipmentLabels';
 import type { InboundShipment } from '../../features/inbound/model/inboundTypes';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { shortPersonName } from '../../shared/lib/personName';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
 import { tashkentDateTime } from '../../shared/lib/tashkentTime';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
@@ -20,14 +19,11 @@ interface Step {
 }
 
 function steps(t: ReturnType<typeof useTranslation>['t'], shipment: InboundShipment): Step[] {
-  const at = (value: string | null) => (value ? tashkentDateTime(value) : null);
-  const list: Step[] = [{ label: t('inb.detail.created'), meta: `${at(shipment.createdAt) ?? ''} · ${shortPersonName(shipment.createdBy.name)}`, done: true }];
-  if (shipment.inTransitAt) list.push({ label: t('inb.detail.inTransit'), meta: at(shipment.inTransitAt), done: true });
-  if (shipment.status === 'CANCELLED') list.push({ label: t('inb.detail.cancelled'), meta: at(shipment.cancelledAt), done: true });
-  else {
-    const by = shipment.completedBy ? ` · ${shortPersonName(shipment.completedBy.name)}` : '';
-    list.push({ label: t('inb.detail.received'), meta: shipment.completedAt ? `${at(shipment.completedAt) ?? ''}${by}` : null, done: Boolean(shipment.completedAt) });
-  }
+  const author = authorLabel(t, shipment.declaredBy);
+  const list: Step[] = [{ label: t('inb.detail.created'), meta: `${tashkentDateTime(shipment.createdAt)} · ${author.name}`, done: true }];
+  if (shipment.status === 'IN_TRANSIT') list.push({ label: t('inb.detail.inTransit'), meta: null, done: true });
+  const by = shipment.receivedBy?.name ? ` · ${personName(shipment.receivedBy)}` : '';
+  list.push({ label: t('inb.detail.received'), meta: shipment.receivedAt ? `${tashkentDateTime(shipment.receivedAt)}${by}` : null, done: Boolean(shipment.receivedAt) });
   return list;
 }
 
@@ -46,8 +42,8 @@ export default function AdminShipmentPage() {
   if (query.isPending) return <PageLoader compact />;
   if (!shipment) return <LoadError error={query.error} onRetry={() => void query.refetch()} title={t('inb.detail.notFound')} />;
 
-  const completed = Boolean(shipment.completedAt);
-  const sub = completed ? t(shipment.status === 'RECEIVED' ? 'inb.detail.noDiff' : 'inb.detail.withDiff') : shipment.status === 'CANCELLED' ? null : t('inb.detail.pending');
+  const completed = Boolean(shipment.receivedAt);
+  const sub = completed ? t(shipment.status === 'RECEIVED' ? 'inb.detail.noDiff' : 'inb.detail.withDiff') : t('inb.detail.pending');
   const pdf = completed ? (
     <a className={styles.pdf} href={inboundActPath(shipment.id)} target="_blank" rel="noopener"><FileText aria-hidden />PDF</a>
   ) : null;
@@ -65,13 +61,17 @@ export default function AdminShipmentPage() {
       ))}
     </div>
   );
+  const products: [string, string][] = shipment.items.map((item) => [
+    shipment.items.length === 1 ? t('inb.detail.product') : t('inb.detail.productN', { count: item.declared }),
+    phone ? item.productName : [item.productName, item.barcode].filter(Boolean).join(' · '),
+  ]);
   const facts: [string, string][] = [
-    [t('inb.detail.product'), phone ? shipment.sku.name : [shipment.sku.name, shipment.sku.barcode].filter(Boolean).join(' · ')],
-    ...(phone && shipment.sku.barcode ? [[t('inb.detail.barcode'), shipment.sku.barcode] as [string, string]] : []),
-    [t('inb.detail.wholesaler'), shipment.wholesaler.name],
-    ...(shipment.completedBy ? [[t('inb.detail.receivedBy'), t('inb.detail.receivedByValue', { name: shortPersonName(shipment.completedBy.name) })] as [string, string]] : []),
-    ...(shipment.actNote ? [[t('inb.detail.actNote'), `«${shipment.actNote}»`] as [string, string]] : []),
-    ...(shipment.cancelReason ? [[t('inb.detail.cancelReason'), shipment.cancelReason] as [string, string]] : []),
+    ...products,
+    ...(phone && shipment.items.length === 1 && shipment.items[0].barcode ? [[t('inb.detail.barcode'), shipment.items[0].barcode] as [string, string]] : []),
+    [t('inb.detail.wholesaler'), wholesalerLabel(t, shipment)],
+    ...(shipment.receivedBy ? [[t('inb.detail.receivedBy'), t('inb.detail.receivedByValue', { name: personName(shipment.receivedBy) })] as [string, string]] : []),
+    ...(shipment.receiveComment ? [[t('inb.detail.actNote'), `«${shipment.receiveComment}»`] as [string, string]] : []),
+    ...(shipment.note ? [[t('inb.detail.note'), shipment.note] as [string, string]] : []),
   ];
 
   return (

@@ -35,3 +35,6 @@ export function shipmentTally({ declared, accepted, defect }: Pick<InboundShipme
   const counted = accepted + defect;
   return { counted, diff: accepted - declared, shortage: Math.max(0, declared - counted), surplus: Math.max(0, counted - declared) };
 }
+
+/** BE-17 yacheyka manzili: harf, raqam va «-», 32 belgigacha («B-02-1»). */
+export const isValidCell = (value: string) => /^[A-Za-z0-9][A-Za-z0-9-]{0,31}$/.test(value.trim());

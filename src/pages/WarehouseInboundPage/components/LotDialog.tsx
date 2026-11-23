@@ -1,44 +1,44 @@
-import { App } from 'antd';
 import { CalendarClock, CircleX, TriangleAlert } from 'lucide-react';
 import { useId, useState } from 'react';
-import { useCreateLotMutation } from '../../../features/inbound/api/inboundQueries';
 import { daysLeft, isSellableExpiry, saleCutoff } from '../../../features/inbound/lib/expiry';
-import type { InboundShipment } from '../../../features/inbound/model/inboundTypes';
-import { getApiErrorMessage } from '../../../shared/api/apiError';
+import { wholesalerLabel } from '../../../features/inbound/lib/shipmentLabels';
+import type { InboundShipment, ShipmentItem } from '../../../features/inbound/model/inboundTypes';
+import type { DraftLot } from '../../../features/inbound/model/receivingDraft';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
-import { useMediaQuery } from '../../../shared/lib/useMediaQuery';
 import { DateInput } from '../../../shared/ui/DateInput/DateInput';
 import { isoToDots } from '../../../shared/ui/DateInput/dateInput';
 import { Dialog, DialogCancel, DialogPrimary } from '../../../shared/ui/Dialog/Dialog';
 import styles from './LotDialog.module.css';
 
 export interface LotRequest {
-  /** Birinchi skan (kod partiya saqlangach yoziladi) yoki «Yangi partiya». */
+  item: ShipmentItem;
+  /** Birinchi skan (kod partiya saqlangach hisoblanadi) yoki «Partiya va muddat» tugmasi. */
   code: string | null;
 }
 
 interface LotDialogProps {
   shipment: InboundShipment;
   request: LotRequest | null;
+  /** Qatorning qoralamadagi partiyasi — o'zgartirishda. */
+  current: DraftLot | null;
   today: string;
   onClose: () => void;
-  onSaved: (lotId: string, code: string | null) => void;
+  onSaved: (item: ShipmentItem, lot: DraftLot, code: string | null) => void;
 }
 
 /**
  * «Partiya va yaroqlilik muddati» (ombor-qabul holatlar 3; OMB-3, tz.md G11): BAD, kosmetika, oziq-ovqatda
  * birinchi skanda so'raladi. Muddatiga 60 kundan kam qolsa — partiya qoldiqqa kiradi, sotuvga chiqmaydi (TC4).
+ * Qabul bilan birga yuboriladi (BE-17 `receive`: qatorga bitta partiya).
  */
-export function LotDialog({ shipment, request, today, onClose, onSaved }: LotDialogProps) {
+export function LotDialog({ shipment, request, current, today, onClose, onSaved }: LotDialogProps) {
   const { t } = useTranslation();
-  const { notification } = App.useApp();
-  const phone = useMediaQuery('(max-width: 767.98px)');
-  const createLot = useCreateLotMutation();
   const id = useId();
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(current?.expiryDate ?? null);
   const [touched, setTouched] = useState(false);
-  const number = `${shipment.number}-${shipment.lots.filter((lot) => lot.expiresAt).length + 1}`;
-  const first = !shipment.lots.some((lot) => lot.expiresAt);
+  const item = request?.item ?? null;
+  const index = item ? shipment.items.findIndex((row) => row.id === item.id) : 0;
+  const number = current?.batch ?? `${shipment.number}-${index + 1}`;
   const left = expiresAt ? daysLeft(expiresAt, today) : null;
   const expired = left !== null && left < 0;
   const blocked = expiresAt !== null && !expired && !isSellableExpiry(expiresAt, today);
@@ -46,45 +46,30 @@ export function LotDialog({ shipment, request, today, onClose, onSaved }: LotDia
 
   const save = () => {
     setTouched(true);
-    if (!expiresAt || expired || createLot.isPending) return;
-    createLot.mutate({ id: shipment.id, number, expiresAt }, {
-      onSuccess: (next) => {
-        const lot = next.lots.find((item) => item.number === number);
-        if (lot) onSaved(lot.id, request?.code ?? null);
-        setExpiresAt(null);
-        setTouched(false);
-      },
-      onError: (error) => notification.error({ title: t('inb.lot.error'), description: getApiErrorMessage(error), placement: phone ? 'top' : 'bottomRight' }),
-    });
-  };
-
-  const close = () => {
-    setExpiresAt(null);
-    setTouched(false);
-    onClose();
+    if (!item || !expiresAt || expired) return;
+    onSaved(item, { batch: number, expiryDate: expiresAt }, request?.code ?? null);
   };
 
   return (
     <Dialog
       open={request !== null}
       title={t('inb.lot.title')}
-      description={t(first ? 'inb.lot.subFirst' : 'inb.lot.subNew', { product: shipment.sku.name })}
+      description={t(request?.code ? 'inb.lot.subFirst' : 'inb.lot.subNew', { product: item?.productName ?? '' })}
       icon={<CalendarClock size={20} />}
       width={480}
-      locked={createLot.isPending}
-      onClose={close}
+      onClose={onClose}
       testId="lot-dialog"
       footer={(
         <>
-          <DialogCancel onClick={close} disabled={createLot.isPending}>{t('inb.lot.cancel')}</DialogCancel>
-          <DialogPrimary shortcut={false} saving={createLot.isPending} disabled={expired} onClick={save}>{t('inb.lot.save')}</DialogPrimary>
+          <DialogCancel onClick={onClose}>{t('inb.lot.cancel')}</DialogCancel>
+          <DialogPrimary shortcut={false} disabled={expired} onClick={save}>{t('inb.lot.save')}</DialogPrimary>
         </>
       )}
     >
       <dl className={styles.facts}>
-        <div><dt>{t('inb.lot.product')}</dt><dd>{[shipment.sku.name, shipment.sku.categoryName].filter(Boolean).join(' · ')}</dd></div>
-        <div><dt>{t('inb.lot.barcode')}</dt><dd>{shipment.sku.barcode ?? '—'}</dd></div>
-        <div><dt>{t('inb.lot.shipment')}</dt><dd>{shipment.number} · {shipment.wholesaler.name}</dd></div>
+        <div><dt>{t('inb.lot.product')}</dt><dd>{item?.productName ?? '—'}</dd></div>
+        <div><dt>{t('inb.lot.barcode')}</dt><dd>{item?.barcode ?? '—'}</dd></div>
+        <div><dt>{t('inb.lot.shipment')}</dt><dd>{shipment.number} · {wholesalerLabel(t, shipment)}</dd></div>
       </dl>
       <div className={styles.field}>
         <label className={styles.label} htmlFor={`${id}-lot`}>{t('inb.lot.number')}</label>

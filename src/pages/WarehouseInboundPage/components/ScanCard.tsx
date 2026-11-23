@@ -78,7 +78,7 @@ export const ScanCard = forwardRef<ScanFieldHandle, ScanCardProps>(function Scan
               <strong>{t(problem.kind === 'UNKNOWN' ? 'inb.recv.unknownTitle' : 'inb.recv.foreignTitle')}</strong>
               {problem.kind === 'UNKNOWN'
                 ? <>{t('inb.recv.unknownText', { code: problem.code, count: accepted })} <span className={styles.muted}>{t('inb.recv.tbd')}</span>.</>
-                : t('inb.recv.foreignText', { code: problem.code, product: problem.productName ?? '', count: accepted })}
+                : t('inb.recv.foreignText', { code: problem.code, product: problem.productName ?? '', number: problem.otherShipment ?? '', count: accepted })}
             </p>
           </div>
           {problem.kind === 'UNKNOWN' && onFindByName ? (

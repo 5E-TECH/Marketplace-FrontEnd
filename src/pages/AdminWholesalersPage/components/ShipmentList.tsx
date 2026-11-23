@@ -1,10 +1,10 @@
 import { Dropdown } from 'antd';
-import { CalendarDays, ExternalLink, FileText, MoreHorizontal, PackagePlus, Search, SlidersHorizontal, XCircle } from 'lucide-react';
-import { useId, useMemo, useState } from 'react';
+import { CalendarDays, ExternalLink, FileText, MoreHorizontal, PackagePlus, Search, SlidersHorizontal } from 'lucide-react';
+import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useShipmentsQuery } from '../../../features/inbound/api/inboundQueries';
-import { adminShipmentPath, arrivalNote, authorLabel, inboundActPath } from '../../../features/inbound/lib/shipmentLabels';
-import { SHIPMENT_STATUSES, type InboundShipment, type InboundWholesaler, type ShipmentListParams, type ShipmentStatus } from '../../../features/inbound/model/inboundTypes';
+import { useShipmentCounts, useShipmentsQuery } from '../../../features/inbound/api/inboundQueries';
+import { adminShipmentPath, arrivalNote, authorLabel, inboundActPath, shipmentTitle, wholesalerLabel } from '../../../features/inbound/lib/shipmentLabels';
+import { SHIPMENT_STATUSES, type InboundShipment, type InboundWholesaler, type ShipmentStatus } from '../../../features/inbound/model/inboundTypes';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
 import { useMediaQuery } from '../../../shared/lib/useMediaQuery';
 import { addDays, tashkentDate } from '../../../shared/lib/tashkentTime';
@@ -15,7 +15,6 @@ import { LoadError } from '../../../shared/ui/LoadError/LoadError';
 import { PillSelect } from '../../../shared/ui/PillSelect/PillSelect';
 import { SearchSelect } from '../../../shared/ui/SearchSelect/SearchSelect';
 import { StatusBadge } from '../../../shared/ui/StatusBadge/StatusBadge';
-import { CancelShipmentDialog } from './CancelShipmentDialog';
 import styles from './ShipmentList.module.css';
 
 type ExpectedPreset = '' | 'today' | 'tomorrow' | 'week' | 'past';
@@ -32,13 +31,13 @@ interface ShipmentFilters {
 
 const EMPTY_FILTERS: ShipmentFilters = { status: '', search: '', wholesalerId: '', author: '', expected: '', expectedFrom: null, expectedTo: null };
 
-function expectedRange(filters: ShipmentFilters, today: string): Pick<ShipmentListParams, 'expectedFrom' | 'expectedTo'> {
+function expectedRange(filters: ShipmentFilters, today: string): { from: string | null; to: string | null } {
   switch (filters.expected) {
-    case 'today': return { expectedFrom: today, expectedTo: today };
-    case 'tomorrow': return { expectedFrom: addDays(today, 1), expectedTo: addDays(today, 1) };
-    case 'week': return { expectedFrom: today, expectedTo: addDays(today, 7) };
-    case 'past': return { expectedFrom: addDays(today, -30), expectedTo: addDays(today, -1) };
-    default: return { expectedFrom: filters.expectedFrom ?? undefined, expectedTo: filters.expectedTo ?? undefined };
+    case 'today': return { from: today, to: today };
+    case 'tomorrow': return { from: addDays(today, 1), to: addDays(today, 1) };
+    case 'week': return { from: today, to: addDays(today, 7) };
+    case 'past': return { from: addDays(today, -30), to: addDays(today, -1) };
+    default: return { from: filters.expectedFrom, to: filters.expectedTo };
   }
 }
 
@@ -50,7 +49,10 @@ interface ShipmentListProps {
   onCreate: () => void;
 }
 
-/** «Postavkalar · hamma optovik» (admin-postavka): holat tablari, filtrlar, jadval; telefonda kartalar va filtr varag'i. */
+/**
+ * «Postavkalar · hamma optovik» (admin-postavka): holat tablari, filtrlar, jadval; telefonda kartalar va filtr varag'i.
+ * Backend holat va optovik bo'yicha filtrlaydi (BE-17); qidiruv, «Kiritdi» va «Kelish» — yuklangan 100 ta ichida.
+ */
 export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -58,22 +60,18 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
   const today = tashkentDate();
   const [filters, setFilters] = useState<ShipmentFilters>(EMPTY_FILTERS);
   const [sheet, setSheet] = useState<ShipmentFilters | null>(null);
-  const [cancelling, setCancelling] = useState<InboundShipment | null>(null);
   const searchId = useId();
-  const params: ShipmentListParams = {
-    page: 1,
-    limit: 100,
-    status: filters.status ? [filters.status] : undefined,
-    search: filters.search.trim() || undefined,
-    wholesalerId: filters.wholesalerId || undefined,
-    authorRole: filters.author || undefined,
-    ...expectedRange(filters, today),
-  };
-  const query = useShipmentsQuery(params);
-  const items = useMemo(() => query.data?.items ?? [], [query.data]);
-  const counts = query.data?.counts;
-  const total = query.data?.total ?? 0;
-  const filtered = Boolean(params.search || params.wholesalerId || params.authorRole || params.expectedFrom || params.expectedTo);
+  const query = useShipmentsQuery({ page: 1, limit: 100, status: filters.status || undefined, wholesalerId: filters.wholesalerId || undefined });
+  const counts = useShipmentCounts();
+  const words = filters.search.trim().toLowerCase();
+  const range = expectedRange(filters, today);
+  const items = (query.data?.items ?? []).filter((shipment) =>
+    (!words || [shipment.number, shipment.wholesaler.name ?? '', ...shipment.items.flatMap((item) => [item.productName, item.barcode ?? ''])].some((value) => value.toLowerCase().includes(words))) &&
+    (!filters.author || (filters.author === 'WHOLESALER') === (shipment.declaredBy.role === 'WHOLESALER')) &&
+    (!range.from || shipment.expectedAt >= range.from) &&
+    (!range.to || shipment.expectedAt <= range.to));
+  const total = items.length;
+  const filtered = Boolean(words || filters.wholesalerId || filters.author || range.from || range.to);
   const set = (patch: Partial<ShipmentFilters>) => setFilters((previous) => ({ ...previous, ...patch }));
 
   const any = t('inb.list.any');
@@ -99,7 +97,6 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
   );
 
   const open = (shipment: InboundShipment) => void navigate(adminShipmentPath(shipment.id));
-  const canCancel = (shipment: InboundShipment) => shipment.status === 'DECLARED' && !shipment.receivingStartedAt;
 
   const menu = (shipment: InboundShipment) => (
     <Dropdown
@@ -108,15 +105,12 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
       menu={{
         items: [
           { key: 'open', icon: <ExternalLink aria-hidden />, label: t('inb.list.open') },
-          { key: 'act', icon: <FileText aria-hidden />, label: t('inb.list.openAct'), disabled: !shipment.completedAt },
-          { type: 'divider' },
-          { key: 'cancel', icon: <XCircle aria-hidden />, label: t('inb.list.cancel'), danger: true, disabled: !canCancel(shipment) },
+          { key: 'act', icon: <FileText aria-hidden />, label: t('inb.list.openAct'), disabled: !shipment.receivedAt },
         ],
         onClick: ({ key, domEvent }) => {
           domEvent.stopPropagation();
           if (key === 'open') open(shipment);
           else if (key === 'act') window.open(inboundActPath(shipment.id), '_blank', 'noopener');
-          else if (key === 'cancel') setCancelling(shipment);
         },
       }}
     >
@@ -127,17 +121,17 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
   );
 
   const actCell = (shipment: InboundShipment) => {
-    if (shipment.completedAt) {
+    if (shipment.receivedAt) {
       return (
         <a className={styles.pdf} href={inboundActPath(shipment.id)} target="_blank" rel="noopener" onClick={(event) => event.stopPropagation()}>
           <FileText aria-hidden />{t('inb.list.pdf')}
         </a>
       );
     }
-    return <span className={styles.sub}>{shipment.status === 'CANCELLED' ? '—' : t('inb.list.actLater')}</span>;
+    return <span className={styles.sub}>{t('inb.list.actLater')}</span>;
   };
 
-  const number = (value: number | null, shipment: InboundShipment) => (shipment.completedAt ? value : '—');
+  const number = (value: number, shipment: InboundShipment) => (shipment.receivedAt ? value : '—');
 
   const table = (
     <div className={styles.scroll}>
@@ -160,7 +154,7 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
         <tbody>
           {items.map((shipment) => {
             const note = arrivalNote(t, shipment, today);
-            const author = authorLabel(t, shipment.createdBy);
+            const author = authorLabel(t, shipment.declaredBy);
             return (
               <tr key={shipment.id} data-shipment-id={shipment.id} data-new={highlight.includes(shipment.id) || undefined} onClick={() => open(shipment)}>
                 <td>
@@ -169,8 +163,8 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
                 </td>
                 <td>
                   <span className={styles.stack}>
-                    <span className={styles.strong}>{shipment.sku.name}</span>
-                    <span className={styles.sub}>{shipment.wholesaler.name}</span>
+                    <span className={styles.strong}>{shipmentTitle(t, shipment)}</span>
+                    <span className={styles.sub}>{wholesalerLabel(t, shipment)}</span>
                   </span>
                 </td>
                 <td className={styles.wide}>
@@ -181,7 +175,7 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
                 </td>
                 <td className={styles.num}>{shipment.declared}</td>
                 <td className={styles.num}>{number(shipment.accepted, shipment)}</td>
-                <td className={styles.num} data-alert={Boolean(shipment.completedAt && shipment.defect) || undefined}>{number(shipment.defect, shipment)}</td>
+                <td className={styles.num} data-alert={Boolean(shipment.receivedAt && shipment.defect) || undefined}>{number(shipment.defect, shipment)}</td>
                 <td><StatusBadge family="shipment" code={shipment.status} /></td>
                 <td className={styles.wide}>
                   <span className={styles.stack}>
@@ -203,17 +197,17 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
     <ul className={styles.cards} aria-label={t('inb.list.caption')}>
       {items.map((shipment) => {
         const note = arrivalNote(t, shipment, today);
-        const author = authorLabel(t, shipment.createdBy);
+        const author = authorLabel(t, shipment.declaredBy);
         const who = `${author.name} (${author.sub})`;
         const status = t(`status.shipment.${shipment.status}`);
         return (
           <li key={shipment.id} data-shipment-id={shipment.id} data-new={highlight.includes(shipment.id) || undefined}>
-            <a href={adminShipmentPath(shipment.id)} className={styles.card} aria-label={t('inb.list.cardOpen', { number: shipment.number, product: shipment.sku.name, status })} onClick={(event) => { event.preventDefault(); open(shipment); }}>
+            <a href={adminShipmentPath(shipment.id)} className={styles.card} aria-label={t('inb.list.cardOpen', { number: shipment.number, product: shipmentTitle(t, shipment), status })} onClick={(event) => { event.preventDefault(); open(shipment); }}>
               <span className={styles.cardTop}>
                 <span className={styles.cardNumber}>{shipment.number}</span>
                 <StatusBadge family="shipment" code={shipment.status} />
               </span>
-              <span className={styles.cardProduct}>{shipment.sku.name} <span>· {shipment.wholesaler.name}</span></span>
+              <span className={styles.cardProduct}>{shipmentTitle(t, shipment)} <span>· {wholesalerLabel(t, shipment)}</span></span>
               <span className={styles.cardBottom}>
                 <span className={styles.sub}>
                   {note ? t('inb.list.cardMetaNote', { date: isoToDots(shipment.expectedAt), note, author: who }) : t('inb.list.cardMeta', { date: isoToDots(shipment.expectedAt), author: who })}
@@ -223,7 +217,7 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
                   {t('inb.pieces', { count: shipment.declared })}
                 </span>
               </span>
-              {shipment.completedAt ? (
+              {shipment.receivedAt ? (
                 <span className={styles.cardResult}>
                   {t('inb.list.cardResult', { accepted: shipment.accepted, defect: shipment.defect })}
                 </span>
@@ -331,7 +325,6 @@ export function ShipmentList({ wholesalers, highlight, onCreate }: ShipmentListP
         ) : null}
       </Dialog>
 
-      <CancelShipmentDialog shipment={cancelling} onClose={() => setCancelling(null)} />
     </section>
   );
 }

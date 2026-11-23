@@ -1,5 +1,6 @@
 /* ombor-qabul 5 «Arizasiz postavka»: ikki ustunli maydonlar (telefonda bitta), kutilayotgan postavka bloki. */
 .intro { margin: 0; font-size: 14px; line-height: 21px; }
+.loadError { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--color-danger-soft); color: var(--color-danger); font-size: 13px; line-height: 18px; font-weight: 600; }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .label { display: block; margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
 .required { color: var(--color-danger); }

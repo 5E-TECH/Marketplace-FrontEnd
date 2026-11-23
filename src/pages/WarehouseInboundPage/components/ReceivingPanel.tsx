@@ -1,36 +1,57 @@
-import { Ban, CircleCheck, CircleMinus, Plus, TriangleAlert } from 'lucide-react';
-import { useId, type ReactNode } from 'react';
-import { daysLeft } from '../../../features/inbound/lib/expiry';
+import { CalendarClock, CircleMinus, TriangleAlert } from 'lucide-react';
+import { useId } from 'react';
+import { daysLeft, isSellableExpiry } from '../../../features/inbound/lib/expiry';
 import { shipmentTally } from '../../../features/inbound/lib/scanRules';
-import type { InboundShipment } from '../../../features/inbound/model/inboundTypes';
+import { shipmentTitle, wholesalerLabel } from '../../../features/inbound/lib/shipmentLabels';
+import type { InboundShipment, ShipmentItem } from '../../../features/inbound/model/inboundTypes';
+import type { DraftLot } from '../../../features/inbound/model/receivingDraft';
+import type { ItemCounts } from '../../../features/inbound/model/useReceiving';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
-import { isoToDots } from '../../../shared/ui/DateInput/dateInput';
 import { Badge } from '../../../shared/ui/Badge/Badge';
+import { isoToDots } from '../../../shared/ui/DateInput/dateInput';
 import { StatusBadge } from '../../../shared/ui/StatusBadge/StatusBadge';
 import styles from '../WarehouseInboundPage.module.css';
 
-export interface Counts {
-  declared: number;
-  accepted: number;
-  defect: number;
+const signed = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : '0');
+
+/** Qator holati: sanoq, partiya (qoralamada) va yacheyka. */
+export interface ItemView {
+  item: ShipmentItem;
+  counts: ItemCounts;
+  lot: DraftLot | null;
+  cell: string;
+  /** Yacheyka qoldiqdan ma'lum — yakunlashda so'ralmaydi. */
+  cellKnown: boolean;
 }
 
-const signed = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : '0');
+/** Partiya muddati: «12.01.2027 · 50 kun» va sotuvga chiqadimi (60 kun qoidasi). */
+function LotLine({ lot, today }: { lot: DraftLot; today: string }) {
+  const { t } = useTranslation();
+  const sellable = isSellableExpiry(lot.expiryDate, today);
+  return (
+    <span className={styles.stack}>
+      <span>{lot.batch} · {isoToDots(lot.expiryDate)}</span>
+      <span className={sellable ? undefined : styles.diffNegative}>
+        {t('inb.lots.days', { days: daysLeft(lot.expiryDate, today) })} · {t(sellable ? 'inb.lots.onSale' : 'inb.lots.blocked')}
+      </span>
+    </span>
+  );
+}
 
 interface ReceivingCardProps {
   shipment: InboundShipment;
-  counts: Counts;
+  counts: ItemCounts;
+  items: readonly ItemView[];
   phone: boolean;
-  /** Muddatli tovar: «Yangi partiya» (qadoqdagi sana boshqacha). */
-  onNewLot?: () => void;
-  /** Partiyalar jadvali — muddatli tovarda (4-qism). */
-  lots?: ReactNode;
-  /** Sotuvdan chiqarilgan partiyalardagi son — chiziqda alohida (to'q sariq). */
-  blocked?: number;
+  today: string;
+  /** Sotuvdan chiqariladigan (60 kundan kam muddatli) qabul — chiziqda alohida. */
+  blocked: number;
+  /** «Partiya va muddat» (muddatli tovarda birinchi skanda so'raladi, boshqasida ixtiyoriy). */
+  onLot: (item: ShipmentItem) => void;
 }
 
 /** Qabul kartasi (ombor-qabul): mahsulot · optovik, e'lon / qabul / brak (ortiq yoki kam), sanoq chizig'i, partiya. */
-export function ReceivingCard({ shipment, counts, phone, onNewLot, lots, blocked = 0 }: ReceivingCardProps) {
+export function ReceivingCard({ shipment, counts, items, phone, today, blocked, onLot }: ReceivingCardProps) {
   const { t } = useTranslation();
   const tally = shipmentTally(counts);
   const cells = [
@@ -38,7 +59,7 @@ export function ReceivingCard({ shipment, counts, phone, onNewLot, lots, blocked
     { key: 'accepted', label: t('inb.recv.accepted'), note: t('inb.recv.acceptedNote'), value: String(counts.accepted), swatch: 'accepted' },
     { key: 'defect', label: t('inb.recv.defect'), note: t('inb.recv.defectNote'), value: String(counts.defect), swatch: 'defect' },
     ...(tally.surplus ? [{ key: 'surplus', label: t('inb.recv.surplus'), note: t('inb.recv.surplusNote'), value: `+${tally.surplus}`, swatch: null, tone: 'warning' }] : []),
-    ...(tally.shortage && counts.accepted + counts.defect > 0 ? [{ key: 'shortage', label: t('inb.recv.shortage'), note: t('inb.recv.shortageNote'), value: String(tally.shortage), swatch: null, tone: 'warning' }] : []),
+    ...(tally.shortage && tally.counted > 0 ? [{ key: 'shortage', label: t('inb.recv.shortage'), note: t('inb.recv.shortageNote'), value: String(tally.shortage), swatch: null, tone: 'warning' }] : []),
   ];
   const total = Math.max(counts.declared, tally.counted);
   const right = tally.surplus
@@ -46,14 +67,20 @@ export function ReceivingCard({ shipment, counts, phone, onNewLot, lots, blocked
     : tally.shortage
       ? <span data-tone="warning">{t('inb.recv.shortageCount', { count: tally.shortage })}</span>
       : <span>{t('inb.recv.exact')}</span>;
+  const single = items.length === 1 ? items[0] : null;
+  const lotButton = (view: ItemView) => (
+    <button type="button" className={styles.linkButton} onMouseDown={(event) => event.preventDefault()} onClick={() => onLot(view.item)}>
+      <CalendarClock aria-hidden />{t(view.lot ? 'inb.recv.lotChange' : 'inb.recv.lotAdd')}
+    </button>
+  );
 
   return (
     <section className={`${styles.card} ${styles.receiving}`} data-testid="receiving-card">
       <div className={styles.cardHead}>
         <div className={styles.cardTitle}>
-          <h2>{shipment.sku.name} · {shipment.wholesaler.name}</h2>
+          <h2>{shipmentTitle(t, shipment)} · {wholesalerLabel(t, shipment)}</h2>
           <span>{t('inb.recv.sub', { number: shipment.number, date: isoToDots(shipment.expectedAt) })}</span>
-          {shipment.sku.expiryTracked ? <span>{t('inb.lots.tracked', { category: shipment.sku.categoryName ?? '—' })}</span> : null}
+          {single?.item.expiryTracked ? <span>{t('inb.lots.tracked')}</span> : null}
         </div>
         <div className={styles.chips}><StatusBadge family="shipment" code={shipment.status} /></div>
       </div>
@@ -101,89 +128,87 @@ export function ReceivingCard({ shipment, counts, phone, onNewLot, lots, blocked
       ) : null}
       {tally.shortage && tally.counted ? <p className={styles.hint}>{t('inb.recv.shortageText', { count: tally.shortage })}</p> : null}
 
-      {lots ?? (
-        <dl className={styles.facts}>
-          <div><dt>{t('inb.recv.lot')}</dt><dd>{shipment.lots[0]?.number ?? shipment.number}</dd></div>
-          <div><dt>{t('inb.recv.expiry')}</dt><dd>{t('inb.recv.expiryNotTracked', { category: shipment.sku.categoryName ?? '—' })}</dd></div>
-          <div><dt>{t('inb.recv.place')}</dt><dd>{shipment.sku.cell ? t('inb.recv.placeValue', { cell: shipment.sku.cell }) : '—'}</dd></div>
-        </dl>
-      )}
-      {onNewLot ? (
-        <div className={styles.factsAction}>
-          <button type="button" className={styles.linkButton} onMouseDown={(event) => event.preventDefault()} onClick={onNewLot}><Plus aria-hidden />{t('inb.recv.newLot')}</button>
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-/** Muddatli tovar partiyalari (ombor-qabul holatlar 3 «Natija»): muddat va qolgan kun, qabul, sotuv holati. */
-export function LotsTable({ shipment, today }: { shipment: InboundShipment; today: string }) {
-  const { t } = useTranslation();
-  const lots = shipment.lots.filter((lot) => lot.expiresAt);
-  if (!lots.length) return <p className={styles.hint}>{t('inb.lots.none')}</p>;
-  return (
-    <>
-      <div className={styles.scroll}>
-        <table className={styles.table} data-testid="lots-table">
-          <caption className={styles.visuallyHidden}>{t('inb.lots.title')}</caption>
-          <thead>
-            <tr>
-              <th>{t('inb.lots.col.lot')}</th>
-              <th>{t('inb.lots.col.expiry')}</th>
-              <th className={styles.num}>{t('inb.lots.col.qty')}</th>
-              <th>{t('inb.lots.col.sale')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lots.map((lot) => {
-              const left = daysLeft(lot.expiresAt ?? today, today);
-              return (
-                <tr key={lot.id} data-lot={lot.number}>
-                  <td><strong>{lot.number}</strong></td>
-                  <td>{isoToDots(lot.expiresAt)} · <span className={lot.sellable ? undefined : styles.diffNegative}>{t('inb.lots.days', { days: left })}</span></td>
-                  <td className={styles.num}>{lot.quantity}</td>
-                  <td>{lot.sellable
-                    ? <Badge tone="success" icon={CircleCheck}>{t('inb.lots.onSale')}</Badge>
-                    : <Badge tone="danger" icon={Ban}>{t('inb.lots.blocked')}</Badge>}</td>
+      {single ? (
+        <>
+          <dl className={styles.facts} data-testid="receiving-facts">
+            <div><dt>{t('inb.recv.lot')}</dt><dd>{single.lot?.batch ?? shipment.number}</dd></div>
+            <div>
+              <dt>{t('inb.recv.expiry')}</dt>
+              <dd>{single.lot ? <LotLine lot={single.lot} today={today} /> : t(single.item.expiryTracked ? 'inb.recv.expiryMissing' : 'inb.recv.expiryNone')}</dd>
+            </div>
+            <div><dt>{t('inb.recv.place')}</dt><dd>{single.cell ? t('inb.recv.placeValue', { cell: single.cell }) : '—'}</dd></div>
+          </dl>
+          <div className={styles.factsAction}>{lotButton(single)}</div>
+        </>
+      ) : (
+        <div className={styles.scroll}>
+          <table className={styles.table} data-testid="receiving-items">
+            <caption className={styles.visuallyHidden}>{t('inb.recv.itemsCaption', { number: shipment.number })}</caption>
+            <thead>
+              <tr>
+                <th>{t('inb.recv.col.product')}</th>
+                <th className={styles.num}>{t('inb.recv.col.declared')}</th>
+                <th className={styles.num}>{t('inb.recv.col.accepted')}</th>
+                <th className={styles.num}>{t('inb.recv.col.defect')}</th>
+                <th>{t('inb.recv.expiry')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((view) => (
+                <tr key={view.item.id} data-item-id={view.item.id}>
+                  <td>
+                    <span className={styles.stack}>
+                      <span>{view.item.productName}</span>
+                      <span>{[view.item.barcode, view.cell].filter(Boolean).join(' · ') || '—'}</span>
+                    </span>
+                  </td>
+                  <td className={styles.num}>{view.counts.declared}</td>
+                  <td className={styles.num}>{view.counts.accepted}</td>
+                  <td className={styles.num}>{view.counts.defect}</td>
+                  <td>{view.lot ? <LotLine lot={view.lot} today={today} /> : lotButton(view)}</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      {lots.filter((lot) => !lot.sellable).map((lot) => (
-        <div key={lot.id} className={styles.notice} data-tone="warning" data-testid="lot-blocked">
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {items.filter((view) => view.lot && !isSellableExpiry(view.lot.expiryDate, today)).map((view) => (
+        <div key={view.item.id} className={styles.notice} data-tone="warning" data-testid="lot-blocked">
           <div className={styles.noticeBody}>
             <TriangleAlert aria-hidden />
-            <p><strong>{t('inb.lots.blockedTitle', { lot: lot.number })}</strong>{t('inb.lots.blockedText')}</p>
+            <p><strong>{t('inb.lots.blockedTitle', { lot: view.lot?.batch ?? '' })}</strong>{t('inb.lots.blockedText')}</p>
           </div>
         </div>
       ))}
-    </>
+    </section>
   );
 }
 
 interface ActCardProps {
   shipment: InboundShipment;
-  counts: Counts;
+  counts: ItemCounts;
+  items: readonly ItemView[];
   phone: boolean;
   receiver: string;
   today: string;
   note: string;
   onNoteChange: (note: string) => void;
   onFinish: () => void;
-  /** Navbatdagi skanlar yuborilmagan — yakunlash yopiq (umumiy-aloqa-uzildi 4). */
-  queued: number;
+  /** Aloqa yo'q — yakunlash yopiq: akt tizimdagi sonlar bilan tuziladi. */
+  offline: boolean;
 }
 
 /** «Farq akti» (ombor-qabul): sonlar jadvali, kimga va kim qabul qildi, aktga izoh, «Qabulni yakunlash». */
-export function ActCard({ shipment, counts, phone, receiver, today, note, onNoteChange, onFinish, queued }: ActCardProps) {
+export function ActCard({ shipment, counts, items, phone, receiver, today, note, onNoteChange, onFinish, offline }: ActCardProps) {
   const { t } = useTranslation();
   const id = useId();
   const tally = shipmentTally(counts);
   const exact = tally.diff === 0 && counts.defect === 0 && tally.surplus === 0;
-  const diffClass = tally.diff < 0 ? styles.diffNegative : tally.diff > 0 ? styles.diffPositive : undefined;
+  const diffClass = (value: number) => (value < 0 ? styles.diffNegative : value > 0 ? styles.diffPositive : undefined);
+  const row = (view: ItemView) => {
+    const line = shipmentTally(view.counts);
+    return { counted: signed(line.counted - view.counts.declared), diff: line.diff };
+  };
   return (
     <section className={`${styles.card} ${styles.actCard}`} data-testid="act-card">
       <div className={styles.cardHead}>
@@ -193,21 +218,21 @@ export function ActCard({ shipment, counts, phone, receiver, today, note, onNote
         </div>
         <div className={styles.chips}><Badge tone="neutral" icon={CircleMinus}>{t('inb.recv.notSent')}</Badge></div>
       </div>
-      {phone ? (
-        <div className={styles.actPhone}>
+      {phone ? items.map((view) => (
+        <div key={view.item.id} className={styles.actPhone}>
           <div className={styles.stack}>
-            <span>{shipment.sku.name}</span>
-            <span>{[shipment.sku.barcode, shipment.number].filter(Boolean).join(' · ')}</span>
+            <span>{view.item.productName}</span>
+            <span>{[view.item.barcode, shipment.number].filter(Boolean).join(' · ')}</span>
           </div>
           <div className={styles.actGrid}>
-            <div><span>{t('inb.recv.col.declared')}</span><strong>{counts.declared}</strong></div>
-            <div><span>{t('inb.recv.col.accepted')}</span><strong>{counts.accepted}</strong></div>
-            <div><span>{t('inb.recv.col.defect')}</span><strong>{counts.defect}</strong></div>
-            <div><span>{t('inb.recv.col.diffCount')}</span><strong>{signed(tally.counted - counts.declared)}</strong></div>
-            <div className={styles.actDiff} data-negative={tally.diff < 0 || undefined}><span>{t('inb.recv.col.diff')}</span><strong>{signed(tally.diff)}</strong></div>
+            <div><span>{t('inb.recv.col.declared')}</span><strong>{view.counts.declared}</strong></div>
+            <div><span>{t('inb.recv.col.accepted')}</span><strong>{view.counts.accepted}</strong></div>
+            <div><span>{t('inb.recv.col.defect')}</span><strong>{view.counts.defect}</strong></div>
+            <div><span>{t('inb.recv.col.diffCount')}</span><strong>{row(view).counted}</strong></div>
+            <div className={styles.actDiff} data-negative={row(view).diff < 0 || undefined}><span>{t('inb.recv.col.diff')}</span><strong>{signed(row(view).diff)}</strong></div>
           </div>
         </div>
-      ) : (
+      )) : (
         <div className={styles.scroll}>
           <table className={styles.table}>
             <caption className={styles.visuallyHidden}>{t('inb.recv.actCaption', { number: shipment.number })}</caption>
@@ -222,20 +247,34 @@ export function ActCard({ shipment, counts, phone, receiver, today, note, onNote
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><span className={styles.stack}><span>{shipment.sku.name}</span><span>{shipment.sku.barcode ?? '—'}</span></span></td>
-                <td className={styles.num}>{counts.declared}</td>
-                <td className={styles.num}>{counts.accepted}</td>
-                <td className={styles.num}>{counts.defect}</td>
-                <td className={styles.num}>{signed(tally.counted - counts.declared)}</td>
-                <td className={styles.num}><span className={diffClass}>{signed(tally.diff)}</span></td>
-              </tr>
+              {items.map((view) => (
+                <tr key={view.item.id}>
+                  <td><span className={styles.stack}><span>{view.item.productName}</span><span>{view.item.barcode ?? '—'}</span></span></td>
+                  <td className={styles.num}>{view.counts.declared}</td>
+                  <td className={styles.num}>{view.counts.accepted}</td>
+                  <td className={styles.num}>{view.counts.defect}</td>
+                  <td className={styles.num}>{row(view).counted}</td>
+                  <td className={styles.num}><span className={diffClass(row(view).diff)}>{signed(row(view).diff)}</span></td>
+                </tr>
+              ))}
             </tbody>
+            {items.length > 1 ? (
+              <tfoot>
+                <tr>
+                  <td>{t('inb.act.total')}</td>
+                  <td className={styles.num}>{counts.declared}</td>
+                  <td className={styles.num}>{counts.accepted}</td>
+                  <td className={styles.num}>{counts.defect}</td>
+                  <td className={styles.num}>{signed(tally.counted - counts.declared)}</td>
+                  <td className={styles.num}><span className={diffClass(tally.diff)}>{signed(tally.diff)}</span></td>
+                </tr>
+              </tfoot>
+            ) : null}
           </table>
         </div>
       )}
       <div className={styles.pair}>
-        <div><p>{t('inb.recv.to')}</p><p>{t('inb.recv.toValue', { name: shipment.wholesaler.name })}</p></div>
+        <div><p>{t('inb.recv.to')}</p><p>{t('inb.recv.toValue', { name: wholesalerLabel(t, shipment) })}</p></div>
         <div><p>{t('inb.recv.by')}</p><p>{t('inb.recv.byValue', { name: receiver, date: isoToDots(today) })}</p></div>
       </div>
       <div>
@@ -246,16 +285,16 @@ export function ActCard({ shipment, counts, phone, receiver, today, note, onNote
         <textarea
           id={`${id}-note`}
           className={styles.textarea}
-          maxLength={500}
+          maxLength={1000}
           placeholder={t(tally.shortage ? 'inb.recv.notePlaceholderShort' : 'inb.recv.notePlaceholder')}
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
         />
       </div>
       <div className={styles.actFooter}>
-        <p>{queued ? t('inb.recv.queueBlocked', { count: queued }) : t('inb.recv.finishHint')}</p>
+        <p>{offline ? t('inb.recv.offlineBlocked') : t('inb.recv.finishHint')}</p>
         {phone ? null : (
-          <button type="button" className={styles.primary} data-size="large" disabled={queued > 0} title={queued ? t('inb.recv.queueBlockedTitle') : undefined} onClick={onFinish}>
+          <button type="button" className={styles.primary} data-size="large" disabled={offline} title={offline ? t('inb.recv.offlineBlockedTitle') : undefined} onClick={onFinish}>
             {t('inb.recv.finish')}
           </button>
         )}
