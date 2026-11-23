@@ -4,10 +4,12 @@ import type {
   Creative,
   DeliveryMode,
   OfferContent,
+  PolicySource,
   PriceStatus,
   ProductAuditEntry,
   ProductPricing,
 } from '../../features/adminProducts/model/adminProductTypes';
+import { calculatePrice, deliveryView, evaluatePrice, marketCheck, maxSalePriceFor, modesView, recommendedAffiliateFee as calcRecommendedFee, type PricingParams } from '../pricingCalculator';
 import { mockOffers, OFFER_CATEGORIES, type MockOffer } from './offers';
 
 type Schemas = components['schemas'];
@@ -60,13 +62,20 @@ export const mockPolicyAudit = (): MockPolicyAudit[] => [{
 }];
 
 export const GLOBAL_POLICY: Schemas['PricePolicyDto'] = {
-  kSale70: 1.43, kSale100: 1, targetMargin: 0.1, taxRate: 0.04, paymentRate: 0.0185, callCenterFee: 12_000, affiliateCoef: 1.29,
+  kSale70: 29_688, kSale100: 15_232, targetMargin: 9_000, taxRate: 0.04, paymentRate: 0.0185, callCenterFee: 12_000, affiliateCoef: 1.29,
   adCost: 50_420, markupCapPercent: 10, deliveryMode: 'PARTIAL', visibleCenter: 30_000, visibleAddress: 50_000,
 };
 
 /** Mock ichki maydonlari javobga chiqmaydi (`productResponse`). */
 export interface MockAdminProduct extends AdminProductListItem {
+  /** Mahsulotdagi yetkazish rejimi (`deliveryModeSource = PRODUCT` bo'lsa); aks holda yuqori qatlamdan. */
   deliveryMode: DeliveryMode;
+  deliveryModeSource: PolicySource;
+  /** Taklif: bozor narxi manbasi va tekshirilgan vaqt (NRX-5). */
+  marketSource: string | null;
+  marketCheckedAt: string | null;
+  /** Narx navbatiga tushgan vaqt (taklif `GET /admin/moderation/prices`). */
+  priceQueuedAt: string | null;
   /** 501–505: sotuvchi offeridagi chegara (FE-05 bilan bir xil). */
   fixedMaxSalePrice: number | null;
 }
@@ -86,7 +95,8 @@ function base(id: string, name: string, slug: string): Omit<MockAdminProduct, 's
     attributes: {}, hasVariants: false, moderationNote: null, affiliateFee: 65_000, lengthMm: null, widthMm: null, heightMm: null,
     approvedPrice: null, priceStatus: null, marketTotal: null, cpaEnabled: true, isBad: false, isBlocked: false, rating: 0,
     createdAt: daysAgo(30), updatedAt: daysAgo(1), shop: MOCK_SHOP, subtitle: null, submittedAt: null, statusChangedAt: null,
-    blockReason: null, statusChangedBy: null, expiryTracked: false, certificate: null, deliveryMode: 'PARTIAL', fixedMaxSalePrice: null,
+    blockReason: null, statusChangedBy: null, expiryTracked: false, certificate: null, deliveryMode: 'PARTIAL', deliveryModeSource: 'GLOBAL', fixedMaxSalePrice: null,
+    marketSource: null, marketCheckedAt: null, priceQueuedAt: null,
     stock: null, results: null, hasVideo: false,
   };
 }
@@ -129,7 +139,7 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
       status: 'PENDING_REVIEW', categoryId: '12', basePrice: 100_000, weightGrams: 1_600, lengthMm: 320, widthMm: 140, heightMm: 170,
       description: 'Keramik taglikli bug‘li dazmol: bug‘ zarbasi va vertikal bug‘lash, shaffof suv idishi. Ko‘ylak va pardani ilgan holida ham dazmollaydi.',
       subtitle: 'Bug‘ zarbasi va vertikal bug‘lash',
-      images: [image('506', 1), image('506', 2), image('506', 3)], createdAt: minutesAgo(26 * 60), submittedAt: minutesAgo(190), statusChangedAt: minutesAgo(190),
+      images: [image('506', 1), image('506', 2), image('506', 3)], createdAt: minutesAgo(26 * 60), submittedAt: minutesAgo(190), statusChangedAt: minutesAgo(190), priceQueuedAt: minutesAgo(190),
       certificate: { name: 'Muvofiqlik sertifikati.pdf', url: 'https://cdn.elchi.example/certificates/506.pdf', uploadedAt: minutesAgo(192) },
     },
     {
@@ -142,7 +152,7 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
     },
     {
       ...base('508', 'Changyutgich', 'changyutgich'),
-      status: 'DRAFT', categoryId: '12', basePrice: 300_000, weightGrams: 6_000, lengthMm: 420, widthMm: 300, heightMm: 280, deliveryMode: 'SEPARATE',
+      status: 'DRAFT', categoryId: '12', basePrice: 300_000, weightGrams: 6_000, lengthMm: 420, widthMm: 300, heightMm: 280, deliveryMode: 'SEPARATE', deliveryModeSource: 'PRODUCT',
       description: 'Simsiz vertikal changyutgich: 40 daqiqa ishlaydi, gilam va pol uchun.', createdAt: daysAgo(9, 16), statusChangedAt: daysAgo(9, 16),
     },
     {
@@ -157,12 +167,25 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
     {
       ...base('510', 'Elektr ustara', 'elektr-ustara'),
       status: 'ACTIVE', categoryId: '11', basePrice: 95_000, weightGrams: 400, lengthMm: 170, widthMm: 70, heightMm: 60,
-      approvedPrice: 199_000, price: 199_000, priceStatus: 'GREEN', fixedMaxSalePrice: 218_000,
+      approvedPrice: 219_000, price: 219_000, priceStatus: 'GREEN', fixedMaxSalePrice: 240_000,
       description: 'Uch boshli elektr ustara: quruq va nam soqol olish, 60 daqiqa quvvat.', subtitle: 'Quruq va nam soqol, 60 daqiqa',
       images: [image('510', 1), image('510', 2)], submittedAt: daysAgo(4), statusChangedAt: daysAgo(3),
       stock: { available: 30, onHand: 30, reserved: 0, incoming: 0 }, hasVideo: false,
     },
+    // Narx navbati (FE-13, admin-narx): moderatsiyadan o'tgan, narxi hali tasdiqlanmagan — sotuvchilarga yopiq.
+    priceQueued('511', 'Bolalar quloqchinlari', 'bolalar-quloqchinlari', 140_000, 300, 300, 'Bolalar uchun simsiz quloqchinlar: ovoz chegarasi 85 dB, 20 soat quvvat.'),
+    priceQueued('512', 'Bolalar tarozisi', 'bolalar-tarozisi', 100_000, 500, 280, 'Chaqaloqlar uchun elektron tarozi: 20 kg gacha, 5 g aniqlik.'),
+    priceQueued('513', 'Termos krujka', 'termos-krujka', 60_000, 400, 260, 'Zanglamaydigan po‘latdan termos krujka: 12 soat issiq saqlaydi, 450 ml.'),
   ];
+}
+
+function priceQueued(id: string, name: string, slug: string, basePrice: number, weightGrams: number, queuedMinutesAgo: number, description: string): MockAdminProduct {
+  return {
+    ...base(id, name, slug),
+    status: 'ACTIVE', categoryId: '13', basePrice, weightGrams, lengthMm: 160, widthMm: 120, heightMm: 80, description,
+    images: [image(id, 1)], createdAt: minutesAgo(queuedMinutesAgo + 120), submittedAt: minutesAgo(queuedMinutesAgo + 60),
+    statusChangedAt: minutesAgo(queuedMinutesAgo), statusChangedBy: 'Nodira Karimova', priceQueuedAt: minutesAgo(queuedMinutesAgo),
+  };
 }
 
 /** Sotuvchi offeridagi kreativlar (FE-05) admin kutubxonasiga; 509 — video bilan, 510 — videosiz. */
@@ -207,6 +230,11 @@ export function mockOfferContents(offers: readonly MockOffer[] = mockOffers()): 
 /** Audit: moderatsiya namunasidagi uch yozuv (admin-moderatsiya «Audit — shu mahsulot»). */
 export function mockProductAudit(): (ProductAuditEntry & { entityId: string })[] {
   return [
+    ...([['511', 251_000, 262_000, 140_000, 300], ['512', 210_000, 221_000, 100_000, 280], ['513', 169_000, 180_000, 60_000, 260]] as const).flatMap(([id, recommendedBase, recommended, basePrice, queued]) => [
+      { id: `A-${id}-1`, entityId: id, at: minutesAgo(queued + 60), actorName: 'Nodira Karimova', action: 'product.create', meta: { status: 'PENDING_REVIEW' } },
+      { id: `A-${id}-2`, entityId: id, at: minutesAgo(queued + 60), actorName: 'Nodira Karimova', action: 'product.basePrice', meta: { from: null, to: basePrice } },
+      { id: `A-${id}-3`, entityId: id, at: minutesAgo(queued), actorName: null, action: 'price.recommended', meta: { recommendedBase, recommended } },
+    ]),
     { id: 'A-506-1', entityId: '506', at: minutesAgo(192), actorName: MOCK_SHOP.name, action: 'product.certificate', meta: { fileName: 'Muvofiqlik sertifikati.pdf' } },
     { id: 'A-506-2', entityId: '506', at: minutesAgo(190), actorName: MOCK_SHOP.name, action: 'product.submit', meta: { from: 'DRAFT', to: 'PENDING_REVIEW' } },
     { id: 'A-506-3', entityId: '506', at: minutesAgo(190), actorName: null, action: 'price.recommended', meta: { recommendedBase: 210_000, recommended: 221_000 } },
@@ -215,50 +243,77 @@ export function mockProductAudit(): (ProductAuditEntry & { entityId: string })[]
 }
 
 // ── Narx hisobi (BE-09) ────────────────────────────────────────────────────────
-// FE-12 uchun soddalashtirilgan: namuna sonlari dizayndagi bilan bir xil (262 000 → 287 000, natija 10 185).
-// Aniq TZ formulasi (K₇₀, K₁₀₀, M) — FE-13 da.
-const AD_COST = 50_420;
-const AFFILIATE_COEF = 1.29;
-const MARKUP_CAP_PERCENT = 10;
+// Aniq kalkulyator — `../pricingCalculator` (backend `price-calculator.ts` nusxasi). Parametrlar: global → kategoriya
+// qatlami → mahsulot (yetkazish rejimi). Taklif maydonlari (modes, market, maxAffiliateFee) — fe-13 hujjati.
 export const TARIFF = { centerBase: 40_000, baseWeightGrams: 3_000, perExtraKg: 4_000, addressExtra: 20_000 };
-const VISIBLE = { center: 30_000, address: 50_000 };
-const up1000 = (value: number) => Math.ceil(value / 1000) * 1000;
-const down1000 = (value: number) => Math.floor(value / 1000) * 1000;
 
-export const recommendedAffiliateFee = () => down1000(AD_COST * AFFILIATE_COEF);
+/** Kategoriya qatlami (null — globaldan). */
+export type MockPolicyLayer = Partial<Record<keyof Schemas['PricePolicyDto'], unknown>>;
 
-function tariffCenter(weightGrams: number) {
-  return TARIFF.centerBase + Math.max(0, Math.ceil((weightGrams - TARIFF.baseWeightGrams) / 1000)) * TARIFF.perExtraKg;
+/** Mahsulot parametrlari: global sozlama, kategoriya qatlami, mahsulotdagi yetkazish rejimi. */
+export function mockPricingParams(product: Pick<MockAdminProduct, 'deliveryMode' | 'deliveryModeSource'>, layer: MockPolicyLayer = {}): PricingParams & { deliveryModeSource: PolicySource } {
+  const merged = { ...GLOBAL_POLICY } as Record<string, unknown>;
+  Object.entries(layer).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) merged[key] = value;
+  });
+  const categoryMode = layer.deliveryMode !== null && layer.deliveryMode !== undefined;
+  const source: PolicySource = product.deliveryModeSource === 'PRODUCT' ? 'PRODUCT' : categoryMode ? 'CATEGORY' : 'GLOBAL';
+  const deliveryMode = (source === 'PRODUCT' ? product.deliveryMode : merged.deliveryMode) as DeliveryMode;
+  const numberOf = (key: string) => Number(merged[key]);
+  return {
+    kSale70: numberOf('kSale70'), kSale100: numberOf('kSale100'), targetMargin: numberOf('targetMargin'), taxRate: numberOf('taxRate'),
+    paymentRate: numberOf('paymentRate'), callCenterFee: numberOf('callCenterFee'), affiliateCoef: numberOf('affiliateCoef'), adCost: numberOf('adCost'),
+    markupCapPercent: numberOf('markupCapPercent'), deliveryMode, visibleCenter: numberOf('visibleCenter'), visibleAddress: numberOf('visibleAddress'),
+    deliveryModeSource: source,
+  };
 }
 
-export function mockDelivery(product: Pick<MockAdminProduct, 'weightGrams' | 'deliveryMode'>) {
-  const center = tariffCenter(product.weightGrams ?? 0);
-  if (product.deliveryMode === 'SEPARATE') return { tariffCenter: center, visibleCenter: center, visibleAddress: center + TARIFF.addressExtra, hidden: 0 };
-  if (product.deliveryMode === 'FREE') return { tariffCenter: center, visibleCenter: 0, visibleAddress: 0, hidden: center };
-  return { tariffCenter: center, visibleCenter: VISIBLE.center, visibleAddress: VISIBLE.address, hidden: center - VISIBLE.center };
+export const recommendedAffiliateFee = () => calcRecommendedFee(mockPricingParams({ deliveryMode: 'PARTIAL', deliveryModeSource: 'GLOBAL' }));
+
+const inputsOf = (product: MockAdminProduct, affiliateFee: number) => ({ basePrice: product.basePrice ?? 0, affiliateFee, weightGrams: product.weightGrams ?? 0 });
+
+export function mockDelivery(product: Pick<MockAdminProduct, 'weightGrams' | 'deliveryMode' | 'deliveryModeSource'>, layer: MockPolicyLayer = {}) {
+  return deliveryView(mockPricingParams(product, layer), TARIFF, product.weightGrams ?? 0);
 }
 
-export function mockPricing(product: MockAdminProduct, query: { price?: number; affiliateFee?: number } = {}): ProductPricing {
-  const fee = query.affiliateFee ?? product.affiliateFee ?? recommendedAffiliateFee();
-  const basePrice = product.basePrice ?? 0;
-  const delivery = mockDelivery(product);
-  const recommendedBase = up1000(1.025 * basePrice + 42_500 + fee);
-  const recommended = recommendedBase + (delivery.hidden > 0 ? up1000(delivery.hidden / 0.9415) : 0);
-  const price = query.price ?? product.approvedPrice ?? recommended;
-  const platformResult70 = Math.floor(0.96 * (price - basePrice - fee) - 0.0185 * price - 29_688 - delivery.hidden);
-  const affiliateResult = fee - AD_COST;
-  const status: PriceStatus = platformResult70 + 15_000 < 0 ? 'RED' : affiliateResult < 0 ? 'ORANGE' : price >= recommended ? 'GREEN' : platformResult70 >= 0 ? 'YELLOW' : 'ORANGE';
+/** BE-09 `isApprovalCurrent`: qizil bo'lsa yoki yangi zarar paydo bo'lsa — tasdiq joriy emas (narx navbatiga). */
+export function mockApprovalCurrent(product: MockAdminProduct, layer: MockPolicyLayer = {}): boolean {
+  if (product.approvedPrice === null || !product.priceStatus || product.basePrice === null || !product.weightGrams) return false;
+  const params = mockPricingParams(product, layer);
+  const now = evaluatePrice(params, calculatePrice(params, TARIFF, inputsOf(product, product.affiliateFee ?? 0)), product.approvedPrice).status;
+  if (now === 'RED') return false;
+  return now !== 'ORANGE' || product.priceStatus === 'ORANGE';
+}
+
+export function mockPricing(product: MockAdminProduct, query: { price?: number; affiliateFee?: number } = {}, layer: MockPolicyLayer = {}): ProductPricing {
+  const params = mockPricingParams(product, layer);
+  const fee = query.affiliateFee ?? product.affiliateFee ?? calcRecommendedFee(params);
+  const calculation = calculatePrice(params, TARIFF, inputsOf(product, fee));
+  const price = query.price ?? product.approvedPrice ?? calculation.recommended;
   const approved = product.approvedPrice;
+  const market = product.marketTotal === null ? null : {
+    ...marketCheck(params, calculatePrice(params, TARIFF, inputsOf(product, product.affiliateFee ?? calcRecommendedFee(params))), product.marketTotal),
+    source: product.marketSource, checkedAt: product.marketCheckedAt,
+  };
   return {
     productId: product.id,
-    approvalCurrent: approved !== null,
-    params: { adCost: AD_COST, affiliateCoef: AFFILIATE_COEF, markupCapPercent: MARKUP_CAP_PERCENT, deliveryMode: product.deliveryMode, taxRate: Number(GLOBAL_POLICY.taxRate), paymentRate: Number(GLOBAL_POLICY.paymentRate) },
+    approvalCurrent: mockApprovalCurrent(product, layer),
+    params,
     tariff: TARIFF,
-    recommendedAffiliateFee: recommendedAffiliateFee(),
-    calculation: { recommendedBase, recommended, delivery },
-    evaluation: { status, price, platformResult70, affiliateResult },
+    recommendedAffiliateFee: calcRecommendedFee(params),
+    calculation,
+    evaluation: evaluatePrice(params, calculation, price),
     approvedPrice: approved,
     priceStatus: (product.priceStatus as PriceStatus | null) ?? null,
-    maxSalePrice: approved === null ? null : product.fixedMaxSalePrice ?? approved + down1000((recommendedBase * MARKUP_CAP_PERCENT) / 100),
+    marketTotal: product.marketTotal,
+    maxSalePrice: approved === null ? null : product.fixedMaxSalePrice ?? maxSalePriceFor(params, approved, calculation.delivery, product.marketTotal),
+    modes: modesView(params, TARIFF, inputsOf(product, fee)),
+    market,
   };
+}
+
+/** NRX-5: bozor narxi tekshiruvi — mahsulotdagi haq bilan (BE-09 `marketCheck`). */
+export function mockMarketCheck(product: MockAdminProduct, competitorTotal: number, layer: MockPolicyLayer = {}) {
+  const params = mockPricingParams(product, layer);
+  return marketCheck(params, calculatePrice(params, TARIFF, inputsOf(product, product.affiliateFee ?? calcRecommendedFee(params))), competitorTotal);
 }

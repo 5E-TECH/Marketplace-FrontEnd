@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
-import { Inbox, ShieldAlert, Tag } from 'lucide-react';
+import { Inbox, ShieldAlert } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getAdminProduct } from '../../features/adminProducts/api/adminProductsApi';
@@ -33,6 +33,7 @@ import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 import { ApproveDialog, RejectDialog } from './components/DecisionDialogs';
 import { DecisionPanel } from './components/DecisionPanel';
 import { ModerationQueue, PhoneQueue, RefreshStatus } from './components/ModerationQueue';
+import { PriceModeration } from './components/PriceModeration';
 import { decisionProgress, emptyDecision, submittedAt, type DecisionState } from './model/decision';
 import styles from './AdminModerationPage.module.css';
 
@@ -42,7 +43,7 @@ const POLL_MS = 60_000;
 /**
  * «Moderatsiya navbatlari» (FE-12, ADM-1; admin-moderatsiya): mahsulot navbati, optovik yuborgan ma'lumot,
  * tekshiruv va qaror (tasdiqlash yoki sabab bilan rad etish), shu mahsulot auditi. Navbat har 60 soniyada
- * yangilanadi. «Narx» tabi mazmuni — FE-13 (admin-narx). Kreativ va landing moderatsiyasi — karta bo'yicha yo'q.
+ * yangilanadi. «Narx» tabi — FE-13 (admin-narx, `PriceModeration`). Kreativ va landing moderatsiyasi — karta bo'yicha yo'q.
  * Telefonda navbat ro'yxati va mahsulot alohida sahifa (`/admin/moderation/:productId`).
  */
 export default function AdminModerationPage() {
@@ -180,14 +181,6 @@ export default function AdminModerationPage() {
     </Link>
   );
   const status = <RefreshStatus updatedAt={queue.dataUpdatedAt} onRefresh={refresh} refreshing={queue.isFetching} />;
-
-  const pricesPanel = (
-    <section className={styles.pricesPanel} data-testid="moderation-prices">
-      <span aria-hidden><Tag /></span>
-      <h2>{t('moderation.pricesTitle')}</h2>
-      <p>{t('moderation.pricesText', { count: pricesCount })}</p>
-    </section>
-  );
 
   const queueError = queue.isError ? (
     <LoadError error={queue.error} onRetry={() => void queue.refetch()} lastSuccessAt={queue.dataUpdatedAt} title={t('moderation.loadErrorTitle')} note={t('moderation.loadErrorNote')} />
@@ -327,13 +320,16 @@ export default function AdminModerationPage() {
     </div>
   );
 
+  // «Narx» tabi — FE-13 (admin-narx): narx navbati va kalkulyator.
+  if (tab === 'prices') return <PriceModeration phone={phone} routeId={routeId} tabs={tabs} bannedLink={bannedLink} />;
+
   // ── Telefon: ro'yxat yoki mahsulot sahifasi ───────────────────────────────────
   if (phone) {
     if (!selectedId) {
       return (
         <div className={styles.page} data-layout="phone">
           {tabs}
-          {tab === 'prices' ? pricesPanel : queueError ?? (
+          {queueError ?? (
             <>
               <div className={styles.phoneStatus}>
                 <RefreshStatus updatedAt={queue.dataUpdatedAt} onRefresh={refresh} refreshing={queue.isFetching} compact />
@@ -368,7 +364,7 @@ export default function AdminModerationPage() {
           {bannedLink}
         </div>
       </div>
-      {tab === 'prices' ? pricesPanel : queueError ?? (queue.isSuccess && !items.length && !requestedId ? empty : (
+      {queueError ?? (queue.isSuccess && !items.length && !requestedId ? empty : (
         <div className={styles.board}>
           <ModerationQueue items={items} loading={queue.isPending} selectedId={selectedId} hrefOf={hrefOf} status={status} />
           <div className={styles.detail}>{review}</div>

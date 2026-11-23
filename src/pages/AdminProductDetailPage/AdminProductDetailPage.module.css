@@ -220,8 +220,10 @@ a.smallButton { text-decoration: none; }
 .lockedField svg { width: 12px; height: 12px; }
 
 /* ── Boshqa yorliqlar ── */
-.placeholder { padding: 32px 24px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; text-align: center; }
-.placeholder > p { margin: 0; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+.priceCard { min-width: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; }
+@container content (max-width: 919.98px) {
+  .priceCard { background: none; border: 0; border-radius: 0; }
+}
 .auditCard { padding: 20px 20px 24px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; }
 .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
 .kpis > div { padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-sunken); }

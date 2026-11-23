@@ -12,9 +12,14 @@ import {
   getCreatives,
   getModerationSummary,
   getOfferContent,
+  checkMarketPrice,
+  decidePrice,
   getPriceDecisions,
+  getPriceQueue,
   getProductAudit,
   getProductPricing,
+  previewMarketPrice,
+  setProductDeliveryMode,
   getWholesalerOptions,
   hideProduct,
   reactivateProduct,
@@ -32,6 +37,8 @@ export const adminProductKeys = {
   summary: ['admin', 'products', 'summary'] as const,
   product: (id: string) => ['admin', 'products', 'item', id] as const,
   pricing: (id: string, query: { price?: number; affiliateFee?: number } = {}) => ['admin', 'products', 'item', id, 'pricing', query] as const,
+  priceQueue: ['admin', 'products', 'price-queue'] as const,
+  marketPreview: (id: string, total: number) => ['admin', 'products', 'item', id, 'market-preview', total] as const,
   decisions: (id: string) => ['admin', 'products', 'item', id, 'decisions'] as const,
   creatives: (id: string) => ['admin', 'products', 'item', id, 'creatives'] as const,
   content: (id: string) => ['admin', 'products', 'item', id, 'content'] as const,
@@ -126,6 +133,38 @@ export function useChangeAffiliateFeeMutation() {
     ]),
   });
 }
+
+/** Narx navbati (taklif `GET /admin/moderation/prices`); moderatsiya sahifasida har 60 soniyada yangilanadi. */
+export function usePriceQueueQuery(options: { refetchInterval?: number; enabled?: boolean } = {}) {
+  return useQuery({ queryKey: adminProductKeys.priceQueue, queryFn: ({ signal }) => getPriceQueue(signal), ...options });
+}
+
+/** Bozor narxi oynasi: kiritilgan summa natijasi (saqlanmaydi). */
+export function useMarketPreviewQuery(id: string, total: number | undefined) {
+  return useQuery({
+    queryKey: adminProductKeys.marketPreview(id, total ?? 0),
+    queryFn: ({ signal }) => previewMarketPrice({ id, competitorTotal: total ?? 0 }, signal),
+    enabled: total !== undefined && total > 0,
+    retry: false,
+    staleTime: 60_000,
+  });
+}
+
+/** Narx qarori, bozor narxi, yetkazish rejimi: mahsulot hisobi, navbat va hisoblagichlar qayta so'raladi. */
+function usePricingMutation<T extends { id: string }, R>(mutationFn: (value: T) => Promise<R>) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: (_, { id }) => Promise.all([
+      client.invalidateQueries({ queryKey: adminProductKeys.product(id) }),
+      client.invalidateQueries({ queryKey: adminProductKeys.all }),
+    ]),
+  });
+}
+
+export const useDecidePriceMutation = () => usePricingMutation(decidePrice);
+export const useMarketCheckMutation = () => usePricingMutation(checkMarketPrice);
+export const useDeliveryModeMutation = () => usePricingMutation(setProductDeliveryMode);
 
 export function useSaveOfferContentMutation() {
   const client = useQueryClient();

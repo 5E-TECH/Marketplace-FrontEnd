@@ -9,9 +9,12 @@ import type {
   Creative,
   CreativeType,
   CreativeUploadPolicy,
+  DeliveryMode,
+  MarketCheckResult,
   ModerationSummary,
   OfferContent,
   PriceDecision,
+  PriceQueueItem,
   ProductAuditEntry,
   ProductListTab,
   ProductPricing,
@@ -161,6 +164,40 @@ export async function getPriceDecisions(id: string, signal?: AbortSignal): Promi
 }
 
 /**
+ * NRX-6: narxni tasdiqlash (FE-13). Qizil — 400 (`details: Eng kam narx …`); to'q sariq — sabab majburiy, superadminga
+ * xabar. `affiliateFee` berilsa — haq ham shu qaror bilan (NRX-13 zararsiz taklif). Javob — yangi hisob.
+ */
+export async function decidePrice({ id, price, affiliateFee, reason }: { id: string; price: number; affiliateFee?: number; reason?: string }): Promise<ProductPricing> {
+  const body = { price, ...(affiliateFee !== undefined ? { affiliateFee } : {}), ...(reason ? { reason } : {}) };
+  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/price-decision`, body);
+  return readDto<ProductPricing>(data, ['params', 'calculation', 'approvedPrice', 'maxSalePrice']);
+}
+
+/** NRX-5: raqobatchida mijoz jami bilan solishtirish; summa mahsulotda saqlanadi. `source` — taklif (fe-13 §3). */
+export async function checkMarketPrice({ id, competitorTotal, source }: { id: string; competitorTotal: number; source?: string }): Promise<MarketCheckResult> {
+  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/market-check`, { competitorTotal, ...(source ? { source } : {}) });
+  return readDto<MarketCheckResult>(data, ['competitorTotal', 'ourTotal', 'verdict']);
+}
+
+/** Taklif (fe-13 §3): bozor narxi natijasini saqlamasdan oldindan ko'rish («Bozor narxini kiritish» oynasi). */
+export async function previewMarketPrice({ id, competitorTotal }: { id: string; competitorTotal: number }, signal?: AbortSignal): Promise<MarketCheckResult> {
+  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/market-check`, { competitorTotal, preview: true }, { signal });
+  return readDto<MarketCheckResult>(data, ['competitorTotal', 'ourTotal', 'verdict']);
+}
+
+/** TZ 2.4, NRX-8: mahsulot darajasida yetkazish rejimi (`null` — yuqori qatlamdan). */
+export async function setProductDeliveryMode({ id, deliveryMode }: { id: string; deliveryMode: DeliveryMode | null }): Promise<void> {
+  await httpClient.put<unknown>(`/admin/products/${encodeURIComponent(id)}/price-policy`, { deliveryMode });
+}
+
+/** Taklif (fe-13 §1): narx navbati — narx qarori kutayotgan mahsulotlar, tavsiya narx bilan. */
+export async function getPriceQueue(signal?: AbortSignal): Promise<PriceQueueItem[]> {
+  const { data } = await httpClient.get<unknown>('/admin/moderation/prices', { signal });
+  const record = asRecord(unwrapApiData(data));
+  return readDtoList<PriceQueueItem>(readItems(record.items) ?? [], ['productId', 'name', 'basePrice', 'recommended']);
+}
+
+/**
  * Sotuvchi haqini o'zgartirish (taklif, 6-bo'lim): tasdiqlangan narx o'zgarmaydi, haq va sabab narx qarori
  * bo'lib yoziladi; to'q sariqda superadminga xabar, qizil — 400.
  */
@@ -224,6 +261,7 @@ export async function deleteCreative({ productId, creativeId, reason }: { produc
 }
 
 /** Taklif (3-bo'lim): mavjud audit ro'yxati `entityType` + `entityId` bilan; eng yangisi tepada. */
+/** Shu mahsulot auditi — vaqt bo'yicha (eski → yangi, admin-moderatsiya va admin-narx «Audit» jadvali). */
 export async function getProductAudit(productId: string, signal?: AbortSignal): Promise<ProductAuditEntry[]> {
   const { data } = await httpClient.get<unknown>('/admin/audit', { params: { entityType: 'Product', entityId: productId, page: 1, limit: 50 }, signal });
   const items = readItems(unwrapApiData(data), 'items');
@@ -237,5 +275,5 @@ export async function getProductAudit(productId: string, signal?: AbortSignal): 
       action: readText(row, 'action'),
       meta: asRecord(row.meta),
     };
-  });
+  }).sort((a, b) => a.at.localeCompare(b.at));
 }

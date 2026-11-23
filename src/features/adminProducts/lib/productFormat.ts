@@ -18,6 +18,10 @@ const STATUS_KEYS = ['DRAFT', 'PENDING_REVIEW', 'ACTIVE', 'REJECTED', 'ARCHIVED'
 const statusName = (t: Translate, code: unknown) =>
   typeof code !== 'string' ? '—' : STATUS_KEYS.includes(code) ? t(`status.product.${code}` as TranslationKey) : code;
 
+const PRICE_STATUSES = ['GREEN', 'YELLOW', 'ORANGE', 'RED'];
+const priceStatusName = (t: Translate, code: unknown) =>
+  typeof code === 'string' && PRICE_STATUSES.includes(code) ? t(`status.price.${code}` as TranslationKey) : '—';
+
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
 const money = (value: unknown) => (typeof value === 'number' ? formatMoney(value) : '—');
 
@@ -32,9 +36,15 @@ export function auditChange(entry: ProductAuditEntry, t: Translate): string {
     case 'product.hide': return t('audit.product.hide', { reason: text(meta.reason) });
     case 'product.reactivate': return t('audit.product.reactivate');
     case 'product.update': return t('audit.product.update');
-    case 'product.create': return t('audit.product.create');
+    case 'product.create': return meta.status ? t('audit.product.createStatus', { status: statusName(t, meta.status) }) : t('audit.product.create');
+    case 'product.basePrice': return t('audit.product.basePrice', { from: money(meta.from), to: money(meta.to) });
     case 'price.recommended': return t('audit.price.recommended', { base: money(meta.recommendedBase), customer: money(meta.recommended) });
-    case 'price.decision': return t('audit.price.decision', { price: money(meta.price), fee: money(meta.affiliateFee) });
+    case 'price.decision': return t('audit.price.decision', { status: priceStatusName(t, meta.status), price: money(meta.price), fee: money(meta.affiliateFee) });
+    case 'price.market': return t('audit.price.market', { total: money(meta.competitorTotal), verdict: meta.verdict === 'MOS' || meta.verdict === 'QIMMAT' ? t(`audit.price.market${meta.verdict}`) : '—' });
+    case 'pricing.policy.update': {
+      const mode = (meta.after as Record<string, unknown> | undefined)?.deliveryMode;
+      return mode === 'SEPARATE' || mode === 'PARTIAL' || mode === 'FREE' ? t('audit.price.mode', { mode: t(`anarx.modeName.${mode}`) }) : t('audit.price.modeInherit');
+    }
     case 'creative.create':
     case 'creative.delete': {
       const type = meta.type === 'VIDEO' || meta.type === 'IMAGE' ? t(`audit.creative.${meta.type}`) : '—';

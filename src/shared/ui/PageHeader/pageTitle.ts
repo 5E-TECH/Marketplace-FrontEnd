@@ -7,6 +7,29 @@ import { createContext, useContext, useLayoutEffect } from 'react';
  */
 export const PageTitleContext = createContext<((title: string | null) => void) | null>(null);
 
+/** Yuqori qatordagi «orqaga»: odatda bo'lim manzili (marshrut `section`); sahifa aniqrog'ini bera oladi. */
+export interface PageBack {
+  path: string;
+  label: string;
+}
+
+export const PageBackContext = createContext<((back: PageBack | null) => void) | null>(null);
+
+/**
+ * Sahifa «orqaga» manzilini beradi (masalan, `/admin/moderation?tab=prices` — «Narx navbati»): bo'lim manzili
+ * boshqa yorliqni ochadigan bo'lsa. `null` — bo'lim manzili.
+ */
+export function usePageBack(back: PageBack | null): void {
+  const setBack = useContext(PageBackContext);
+  const path = back?.path ?? null;
+  const label = back?.label ?? null;
+  useLayoutEffect(() => {
+    if (!setBack) return;
+    setBack(path && label ? { path, label } : null);
+    return () => setBack(null);
+  }, [setBack, path, label]);
+}
+
 /** Karkas ichidami — PageHeader o'z `h1` ini chizmasligi uchun. */
 export function useInShell(): boolean {
   return useContext(PageTitleContext) !== null;

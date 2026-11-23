@@ -1,5 +1,6 @@
 import type { Language } from '../../features/preferences/model/preferencesSlice';
 import { adminTranslations } from './adminTranslations';
+import { adminPriceTranslations } from './adminPriceTranslations';
 import { adminProductsTranslations } from './adminProductsTranslations';
 import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
@@ -60,6 +61,7 @@ export const translations = {
     ...sellerOffersTranslations.uz,
     ...sellerOfferDetailTranslations.uz,
     ...adminProductsTranslations.uz,
+    ...adminPriceTranslations.uz,
     ...operatorWorkspaceTranslations.uz,
     ...statusTranslations.uz,
     ...sharedUiTranslations.uz,
@@ -105,6 +107,7 @@ export const translations = {
     ...sellerOffersTranslations.ru,
     ...sellerOfferDetailTranslations.ru,
     ...adminProductsTranslations.ru,
+    ...adminPriceTranslations.ru,
     ...operatorWorkspaceTranslations.ru,
     ...statusTranslations.ru,
     ...sharedUiTranslations.ru,
@@ -150,6 +153,7 @@ export const translations = {
     ...sellerOffersTranslations.en,
     ...sellerOfferDetailTranslations.en,
     ...adminProductsTranslations.en,
+    ...adminPriceTranslations.en,
     ...operatorWorkspaceTranslations.en,
     ...statusTranslations.en,
     ...sharedUiTranslations.en,
