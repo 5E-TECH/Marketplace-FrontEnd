@@ -3,7 +3,7 @@ import type { CreativeType, ModerationSummary, OfferContent, ProductListTab } fr
 import { creativesOf } from '../catalog';
 import { db } from '../db';
 import { categorySlug, SLUG_PATTERN } from '../../features/categories/lib/categorySlug';
-import { categoryTree, GLOBAL_POLICY, MOCK_SHOP, mockDelivery, mockPricing, TARIFF, type MockAdminProduct, type MockCategory } from '../fixtures/adminProducts';
+import { categoryTree, GLOBAL_POLICY, MOCK_SHOP, mockApprovalCurrent, mockDelivery, mockMarketCheck, mockPricing, TARIFF, type MockAdminProduct, type MockCategory } from '../fixtures/adminProducts';
 import { API, fail, ok, pageOf } from '../utils';
 import { currentMockUser } from './auth';
 import { inboundProductRecords, warehouseStockRows, wholesalerDtos } from './warehouse';
@@ -23,9 +23,15 @@ const guard = (request: Request, cookies: Record<string, string>, roles = ADMIN_
 };
 
 const findProduct = (id: unknown) => db.adminProducts.find((product) => product.id === String(id));
+/** Kategoriya narx qatlami (null — globaldan). */
+const layerOf = (product: MockAdminProduct) => db.categoryPolicies[product.categoryId ?? ''] ?? {};
+
+/** BE-27 `pricesPending`: CPA, bloklanmagan, ko'rib chiqilmoqda yoki faol va narx tasdig'i joriy emas. */
+const inPriceQueue = (product: MockAdminProduct) => product.cpaEnabled && !product.isBlocked
+  && (product.status === 'PENDING_REVIEW' || product.status === 'ACTIVE') && !mockApprovalCurrent(product, layerOf(product));
 
 /** Mock ichki maydonlarisiz; ro'yxatda — taklif qilingan qo'shimchalar (narx, qoldiq, natija, video). */
-const INTERNAL_KEYS = ['deliveryMode', 'fixedMaxSalePrice', 'stock', 'results', 'hasVideo'] as const;
+const INTERNAL_KEYS = ['deliveryMode', 'deliveryModeSource', 'marketSource', 'marketCheckedAt', 'priceQueuedAt', 'fixedMaxSalePrice', 'stock', 'results', 'hasVideo'] as const;
 
 function productResponse(product: MockAdminProduct, list = false) {
   const dto: Partial<MockAdminProduct> = { ...product };
@@ -67,8 +73,7 @@ function summary(): ModerationSummary {
   });
   return {
     productsPending: byStatus.PENDING_REVIEW,
-    // Narx qarori kutayotganlar (FE-13): tasdiqlangan narxi yo'q, arxivlanmagan.
-    pricesPending: db.adminProducts.filter((product) => product.approvedPrice === null && product.status !== 'ARCHIVED').length,
+    pricesPending: db.adminProducts.filter(inPriceQueue).length,
     byStatus,
     outOfStock: db.adminProducts.filter((product) => product.status === 'ACTIVE' && product.stock?.available === 0).length,
     expirySoon: 0,
@@ -194,6 +199,21 @@ export const adminHandlers = [
     return denied ?? ok(summary());
   }),
 
+  // Taklif (fe-13 §1): narx navbati — narx qarori kutayotganlar, navbatga tushgan vaqt tartibida.
+  http.get(`${API}/admin/moderation/prices`, ({ request, cookies }) => {
+    const { denied } = guard(request, cookies);
+    if (denied) return denied;
+    const items = db.adminProducts
+      .filter(inPriceQueue)
+      .map((product) => ({
+        productId: product.id, name: product.name, shopName: product.shop?.name ?? null, basePrice: product.basePrice ?? 0,
+        recommended: mockPricing(product, {}, layerOf(product)).calculation.recommended, deliveryMode: product.deliveryMode,
+        queuedAt: product.priceQueuedAt ?? product.submittedAt ?? product.updatedAt,
+      }))
+      .sort((a, b) => a.queuedAt.localeCompare(b.queuedAt));
+    return ok({ items, total: items.length });
+  }),
+
   http.get(`${API}/admin/products`, ({ request, cookies }) => {
     const { denied } = guard(request, cookies, [...ADMIN_ROLES, 'WAREHOUSE']);
     if (denied) return denied;
@@ -315,7 +335,7 @@ export const adminHandlers = [
     if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
     const url = new URL(request.url);
     const number = (key: string) => (url.searchParams.has(key) ? Number(url.searchParams.get(key)) : undefined);
-    return ok(mockPricing(product, { price: number('price'), affiliateFee: number('affiliateFee') }));
+    return ok(mockPricing(product, { price: number('price'), affiliateFee: number('affiliateFee') }, layerOf(product)));
   }),
 
   http.get(`${API}/admin/products/:id/price-decisions`, ({ request, cookies, params }) => {
@@ -339,16 +359,21 @@ export const adminHandlers = [
     if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
     const body = (await request.json().catch(() => ({}))) as { price?: number; affiliateFee?: number; reason?: string };
     if (!Number.isInteger(body.price) || (body.affiliateFee !== undefined && !Number.isInteger(body.affiliateFee))) return fail(400, 'VALIDATION_ERROR', 'Narx va haq butun so‘mda');
-    const pricing = mockPricing(product, { price: body.price, affiliateFee: body.affiliateFee });
+    const pricing = mockPricing(product, { price: body.price, affiliateFee: body.affiliateFee }, layerOf(product));
     const status = pricing.evaluation?.status ?? 'GREEN';
     const reason = body.reason?.trim() || null;
-    if (status === 'RED') return fail(400, 'VALIDATION_ERROR', 'Qizil narx: har bir buyurtma sotilsa ham platforma zarar ko‘radi — saqlanmaydi');
+    if (status === 'RED') {
+      return fail(400, 'VALIDATION_ERROR', 'Qizil narx: har bir buyurtma sotilsa ham platforma zarar ko‘radi — saqlanmaydi', undefined, {
+        details: [{ field: 'price', error: `Eng kam narx ${pricing.calculation.orangeFrom}` }],
+      });
+    }
     if (status === 'ORANGE' && !reason) return fail(400, 'VALIDATION_ERROR', 'To‘q sariq narx: sabab majburiy (platforma yoki sotuvchi zarar ko‘radi)');
     const previousFee = product.affiliateFee;
     product.approvedPrice = body.price ?? product.approvedPrice;
     product.price = product.approvedPrice ?? product.price;
     product.priceStatus = status;
     product.affiliateFee = body.affiliateFee ?? product.affiliateFee;
+    product.priceQueuedAt = null;
     touch(product);
     const decision = {
       id: `PD-${product.id}-${Date.now()}`, productId: product.id, price: product.approvedPrice ?? 0, basePrice: product.basePrice ?? 0,
@@ -357,7 +382,47 @@ export const adminHandlers = [
     };
     db.priceDecisions[product.id] = [decision, ...(db.priceDecisions[product.id] ?? [])];
     audit(product.id, 'price.decision', actor, { price: decision.price, affiliateFee: decision.affiliateFee, previousFee, status, reason });
-    return ok({ decision, ...pricing }, 201);
+    return ok({ decision, ...mockPricing(product, {}, layerOf(product)) }, 201);
+  }),
+
+  // NRX-5 (BE-09): raqobatchida mijoz jami — summa mahsulotda saqlanadi; `source` — taklif (fe-13 §3).
+  http.post(`${API}/admin/products/:id/market-check`, async ({ request, cookies, params }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const product = findProduct(params.id);
+    if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
+    const body = (await request.json().catch(() => ({}))) as { competitorTotal?: unknown; source?: unknown; preview?: unknown };
+    const total = body.competitorTotal;
+    if (typeof total !== 'number' || !Number.isInteger(total) || total <= 0) return fail(400, 'VALIDATION_ERROR', 'competitorTotal musbat butun son bo‘lishi kerak');
+    const source = typeof body.source === 'string' && body.source.trim() ? body.source.trim().slice(0, 300) : null;
+    const check = mockMarketCheck(product, total, layerOf(product));
+    if (body.preview === true) return ok({ ...check, source, checkedAt: null }, 201);
+    product.marketTotal = total;
+    product.marketSource = source;
+    product.marketCheckedAt = new Date().toISOString();
+    audit(product.id, 'price.market', actor, { competitorTotal: total, verdict: check.verdict, maxBasePrice: check.maxBasePrice, source });
+    return ok({ ...check, source, checkedAt: product.marketCheckedAt }, 201);
+  }),
+
+  // TZ 2.4, NRX-8 (BE-09): mahsulot darajasida yetkazish rejimi; null — yuqori qatlamdan.
+  http.put(`${API}/admin/products/:id/price-policy`, async ({ request, cookies, params }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const product = findProduct(params.id);
+    if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
+    const body = (await request.json().catch(() => ({}))) as { deliveryMode?: unknown };
+    const mode = body.deliveryMode;
+    if (mode !== null && mode !== 'SEPARATE' && mode !== 'PARTIAL' && mode !== 'FREE') return fail(400, 'VALIDATION_ERROR', 'deliveryMode noto‘g‘ri');
+    const before = product.deliveryModeSource === 'PRODUCT' ? product.deliveryMode : null;
+    if (mode === null) {
+      product.deliveryModeSource = 'GLOBAL';
+      product.deliveryMode = (layerOf(product).deliveryMode as MockAdminProduct['deliveryMode'] | undefined) ?? GLOBAL_POLICY.deliveryMode ?? 'PARTIAL';
+    } else {
+      product.deliveryMode = mode;
+      product.deliveryModeSource = 'PRODUCT';
+    }
+    audit(product.id, 'pricing.policy.update', actor, { scope: 'PRODUCT', before: { deliveryMode: before }, after: { deliveryMode: mode } });
+    return ok({ scope: 'PRODUCT', scopeId: product.id, deliveryMode: mode, visibleCenter: null, visibleAddress: null, updatedBy: 'U-0007', updatedAt: new Date().toISOString() });
   }),
 
   http.get(`${API}/admin/offer-content/:productId`, ({ request, cookies, params }) => {

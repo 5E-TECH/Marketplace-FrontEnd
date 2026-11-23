@@ -122,33 +122,125 @@ export interface CreativeUploadPolicy {
 
 export type OfferContent = Schemas['OfferContentDto'];
 
+/** Narx parametrlari (ADM-2; global → kategoriya → mahsulot qatlamlari birlashgani). Pul — so'mda, foiz — ulush. */
+export interface PricingParams {
+  /** K — har sotuvdagi qat'iy xarajatlar, sotilish 70% (TZ 2.1: 29 688). */
+  kSale70: number;
+  /** K — har tasdiqlangan buyurtma sotilganda (qat'iy pastki chegara, 15 232). */
+  kSale100: number;
+  /** M — platformaning maqsadli minimal natijasi (9 000). */
+  targetMargin: number;
+  taxRate: number;
+  paymentRate: number;
+  callCenterFee: number;
+  affiliateCoef: number;
+  adCost: number;
+  markupCapPercent: number;
+  deliveryMode: DeliveryMode;
+  visibleCenter: number;
+  visibleAddress: number;
+  /** Taklif: yetkazish rejimi qaysi qatlamdan («qisman, global sozlamadan»). */
+  deliveryModeSource?: PolicySource | null;
+}
+
+export type PolicySource = 'GLOBAL' | 'CATEGORY' | 'PRODUCT';
+
+export interface PricingDelivery {
+  tariffCenter: number;
+  tariffAddress: number;
+  visibleCenter: number;
+  visibleAddress: number;
+  /** Tovar narxiga qo'shiladigan yashirilgan qism (markazgacha tarif − ko'rinadigan). */
+  hidden: number;
+  /** Yashirilgan qism ÷ (1 − soliq − to'lov), 1 000 ga yuqoriga. */
+  hiddenPriceAdd: number;
+}
+
+export interface PriceEvaluation {
+  status: PriceStatus;
+  price: number;
+  /** To'rt qator taqsimot (TZ 2.2) va yashirilgan yetkazish; platforma xizmati — qoldiq. */
+  split: { wholesaler: number; affiliate: number; callCenter: number; platformService: number; hiddenDelivery: number };
+  platformResult70: number;
+  platformResult100: number;
+  /** Sotuvchi natijasi: haq − reklama xarajati. */
+  affiliateResult: number;
+  belowRecommended: number;
+  /** NRX-13: hech kim zarar ko'rmaydigan eng katta sotuvchi haqi; yo'q bo'lsa — null. */
+  safeAffiliateFee: number | null;
+  /** Taklif: platforma zarar ko'rmaydigan eng katta haq (reklama xarajatidan kam bo'lsa ham) — qizil holat izohi. */
+  maxAffiliateFee?: number | null;
+}
+
+/** Taklif: uch rejim solishtiruvi — har rejimda tavsiya tovar narxi, ko'rinadigan yetkazish va natija. */
+export interface PricingModeRow {
+  mode: DeliveryMode;
+  goodsPrice: number;
+  delivery: number;
+  customerTotal: number;
+  platformResult70: number;
+  platformResult100: number;
+}
+
+/** Bozor narxi tekshiruvi (NRX-5): `POST …/market-check` javobi; `source`, `checkedAt` — taklif. */
+export interface MarketCheckResult {
+  competitorTotal: number;
+  ourTotal: number;
+  verdict: 'MOS' | 'QIMMAT';
+  maxBasePrice: number | null;
+  source?: string | null;
+  checkedAt?: string | null;
+}
+
 /**
- * `GET /admin/products/{id}/pricing` (BE-09) — sxemada javob tipsiz; FE-12 o'qiydigan qismi
- * (`catalog-service/src/pricing.service.ts` `view()`, `@app/common` `price-calculator`).
+ * `GET /admin/products/{id}/pricing` (BE-09) — sxemada javob tipsiz; shakl `catalog-service/src/pricing.service.ts`
+ * `view()` va `@app/common` `price-calculator` dan. Hisob faqat serverda — UI natijani ko'rsatadi (FE-13).
+ * Ixtiyoriy maydonlar — taklif (docs/api-taklif/fe-13-admin-narx.md).
  */
 export interface ProductPricing {
   productId: string;
+  /** Tasdiq joriymi: asos o'zgarib holat yomonlashgan bo'lsa — false (narx navbatiga qaytadi). */
   approvalCurrent: boolean;
-  params: {
-    adCost: number;
-    affiliateCoef: number;
-    markupCapPercent: number;
-    deliveryMode: DeliveryMode;
-    /** Tushum solig'i va to'lov xarajati (TZ 2.1) — haq oynasidagi formula uchun. */
-    taxRate?: number;
-    paymentRate?: number;
-  };
+  params: PricingParams;
   tariff: { centerBase: number; baseWeightGrams: number; perExtraKg: number; addressExtra: number };
   recommendedAffiliateFee: number;
   calculation: {
+    basePrice: number;
+    affiliateFee: number;
     recommendedBase: number;
+    /** Taklif: tavsiya 1 000 ga yaxlitlanmasdan (formula izohidagi «= 250 120»). */
+    recommendedBaseExact?: number;
+    breakevenBase: number;
+    hardFloorBase: number;
+    delivery: PricingDelivery;
+    /** Mijoz ko'radigan tavsiya tovar narxi (joriy rejimda). */
     recommended: number;
-    delivery: { tariffCenter: number; visibleCenter: number; visibleAddress: number; hidden: number };
+    yellowFrom: number;
+    orangeFrom: number;
+    platformSharePercent: number;
   };
-  evaluation: { status: PriceStatus; price: number; platformResult70: number; affiliateResult: number } | null;
+  /** Kiritilgan (yoki tasdiqlangan, yo'q bo'lsa tavsiya) narx holati. */
+  evaluation: PriceEvaluation | null;
   approvedPrice: number | null;
   priceStatus: PriceStatus | null;
+  marketTotal: number | null;
   maxSalePrice: number | null;
+  /** Taklif: uch rejim solishtiruvi. */
+  modes?: PricingModeRow[];
+  /** Taklif: oxirgi bozor narxi tekshiruvi (manba bilan). */
+  market?: MarketCheckResult | null;
+}
+
+/** Taklif: narx navbati qatori (`GET /admin/moderation/prices`) — optovik narxi → tavsiya. */
+export interface PriceQueueItem {
+  productId: string;
+  name: string;
+  shopName: string | null;
+  basePrice: number;
+  recommended: number;
+  deliveryMode: DeliveryMode;
+  /** Narx navbatiga tushgan vaqt (yuborilgan yoki asos o'zgargan). */
+  queuedAt: string;
 }
 
 /** `reason` sxemada satr, lekin sababsiz qarorda backend `null` qaytaradi. */

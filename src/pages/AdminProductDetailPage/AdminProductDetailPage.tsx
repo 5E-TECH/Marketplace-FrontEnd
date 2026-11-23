@@ -6,6 +6,7 @@ import { useAdminProductQuery, useProductPricingQuery, useProductStockQuery, use
 import type { AdminProductListItem, ProductStockSummary } from '../../features/adminProducts/model/adminProductTypes';
 import { productBadgeCode } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import { ProductAudit } from '../../features/adminProducts/ui/ProductAudit';
+import { PriceWorkbench } from '../../features/adminProducts/ui/price/PriceWorkbench';
 import { SellerPreviewDialog } from '../../features/adminProducts/ui/SellerPreviewDialog';
 import { StopProductDialog } from '../../features/adminProducts/ui/StopProductDialog';
 import { useAdminCategoryNames } from '../../features/categories/api/categoryQueries';
@@ -111,9 +112,6 @@ export default function AdminProductDetailPage() {
       : []),
   ];
 
-  const placeholder = (text: string): ReactNode => (
-    <section className={styles.placeholder} data-testid="card-placeholder"><p>{text}</p></section>
-  );
   const content: Record<CardTab, () => ReactNode> = {
     main: () => (
       <MainTab
@@ -126,7 +124,7 @@ export default function AdminProductDetailPage() {
         onResume={resume}
       />
     ),
-    price: () => placeholder(t('card.priceSoon')),
+    price: () => <section className={styles.priceCard} data-testid="price-tab"><PriceWorkbench product={product} phone={phone} allowChange /></section>,
     offer: () => <OfferTab product={product} stock={stock} onStop={() => setDialog('stop')} onResume={resume} />,
     creatives: () => <CreativesTab product={product} />,
     landing: () => <LandingTab product={product} onDirtyChange={setDirty} />,

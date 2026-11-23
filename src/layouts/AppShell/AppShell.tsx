@@ -17,7 +17,7 @@ import { WarehouseTopStatus } from '../../features/warehouse/ui/WarehouseTopStat
 import { ConnectionBanner } from '../../shared/ui/ConnectionBanner/ConnectionBanner';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { formatUzPhone } from '../../shared/lib/phone';
-import { PageHeaderSlotContext, PageStatusContext, PageTitleContext, type PageStatus } from '../../shared/ui/PageHeader/pageTitle';
+import { PageBackContext, PageHeaderSlotContext, PageStatusContext, PageTitleContext, type PageBack, type PageStatus } from '../../shared/ui/PageHeader/pageTitle';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import { DrawerNav, SideNav, WarehouseRail } from './NavMenu';
 import { TopBar, UserMenu, type ShellLayout } from './TopBar';
@@ -63,6 +63,7 @@ export default function AppShell() {
   const layout = useShellLayout(shell?.variant);
   const [pageTitle, setPageTitle] = useState<string | null>(null);
   const [pageStatus, setPageStatus] = useState<PageStatus | null>(null);
+  const [pageBack, setPageBack] = useState<PageBack | null>(null);
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   // Panel qaysi manzilda ochilgan bo'lsa, faqat o'sha yerda ochiq: boshqa sahifaga o'tganda o'zi yopiladi.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function AppShell() {
 
   const route = findRoute(pathname);
   const section = route?.section ? findNavSection(pathname) : undefined;
-  const back = section ? { path: section.path, label: t(section.label) } : undefined;
+  const back = pageBack ?? (section ? { path: section.path, label: t(section.label) } : undefined);
   const title = pageTitle ?? (route ? t(route.label) : '');
   const usesDrawer = layout === 'tablet' || layout === 'phone';
   const touch = layout !== 'desktop';
@@ -153,6 +154,7 @@ export default function AppShell() {
         {sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>
+            <PageBackContext value={setPageBack}>
             <PageStatusContext value={setPageStatus}>
               <PageHeaderSlotContext value={layout === 'desktop' ? headerSlot : null}>
                 {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}
@@ -163,6 +165,7 @@ export default function AppShell() {
                 </Suspense>
               </PageHeaderSlotContext>
             </PageStatusContext>
+            </PageBackContext>
           </PageTitleContext>
         </main>
       </div>

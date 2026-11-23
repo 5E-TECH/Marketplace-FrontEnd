@@ -1,0 +1,336 @@
+/* Narx kalkulyatori va qaror (FE-13, admin-narx): desktop — «Hisob | Qaror» ikki ustun, planshet va telefonda
+   alohida kartalar (Qaror birinchi). */
+.workbench { min-width: 0; container: price-board / inline-size; }
+.columns { display: flex; flex-wrap: wrap; align-items: flex-start; border-top: 1px solid var(--color-border); min-width: 0; }
+.workbench[data-flush] > .columns { border-top: 0; }
+.calc { flex: 999 1 360px; min-width: 0; box-sizing: border-box; align-self: stretch; border-right: 1px solid var(--color-border); }
+.decision { flex: 1 1 448px; min-width: 0; box-sizing: border-box; position: sticky; top: 24px; align-self: flex-start; background: var(--color-surface); }
+.sectionHead { margin: 0; min-height: 44px; padding: 11px 20px; box-sizing: border-box; background: var(--color-sunken); border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; }
+.sectionHead > span:first-child { font-weight: 700; }
+.sectionHead > span + span { color: var(--color-text-secondary); }
+.calcBody { display: flex; flex-direction: column; gap: 32px; padding: 20px 20px 28px; }
+.decisionBody { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+
+.h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.h3 > span { font-weight: 500; color: var(--color-text-secondary); }
+.h4 { margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; }
+.h4 > span { font-weight: 500; color: var(--color-text-secondary); }
+.note { margin: 2px 0 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.muted { color: var(--color-text-secondary); font-weight: 500; }
+.nums { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.below { margin-top: 8px; }
+.gap16 { margin-top: 16px; }
+.regular { font-weight: 400 !important; }
+.bold { font-weight: 700 !important; }
+.tight { margin-bottom: 2px; }
+.resultsNote { margin: 2px 0 10px; }
+.flush { margin-top: 0; }
+
+/* Qiymat qatorlari: nom | summa, ostida formula. */
+.rows { margin-top: 10px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.rows > .row:first-child { border-top: 1px solid var(--color-border); }
+.row > span:first-child { min-width: 0; font-size: 14px; line-height: 21px; }
+.row[data-strong] > span:first-child { font-weight: 700; }
+.rowValue { display: inline-flex; align-items: baseline; gap: 14px; white-space: nowrap; }
+.rowValue > strong { font-size: 14px; line-height: 21px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.row[data-strong] .rowValue > strong { font-size: 16px; line-height: 24px; font-weight: 700; }
+.rowValue > strong[data-tone='danger'] { color: var(--color-danger); }
+.row > .note { grid-column: 1 / -1; }
+.link { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; cursor: pointer; text-decoration: none; }
+.link > svg { width: 14px; height: 14px; }
+.link:hover { color: var(--color-action-hover); }
+
+.values { margin-top: 16px; padding: 14px 16px; background: var(--color-sunken); border: 1px solid var(--color-border); border-radius: 12px; }
+.values > p:first-child { margin: 0; font-size: 13px; line-height: 18px; font-weight: 700; }
+.values dl { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; row-gap: 4px; margin: 10px 0 0; font-size: 13px; line-height: 18px; }
+.values dt { margin: 0; font-weight: 700; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.values dd { margin: 0; color: var(--color-text-secondary); }
+.valuesNote { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--color-border); font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.valuesNote > svg { flex: none; width: 16px; height: 16px; margin-top: 1px; }
+
+/* Jadvallar (taqsimot, rejimlar, audit). */
+.tableBox { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 12px; margin-top: 12px; }
+.table { width: 100%; min-width: 340px; border-collapse: collapse; font-size: 14px; line-height: 21px; }
+.table th { height: 44px; padding: 0 12px; box-sizing: border-box; background: var(--color-sunken); border-bottom: 1px solid var(--color-border); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); vertical-align: middle; text-align: right; white-space: nowrap; }
+.table th:first-child { padding-left: 16px; text-align: left; white-space: normal; }
+.table th:last-child { padding-right: 16px; }
+.table td { padding: 12px; vertical-align: top; border-bottom: 1px solid var(--color-border); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table td:first-child { padding-left: 16px; text-align: left; white-space: normal; }
+.table td:last-child { padding-right: 16px; }
+.table tr:last-child td { border-bottom: 0; }
+.table tr[data-divider] td { border-bottom: 2px solid var(--color-text); }
+.table tr[data-strong] td { font-weight: 700; }
+.table tr[data-total] td { background: var(--color-sunken); border-bottom: 0; }
+.table tr[data-total] td:nth-child(2) { font-size: 16px; line-height: 24px; font-weight: 700; }
+.table tr[data-current] td { background: var(--color-sunken); }
+.table tr[data-current] td:nth-child(2) { font-weight: 700; }
+.cellName { display: block; font-weight: 600; }
+.cellSub { display: block; margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-weight: 400; font-variant-numeric: tabular-nums; }
+.dash { color: var(--color-text-secondary); }
+
+/* Telefon: taqsimot va rejimlar — ikki ustunli ro'yxat (admin-narx.mobil). */
+.list { margin-top: 12px; border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; }
+.listTitle { margin: 16px 0 8px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.listTitle > span { font-weight: 500; color: var(--color-text-secondary); }
+.listTitle + .list { margin-top: 0; }
+.listRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; }
+.listRow:last-child { border-bottom: 0; }
+.listRow > span:first-child { min-width: 0; }
+.listRow > span:last-child { flex: none; text-align: right; }
+.listRow > span > span { display: block; }
+.listRow > span > span:first-child { font-weight: 600; font-variant-numeric: tabular-nums; }
+.listRow > span:last-child > span:first-child { white-space: nowrap; }
+.listRow > span > span + span { margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.listRow[data-kind='divider'] { border-bottom: 2px solid var(--color-text); }
+.listRow[data-kind='strong'] > span > span:first-child { font-weight: 700; }
+.listRow[data-kind='plain'] > span:first-child > span:first-child { font-weight: 400; }
+.listRow[data-kind='total'], .listRow[data-current] { background: var(--color-sunken); }
+.listRow[data-kind='total'] > span > span:first-child { font-weight: 700; }
+.listRow[data-kind='total'] > span:last-child > span:first-child { font-size: 16px; line-height: 24px; }
+.listRow[data-current] > span > span:first-child { font-weight: 700; }
+
+/* Yetkazish: rejim va yetkazish qismlari (chegarasiz jadval). */
+.fieldLabel { margin: 12px 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.modeRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.modeRow > span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.segmented { display: inline-flex; gap: 4px; height: 44px; padding: 3px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); border: 1px solid var(--color-border); }
+.segmented > button { display: inline-flex; align-items: center; justify-content: center; height: 36px; margin: 0; padding: 0 12px; box-sizing: border-box; border-radius: 9px; border: 1px solid transparent; background: transparent; color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; }
+.segmented > button[aria-checked='true'] { border-color: var(--color-border-strong); background: var(--color-surface); font-weight: 600; box-shadow: 0 1px 2px rgb(16 23 51 / 8%); }
+.segmented > button:disabled { cursor: default; opacity: 0.6; }
+.plain { width: 100%; min-width: 340px; margin-top: 16px; border-collapse: collapse; font-size: 14px; line-height: 21px; }
+.plain th { padding: 0 12px 8px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); text-align: right; white-space: nowrap; }
+.plain th:first-child { padding-left: 0; text-align: left; }
+.plain th:last-child { padding-right: 0; }
+.plain td { padding: 12px; vertical-align: top; border-bottom: 1px solid var(--color-border); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.plain td:first-child { padding-left: 0; text-align: left; white-space: normal; }
+.plain td:last-child { padding-right: 0; }
+.plain tr[data-divider] td { border-bottom: 2px solid var(--color-text); }
+.plain tr[data-strong] td { font-weight: 700; }
+.scroll { overflow-x: auto; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Qaror: narx maydoni, holat, shkala. */
+.priceField label { display: block; margin-bottom: 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.priceLine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.priceInput { flex: 0 0 216px; max-width: 100%; }
+.recommended { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); white-space: nowrap; }
+.recommended > strong { font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.fieldError { margin: 6px 0 0; font-size: 12px; line-height: 18px; color: var(--color-danger); font-weight: 600; }
+.stateLabel { margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.state { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.state > div { min-width: 0; }
+.stateIcon { display: block; flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; }
+.state[data-status='GREEN'] .stateIcon { color: var(--color-success); }
+.state[data-status='YELLOW'] .stateIcon { color: var(--color-price-yellow); }
+.state[data-status='ORANGE'] .stateIcon { color: var(--color-price-orange); }
+.state[data-status='RED'] .stateIcon { color: var(--color-danger); }
+.state p { margin: 0; }
+.state p:first-child { font-size: 15px; line-height: 22px; font-weight: 700; }
+.state p + p { margin-top: 2px; font-size: 14px; line-height: 21px; }
+.state[data-status='GREEN'] { background: var(--color-success-soft); }
+.state[data-status='GREEN'] p:first-child { color: var(--color-success); }
+.state[data-status='YELLOW'] { background: var(--color-price-yellow-soft); }
+.state[data-status='YELLOW'] p:first-child { color: var(--color-price-yellow); }
+.state[data-status='ORANGE'] { background: var(--color-price-orange-soft); }
+.state[data-status='ORANGE'] p:first-child { color: var(--color-price-orange); }
+.state[data-status='RED'] { background: var(--color-danger-soft); }
+.state[data-status='RED'] p:first-child { color: var(--color-danger); }
+
+.scaleBox { position: relative; }
+.scaleTop { position: relative; height: 36px; margin: 0 1px; }
+.marker { position: absolute; bottom: -2px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+.marker[data-align='start'] { transform: none; align-items: flex-start; }
+.marker[data-align='end'] { transform: translateX(-100%); align-items: flex-end; }
+.marker > span:first-child { display: block; height: 22px; padding: 0 8px; box-sizing: border-box; border-radius: 6px; background: var(--color-text); color: var(--color-white); font-size: 12px; line-height: 22px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.marker > svg { display: block; fill: var(--color-text); }
+.bar { display: flex; height: 32px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 8px; overflow: hidden; background: var(--color-surface); }
+.bar > div { flex: none; box-sizing: border-box; }
+.bar > div + div { border-left: 2px solid var(--color-white); }
+.bar > [data-zone='RED'], .bar > [data-zone='GREEN'] { position: relative; }
+.bar > [data-zone='RED'] { background: #7a1622 repeating-linear-gradient(45deg, rgb(255 255 255 / 35%) 0 1px, transparent 1px 6px); }
+.bar > div > svg { position: absolute; top: 8px; width: 14px; height: 14px; color: var(--color-white); }
+.bar > [data-zone='RED'] > svg { left: 5px; }
+.bar > [data-zone='GREEN'] > svg { right: 5px; }
+.bar > [data-zone='ORANGE'] { background: #e07b2a; }
+.bar > [data-zone='YELLOW'] { background: #f2c94c; }
+.bar > [data-zone='GREEN'] { flex: 1 1 0; background: var(--color-success); }
+.scaleBottom { position: relative; height: 54px; margin: 0 1px; }
+.tick { position: absolute; top: 0; width: 1px; height: 6px; margin-left: 1px; background: var(--color-field-border); }
+.bound { position: absolute; top: 0; width: 2px; height: 10px; background: var(--color-text); }
+.zoneLabel { position: absolute; top: 16px; display: flex; flex-direction: column; gap: 3px; }
+.zoneLabel[data-side='right'] { align-items: flex-end; text-align: right; padding-right: 6px; }
+.zoneLabel[data-side='left'] { padding-left: 8px; }
+.zoneLabel > span:first-child { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; font-weight: 700; white-space: nowrap; }
+.zoneLabel > span:first-child > svg { width: 14px; height: 14px; flex: none; }
+.zoneLabel > span + span { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.zoneGrid { display: none; }
+.zoneGrid > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.zoneGrid > div > span:first-child { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; font-weight: 700; }
+.zoneGrid > div > span:first-child > svg { width: 14px; height: 14px; flex: none; }
+.zoneGrid > div > span + span { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.zoneGrid > [data-zone='RED'] > span:first-child, .zoneLabel[data-zone='RED'] > span:first-child { color: var(--color-danger); }
+.zoneGrid > [data-zone='ORANGE'] > span:first-child { color: var(--color-price-orange); }
+.zoneGrid > [data-zone='YELLOW'] > span:first-child { color: var(--color-price-yellow); }
+.zoneGrid > [data-zone='GREEN'] > span:first-child { color: var(--color-success); }
+.zoneLabel[data-zone='ORANGE'] > span:first-child { color: var(--color-price-orange); }
+.zoneLabel[data-zone='YELLOW'] > span:first-child { color: var(--color-price-yellow); }
+.zoneLabel[data-zone='GREEN'] > span:first-child { color: var(--color-success); }
+
+/* Sariq: kim qancha kam oladi; to'q sariq/qizil: zararsiz taqsimot. */
+.callout { padding: 12px 16px; border-radius: 12px; background: var(--color-sunken); border: 1px solid var(--color-border); font-size: 14px; line-height: 21px; }
+.callout > p { margin: 0; }
+.callout > p + p { margin-top: 4px; }
+.callout strong { font-weight: 700; }
+.callout[data-tone='warning'] { background: var(--color-price-orange-soft); border-color: transparent; }
+.callout[data-tone='danger'] { background: var(--color-danger-soft); border-color: transparent; }
+.callout .rows { margin-top: 8px; }
+.callout .row:last-child { border-bottom: 0; }
+.calloutAction { margin-top: 10px; }
+.secondaryButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 16px; box-sizing: border-box; border-radius: 12px; border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.secondaryButton:hover:not(:disabled) { background: var(--color-sunken); }
+.secondaryButton:disabled { opacity: 0.6; cursor: not-allowed; }
+.rejectButton, .ghostButton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 44px; margin: 0; padding: 0 16px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.rejectButton { border: 1px solid var(--color-danger-soft); background: var(--color-danger-soft); color: var(--color-danger); }
+.rejectButton:hover:not(:disabled) { border-color: var(--color-danger); }
+.ghostButton { border: 1px solid transparent; background: transparent; color: var(--color-text-secondary); }
+.ghostButton:hover { background: var(--color-sunken); color: var(--color-text); }
+.rejectButton:disabled { opacity: 0.6; cursor: not-allowed; }
+.linkTall { height: 28px; }
+.linkTall > svg { width: 16px; height: 16px; }
+.current { display: inline-flex !important; align-items: center; gap: 6px; font-weight: 700 !important; }
+.current > svg { width: 16px; height: 16px; flex: 0 0 16px; }
+.secondaryButton[data-size='small'] { height: 36px; padding: 0 12px; font-size: 13px; line-height: 18px; }
+
+/* Bozor narxi. */
+.market label { display: block; margin-bottom: 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.marketLine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.marketInput { flex: 0 0 200px; max-width: 100%; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); box-shadow: inset 0 0 0 1px var(--color-border); font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.chip > svg { width: 14px; height: 14px; }
+.chip[data-tone='success'] { background: var(--color-success-soft); color: var(--color-success); box-shadow: none; }
+.chip[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); box-shadow: none; }
+.marketResult { margin-top: 10px; }
+.marketResult .row > strong[data-tone='orange'] { color: var(--color-price-orange); }
+.marketSource { margin: 8px 0 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.marketActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+/* Sabab. */
+.reason > div:first-child { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; margin-bottom: 6px; }
+.reason label { font-size: 13px; line-height: 18px; font-weight: 600; }
+.reason label > span { font-weight: 500; color: var(--color-text-secondary); }
+.reason > div:first-child > span { font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.textarea { display: block; width: 100%; min-height: 88px; margin: 0; padding: 11px 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; resize: vertical; }
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+/* Amallar. */
+.actions { display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--color-border); }
+.primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 44px; margin: 0; padding: 0 12px 0 16px; box-sizing: border-box; border: 0; border-radius: 12px; background: var(--color-action); color: var(--color-white); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); }
+.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.primary kbd { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 6px; border: 1px solid rgb(255 255 255 / 40%); background: transparent; color: var(--color-white); font-family: inherit; font-size: 12px; line-height: 20px; font-weight: 600; white-space: nowrap; }
+.actionRow { display: flex; gap: 8px; }
+.actionRow > button { flex: 1 1 0; }
+.danger { color: var(--color-danger); }
+.blocked { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-danger); font-weight: 600; }
+.actionNotes p { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.actionNotes p + p { margin-top: 2px; }
+.actionNotes p > svg { display: none; }
+
+/* Holatlar izohi. */
+.legend { padding-top: 20px; border-top: 1px solid var(--color-border); }
+.legend ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.legend li { display: grid; grid-template-columns: 108px minmax(0, 1fr); column-gap: 12px; padding: 10px 12px; border-radius: 12px; }
+.legend li[data-current] { background: var(--color-sunken); }
+.legend li p { margin: 0; font-size: 14px; line-height: 21px; }
+.legend li p + p { margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.legend li p + p > strong { font-weight: 600; color: var(--color-text); }
+.legendNotes { margin-top: 8px; }
+.legendNotes p { margin: 4px 0 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+/* Qarordan keyin (holatlar 4). */
+.done { padding: 20px; border-top: 1px solid var(--color-border); }
+.doneBox { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-radius: 12px; background: var(--color-success-soft); }
+.doneBox[data-tone='danger'] { background: var(--color-danger-soft); }
+.doneBox[data-tone='orange'] { background: var(--color-price-orange-soft); }
+.doneBox > svg { flex: none; width: 24px; height: 24px; color: var(--color-success); }
+.doneBox[data-tone='danger'] > svg { color: var(--color-danger); }
+.doneBox[data-tone='orange'] > svg { color: var(--color-price-orange); }
+.doneBox > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.doneBox p { margin: 0; font-size: 14px; line-height: 21px; }
+.doneTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 16px !important; line-height: 24px !important; font-weight: 700; }
+.doneActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+.audit { padding: 20px 20px 24px; border-top: 1px solid var(--color-border); }
+.loading { display: flex; flex-direction: column; gap: 12px; padding: 20px; }
+.skeleton { display: block; height: 18px; border-radius: 6px; background: var(--color-sunken); }
+
+/* Oynalar. */
+.dialogField label, .dialogLabel { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dialogField label > span, .dialogLabel > span { font-size: 12px; line-height: 16px; font-weight: 400; color: var(--color-text-secondary); }
+.dialogHint { margin: 6px 0 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.input { display: block; width: 100%; height: 44px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; }
+.input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.resultBox { padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.resultBox > p:first-child { margin: 0 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.resultBox > p.dialogHint { margin: 0; }
+.resultBox .row > span:last-of-type { margin-left: auto; }
+.facts { margin: 0; display: flex; flex-direction: column; }
+.facts > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.facts dt { font-size: 14px; line-height: 21px; }
+.facts dd { margin: 0; text-align: right; font-size: 14px; line-height: 21px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts dd > span { display: block; font-size: 12px; line-height: 18px; font-weight: 400; color: var(--color-text-secondary); }
+.compare { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 21px; }
+.compare caption { text-align: left; margin-bottom: 6px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.compare th { padding: 8px 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); text-align: right; }
+.compare th:first-child { text-align: left; }
+.compare td { padding: 10px 0 10px 12px; border-bottom: 1px solid var(--color-border); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.compare td:first-child { padding-left: 0; text-align: left; white-space: normal; }
+.compare td[data-tone='danger'] { color: var(--color-danger); font-weight: 600; }
+.dialogNote { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+/* Ustunlar sig'masa («Qaror» pastga tushadi): chiziq pastda, yopishmaydi. */
+@container price-board (max-width: 829px) {
+  .calc { border-right: 0; border-bottom: 1px solid var(--color-border); }
+  .decision { position: static; align-self: stretch; }
+}
+
+/* Planshet va telefon (admin-narx.planshet, .mobil): ustunlar alohida kartalarga, «Qaror» — birinchi. */
+@container content (max-width: 919.98px) {
+  .columns { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 20px; border-top: 0; }
+  .calc, .decision { flex: none; position: static; align-self: stretch; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+  .decision { order: -1; }
+  .sectionHead { border-radius: 15px 15px 0 0; }
+  .calcBody, .decisionBody { padding: 20px 20px 24px; }
+  .done, .audit { border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+  .workbench { display: flex; flex-direction: column; gap: 20px; }
+  .actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  .actionRow { display: contents; }
+  .actions > .primary { order: 3; padding: 0 18px; }
+  .actions > .primary kbd { display: none; }
+  .actionRow > .rejectButton { order: 2; flex: none; padding: 0 18px; }
+  .actionRow > .ghostButton { order: 1; flex: none; padding: 0 18px; }
+  .actionNotes { order: 4; flex: 1 1 100%; display: flex; flex-direction: column; gap: 6px; }
+  .actionNotes p { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; }
+  .actionNotes p + p { margin-top: 0; }
+  .actionNotes p > svg { display: block; flex: none; width: 16px; height: 16px; margin-top: 1px; }
+}
+
+@container content (max-width: 575.98px) {
+  .columns { gap: 16px; }
+  .workbench { gap: 16px; }
+  .calcBody { gap: 28px; padding: 16px 16px 20px; }
+  .decisionBody { padding: 16px 16px 20px; }
+  .done, .audit { padding: 16px; }
+  .scaleBottom { height: 12px; }
+  .zoneLabel { display: none; }
+  .zoneGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin-top: 6px; }
+  .legend li { grid-template-columns: 96px minmax(0, 1fr); }
+}
+
+.barSecondary, .barPrimary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; margin: 0; padding: 0 18px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 15px; line-height: 22px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.barSecondary { flex: 0 0 auto; border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.barPrimary { flex: 1 1 auto; min-width: 0; padding: 0 20px; border: 0; background: var(--color-action); color: var(--color-white); }
+.barPrimary:disabled { opacity: 0.45; cursor: not-allowed; }

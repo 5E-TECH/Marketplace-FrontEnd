@@ -26,7 +26,8 @@ const row = (page: Page, name: string) => page.getByTestId('product-row').filter
 
 test('jadval: holatlar bo‘yicha tartib, narx, qoldiq, natija va rad sababi', async ({ page }) => {
   await openProducts(page);
-  await expect(page.getByRole('tab', { name: /Hammasi\s*10/ })).toHaveAttribute('aria-selected', 'true');
+  // 10 ta FE-12 mahsuloti + 3 ta narx navbatidagi (FE-13, 511–513).
+  await expect(page.getByRole('tab', { name: /Hammasi\s*13/ })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('product-row').first()).toContainText('Ko‘rib chiqilmoqda');
   await expect(row(page, 'Simsiz quloqchinlar')).toContainText('262 000 so‘m');
   await expect(row(page, 'Simsiz quloqchinlar')).toContainText('omborda 128 · band 8');

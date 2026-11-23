@@ -167,7 +167,7 @@ test('telefon: navbat ro‘yxati → mahsulot sahifasi, pastki panelda tasdiqlas
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test('Narx tabi — FE-13 joyi; navbat bo‘sh holati', async ({ page }) => {
+test('mahsulot navbati bo‘sh holati; «Narx» tabida narx navbati (FE-13)', async ({ page }) => {
   db.adminProducts.forEach((product) => {
     if (product.status === 'PENDING_REVIEW') product.status = 'ACTIVE';
   });
@@ -175,5 +175,5 @@ test('Narx tabi — FE-13 joyi; navbat bo‘sh holati', async ({ page }) => {
   await expect(page.getByTestId('moderation-empty')).toContainText('Mahsulot navbati bo‘sh');
   await page.getByRole('tab', { name: /Narx/ }).click();
   await expect(page).toHaveURL(/tab=prices/);
-  await expect(page.getByTestId('moderation-prices')).toContainText('Narx navbati');
+  await expect(page.getByTestId('price-queue')).toContainText('Narx navbati');
 });

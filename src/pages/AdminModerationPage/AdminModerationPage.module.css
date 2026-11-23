@@ -321,11 +321,11 @@
 .unchecked svg { width: 16px; height: 16px; flex: 0 0 16px; color: var(--color-danger); }
 
 /* ── Bo'sh navbat, narx tabi ── */
-.empty, .pricesPanel { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 24px; box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; text-align: center; }
-.empty > span, .pricesPanel > span { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
-.empty > span svg, .pricesPanel > span svg { width: 24px; height: 24px; }
-.empty h2, .pricesPanel h2 { margin: 8px 0 0; font-size: 18px; line-height: 26px; font-weight: 700; }
-.empty p, .pricesPanel p { max-width: 460px; margin: 0; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 24px; box-sizing: border-box; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; text-align: center; }
+.empty > span { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.empty > span svg { width: 24px; height: 24px; }
+.empty h2 { margin: 8px 0 0; font-size: 18px; line-height: 26px; font-weight: 700; }
+.empty p { max-width: 460px; margin: 0; font-size: 14px; line-height: 21px; color: var(--color-text-secondary); }
 
 /* ── Planshet: alohida kartalar, navbat 3 ustunli ── */
 @container content (max-width: 919.98px) {
