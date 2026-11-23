@@ -1,6 +1,7 @@
 import type { components } from '../generated/api-types';
 import type { CreativeType, PriceDecision } from '../features/adminProducts/model/adminProductTypes';
 import { mockAdminProducts, mockCategories, mockCategoryPolicies, mockCreatives, mockOfferContents, mockPolicyAudit, mockProductAudit } from './fixtures/adminProducts';
+import { mockFulfillment } from './fixtures/fulfillment';
 import { mockInbound } from './fixtures/inbound';
 import { mockOffers } from './fixtures/offers';
 import { resetRegisteredMockAccounts } from './fixtures/users';
@@ -124,6 +125,7 @@ function createMockDb() {
     notifications: notifications(),
     // Ombor (FE-16): optoviklar, SKU lar, postavkalar va skan jurnali.
     inbound: mockInbound(),
+    fulfillment: mockFulfillment(),
   };
 }
 

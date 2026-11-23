@@ -15,6 +15,8 @@ interface ScanFieldProps {
   onScan: (code: string) => void;
   /** Noma'lum kod: maydon qizil, kod ko'rinib turadi — keyingi yozuvgacha. */
   invalidCode?: string | null;
+  /** `false` — maydon qizil, lekin bo'sh (placeholder «To'g'ri tovarni skanerlang»; kod ogohlantirish blokida). */
+  echoInvalid?: boolean;
   /** Noma'lum kod ko'rinib turganda yangi belgi yozildi — sahifa ogohlantirishni yopadi. */
   onInvalidClear?: () => void;
   /** Ogohlantirish bloki (`aria-describedby`). */
@@ -34,13 +36,13 @@ const dialogOpen = () => Boolean(document.querySelector('.ant-modal-wrap:not([st
  * qatorda «Skaner: maydonga bosing». `inputmode="none"` — planshetda ekran klaviaturasi chiqmaydi.
  */
 export const ScanField = forwardRef<ScanFieldHandle, ScanFieldProps>(function ScanField(
-  { label, placeholder, onScan, invalidCode = null, onInvalidClear, describedBy, labelExtra, disabled = false, testId = 'scan-field' },
+  { label, placeholder, onScan, invalidCode = null, echoInvalid = true, onInvalidClear, describedBy, labelExtra, disabled = false, testId = 'scan-field' },
   ref,
 ) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState('');
-  const showingInvalid = invalidCode !== null && value === '';
+  const showingInvalid = echoInvalid && invalidCode !== null && value === '';
 
   useImperativeHandle(ref, () => ({ focus: () => inputRef.current?.focus() }), []);
 

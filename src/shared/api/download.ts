@@ -73,12 +73,17 @@ export interface DownloadedFile {
   size: number;
 }
 
-/** Server tayyorlagan faylni yuklab, saqlaydi. Nom serverdan, bo'lmasa `fallbackName`. */
-export async function downloadFile(
+export interface FetchedFile {
+  blob: Blob;
+  fileName: string;
+}
+
+/** Server tayyorlagan faylni olib keladi (saqlamaydi) — oldindan ko'rish va chop etish uchun. */
+export async function fetchFile(
   url: string,
   fallbackName: string,
   config: Omit<AxiosRequestConfig, 'responseType'> = {},
-): Promise<DownloadedFile> {
+): Promise<FetchedFile> {
   try {
     const response = await httpClient.request<Blob>({
       method: 'GET',
@@ -88,10 +93,19 @@ export async function downloadFile(
       responseType: 'blob',
     });
     if (!(response.data instanceof Blob) || response.data.size === 0) throw new Error('Fayl bo‘sh qaytdi');
-    const fileName = fileNameFromDisposition(response.headers['content-disposition'], fallbackName);
-    saveBlob(response.data, fileName);
-    return { fileName, size: response.data.size };
+    return { blob: response.data, fileName: fileNameFromDisposition(response.headers['content-disposition'], fallbackName) };
   } catch (error) {
     throw await withReadableErrorBody(error);
   }
+}
+
+/** Server tayyorlagan faylni yuklab, saqlaydi. Nom serverdan, bo'lmasa `fallbackName`. */
+export async function downloadFile(
+  url: string,
+  fallbackName: string,
+  config: Omit<AxiosRequestConfig, 'responseType'> = {},
+): Promise<DownloadedFile> {
+  const { blob, fileName } = await fetchFile(url, fallbackName, config);
+  saveBlob(blob, fileName);
+  return { fileName, size: blob.size };
 }

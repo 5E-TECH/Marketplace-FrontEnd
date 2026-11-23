@@ -97,6 +97,14 @@ export const STATUS_FAMILIES = {
     RECEIVED: { tone: 'success' },
     DISCREPANCY: { tone: 'danger' },
   },
+  /** Yig'ish vazifasi (T4 fulfillment_task, ombor-yigish): «Yig'ilmoqda» — boshlangan, hali to'liq emas. */
+  task: {
+    TO_PICK: { tone: 'neutral' },
+    PICKING: { tone: 'warning' },
+    PICKED: { tone: 'info' },
+    PACKED: { tone: 'success' },
+    HANDED_OVER: { tone: 'success' },
+  },
 } as const satisfies Record<string, Record<string, StatusEntry>>;
 
 export type StatusFamily = keyof typeof STATUS_FAMILIES;

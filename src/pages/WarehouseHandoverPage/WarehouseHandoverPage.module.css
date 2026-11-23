@@ -1,0 +1,76 @@
+/* ombor-topshirish: QR skan va jurnal, ochiq akt, posilkalar va oldingi aktlar. Umumiy bloklar — WarehousePickingPage. */
+.top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.left { flex: 999 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.right { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.hint { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.journalBlock { display: flex; flex-direction: column; gap: 4px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.journalHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.journalHead h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.journalHead span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.journal { list-style: none; margin: 0; padding: 0; }
+.journal > li { display: flex; align-items: flex-start; gap: 12px; min-height: 56px; padding: 10px 0; box-sizing: border-box; border-bottom: 1px solid var(--color-border); }
+.journal > li:last-child { border-bottom: 0; }
+.journal > li[data-tone='danger'] { padding: 10px 12px; border-radius: 12px; border-bottom: 0; background: var(--color-danger-soft); }
+.journal > li > svg { flex: none; width: 20px; height: 20px; margin-top: 1px; color: var(--color-text-secondary); }
+.journal > li[data-tone='ok'] > svg { color: var(--color-success); }
+.journal > li[data-tone='danger'] > svg { color: var(--color-danger); }
+.journal > li > span:first-of-type { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.journal > li > span:first-of-type > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.journal > li > span:first-of-type > span + span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.journal > li[data-tone='danger'] > span:first-of-type > span + span { color: var(--color-danger); font-weight: 600; }
+.journal > li > span:last-child { flex: none; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.undo { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; height: 44px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.undo:disabled { color: var(--color-text-secondary); opacity: 0.6; cursor: not-allowed; }
+.undo > svg { width: 18px; height: 18px; }
+.actBody { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.actCount { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.actCount > span:first-child { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary); }
+.actValue { display: inline-flex; align-items: baseline; gap: 6px; }
+.actValue > span:first-child { font-size: 36px; line-height: 44px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.actValue > span + span { font-size: 16px; line-height: 22px; font-weight: 600; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.bar { display: flex; gap: 2px; min-width: 0; }
+.bar > span { display: block; min-width: 8px; height: 12px; border-radius: 4px; background: var(--color-border-strong); }
+.bar > span[data-kind='scanned'] { background: var(--color-nav); }
+.actFacts { padding-top: 14px; border-top: 1px solid var(--color-border); }
+.finish { width: 100%; }
+.finish > svg { width: 18px; height: 18px; }
+.finishCount { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: rgb(255 255 255 / 18%); font-size: 13px; line-height: 18px; font-weight: 700; }
+.note { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.chipInfo { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; box-sizing: border-box; border-radius: 999px; background: var(--color-info-soft); color: var(--color-info); font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.tableTools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; box-shadow: inset 0 0 0 1px var(--color-border); }
+.scanCell { display: inline-flex; align-items: center; gap: 8px; }
+.scanCell > span + span { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.scanState { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; box-sizing: border-box; border-radius: 999px; font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.scanState[data-state='scanned'] { background: var(--color-success-soft); color: var(--color-success); }
+.scanState[data-state='pending'] { background: var(--color-warning-soft); color: var(--color-warning); }
+.scanState > svg { width: 14px; height: 14px; }
+.footnote { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.footnote > svg { flex: none; width: 16px; height: 16px; margin-top: 1px; }
+.narrow { display: none; }
+.parcelCards { list-style: none; margin: 0; padding: 0; }
+.parcelCards > li { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.parcelCards > li:last-child { border-bottom: 0; }
+.cardRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.cardRow > strong { font-size: 15px; line-height: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cardRow > span:first-child:not([class]) { min-width: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.cardWho { font-size: 15px; line-height: 22px; font-weight: 600; }
+.cardWho > span { font-weight: 400; color: var(--color-text-secondary); }
+
+/* Planshet (ombor-topshirish.planshet): akt — ikki ustun, jadval — 3 ustun. */
+@container content (max-width: 839.98px) {
+  .wide { display: none; }
+  .narrow { display: inline; }
+}
+
+@container content (min-width: 576px) and (max-width: 839.98px) {
+  .actBody { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 16px 32px; }
+  .actBody > .actCount { flex: 1 1 220px; }
+  .actBody > .actFacts { flex: 1 1 300px; padding-top: 0; border-top: 0; }
+}
+
+@container content (max-width: 575.98px) {
+  .finishDesktop { display: none; }
+  .filterTabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+  .filterTabs > * { flex: none; }
+}

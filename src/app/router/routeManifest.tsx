@@ -100,6 +100,7 @@ export const roleShells: Record<UserRole, RoleShell> = {
  */
 export const documentRoutes: readonly AppRoute[] = [
   { path: '/inbound-acts/:shipmentId', load: () => import('../../pages/InboundActPage/InboundActPage'), roles: ['WAREHOUSE', 'ADMIN', 'SUPERADMIN'], label: 'inb.act.title' },
+  { path: '/warehouse/pick-sheet', load: () => import('../../pages/PickSheetPage/PickSheetPage'), roles: ['WAREHOUSE', 'ADMIN', 'SUPERADMIN'], label: 'ful.sheet.title' },
 ];
 
 // Sahifasi hali qurilmagan bandlar: o'z kartasi kelganda shu yerda `load` almashtiriladi.
@@ -141,8 +142,8 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/warehouse', load: () => import('../../pages/WarehouseInboundPage/WarehouseInboundPage'), roles: ['WAREHOUSE'], label: 'nav.inbound', navIcon: <PackagePlus />, railLabel: 'rail.inbound' },
   { path: '/warehouse/sku', load: pending, roles: ['WAREHOUSE'], label: 'nav.skuCells', navIcon: <ScanBarcode />, railLabel: 'rail.sku' },
   { path: '/warehouse/stock', load: () => import('../../pages/WarehouseStockPage/WarehouseStockPage'), roles: ['WAREHOUSE'], label: 'nav.stock', navIcon: <Warehouse />, railLabel: 'rail.stock' },
-  { path: '/warehouse/picking', load: pending, roles: ['WAREHOUSE'], label: 'nav.pickPack', navIcon: <PackageCheck />, railLabel: 'rail.pick' },
-  { path: '/warehouse/handover', load: pending, roles: ['WAREHOUSE'], label: 'nav.handover', navIcon: <Truck />, railLabel: 'rail.handover' },
+  { path: '/warehouse/picking', load: () => import('../../pages/WarehousePickingPage/WarehousePickingPage'), roles: ['WAREHOUSE'], label: 'nav.pickPack', navIcon: <PackageCheck />, railLabel: 'rail.pick' },
+  { path: '/warehouse/handover', load: () => import('../../pages/WarehouseHandoverPage/WarehouseHandoverPage'), roles: ['WAREHOUSE'], label: 'nav.handover', navIcon: <Truck />, railLabel: 'rail.handover' },
   { path: '/warehouse/returns', load: pending, roles: ['WAREHOUSE'], label: 'nav.returnsSorting', navIcon: <Undo2 />, railLabel: 'rail.returns' },
   { path: '/warehouse/wholesaler-handover', load: pending, roles: ['WAREHOUSE'], label: 'nav.toWholesaler', navIcon: <Building2 />, railLabel: 'rail.toWholesaler' },
 

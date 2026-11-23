@@ -23,7 +23,9 @@ type ApiErrorCode =
   | 'BOOKING_LIMIT_REACHED'
   | 'ADDRESS_NOT_CONFIRMED'
   | 'LANDING_NOT_OPEN'
-  | 'OUT_OF_STOCK';
+  | 'OUT_OF_STOCK'
+  // Ombor (BE-19): yig'ishda buyurtmada yo'q tovar skanerlandi.
+  | 'WRONG_ITEM';
 
 const API_ERROR_CODES: readonly ApiErrorCode[] = [
   'VALIDATION_ERROR',
@@ -44,6 +46,7 @@ const API_ERROR_CODES: readonly ApiErrorCode[] = [
   'ADDRESS_NOT_CONFIRMED',
   'LANDING_NOT_OPEN',
   'OUT_OF_STOCK',
+  'WRONG_ITEM',
 ];
 
 const MAX_MESSAGE_LENGTH = 160;
@@ -106,6 +109,7 @@ const CODE_MESSAGES: Record<ApiErrorCode, string> = {
   ADDRESS_NOT_CONFIRMED: 'Manzil tasdiqlanmagan. Avval mijoz manzilini tasdiqlang.',
   LANDING_NOT_OPEN: 'Sahifa hozir ariza qabul qilmaydi.',
   OUT_OF_STOCK: 'Omborda bu tovar qolmagan.',
+  WRONG_ITEM: 'Boshqa tovar skanerlandi — bu posilkada yo‘q.',
 };
 
 const CONNECTION_ERROR_MESSAGE =

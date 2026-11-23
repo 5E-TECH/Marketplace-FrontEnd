@@ -52,6 +52,11 @@ const uz = {
   'status.shipment.IN_TRANSIT': 'Yo‘lda',
   'status.shipment.RECEIVED': 'Qabul qilindi',
   'status.shipment.DISCREPANCY': 'Farq bor',
+  'status.task.TO_PICK': 'Navbatda',
+  'status.task.PICKING': 'Yig‘ilmoqda',
+  'status.task.PICKED': 'Yig‘ildi',
+  'status.task.PACKED': 'Qadoqlandi',
+  'status.task.HANDED_OVER': 'Elchi’ga topshirildi',
 } as const;
 
 export type StatusTranslationKey = keyof typeof uz;
@@ -107,6 +112,11 @@ const ru: Record<StatusTranslationKey, string> = {
   'status.shipment.IN_TRANSIT': 'В пути',
   'status.shipment.RECEIVED': 'Принята',
   'status.shipment.DISCREPANCY': 'Есть расхождение',
+  'status.task.TO_PICK': 'В очереди',
+  'status.task.PICKING': 'Собирается',
+  'status.task.PICKED': 'Собрано',
+  'status.task.PACKED': 'Упаковано',
+  'status.task.HANDED_OVER': 'Передано Elchi',
 };
 
 const en: Record<StatusTranslationKey, string> = {
@@ -160,6 +170,11 @@ const en: Record<StatusTranslationKey, string> = {
   'status.shipment.IN_TRANSIT': 'In transit',
   'status.shipment.RECEIVED': 'Received',
   'status.shipment.DISCREPANCY': 'Discrepancy',
+  'status.task.TO_PICK': 'Queued',
+  'status.task.PICKING': 'Picking',
+  'status.task.PICKED': 'Picked',
+  'status.task.PACKED': 'Packed',
+  'status.task.HANDED_OVER': 'Handed to Elchi',
 };
 
 export const statusTranslations = { uz, ru, en } as const;
