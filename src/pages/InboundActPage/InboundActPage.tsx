@@ -14,25 +14,13 @@ import { getApiErrorMessage } from '../../shared/api/apiError';
 import { BRAND } from '../../shared/config/brand';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDate, tashkentDateTime, tashkentDay } from '../../shared/lib/tashkentTime';
+import { useSheetScale } from '../../shared/lib/useSheetScale';
 import { isoToDots } from '../../shared/ui/DateInput/dateInput';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
 import styles from './InboundActPage.module.css';
 
-const SHEET_WIDTH = 794;
 const signed = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : '0');
-
-/** Telefonda varaq ekranga sig'adi (A4 794 px); chop etishda — haqiqiy o'lcham. */
-function useSheetScale() {
-  const read = () => Math.min(1, (window.innerWidth - 32) / SHEET_WIDTH);
-  const [scale, setScale] = useState(read);
-  useEffect(() => {
-    const onResize = () => setScale(read());
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-  return scale;
-}
 
 /**
  * Postavka qabul akti (hujjat-qabul-akti; FE-16 TC1): A4 varaq ekranda; «PDF yuklab olish» — server tuzgan akt

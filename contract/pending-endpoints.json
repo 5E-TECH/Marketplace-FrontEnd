@@ -1,5 +1,5 @@
 {
-  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md, docs/api-taklif/fe-05-sotuvchi-offer.md, docs/api-taklif/fe-08-operator.md, docs/api-taklif/fe-12-admin-moderatsiya.md, docs/api-taklif/fe-16-ombor.md",
+  "$comment": "Backend sxemasida HALI YO'Q, lekin frontend mock (src/mocks) bilan ishlatayotgan endpointlar. Har biri qaysi backend kartasida qo'shilishini yozadi. contract:check ularni xato emas, ogohlantirish deb ko'rsatadi; backend qo'shgach — shu ro'yxatdan o'chiring (skript eslatadi). Taklif qilingan shakl: docs/api-taklif/fe-04-sotuvchi.md, docs/api-taklif/fe-05-sotuvchi-offer.md, docs/api-taklif/fe-08-operator.md, docs/api-taklif/fe-12-admin-moderatsiya.md, docs/api-taklif/fe-16-ombor.md, docs/api-taklif/fe-17-ombor-yigish.md",
   "endpoints": [
     {"operation": "POST /api/v1/auth/otp/send", "card": "BE-06", "note": "SMS kod: ro'yxat yoki kirish"},
     {"operation": "POST /api/v1/auth/otp/verify", "card": "BE-06", "note": "Kodni tekshirish: kirish tokeni yoki ro'yxat tokeni"},
@@ -27,6 +27,7 @@
     {"operation": "GET /api/v1/admin/inventory/shipments/{}", "card": "BE-17 (PR #132)", "note": "Postavka kartasi: qatorlar, qabul, brak, partiya, yacheyka"},
     {"operation": "POST /api/v1/admin/inventory/shipments/{}/receive", "card": "BE-17 (PR #132)", "note": "Qabul (WAREHOUSE, SUPERADMIN): hamma qator bir so'rovda — kelgan, brak, partiya, muddat, yacheyka; takror — o'sha natija"},
     {"operation": "GET /api/v1/admin/inventory/shipments/{}/act.pdf", "card": "BE-17 (PR #132)", "note": "Qabul (farq va brak) akti PDF — optovikka qo'lda"},
-    {"operation": "GET /api/v1/admin/inventory/lots", "card": "BE-17 (PR #132)", "note": "Yaroqlilik partiyalari: muddat, sotuvdan chiqish sanasi (muddat − 60 kun), blocked"}
+    {"operation": "GET /api/v1/admin/inventory/lots", "card": "BE-17 (PR #132)", "note": "Yaroqlilik partiyalari: muddat, sotuvdan chiqish sanasi (muddat − 60 kun), blocked"},
+    {"operation": "GET /api/v1/warehouse/handover-acts", "card": "BE-19 taklif", "note": "Oldingi topshirish aktlari ro'yxati, yangisi tepada; kelmasa «Oldingi aktlar» bloki yashiriladi (docs/api-taklif/fe-17-ombor-yigish.md)"}
   ]
 }
