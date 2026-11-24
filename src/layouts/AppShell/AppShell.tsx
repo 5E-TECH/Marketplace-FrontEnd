@@ -1,6 +1,6 @@
 import { shortPersonName } from '../../shared/lib/personName';
 import { App, Drawer } from 'antd';
-import { MonitorSmartphone, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/store/hooks';
@@ -32,18 +32,6 @@ const LAYOUT_CLASS: Record<ShellLayout, string | undefined> = {
   tablet: styles.tablet,
   phone: styles.phone,
 };
-
-/** Operator «Ish joyi» telefonda ochilmaydi (karkas-E 4.7, operator-karkas.mobil). */
-function DesktopOnlyNotice() {
-  const { t } = useTranslation();
-  return (
-    <section className={styles.desktopOnly} data-testid="desktop-only">
-      <span className={styles.desktopOnlyIcon} aria-hidden><MonitorSmartphone /></span>
-      <h2>{t('shell.desktopOnlyTitle')}</h2>
-      <p>{t('shell.desktopOnlyText')}</p>
-    </section>
-  );
-}
 
 /**
  * Barcha rollar uchun yagona panel karkasi (FE-01, docs/dizayn/karkas-E.md).
@@ -157,7 +145,6 @@ export default function AppShell() {
             <PageBackContext value={setPageBack}>
             <PageStatusContext value={setPageStatus}>
               <PageHeaderSlotContext value={layout === 'desktop' ? headerSlot : null}>
-                {shell.variant === 'workspace' && layout === 'phone' && pathname === shell.home ? <DesktopOnlyNotice /> : null}
                 {/* Telefonda yuqori qator 56 px — sahifa holati mazmun tepasida. */}
                 {layout === 'phone' && pageStatus ? <PageStatusLine status={pageStatus} /> : null}
                 <Suspense fallback={<PageLoader compact />}>

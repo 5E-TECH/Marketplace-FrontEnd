@@ -57,7 +57,8 @@ test('TC1 + mezon: «Keyingi lid» → karta 1 soniyada; F2 ham ishlaydi', async
 
   const started = Date.now();
   await nextButton(page).click();
-  await expect(card(page).getByRole('heading', { level: 2 })).toHaveText('Sarvar · Toshkent shahri (formadan)');
+  // DZ-12 (FE-09): sotuvchi sahifasidan kelgan lid sarlavhasida faqat ism — manzil «(formadan)» bilan kartada.
+  await expect(card(page).getByRole('heading', { level: 2 })).toHaveText('Sarvar');
   expect(Date.now() - started).toBeLessThan(1000);
 
   await expect(card(page).getByTestId('booking-left')).toHaveText(/Bron: (10:00|09:5\d) qoldi/);
@@ -282,11 +283,15 @@ test('buyurtma tasdiqlandi: manzil mijoz yozganidek tasdiqlanadi, summa — serv
   await expect(order.getByLabel('Ko‘cha, uy')).toHaveValue('19-mavze, 4-uy, 27-xonadon');
   await order.getByLabel(/Izoh/).fill('Markazdan o‘zi olib ketadi');
   await page.keyboard.press('Control+Enter');
-  await expect(page.getByText('L-1275 · Sarvar → buyurtma yaratildi.')).toBeVisible();
-  await expect(card(page)).toHaveCount(0);
+  // FE-09: karta ochiq qoladi — «Buyurtma yaratildi», keyin «Keyingi lid».
+  await expect(page.getByTestId('order-done')).toContainText('490 000 + 50 000 = 540 000 so‘m');
+  await expect(page.getByTestId('order-done-status')).toContainText('Buyurtma L-1275 yaratildi');
+  await expect(card(page).getByText('Tasdiqlandi').first()).toBeVisible();
+  await takeNext(page, 'Nargiza');
+  await expect(page.getByTestId('order-done')).toHaveCount(0);
 });
 
-test('qoldiq tugagan va API lidi: «Buyurtma tasdiqlandi» yopiq, sababi ko‘rinadi', async ({ page }) => {
+test('qoldiq tugagan va API lidi: qoldiqsiz «Buyurtma tasdiqlandi» yopiq; manzilsiz — operator kiritadi', async ({ page }) => {
   await signInOperator(page);
   await goOnline(page);
   for (const name of ['Sarvar', 'Nargiza', 'Shahnoza']) {
@@ -296,8 +301,19 @@ test('qoldiq tugagan va API lidi: «Buyurtma tasdiqlandi» yopiq, sababi ko‘ri
   await takeNext(page, 'Madina');
   await expect(card(page).getByRole('heading', { level: 2 })).toHaveText('Madina (API orqali)');
   await expect(card(page)).toContainText('Sotuvchining o‘z saytidan keldi');
-  await expect(tile(page, /Buyurtma tasdiqlandi/)).toBeDisabled();
-  await expect(tile(page, /Buyurtma tasdiqlandi/)).toContainText('manzil yo‘q');
+  // FE-09: manzil formada kiritiladi; kiritilmaguncha «Buyurtmani tasdiqlash» o'chiq.
+  await tile(page, /Buyurtma tasdiqlandi/).click();
+  const order = page.getByTestId('order-form');
+  await expect(order.getByTestId('address-provenance')).toHaveCount(0);
+  await expect(footerAction(page)).toBeDisabled();
+  await expect(page.getByTestId('footer-reason')).toContainText('Manzil kiritilmaguncha «Buyurtmani tasdiqlash» o‘chiq.');
+  await order.getByLabel('Viloyat').selectOption({ label: 'Andijon viloyati' });
+  await expect(page.getByTestId('footer-reason')).toContainText('Tuman tanlanmaguncha');
+  await order.getByLabel('Tuman / shahar').selectOption({ label: 'Asaka tumani' });
+  await order.getByLabel('Ko‘cha, uy').fill('Navoiy ko‘chasi, 3-uy');
+  await expect(footerAction(page)).toBeEnabled();
+  // Matn yozilayotganda tezkor tugmalar ishlamaydi — maydondan chiqib, keyin Alt+6.
+  await order.getByLabel('Ko‘cha, uy').blur();
   await closeAsInvalid(page);
 
   await takeNext(page, 'Jahongir');

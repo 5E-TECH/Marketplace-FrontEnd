@@ -76,6 +76,16 @@ function readServerMessage(data: unknown): string | null {
 }
 
 /** Javobdagi `errorCode` — tanilmagan kod bo'lsa null. Mantiq matnga emas, shu kodga tayanadi. */
+/** Validatsiya xatosidagi maydonlar (`details[].field`, backend AllExceptionsFilter) — forma xatoni o'sha maydon ostida ko'rsatadi. */
+export function getApiErrorFields(error: unknown): string[] {
+  const data = getResponseData(error);
+  if (typeof data !== 'object' || data === null || !('details' in data) || !Array.isArray(data.details)) return [];
+  return (data.details as unknown[]).flatMap((item) => {
+    const field: unknown = typeof item === 'object' && item !== null && 'field' in item ? item.field : null;
+    return typeof field === 'string' && field ? [field] : [];
+  });
+}
+
 export function getApiErrorCode(error: unknown): ApiErrorCode | null {
   const data = getResponseData(error);
   if (typeof data !== 'object' || data === null || !('errorCode' in data)) {

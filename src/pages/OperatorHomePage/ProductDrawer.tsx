@@ -48,21 +48,29 @@ export function ProductDrawer({ card, open, onClose }: { card: LeadCard; open: b
             <h3>{t('opw.productPrice')} <span>{t('opw.productPriceNote')}</span></h3>
             <dl className={styles.priceBox}>
               <div><dt>{t('opw.sumGoods')}</dt><dd>{sum(info.salePrice)}</dd></div>
-              <div>
-                <dt>{t('opw.delivery')}</dt>
-                <dd>{sum(info.deliveryFee.CENTER)} {t('opw.whereDeliver.CENTER')}<small>{t('opw.whereDeliver.ADDRESS')} {sum(info.deliveryFee.ADDRESS)}</small></dd>
-              </div>
-              <div>
-                <dt>{t('opw.productTotal')}</dt>
-                <dd data-total="true">{sum(info.salePrice + info.deliveryFee.CENTER)}<small>{t('opw.whereDeliver.ADDRESS')} {sum(info.salePrice + info.deliveryFee.ADDRESS)}</small></dd>
-              </div>
+              {info.deliveryFee ? (
+                <>
+                  <div>
+                    <dt>{t('opw.delivery')}</dt>
+                    <dd>{sum(info.deliveryFee.CENTER)} {t('opw.whereDeliver.CENTER')}<small>{t('opw.whereDeliver.ADDRESS')} {sum(info.deliveryFee.ADDRESS)}</small></dd>
+                  </div>
+                  <div>
+                    <dt>{t('opw.productTotal')}</dt>
+                    <dd data-total="true">{sum(info.salePrice + info.deliveryFee.CENTER)}<small>{t('opw.whereDeliver.ADDRESS')} {sum(info.salePrice + info.deliveryFee.ADDRESS)}</small></dd>
+                  </div>
+                </>
+              ) : (
+                <div><dt>{t('opw.delivery')}</dt><dd>—</dd></div>
+              )}
               <div><dt>{t('opw.payLabelPlain')}</dt><dd>{t('opw.payValue')}</dd></div>
             </dl>
           </section>
 
           <section>
             <h3>{t('opw.productStock')}</h3>
-            {info.available > 0 ? (
+            {info.available === null ? (
+              <p className={styles.stockLine}>—</p>
+            ) : info.available > 0 ? (
               <p className={styles.stockLine}>
                 <Badge tone="success" icon={CircleCheck}>{t('opw.productInStock')}</Badge>
                 <span>{t('opw.productAvailableBefore')} <strong>{t('opw.productAvailableCount', { count: info.available })}</strong> {t('opw.productAvailableAfter')}</span>

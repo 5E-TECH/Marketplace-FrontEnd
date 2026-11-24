@@ -1,4 +1,5 @@
 import type { components } from '../../../generated/api-types';
+import { unwrapApiData } from '../../../shared/api/apiResponse';
 import { httpClient } from '../../../shared/api/httpClient';
 import { readDto, readDtoList } from '../../../shared/api/readDto';
 import { REQUEST_TIMEOUT } from '../../../shared/api/requestOptions';
@@ -49,26 +50,26 @@ export async function submitLeadResult(id: string, input: LeadResultInput): Prom
   return readDto<LeadResultAccepted>(data, ['leadId', 'status', 'nextAttemptAt']);
 }
 
+export type LeadAddressInput = Schemas['UpdateLeadAddressDto'];
+
 /**
- * «Buyurtma tasdiqlandi» dan oldin manzil tasdig'i (BE-38): FE-08 da mijoz yozgan manzil
- * o'zgarishsiz tasdiqlanadi; tahrirlash va miqdor — FE-09.
+ * Manzilni tasdiqlash yoki tuzatish (BE-38, OPR-4): saqlash — tasdiq; tuzatilgan maydonning eski va yangi
+ * qiymati lid tarixiga yoziladi. Javob — yangilangan lid kartasi.
  */
-export async function confirmLeadAddress(id: string, address: NonNullable<LeadCard['address']>, whereDeliver: WhereDeliver = address.whereDeliver): Promise<LeadCard> {
-  const body: Schemas['UpdateLeadAddressDto'] = {
-    regionSoato: address.regionSoato,
-    districtSoato: address.districtSoato,
-    addressLine: address.addressLine,
-    whereDeliver,
-  };
-  const { data } = await httpClient.patch<unknown>(`/operator/leads/${encodeURIComponent(id)}/address`, body, { timeout: REQUEST_TIMEOUT.action });
+export async function confirmLeadAddress(id: string, address: LeadAddressInput): Promise<LeadCard> {
+  const { data } = await httpClient.patch<unknown>(`/operator/leads/${encodeURIComponent(id)}/address`, address, { timeout: REQUEST_TIMEOUT.action });
   return readDto<LeadCard>(data, [...LEAD_CARD_KEYS]);
 }
 
-/** Miqdor va yetkazish turi bo'yicha summa — ekran o'zi hisoblamaydi (BE-09). */
-export async function quoteLeadPrice(id: string, quantity: number, whereDeliver: WhereDeliver): Promise<LeadPrice> {
+/**
+ * Miqdor va yetkazish turi bo'yicha summa — ekran o'zi hisoblamaydi (BE-09: yetkazish jami og'irlikka qarab).
+ * Backend narxni hisoblay olmasa `null` qaytaradi — mijozga summa aytilmaydi.
+ */
+export async function quoteLeadPrice(id: string, quantity: number, whereDeliver: WhereDeliver, signal?: AbortSignal): Promise<LeadPrice | null> {
   const body: Schemas['LeadPriceQuoteDto'] = { quantity, whereDeliver };
-  const { data } = await httpClient.post<unknown>(`/operator/leads/${encodeURIComponent(id)}/quote`, body, { timeout: REQUEST_TIMEOUT.action });
-  return readDto<LeadPrice>(data, ['subtotal', 'deliveryFee', 'totalAmount']);
+  const { data } = await httpClient.post<unknown>(`/operator/leads/${encodeURIComponent(id)}/quote`, body, { timeout: REQUEST_TIMEOUT.action, signal });
+  const payload = unwrapApiData(data);
+  return payload === null || payload === undefined || payload === '' ? null : readDto<LeadPrice>(payload, ['subtotal', 'deliveryFee', 'totalAmount']);
 }
 
 /** Taklif (BE-13): «Bugungi urinishlarim · oxirgi 10 tasi». */

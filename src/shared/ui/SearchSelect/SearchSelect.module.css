@@ -1,4 +1,7 @@
-/* Tanlov maydoni (komponentlar-E §20, umumiy-komponentlar «2. Viloyat → tuman kaskadi»): 44, matn 16. */
+/*
+ * Tanlov maydoni (komponentlar-E §20, umumiy-komponentlar «2. Viloyat → tuman kaskadi»): 44, matn 16.
+ * Zich forma (operator buyurtma formasi — 15/22) `--field-font-size` / `--field-line-height` bilan.
+ */
 .wrap { position: relative; }
 
 .control {
@@ -16,13 +19,13 @@
   background: var(--color-surface);
   color: var(--color-text);
   font-family: inherit;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--field-font-size, 16px);
+  line-height: var(--field-line-height, 24px);
   text-align: left;
   cursor: pointer;
 }
 
-select.control { display: block; padding-right: 44px; appearance: none; -webkit-appearance: none; }
+select.control { display: block; padding-right: var(--field-select-pad, 44px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; appearance: none; -webkit-appearance: none; }
 .control[data-empty] { color: var(--color-text-secondary); }
 .control:focus-visible, .control[aria-expanded='true'] { border-color: var(--color-action); outline: 0; box-shadow: 0 0 0 3px var(--color-focus-ring); }
 .control[aria-invalid='true'] { border-color: var(--color-danger); }

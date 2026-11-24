@@ -139,14 +139,22 @@ export function QueueColumn({ bookings, callbacks, max, activeId, queue, stats, 
           <h2>{t('opw.todayTitle')}</h2>
           <Link to="/operator/stats" className={styles.textLink}>{t('opw.myStats')}<ChevronRight size={16} aria-hidden /></Link>
         </div>
-        <dl className={styles.todayList}>
-          <div><dt>{t('opw.attempts')}</dt><dd>{stats?.attempts ?? '—'}</dd></div>
-          <div><dt>{t('opw.confirmed')}</dt><dd>{stats?.confirmed ?? '—'}</dd></div>
-          <div><dt>{t('opw.approveRate')}</dt><dd>{stats?.approveRate == null ? '—' : `${Math.round(stats.approveRate * 100)}%`}</dd></div>
-          <div><dt>{t('opw.firstCall')}</dt><dd>{stats?.firstCallMedianMinutes == null ? '—' : t('opw.minutes', { count: stats.firstCallMedianMinutes })}</dd></div>
-          <div><dt>{t('opw.bonus')}</dt><dd>{t('opw.bonusEmpty')}</dd></div>
-        </dl>
+        <TodayStatsList stats={stats} />
       </div>
     </section>
+  );
+}
+
+/** «Bugun» ro'yxati (operator-bosh, operator-buyurtma-formasi.mobil): urinishlar, tasdiq, foiz, birinchi qo'ng'iroq, bonus. */
+export function TodayStatsList({ stats }: { stats: OperatorStats | undefined }) {
+  const { t } = useTranslation();
+  return (
+    <dl className={styles.todayList}>
+      <div><dt>{t('opw.attempts')}</dt><dd>{stats?.attempts ?? '—'}</dd></div>
+      <div><dt>{t('opw.confirmed')}</dt><dd>{stats?.confirmed ?? '—'}</dd></div>
+      <div><dt>{t('opw.approveRate')}</dt><dd>{stats?.approveRate == null ? '—' : `${Math.round(stats.approveRate * 100)}%`}</dd></div>
+      <div><dt>{t('opw.firstCall')}</dt><dd>{stats?.firstCallMedianMinutes == null ? '—' : t('opw.minutes', { count: stats.firstCallMedianMinutes })}</dd></div>
+      <div><dt>{t('opw.bonus')}</dt><dd>{t('opw.bonusEmpty')}</dd></div>
+    </dl>
   );
 }

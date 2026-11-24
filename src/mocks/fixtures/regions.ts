@@ -1,9 +1,10 @@
-import type { components } from '../../generated/api-types';
+import type { RegionGroup } from '../../features/address/model/regionTypes';
 
-const group = (satoCode: string, name: string, districts: ReadonlyArray<readonly [string, string]>): components['schemas']['LeadRegionGroupDto'] => ({
+/** Uchinchi qiymat `false` — Elchi bu tumanda eshikkacha olib bormaydi (taklif `doorDelivery`, 40-savol) [namuna]. */
+const group = (satoCode: string, name: string, districts: ReadonlyArray<readonly [string, string, boolean?]>): RegionGroup => ({
   satoCode,
   name,
-  districts: districts.map(([code, district]) => ({ satoCode: code, name: district })),
+  districts: districts.map(([code, district, doorDelivery]) => ({ satoCode: code, name: district, ...(doorDelivery === false ? { doorDelivery } : {}) })),
 });
 
 /** `GET /regions/tree` namunasi (BE-38): viloyat → tuman, kalit SOATO, Elchi tartibida. Farg‘onada 7 tadan ko'p tuman — qidiruvli ro'yxat. */
@@ -25,7 +26,7 @@ export const REGION_TREE = [
   group('1727', 'Toshkent viloyati', [['1727401', 'Nurafshon shahri']]),
   group('1730', 'Farg‘ona viloyati', [
     ['1730412', 'Qo‘qon shahri'], ['1730401', 'Farg‘ona shahri'], ['1730408', 'Marg‘ilon shahri'], ['1730413', 'Quvasoy shahri'],
-    ['1730206', 'Beshariq tumani'], ['1730209', 'Bag‘dod tumani'], ['1730227', 'Rishton tumani'], ['1730203', 'Oltiariq tumani'],
+    ['1730206', 'Beshariq tumani'], ['1730209', 'Bag‘dod tumani', false], ['1730227', 'Rishton tumani'], ['1730203', 'Oltiariq tumani'],
     ['1730224', 'Quva tumani'], ['1730236', 'Uchko‘prik tumani'], ['1730233', 'Toshloq tumani'],
   ]),
   group('1733', 'Xorazm viloyati', [['1733401', 'Urganch shahri']]),
