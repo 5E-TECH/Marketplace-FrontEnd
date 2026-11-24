@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
 import { httpClient } from '../../../shared/api/httpClient';
 import { readDto, readDtoList } from '../../../shared/api/readDto';
@@ -173,10 +174,26 @@ export async function decidePrice({ id, price, affiliateFee, reason }: { id: str
   return readDto<ProductPricing>(data, ['params', 'calculation', 'approvedPrice', 'maxSalePrice']);
 }
 
-/** NRX-5: raqobatchida mijoz jami bilan solishtirish; summa mahsulotda saqlanadi. `source` — taklif (fe-13 §3). */
+/** Backend so'rovdagi maydonni hali bilmaydi: `forbidNonWhitelisted` → 400, `details[].field`. */
+function rejectsField(error: unknown, field: string): boolean {
+  if (!axios.isAxiosError(error) || error.response?.status !== 400) return false;
+  return readItems(asRecord(error.response.data).details)?.some((item) => asRecord(item).field === field) ?? false;
+}
+
+/**
+ * NRX-5: raqobatchida mijoz jami bilan solishtirish; summa mahsulotda saqlanadi. `source` — taklif (fe-13 §3):
+ * backend uni hali qabul qilmasa, summa manbasiz saqlanadi.
+ */
 export async function checkMarketPrice({ id, competitorTotal, source }: { id: string; competitorTotal: number; source?: string }): Promise<MarketCheckResult> {
-  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/market-check`, { competitorTotal, ...(source ? { source } : {}) });
-  return readDto<MarketCheckResult>(data, ['competitorTotal', 'ourTotal', 'verdict']);
+  const url = `/admin/products/${encodeURIComponent(id)}/market-check`;
+  const send = async (body: object) => readDto<MarketCheckResult>((await httpClient.post<unknown>(url, body)).data, ['competitorTotal', 'ourTotal', 'verdict']);
+  if (!source) return send({ competitorTotal });
+  try {
+    return await send({ competitorTotal, source });
+  } catch (error) {
+    if (rejectsField(error, 'source')) return send({ competitorTotal });
+    throw error;
+  }
 }
 
 /** Taklif (fe-13 §3): bozor narxi natijasini saqlamasdan oldindan ko'rish («Bozor narxini kiritish» oynasi). */
