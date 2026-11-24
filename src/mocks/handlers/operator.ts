@@ -11,15 +11,27 @@ import {
   tashkentMoment,
   tashkentParts,
 } from '../../features/operator/lib/leadRules';
-import type { LeadProductInfo, OperatorAttemptItem, OperatorLeadListItem, OperatorStateInfo } from '../../features/operator/model/operatorTypes';
+import type {
+  DeliveryMode,
+  LeadAddressChange,
+  LeadCard,
+  LeadPrice,
+  LeadProductInfo,
+  LeadResultAccepted,
+  OperatorAttemptItem,
+  OperatorLeadListItem,
+  OperatorStateInfo,
+  WhereDeliver,
+} from '../../features/operator/model/operatorTypes';
 import { addDays } from '../../shared/lib/tashkentTime';
 import { db, MOCK_PRODUCTS } from '../db';
+import { mockPricingParams, TARIFF } from '../fixtures/adminProducts';
 import { REGION_TREE } from '../fixtures/regions';
+import { deliveryView, elchiTariffFor } from '../pricingCalculator';
 import { API, fail, ok, seeded } from '../utils';
 import { currentMockUser } from './auth';
 
 type Schemas = components['schemas'];
-type LeadCard = Schemas['LeadCardDto'];
 type LeadStatus = LeadCard['status'];
 
 /**
@@ -28,38 +40,124 @@ type LeadStatus = LeadCard['status'];
  * qayta qo'ng'iroqlar (o'zingiz rejalashtirganlari birinchi), keyin eng yangi lidlar;
  * natija tekshiruvi (sabab, vaqt, manzil); javobsiz urinishlar jadvali; muddati o'tgan
  * bron va kechikkan rejalashtirilgan qo'ng'iroq navbatga qaytadi.
+ * FE-09: narx obyekti backend formulasi bilan (BE-09: yetkazish jami og'irlikka qarab), manzil tuzatish tarixi,
+ * qoldiq va band qilish (taklif maydonlari — docs/api-taklif/fe-09-operator-buyurtma.md).
  */
 const MINUTE = 60_000;
 const ago = (minutes: number) => new Date(Date.now() - minutes * MINUTE).toISOString();
 const ahead = (minutes: number) => new Date(Date.now() + minutes * MINUTE).toISOString();
 const money = (value: number) => value.toLocaleString('ru-RU').replace(/\u00a0/g, ' ');
-const CENTER_FEE = 30_000;
-const ADDRESS_FEE = 50_000;
 const OPERATOR = 'Dilnoza R.';
 
+/**
+ * Lid sahifasidagi tovar (narx, og'irlik, yetkazish rejimi, ombordagi qoldiq). Dastlabki uchtasi — umumiy
+ * mock mahsulotlar; qolganlari FE-09 holatlari uchun (og'ir tovar alohida rejimda, oxirgi dona, bepul rejim,
+ * og'irligi kiritilmagan — summa hisoblanmaydi).
+ */
+interface MockOffer {
+  id: string;
+  name: string;
+  salePrice: number;
+  weightGrams: number | null;
+  deliveryMode: DeliveryMode;
+  stock: number;
+  category: string;
+}
+
+// Kechiktirib: `db.ts` bu faylni import qiladi (aylana import) — `MOCK_PRODUCTS` modul yuklanganda hali yo'q.
+let offerList: readonly MockOffer[] | null = null;
+const offers = (): readonly MockOffer[] => (offerList ??= [
+  { ...MOCK_PRODUCTS[0], weightGrams: 300, deliveryMode: 'PARTIAL', stock: 120, category: 'Elektronika' },
+  { ...MOCK_PRODUCTS[1], weightGrams: 1_200, deliveryMode: 'PARTIAL', stock: 120, category: 'Uy-ro‘zg‘or' },
+  { ...MOCK_PRODUCTS[2], weightGrams: 1_400, deliveryMode: 'PARTIAL', stock: 120, category: 'Uy-ro‘zg‘or' },
+  { id: '520', name: 'Changyutgich', salePrice: 414_000, weightGrams: 5_600, deliveryMode: 'SEPARATE', stock: 14, category: 'Uy-ro‘zg‘or' },
+  { id: '521', name: 'Bolalar termos shishasi', salePrice: 180_000, weightGrams: 450, deliveryMode: 'PARTIAL', stock: 1, category: 'Bolalar uchun' },
+  { id: '522', name: 'Aqlli soat', salePrice: 294_000, weightGrams: 200, deliveryMode: 'FREE', stock: 40, category: 'Elektronika' },
+  { id: '523', name: 'Yoga gilamchasi', salePrice: 159_000, weightGrams: null, deliveryMode: 'PARTIAL', stock: 25, category: 'Sport' },
+]);
+const offerOf = (productId: string) => offers().find((item) => item.id === productId) ?? offers()[0];
+
+const extraKg = (grams: number) => Math.max(0, Math.ceil((grams - TARIFF.baseWeightGrams) / 1000));
+
+/**
+ * Ko'rinadigan yetkazish (backend `pricing.service.ts` `quoteFor`): bir donadagi ko'rinadigan summa + og'irlik
+ * oshgani uchun tarif farqi; bepul rejimda 0. Og'irlik bo'lmasa — hisoblanmaydi (null).
+ */
+function deliveryQuote(offer: MockOffer, quantity: number, where: WhereDeliver) {
+  if (offer.weightGrams === null) return null;
+  const params = mockPricingParams({ deliveryMode: offer.deliveryMode, deliveryModeSource: 'PRODUCT' });
+  const unit = deliveryView(params, TARIFF, offer.weightGrams);
+  const address = where === 'ADDRESS';
+  const weightGrams = offer.weightGrams * quantity;
+  const tariff = elchiTariffFor(TARIFF, weightGrams, address);
+  const visibleUnit = address ? unit.visibleAddress : unit.visibleCenter;
+  const unitTariff = address ? unit.tariffAddress : unit.tariffCenter;
+  const fee = offer.deliveryMode === 'FREE' ? 0 : Math.min(tariff, visibleUnit + (tariff - unitTariff));
+  const formula: LeadPrice['deliveryFormula'] = offer.deliveryMode === 'FREE' ? null
+    : offer.deliveryMode === 'SEPARATE'
+      ? { base: TARIFF.centerBase + (address ? TARIFF.addressExtra : 0), extraKg: extraKg(weightGrams), perExtraKg: TARIFF.perExtraKg, baseWeightGrams: TARIFF.baseWeightGrams }
+      : { base: visibleUnit, extraKg: extraKg(weightGrams) - extraKg(offer.weightGrams), perExtraKg: TARIFF.perExtraKg, baseWeightGrams: TARIFF.baseWeightGrams };
+  return { fee, formula, weightGrams };
+}
+
+/** Oldindan to'lov usuli — 6-savol javobigacha namuna [taklif]. */
+const PREPAYMENT_METHOD = 'SMS-havola orqali (Click yoki Payme)';
+
+/** Lid kartasidagi `price` va `POST …/quote` javobi (taklif maydonlari bilan). */
+function priceFor(offer: MockOffer, quantity: number, whereDeliver: WhereDeliver, blacklisted = false): LeadPrice | null {
+  const quote = deliveryQuote(offer, quantity, whereDeliver);
+  if (!quote) return null;
+  const subtotal = offer.salePrice * quantity;
+  const options = { CENTER: deliveryQuote(offer, quantity, 'CENTER')?.fee ?? 0, ADDRESS: deliveryQuote(offer, quantity, 'ADDRESS')?.fee ?? 0 };
+  return {
+    unitPrice: offer.salePrice, quantity, subtotal, whereDeliver, deliveryFee: quote.fee, totalAmount: subtotal + quote.fee,
+    deliveryMode: offer.deliveryMode, weightGrams: quote.weightGrams, deliveryOptions: options, deliveryFormula: quote.formula,
+    prepayment: blacklisted ? { amount: quote.fee, method: PREPAYMENT_METHOD } : null,
+  };
+}
+
 const ADDRESSES: ReadonlyArray<Omit<NonNullable<LeadCard['address']>, 'whereDeliver' | 'confirmedAt' | 'editedByOperator'>> = [
-  { regionSoato: '1730', regionName: 'Farg‘ona viloyati', districtSoato: '1730412', districtName: 'Qo‘qon shahri', addressLine: 'Navoiy ko‘chasi, 12-uy' },
+  { regionSoato: '1730', regionName: 'Farg‘ona viloyati', districtSoato: '1730412', districtName: 'Qo‘qon shahri', addressLine: 'Turkiston ko‘chasi, 27-uy' },
   { regionSoato: '1726', regionName: 'Toshkent shahri', districtSoato: '1726266', districtName: 'Yunusobod tumani', addressLine: '19-mavze, 4-uy, 27-xonadon' },
   { regionSoato: '1718', regionName: 'Samarqand viloyati', districtSoato: '1718401', districtName: 'Samarqand shahri', addressLine: 'Registon ko‘chasi, 5-uy' },
   { regionSoato: '1722', regionName: 'Surxondaryo viloyati', districtSoato: '1722401', districtName: 'Termiz shahri', addressLine: 'Alpomish ko‘chasi, 3-uy' },
   { regionSoato: '1703', regionName: 'Andijon viloyati', districtSoato: '1703401', districtName: 'Andijon shahri', addressLine: 'Bobur shoh ko‘chasi, 44-uy' },
+  { regionSoato: '1724', regionName: 'Sirdaryo viloyati', districtSoato: '1724401', districtName: 'Guliston shahri', addressLine: 'Mustaqillik ko‘chasi, 8-uy' },
+  { regionSoato: '1730', regionName: 'Farg‘ona viloyati', districtSoato: '1730209', districtName: 'Bag‘dod tumani', addressLine: 'Navbahor ko‘chasi, 14-uy' },
 ];
 
 const NAMES = ['Mohira', 'Gulnoza', 'Oybek', 'Saida', 'Nodir', 'Kamola'];
 
-function script(name: string, product: string, price: number): string {
+const addressText = (address: NonNullable<LeadCard['address']>) => `${address.regionName}, ${address.districtName}, ${address.addressLine}`;
+const WHERE_TEXT: Record<WhereDeliver, string> = { CENTER: 'markazgacha', ADDRESS: 'eshikkacha' };
+
+/**
+ * Suhbat skripti — o'zgaruvchilarni server qo'yadi (admin-skript): ism, tovar, narx, yetkazish va manzil
+ * (DZ-12: 4-qadam «Manzilni tasdiqlaymiz»).
+ */
+function script(lead: LeadCard): string {
+  const { customerName: name, product, price, address } = lead;
+  const fee = price?.deliveryFee ?? null;
+  const priceLine = fee === null
+    ? `Narxi ${money(product.salePrice)} so‘m. To‘lov tovarni olganingizda.`
+    : fee === 0
+      ? `Narxi ${money(product.salePrice)} so‘m, yetkazish bepul. To‘lov tovarni olganingizda.`
+      : `Narxi ${money(product.salePrice)} so‘m, yetkazish viloyat va tuman markazigacha ${money(fee)} so‘m, jami ${money(product.salePrice + fee)} so‘m. To‘lov tovarni olganingizda.`;
   return [
     `Assalomu alaykum, ${name}! Elchi Market’dan qo‘ng‘iroq qilyapman. Suhbat sifat nazorati uchun yozib olinadi.`,
-    `Siz «${product}» uchun ariza qoldirgan edingiz. Buyurtmani rasmiylashtiramizmi?`,
-    `Narxi ${money(price)} so‘m, yetkazish viloyat va tuman markazigacha ${money(CENTER_FEE)} so‘m, jami ${money(price + CENTER_FEE)} so‘m. To‘lov tovarni olganingizda.`,
-    'Manzilni aniqlaymiz: tuman yoki shahar, markazgacha yoki eshikkacha.',
+    `Siz «${product.name}» uchun ariza qoldirgan edingiz. Buyurtmani rasmiylashtiramizmi?`,
+    priceLine,
+    address
+      ? `Manzilni tasdiqlaymiz: ${addressText(address)}, yetkazish ${WHERE_TEXT[address.whereDeliver]}. To‘g‘rimi?`
+      : 'Manzilni aniqlaymiz: viloyat, tuman yoki shahar, ko‘cha va uy; markazgacha yoki eshikkacha.',
   ].join('\n');
 }
 
 interface Seed {
   id: string;
   name: string;
-  product: number;
+  /** `MOCK_PRODUCTS` indeksi yoki FE-09 tovari (`offers()` id si). */
+  product: number | string;
   address: number | null;
   status?: LeadStatus;
   source?: LeadCard['source'];
@@ -69,13 +167,17 @@ interface Seed {
   stockShortage?: boolean;
   bookedUntil?: string | null;
   nextAttemptAt?: string | null;
+  quantity?: number;
+  /** Ketma-ket rad etgan mijoz (TZ 7): `blacklistRejections`. */
+  blacklist?: number;
 }
 
 function makeLead(seed: Seed): LeadCard {
-  const product = MOCK_PRODUCTS[seed.product % MOCK_PRODUCTS.length];
+  const offer = typeof seed.product === 'string' ? offerOf(seed.product) : offers()[seed.product % MOCK_PRODUCTS.length];
   const address = seed.address === null ? null : ADDRESSES[seed.address % ADDRESSES.length];
   const attempts = seed.attempts ?? [];
   const created = ago(seed.createdMinutesAgo);
+  const quantity = seed.quantity ?? 1;
   const history: LeadCard['history'] = [{ at: created, fromStatus: null, toStatus: 'NEW', actor: 'Tizim', note: null }];
   attempts.forEach((attempt, index) => {
     history.push({ at: attempt.at, fromStatus: index ? 'CALLBACK' : 'NEW', toStatus: 'CALLBACK', actor: attempt.operatorName, note: attempt.comment });
@@ -87,17 +189,15 @@ function makeLead(seed: Seed): LeadCard {
     source: seed.source ?? 'LANDING',
     customerName: seed.name,
     phoneMasked: `+998 ** *** ${seeded(seed.id, 10, 99)} ${seeded(`${seed.id}:2`, 10, 99)}`,
-    product: { id: product.id, name: product.name, salePrice: product.salePrice },
-    quantity: 1,
+    product: { id: offer.id, name: offer.name, salePrice: offer.salePrice },
+    quantity,
     address: address && { ...address, whereDeliver: 'CENTER', confirmedAt: null, editedByOperator: false },
-    price: address && {
-      unitPrice: product.salePrice, quantity: 1, subtotal: product.salePrice, whereDeliver: 'CENTER',
-      deliveryFee: CENTER_FEE, totalAmount: product.salePrice + CENTER_FEE,
-    },
+    // Backend: manzil (yetkazish turi) bo'lmasa narx obyekti yo'q.
+    price: address ? priceFor(offer, quantity, 'CENTER', Boolean(seed.blacklist)) : null,
     rejectReason: null,
-    callScript: script(seed.name, product.name, product.salePrice),
+    callScript: null,
     stockShortage: seed.stockShortage ?? false,
-    blacklistRejections: null,
+    blacklistRejections: seed.blacklist ?? null,
     attemptsCount: attempts.length,
     bookedUntil: seed.bookedUntil ?? null,
     nextAttemptAt: seed.nextAttemptAt ?? null,
@@ -109,10 +209,12 @@ function makeLead(seed: Seed): LeadCard {
   };
 }
 
-/** Admin offer sozlamasida yozilgan skript (FE-12 TC3, `PUT /admin/offer-content`) — bo'lmasa namuna skript. */
-function withOfferScript(lead: LeadCard): LeadCard {
-  const script = db.offerContents[lead.product.id]?.callScript;
-  return script ? { ...lead, callScript: script } : lead;
+/**
+ * Javobdagi karta: skript — admin offer sozlamasida yozilgani (FE-12 TC3, `PUT /admin/offer-content`), bo'lmasa
+ * namuna skript joriy narx va manzil bilan (o'zgaruvchilarni server qo'yadi).
+ */
+function present(lead: LeadCard): LeadCard {
+  return { ...lead, callScript: db.offerContents[lead.product.id]?.callScript ?? script(lead) };
 }
 
 interface OperatorStore {
@@ -124,6 +226,10 @@ interface OperatorStore {
   stateSince: string;
   /** Shu operatorning bugungi urinishlari (yangisi birinchi) — «Bugungi urinishlarim». */
   log: OperatorAttemptItem[];
+  /** Ombordagi sotuvga bor dona (band qilinganda kamayadi). */
+  stock: Map<string, number>;
+  /** Tasdiq paytida oxirgi donani boshqa buyurtma band qiladi (FE-09 19-kadr: ikki parallel tasdiq). */
+  raceOnce: Set<string>;
 }
 
 /** Bugungi urinishlar namunasi (operator-bosh jadvalidagidek); «jami» statistika bilan bir xil — 38. */
@@ -170,10 +276,21 @@ function createStore(): OperatorStore {
     },
     { id: 'L-1291', name: 'Madina', product: 0, address: null, source: 'API', createdMinutesAgo: 9 },
     { id: 'L-1151', name: 'Jahongir', product: 2, address: 4, createdMinutesAgo: 20, stockShortage: true },
-    ...NAMES.map((name, index) => ({ id: `L-12${60 + index}`, name, product: index, address: index, createdMinutesAgo: 25 + index * 7 })),
+    ...NAMES.map((name, index) => ({ id: `L-12${60 + index}`, name, product: index, address: index % 5, createdMinutesAgo: 25 + index * 7 })),
+    // FE-09 holatlari (navbat oxirida — FE-08 tartibi o'zgarmaydi): miqdor > qoldiq va oxirgi dona, qora ro'yxat,
+    // og'ir tovar alohida rejimda, bepul rejim, og'irligi yo'q (summa hisoblanmaydi), eshikkacha bormaydigan tuman.
+    { id: 'L-1233', name: 'Kamron', product: '521', address: 2, quantity: 2, createdMinutesAgo: 95 },
+    { id: 'L-1241', name: 'Gulchehra', product: 0, address: 5, blacklist: 2, createdMinutesAgo: 100 },
+    { id: 'L-1244', name: 'Bekzod', product: '520', address: 1, createdMinutesAgo: 105 },
+    { id: 'L-1246', name: 'Sevinch', product: '522', address: 4, createdMinutesAgo: 110 },
+    { id: 'L-1248', name: 'Ulug‘bek', product: '523', address: 3, createdMinutesAgo: 115 },
+    { id: 'L-1249', name: 'Zuhra', product: 0, address: 6, createdMinutesAgo: 120 },
   ];
   const leads = new Map(seeds.map((seed) => [seed.id, makeLead(seed)]));
-  return { leads, owned: new Set(['L-1284', 'L-1255', 'L-1253']), returned: [], stateSince: ago(20), log: seedLog() };
+  return {
+    leads, owned: new Set(['L-1284', 'L-1255', 'L-1253']), returned: [], stateSince: ago(20), log: seedLog(),
+    stock: new Map(offers().map((offer) => [offer.id, offer.stock])), raceOnce: new Set(['L-1233']),
+  };
 }
 
 // Kechiktirib yaratiladi: `db.ts` bu faylni reset uchun import qiladi (aylana import).
@@ -182,6 +299,17 @@ const current = () => (store ??= createStore());
 
 export function resetMockOperator(): void {
   store = null;
+}
+
+/**
+ * Test va namoyish uchun: navbatdagi lidni shu operatorga bron qiladi (FE-09 holatlari navbat oxirida turadi).
+ * Playwright handler'lari test jarayonida ishlaydi — test shu funksiyani to'g'ridan-to'g'ri chaqiradi.
+ */
+export function bookMockLead(id: string): void {
+  const lead = current().leads.get(id);
+  if (!lead) throw new Error(`Mock lid topilmadi: ${id}`);
+  current().leads.set(id, { ...withStatus(lead, 'BOOKED', OPERATOR, null), bookedUntil: ahead(BOOKING_MINUTES) });
+  current().owned.add(id);
 }
 
 const guard = (request: Request, cookies: Record<string, string>, roles: readonly string[] = ['OPERATOR_LEAD']) => {
@@ -266,20 +394,25 @@ function listItem(lead: LeadCard): OperatorLeadListItem {
   };
 }
 
+/** Shu lid tovari uchun omborda sotuvga bor dona (qoldiq tugagan lidda — 0). */
+const stockOf = (lead: LeadCard) => (lead.stockShortage ? 0 : current().stock.get(lead.product.id) ?? 0);
+
 function productInfo(lead: LeadCard): LeadProductInfo {
-  const product = MOCK_PRODUCTS.find((item) => item.id === lead.product.id) ?? MOCK_PRODUCTS[0];
+  const offer = offerOf(lead.product.id);
+  const center = deliveryQuote(offer, 1, 'CENTER');
+  const address = deliveryQuote(offer, 1, 'ADDRESS');
   return {
-    id: product.id,
-    name: product.name,
-    category: product.id === '501' ? 'Elektronika' : 'Uy-ro‘zg‘or',
+    id: offer.id,
+    name: offer.name,
+    category: offer.category,
     imageUrl: null,
-    description: `${product.name} — kundalik foydalanish uchun. Tavsif optovik kartasidan olinadi.`,
+    description: `${offer.name} — kundalik foydalanish uchun. Tavsif optovik kartasidan olinadi.`,
     highlights: ['Kafolat va sertifikat — optovik hujjatlarida', 'Tovar platforma omborida', 'To‘lov tovarni olganda'],
-    available: lead.stockShortage ? 0 : 120,
-    weightKg: 0.3,
+    available: stockOf(lead),
+    weightKg: offer.weightGrams === null ? null : offer.weightGrams / 1000,
     contents: null,
     salePrice: lead.product.salePrice,
-    deliveryFee: { CENTER: CENTER_FEE, ADDRESS: ADDRESS_FEE },
+    deliveryFee: center && address ? { CENTER: center.fee, ADDRESS: address.fee } : null,
     pageUrl: null,
     warning: null,
   };
@@ -375,7 +508,7 @@ export const operatorHandlers = [
     const booked: LeadCard = { ...withStatus(lead, 'BOOKED', shortName(user?.name), null), bookedUntil: ahead(BOOKING_MINUTES) };
     current().leads.set(lead.id, booked);
     current().owned.add(lead.id);
-    return ok(withOfferScript(booked));
+    return ok(present(booked));
   }),
 
   http.get(`${API}/operator/leads/:id`, ({ request, cookies, params }) => {
@@ -383,7 +516,7 @@ export const operatorHandlers = [
     if (denied) return denied;
     sweep();
     const lead = mine().find((item) => item.id === String(params.id));
-    return lead ? ok(withOfferScript(lead)) : fail(404, 'NOT_FOUND', 'Lid topilmadi yoki bron muddati tugagan');
+    return lead ? ok(present(lead)) : fail(404, 'NOT_FOUND', 'Lid topilmadi yoki bron muddati tugagan');
   }),
 
   // Taklif (BE-13 / OPT-2): «Mahsulot ma'lumoti» paneli.
@@ -405,6 +538,19 @@ export const operatorHandlers = [
     if (invalid || !body.outcome) return invalid ?? fail(400, 'VALIDATION_ERROR', 'Natija tanlanmagan');
 
     const { outcome } = body;
+    // Band qilish (BE-16; sinxron xato — taklif): miqdor qoldiqdan ko'p yoki oxirgi dona shu soniyada band bo'ldi.
+    let stockAvailable: number | null = null;
+    if (outcome === 'CONFIRMED') {
+      const quantity = body.quantity ?? lead.quantity;
+      const available = stockOf(lead);
+      if (quantity > available) return fail(409, 'OUT_OF_STOCK', `Omborda ${available} dona bor`, undefined, { available });
+      if (current().raceOnce.delete(lead.id)) {
+        current().stock.set(lead.product.id, 0);
+        return fail(409, 'OUT_OF_STOCK', 'Oxirgi dona boshqa buyurtmaga band bo‘ldi', undefined, { available: 0 });
+      }
+      stockAvailable = available - quantity;
+      current().stock.set(lead.product.id, stockAvailable);
+    }
     const now = Date.now();
     const operator = shortName(user?.name);
     const comment = body.comment?.trim() || null;
@@ -443,24 +589,38 @@ export const operatorHandlers = [
     });
     // «Keyinroq» va «O'ylab ko'radi» — lid operatorda qoladi; javobsiz — umumiy navbatga; qolgani yopiladi.
     if (outcome !== 'CALL_LATER' && outcome !== 'THINKING') current().owned.delete(lead.id);
-    const accepted: Schemas['LeadResultAcceptedDto'] = { leadId: lead.id, status, nextAttemptAt };
+    const accepted: LeadResultAccepted = { leadId: lead.id, status, nextAttemptAt, ...(outcome === 'CONFIRMED' ? { stockAvailable } : {}) };
     return ok(accepted);
   }),
 
+  // BE-38: saqlash — tasdiq; tuzatilgan maydonlar eski va yangi qiymati bilan lid tarixiga (`changes` — taklif).
   http.patch(`${API}/operator/leads/:id/address`, async ({ request, cookies, params }) => {
-    const { denied } = guard(request, cookies);
+    const { denied, user } = guard(request, cookies);
     if (denied) return denied;
-    const lead = mine().find((item) => item.id === String(params.id));
-    if (!lead) return fail(404, 'NOT_FOUND', 'Lid topilmadi');
+    const lead = mine().find((item) => item.id === String(params.id) && (item.status === 'BOOKED' || item.status === 'CALLBACK'));
+    if (!lead) return fail(404, 'NOT_FOUND', 'Lid topilmadi yoki bu operatorda emas');
     const body = (await request.json().catch(() => ({}))) as Partial<Schemas['UpdateLeadAddressDto']>;
+    const fieldError = (field: keyof Schemas['UpdateLeadAddressDto'], message: string) =>
+      fail(400, 'VALIDATION_ERROR', message, undefined, { details: [{ field, error: message }] });
     const region = REGION_TREE.find((item) => item.satoCode === body.regionSoato);
-    const district = region?.districts.find((item) => item.satoCode === body.districtSoato);
-    if (!region || !district || !body.addressLine?.trim() || !body.whereDeliver) {
-      return fail(400, 'VALIDATION_ERROR', 'Tuman tanlangan viloyatga tegishli emas yoki maydon bo‘sh');
-    }
-    const edited = lead.address !== null && (body.addressLine.trim() !== lead.address.addressLine || body.districtSoato !== lead.address.districtSoato);
-    const deliveryFee = body.whereDeliver === 'ADDRESS' ? ADDRESS_FEE : CENTER_FEE;
-    const subtotal = lead.product.salePrice * lead.quantity;
+    if (!region) return fieldError('regionSoato', 'Viloyat Elchi ro‘yxatida yo‘q');
+    const district = region.districts.find((item) => item.satoCode === body.districtSoato);
+    if (!district) return fieldError('districtSoato', 'Tuman tanlangan viloyatga tegishli emas');
+    const line = body.addressLine?.trim() ?? '';
+    if (!line) return fieldError('addressLine', 'Ko‘cha va uy kiritilmagan');
+    const where = body.whereDeliver;
+    if (where !== 'CENTER' && where !== 'ADDRESS') return fieldError('whereDeliver', 'Yetkazish turi tanlanmagan');
+    if (where === 'ADDRESS' && district.doorDelivery === false) return fieldError('whereDeliver', 'Elchi Pochta bu tumanda eshikkacha olib bormaydi');
+
+    const before = lead.address;
+    const changes: LeadAddressChange[] = [];
+    if (before?.regionSoato !== region.satoCode) changes.push({ field: 'region', from: before?.regionName ?? null, to: region.name });
+    if (before?.districtSoato !== district.satoCode) changes.push({ field: 'district', from: before?.districtName ?? null, to: district.name });
+    if (before?.addressLine !== line) changes.push({ field: 'addressLine', from: before?.addressLine ?? null, to: line });
+    if (before?.whereDeliver !== where) changes.push({ field: 'whereDeliver', from: before?.whereDeliver ?? null, to: where });
+    const at = new Date().toISOString();
+    const actor = shortName(user?.name);
+    const entry = (note: string, list: LeadAddressChange[]) => ({ at, fromStatus: lead.status, toStatus: lead.status, actor, note, changes: list });
     const updated: LeadCard = {
       ...lead,
       address: {
@@ -468,29 +628,31 @@ export const operatorHandlers = [
         regionName: region.name,
         districtSoato: district.satoCode,
         districtName: district.name,
-        addressLine: body.addressLine.trim(),
-        whereDeliver: body.whereDeliver,
-        confirmedAt: new Date().toISOString(),
-        editedByOperator: Boolean(lead.address?.editedByOperator) || edited,
+        addressLine: line,
+        whereDeliver: where,
+        confirmedAt: at,
+        editedByOperator: Boolean(before?.editedByOperator) || (before !== null && changes.length > 0),
       },
-      price: { unitPrice: lead.product.salePrice, quantity: lead.quantity, subtotal, whereDeliver: body.whereDeliver, deliveryFee, totalAmount: subtotal + deliveryFee },
+      price: priceFor(offerOf(lead.product.id), lead.quantity, where, Boolean(lead.blacklistRejections)),
+      // Mijoz manzili birinchi marta kiritilsa (API lidi) — bu tuzatish emas, faqat tasdiq.
+      history: [...lead.history, ...(before && changes.length ? [entry('Operator manzilni tuzatdi', changes)] : []), entry('Operator manzilni tasdiqladi', [])],
     };
     current().leads.set(lead.id, updated);
-    return ok(updated);
+    return ok(present(updated));
   }),
 
+  // Summa (BE-09): yetkazish jami og'irlikka qarab; lid o'zgarmaydi. Og'irlik bo'lmasa — 400 (backend kabi).
   http.post(`${API}/operator/leads/:id/quote`, async ({ request, cookies, params }) => {
     const { denied } = guard(request, cookies);
     if (denied) return denied;
-    const lead = current().leads.get(String(params.id));
-    if (!lead) return fail(404, 'NOT_FOUND', 'Lid topilmadi');
+    const lead = mine().find((item) => item.id === String(params.id));
+    if (!lead) return fail(404, 'NOT_FOUND', 'Lid topilmadi yoki bu operatorda emas');
     const body = (await request.json().catch(() => ({}))) as Partial<Schemas['LeadPriceQuoteDto']>;
-    const quantity = Math.max(1, Math.min(10, Number(body.quantity) || 1));
+    const quantity = Number(body.quantity);
+    if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 1000) return fail(400, 'VALIDATION_ERROR', 'Miqdor 1 dan 1000 gacha butun son');
     const whereDeliver = body.whereDeliver === 'ADDRESS' ? 'ADDRESS' : 'CENTER';
-    const deliveryFee = whereDeliver === 'ADDRESS' ? ADDRESS_FEE : CENTER_FEE;
-    const subtotal = lead.product.salePrice * quantity;
-    const price: Schemas['LeadPriceDto'] = { unitPrice: lead.product.salePrice, quantity, subtotal, whereDeliver, deliveryFee, totalAmount: subtotal + deliveryFee };
-    return ok(price);
+    const price = priceFor(offerOf(lead.product.id), quantity, whereDeliver, Boolean(lead.blacklistRejections));
+    return price ? ok(price) : fail(400, 'VALIDATION_ERROR', 'Narx hisoblash uchun bazaviy narx va og‘irlik kerak (BE-07)');
   }),
 
   // Taklif (BE-13): «Bugungi urinishlarim · oxirgi 10 tasi, jami N».

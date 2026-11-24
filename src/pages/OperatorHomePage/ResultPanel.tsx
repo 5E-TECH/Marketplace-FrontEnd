@@ -1,19 +1,14 @@
-import { Check, ChevronDown, ChevronRight, CircleAlert, Lock, MessageSquareText, Minus, Plus } from 'lucide-react';
+import { Check, ChevronRight, CircleAlert, Lock, MessageSquareText } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { clock, dayLabel, dayOffset } from '../../features/operator/lib/leadFormat';
 import { closesAsNoContact, isNoAnswer, MAX_ATTEMPTS, nextRetryAt, noContactDeadline } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../shared/lib/useNow';
-import type { LeadCard, LeadProductInfo, WhereDeliver } from '../../features/operator/model/operatorTypes';
+import type { LeadCard } from '../../features/operator/model/operatorTypes';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDateTime } from '../../shared/lib/tashkentTime';
 import { confirmBlocked, RESULT_TILES, type NoAnswerOutcome, type ResultChoice } from './resultChoices';
 import styles from './OperatorWorkspace.module.css';
-
-export interface OrderDraft {
-  whereDeliver: WhereDeliver;
-  quantity: number;
-  comment: string;
-}
 
 export interface NoAnswerDraft {
   outcome: NoAnswerOutcome;
@@ -23,12 +18,13 @@ export interface NoAnswerDraft {
 interface ResultPanelProps {
   card: LeadCard;
   selected: 'CONFIRMED' | 'NO_ANSWER' | null;
-  order: OrderDraft;
   noAnswer: NoAnswerDraft;
-  product: LeadProductInfo | undefined;
   busy: boolean;
+  /** «Buyurtma tasdiqlandi» tanlanganda — buyurtma formasi (FE-09). */
+  orderForm: ReactNode;
+  /** Buyurtma yaratilgach — butun panel o'rnida «Buyurtma yaratildi» (20-kadr). */
+  done: ReactNode;
   onChoose: (choice: ResultChoice) => void;
-  onOrderChange: (patch: Partial<OrderDraft>) => void;
   onNoAnswerChange: (patch: Partial<NoAnswerDraft>) => void;
 }
 
@@ -36,9 +32,17 @@ const NO_ANSWER: readonly NoAnswerOutcome[] = ['NO_ANSWER', 'BUSY', 'PHONE_OFF']
 const MINUTE = 60_000;
 
 /** «Natija va buyurtma» paneli (operator-lid-kartasi, operator-natija): plitkalar, buyurtma formasi yoki keyingi urinish. */
-export function ResultPanel({ card, selected, order, noAnswer, product, busy, onChoose, onOrderChange, onNoAnswerChange }: ResultPanelProps) {
+export function ResultPanel({ card, selected, noAnswer, busy, orderForm, done, onChoose, onNoAnswerChange }: ResultPanelProps) {
   const { t } = useTranslation();
   const blocked = confirmBlocked(card);
+
+  if (done) {
+    return (
+      <section className={`${styles.panel} ${styles.result}`} aria-label={t('opw.resultLabel')} id="lead-result">
+        {done}
+      </section>
+    );
+  }
 
   return (
     <section className={`${styles.panel} ${styles.result}`} aria-label={t('opw.resultLabel')} id="lead-result">
@@ -66,7 +70,7 @@ export function ResultPanel({ card, selected, order, noAnswer, product, busy, on
               >
                 {locked ? <Lock aria-hidden /> : checked ? <Check aria-hidden /> : null}
                 <span>{label}</span>
-                {locked ? <span className={styles.tileLockNote}>{t(card.stockShortage ? 'opw.lockStock' : 'opw.lockAddress')}</span> : null}
+                {locked ? <span className={styles.tileLockNote}>{t('opw.lockStock')}</span> : null}
                 {choice === 'NO_ANSWER' && checked ? <span className={styles.tileTag}>{t('opw.noAnswerTag', { outcome: t(`opw.outcome.${noAnswer.outcome}` as TranslationKey) })}</span> : null}
                 <kbd className={styles.kbd}>{key}</kbd>
               </button>
@@ -80,8 +84,8 @@ export function ResultPanel({ card, selected, order, noAnswer, product, busy, on
 
       {selected === 'NO_ANSWER' ? (
         <NextAttemptPanel card={card} draft={noAnswer} onChange={onNoAnswerChange} />
-      ) : selected === 'CONFIRMED' && !blocked && card.address ? (
-        <OrderForm card={card} draft={order} product={product} onChange={onOrderChange} />
+      ) : selected === 'CONFIRMED' && !blocked ? (
+        orderForm
       ) : (
         <div className={styles.lower}>
           <div className={styles.orderHead}>
@@ -93,93 +97,13 @@ export function ResultPanel({ card, selected, order, noAnswer, product, busy, on
               <Lock size={20} aria-hidden />
               <div>
                 <strong>{t('opw.orderLocked')}</strong>
-                <p>{t(card.stockShortage ? 'opw.orderLockedStock' : 'opw.orderLockedAddress')}</p>
+                <p>{t('opw.orderLockedStock')}</p>
               </div>
             </div>
           ) : null}
         </div>
       )}
     </section>
-  );
-}
-
-function OrderForm({ card, draft, product, onChange }: { card: LeadCard; draft: OrderDraft; product: LeadProductInfo | undefined; onChange: (patch: Partial<OrderDraft>) => void }) {
-  const { t } = useTranslation();
-  const address = card.address;
-  if (!address) return null;
-  const weight = product?.weightKg != null ? Math.round(product.weightKg * draft.quantity * 10) / 10 : null;
-
-  return (
-    <div className={`${styles.lower} ${styles.lowerOpen}`} data-testid="order-form">
-      <div className={styles.orderHead}>
-        <h2 className={styles.panelTitle}>{t('opw.orderTitle')}</h2>
-        <p className={styles.note}>{t('opw.orderOpenHint')}</p>
-      </div>
-      <div className={styles.fieldGrid}>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel} htmlFor="order-region">{t('opw.region')}</label>
-          <div className={styles.selectWrap}>
-            <select id="order-region" className={styles.select} value={address.regionSoato} onChange={() => undefined}>
-              <option value={address.regionSoato}>{address.regionName}</option>
-            </select>
-            <ChevronDown size={18} aria-hidden />
-          </div>
-        </div>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel} htmlFor="order-district">{t('opw.district')}</label>
-          <div className={styles.selectWrap}>
-            <select id="order-district" className={styles.select} value={address.districtSoato} onChange={() => undefined}>
-              <option value={address.districtSoato}>{address.districtName}</option>
-            </select>
-            <ChevronDown size={18} aria-hidden />
-          </div>
-        </div>
-      </div>
-      <div className={styles.field}>
-        <span className={styles.fieldLabel} id="order-delivery">{t('opw.delivery')}</span>
-        <div className={styles.segmented} role="radiogroup" aria-labelledby="order-delivery">
-          {(['CENTER', 'ADDRESS'] as const).map((value) => (
-            <button key={value} type="button" role="radio" aria-checked={draft.whereDeliver === value} className={styles.segment} onClick={() => onChange({ whereDeliver: value })}>
-              {t(`opw.deliver.${value}` as TranslationKey)}
-            </button>
-          ))}
-        </div>
-      </div>
-      {draft.whereDeliver === 'ADDRESS' ? (
-        <div className={styles.field}>
-          <span className={styles.fieldLabelRow}>
-            <label className={styles.fieldLabel} htmlFor="order-street">{t('opw.street')}</label>
-            <span>{t('opw.fromForm')}</span>
-          </span>
-          <input id="order-street" className={styles.input} value={address.addressLine} readOnly />
-        </div>
-      ) : null}
-      <div className={styles.qtyGrid}>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel} htmlFor="order-qty">{t('opw.quantity')}</label>
-          <div className={styles.stepper}>
-            <button type="button" aria-label={t('opw.decrease')} disabled={draft.quantity <= 1} onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })}><Minus size={18} aria-hidden /></button>
-            <input id="order-qty" type="text" inputMode="numeric" value={draft.quantity} onChange={(event) => {
-              const value = Number(event.target.value.replace(/\D/g, ''));
-              if (value >= 1 && value <= 10) onChange({ quantity: value });
-            }} />
-            <button type="button" aria-label={t('opw.increase')} disabled={draft.quantity >= 10} onClick={() => onChange({ quantity: Math.min(10, draft.quantity + 1) })}><Plus size={18} aria-hidden /></button>
-          </div>
-        </div>
-        <div className={styles.field}>
-          <span className={styles.fieldLabel}>{t('opw.weight')}</span>
-          <div className={styles.infoBox}><span>{weight != null ? <><strong>{weight} kg</strong> {t('opw.weightTariff')}</> : '—'}</span></div>
-        </div>
-      </div>
-      <div className={styles.field}>
-        <span className={styles.fieldLabelRow}>
-          <label className={styles.fieldLabel} htmlFor="order-comment">{t('opw.comment')}</label>
-          <span>{t('opw.commentToAttempt')}</span>
-        </span>
-        <textarea id="order-comment" className={styles.textarea} value={draft.comment} maxLength={500} onChange={(event) => onChange({ comment: event.target.value })} />
-        <p className={styles.note}>{t('opw.helpTyping')}</p>
-      </div>
-    </div>
   );
 }
 

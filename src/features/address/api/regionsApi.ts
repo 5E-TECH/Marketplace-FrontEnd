@@ -1,8 +1,8 @@
-import type { components } from '../../../generated/api-types';
 import { httpClient } from '../../../shared/api/httpClient';
 import { readDtoList } from '../../../shared/api/readDto';
+import type { RegionGroup } from '../model/regionTypes';
 
-export type RegionGroup = components['schemas']['LeadRegionGroupDto'];
+export type { DistrictOption, RegionGroup } from '../model/regionTypes';
 
 /**
  * Viloyatlar va ularning tumanlari bitta ro'yxatda (BE-38, kalit — SOATO, EQ-06). Lid manzilini

@@ -4,16 +4,22 @@ import { useState } from 'react';
 import { clock, dayLabel, mmss, outcomeLabel, rejectLabel, sourceMark, statusLabel, sum } from '../../features/operator/lib/leadFormat';
 import { CALLBACK_GRACE_MINUTES, isNoAnswer, leadKind, scriptSteps } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../shared/lib/useNow';
-import type { LeadCard } from '../../features/operator/model/operatorTypes';
+import type { LeadAddressChange, LeadCard, LeadHistoryEntry } from '../../features/operator/model/operatorTypes';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import styles from './OperatorWorkspace.module.css';
 import { Badge } from '../../shared/ui/Badge/Badge';
 import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 
-/** Skriptdagi summalar qalin (dizayndagidek): «262 000 so‘m». */
-function withAmounts(text: string) {
-  return text.split(/(\d[\d\s\u00a0]*\d\s?so[‘']m)/).map((part, index) => (index % 2 ? <strong key={index} className={styles.amount}>{part}</strong> : part));
+const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Skriptdagi o'zgaruvchi qiymatlari qalin (dizayndagidek): summalar «262 000 so‘m», 4-qadamda manzil va yetkazish
+ * turi («yetkazish markazgacha»). Qiymatlarni server qo'yadi — ekran faqat ma'lum qiymatlarni ajratadi.
+ */
+function withValues(text: string, address: string | null) {
+  const parts = ['\\d[\\d\\s\\u00a0]*\\d\\s?so[‘\']m', '(?<=yetkazish )(?:markazgacha|eshikkacha)', ...(address ? [escape(address)] : [])];
+  return text.split(new RegExp(`(${parts.join('|')})`)).map((part, index) => (index % 2 ? <strong key={index} className={/so[‘']m$/.test(part) ? styles.amount : styles.scriptValue}>{part}</strong> : part));
 }
 
 interface LeadCardViewProps {
@@ -23,9 +29,10 @@ interface LeadCardViewProps {
 }
 
 /**
- * Lid kartasi (operator-lid-kartasi): sarlavha «Ism · Viloyat (formadan)», holat belgilari, lid turi
- * izohi, mahsulot va narx, mijoz yozgan manzil «formadan» (DZ-12, TC5), suhbat skripti, oldingi lidlar,
- * urinishlar va tarix. S1/S3 varianti operatorga ko'rsatilmaydi (ko'r sinov).
+ * Lid kartasi (operator-lid-kartasi, DZ-12): sarlavha — ism (API va sayt lidida «· Viloyat (API orqali)»), holat
+ * belgilari, lid turi izohi; manzil va yetkazish «(formadan)» yoki «(operator tuzatdi)», manba, mahsulot va narx
+ * rejimi bilan, suhbat skripti, oldingi lidlar, urinishlar va tarix (manzil tuzatishi — eski va yangi qiymat,
+ * FE-09 TC5). S1/S3 varianti operatorga ko'rsatilmaydi (ko'r sinov).
  */
 export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps) {
   const { t } = useTranslation();
@@ -40,6 +47,10 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
   const failed = card.attempts.filter((attempt) => isNoAnswer(attempt.outcome)).length;
   const sameDay = (value: string) => dayLabel(value) === dayLabel(now);
   const at = (value: string) => (sameDay(value) ? clock(value) : `${dayLabel(value)}, ${clock(value)}`);
+  // O'zgarishsiz manzil tasdig'i (`changes: []`) tarixda ko'rinmaydi — buyurtma tasdig'i o'zi aytadi (20-kadr).
+  const history = card.history.filter((entry) => !entry.changes || entry.changes.length > 0);
+  const whereChanged = card.history.some((entry) => entry.changes?.some((change) => change.field === 'whereDeliver'));
+  const addressText = card.address ? [card.address.regionName, card.address.districtName, card.address.addressLine].join(', ') : null;
 
   return (
     <section className={`${styles.panel} ${styles.card}`} aria-labelledby="lead-card-title" data-testid="lead-card">
@@ -47,8 +58,12 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
         <div className={styles.cardTitleRow}>
           <h2 id="lead-card-title" className={styles.cardTitle}>
             {card.customerName}
-            {card.address ? <span className={styles.cardRegion}> · {card.address.regionName}</span> : null}{' '}
-            <span className={styles.cardSource}>({sourceMark(card, t)})</span>
+            {card.source === 'LANDING' ? null : (
+              <>
+                {card.address ? <span className={styles.cardRegion}> · {card.address.regionName}</span> : null}{' '}
+                <span className={styles.cardSource}>({sourceMark(card, t)})</span>
+              </>
+            )}
           </h2>
           <Dropdown
             trigger={['click']}
@@ -124,6 +139,20 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
       <dl className={styles.facts}>
         <dt>{t('opw.phone')}</dt>
         <dd><span className={styles.hidden}><Lock size={16} aria-hidden /><span>{t('opw.phoneHidden')}</span></span></dd>
+        {card.address ? (
+          <>
+            <dt>{t('opw.address')}</dt>
+            <dd data-testid="lead-address">
+              {addressText}{' '}
+              <span className={styles.formMark}>({card.address.editedByOperator ? t('opo.cardEdited') : t('opw.fromForm')})</span>
+            </dd>
+            <dt>{t('opw.delivery')}</dt>
+            <dd data-testid="lead-delivery">
+              {t(`opw.deliver.${card.address.whereDeliver}` as TranslationKey)}{' '}
+              <span className={styles.formMark}>({whereChanged ? t('opo.changed').toLocaleLowerCase() : t('opw.fromForm')})</span>
+            </dd>
+          </>
+        ) : null}
         <dt>{t('opw.source')}</dt>
         <dd>{t(`opw.source.${card.source}` as TranslationKey)} · {t('opw.requestAt')} <span className={styles.tabular}>{at(card.createdAt)}</span></dd>
         <dt>{t('opw.product')}</dt>
@@ -134,18 +163,8 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
         <dt>{t('opw.price')}</dt>
         <dd>
           <span className={`${styles.tabular} ${styles.nowrap}`}>{sum(card.price?.subtotal ?? card.product.salePrice)}</span>
-          {card.price ? <> + {t('opw.deliveryWord')} <span className={`${styles.tabular} ${styles.nowrap}`}>{sum(card.price.deliveryFee)}</span></> : null}
-        </dd>
-        <dt>{t('opw.address')}</dt>
-        <dd data-testid="lead-address">
-          {card.address ? (
-            <>
-              {[card.address.regionName, card.address.districtName, card.address.addressLine].join(', ')}
-              <span className={styles.formMark}>{card.address.confirmedAt ? t('opw.addressConfirmed') : t('opw.fromForm')}</span>
-            </>
-          ) : (
-            <span className={styles.muted}>{t('opw.addressMissing')}</span>
-          )}
+          {card.price ? <> + {t('opw.deliveryWord')} <span className={`${styles.tabular} ${styles.nowrap}`}>{card.price.deliveryFee === 0 ? t('opo.free') : sum(card.price.deliveryFee)}</span></> : null}
+          {card.price?.deliveryMode ? <> <span className={styles.formMark}>({t(`opo.mode.${card.price.deliveryMode}` as TranslationKey)})</span></> : null}
         </dd>
       </dl>
 
@@ -153,7 +172,7 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
         <h3>{t('opw.script')}</h3>
         {steps.length ? (
           <ol className={styles.script}>
-            {steps.map((step, index) => <li key={index}><span>{index + 1}.</span><span>{withAmounts(step)}</span></li>)}
+            {steps.map((step, index) => <li key={index}><span>{index + 1}.</span><span>{withValues(step, addressText)}</span></li>)}
           </ol>
         ) : (
           <p className={styles.emptyBox}>{t('opw.scriptEmpty')}</p>
@@ -218,20 +237,21 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
       <div className={styles.section}>
         <h3>{t('opw.history')}</h3>
         <ol className={styles.history}>
-          {card.history.map((entry, index) => (
+          {history.map((entry, index) => (
             <li key={`${entry.at}-${index}`}>
-              <span className={styles.historyRail} aria-hidden><span />{index < card.history.length - 1 ? <span /> : null}</span>
+              <span className={styles.historyRail} aria-hidden><span />{index < history.length - 1 ? <span /> : null}</span>
               <span className={styles.historyBody}>
                 <span>{clock(entry.at)}</span>
                 <span>
-                  {entry.fromStatus === null
-                    ? t('opw.historyArrived')
-                    : entry.toStatus === 'BOOKED'
-                      ? t('opw.historyBooked', { actor: entry.actor })
-                      : t('opw.historyChanged', { status: statusLabel(entry.toStatus, t), actor: entry.actor })}
-                  {entry.note ? <span className={styles.muted}> · {entry.note}</span> : null}
+                  {historyLabel(entry, card.id, t)}
+                  {entry.note && !entry.changes && entry.fromStatus !== entry.toStatus ? <span className={styles.muted}> · {entry.note}</span> : null}
                 </span>
                 <StatusBadge family="lead" code={entry.toStatus} titlePrefix={t('opw.statusTitle')} />
+                {entry.changes?.length ? (
+                  <span className={styles.historyChanges} data-testid="history-address-change">
+                    {entry.changes.map((change) => <span key={change.field}>{changeLabel(change, t)}</span>)}
+                  </span>
+                ) : null}
               </span>
             </li>
           ))}
@@ -239,4 +259,23 @@ export function LeadCardView({ card, onProductInfo, onHelp }: LeadCardViewProps)
       </div>
     </section>
   );
+}
+
+type T = ReturnType<typeof useTranslation>['t'];
+
+/** Tarix yozuvi: lid keldi, bron, holat o'zgarishi, manzil tuzatildi (taklif `changes`), buyurtma tasdiqlandi. */
+function historyLabel(entry: LeadHistoryEntry, leadId: string, t: T): string {
+  if (entry.fromStatus === null) return t('opw.historyArrived');
+  if (entry.changes?.length) return t('opo.historyAddress', { actor: entry.actor });
+  if (entry.toStatus === 'CONFIRMED' && entry.fromStatus !== 'CONFIRMED') return t('opo.historyOrder', { lead: leadId });
+  if (entry.toStatus === 'BOOKED' && entry.fromStatus !== 'BOOKED') return t('opw.historyBooked', { actor: entry.actor });
+  // Holat o'zgarmagan yozuv (backend izohi, masalan «Operator manzilni tuzatdi») — izoh bilan.
+  if (entry.fromStatus === entry.toStatus && entry.note) return t('opo.historyNote', { note: entry.note, actor: entry.actor });
+  return t('opw.historyChanged', { status: statusLabel(entry.toStatus, t), actor: entry.actor });
+}
+
+/** «Tuman: Qo‘qon shahri → Farg‘ona shahri»; yetkazish — «Markazgacha → Eshikkacha». */
+function changeLabel(change: LeadAddressChange, t: T): string {
+  const value = (raw: string | null) => (raw === null ? '—' : change.field === 'whereDeliver' ? t(`opw.deliver.${raw}` as TranslationKey) : raw);
+  return t(`opo.change.${change.field}` as TranslationKey, { from: value(change.from), to: value(change.to) });
 }

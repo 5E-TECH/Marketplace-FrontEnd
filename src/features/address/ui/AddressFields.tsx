@@ -1,7 +1,6 @@
-import { CircleX, PencilLine, RefreshCw, UserRound } from 'lucide-react';
+import { CircleX, RefreshCw } from 'lucide-react';
 import { useId, type ReactNode } from 'react';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
-import { Badge } from '../../../shared/ui/Badge/Badge';
 import { SearchSelect } from '../../../shared/ui/SearchSelect/SearchSelect';
 import { useRegionTree } from '../api/regionsQueries';
 import { addressChanged, missingAddressFields, type AddressField, type AddressValue } from '../lib/addressValue';
@@ -12,7 +11,8 @@ interface AddressFieldsProps {
   onChange: (value: AddressValue) => void;
   /**
    * Mijoz yozgan manzil (lid formasidan). Berilsa sarlavha yonida belgi: «Mijoz yozgan»;
-   * operator maydonni o'zgartirsa (yoki oldin tuzatgan bo'lsa — `editedBefore`) «Operator tuzatdi».
+   * operator maydonni o'zgartirsa (yoki oldin tuzatgan bo'lsa — `editedBefore`) «Operator tuzatdi»,
+   * o'zgargan maydon ostida — «Mijoz yozgani: «…». Tuzatish lid tarixiga yoziladi.» (DZ-12).
    */
   original?: AddressValue | null;
   editedBefore?: boolean;
@@ -22,8 +22,10 @@ interface AddressFieldsProps {
   showRequired?: boolean;
   /** Server xatolari (masalan, «Elchi u yerga yetkazmaydi»). */
   errors?: Partial<Record<AddressField, string>>;
-  /** Kaskad va ko'cha maydonlari orasida (operator formasida — «Yetkazish» tanlovi). */
+  /** Kaskad va ko'cha maydonlari orasida. */
   children?: ReactNode;
+  /** Zich forma (operator buyurtma formasi): maydon matni 15/22. */
+  dense?: boolean;
 }
 
 /**
@@ -33,7 +35,7 @@ interface AddressFieldsProps {
  */
 const REQUIRED_TEXT = { region: 'address.regionRequired', district: 'address.districtRequired', street: 'address.streetRequired' } as const;
 
-export function AddressFields({ value, onChange, original, editedBefore = false, withStreet = true, showRequired = false, errors: serverErrors, children }: AddressFieldsProps) {
+export function AddressFields({ value, onChange, original, editedBefore = false, withStreet = true, showRequired = false, errors: serverErrors, children, dense = false }: AddressFieldsProps) {
   const { t } = useTranslation();
   const missing = showRequired ? missingAddressFields(value, withStreet) : [];
   const errors: Partial<Record<AddressField, string>> = {
@@ -49,16 +51,36 @@ export function AddressFields({ value, onChange, original, editedBefore = false,
   const ids = { title: `${id}-title`, region: `${id}-region`, district: `${id}-district`, street: `${id}-street`, apartment: `${id}-apartment` };
   const districtHelp = `${ids.district}-help`;
 
+  // Mijoz yozgani — faqat operator o'zgartirgan maydon ostida (bo'sh qoldirganda ham).
+  const nameOf = (regionSoato: string | null, districtSoato?: string | null) => {
+    const group = tree.data?.find((item) => item.satoCode === regionSoato);
+    return districtSoato === undefined ? group?.name : group?.districts.find((item) => item.satoCode === districtSoato)?.name;
+  };
+  const was = (text: string | null | undefined) => (text ? t('address.originalWas', { value: text }) : null);
+  const originalOf = {
+    region: original && value.regionSoato !== original.regionSoato ? was(nameOf(original.regionSoato)) : null,
+    district: original && value.districtSoato !== original.districtSoato ? was(nameOf(original.regionSoato, original.districtSoato)) : null,
+    street: original && value.street.trim() !== original.street.trim() ? was(original.street) : null,
+  };
+  const error = (field: AddressField, help: string) => (errors[field] ? (
+    <p id={help} className={styles.error} role="alert">
+      <CircleX aria-hidden />
+      <span>{errors[field]}</span>
+    </p>
+  ) : null);
+  const wasNote = (field: AddressField, help: string) => (originalOf[field] ? <p id={`${help}-was`} className={styles.hint}>{originalOf[field]}</p> : null);
+  const describedByOf = (field: AddressField, help: string) => [errors[field] ? help : null, originalOf[field] ? `${help}-was` : null].filter(Boolean).join(' ') || undefined;
+
   const districtNote = failed ? (
     <p id={districtHelp} className={styles.error}>
       <CircleX aria-hidden />
       <span>{t('address.loadFailed')}</span>
     </p>
-  ) : errors.district ? (
-    <p id={districtHelp} className={styles.error} role="alert">
-      <CircleX aria-hidden />
-      <span>{errors.district}</span>
-    </p>
+  ) : errors.district || originalOf.district ? (
+    <>
+      {error('district', districtHelp)}
+      {wasNote('district', districtHelp)}
+    </>
   ) : (
     <p id={districtHelp} className={styles.hint}>
       {tree.isPending ? t('address.loadingHint') : region ? t('address.soato') : t('address.districtHint')}
@@ -66,13 +88,13 @@ export function AddressFields({ value, onChange, original, editedBefore = false,
   );
 
   return (
-    <div className={styles.address} role="group" aria-labelledby={ids.title}>
+    <div className={styles.address} role="group" aria-labelledby={ids.title} data-dense={dense || undefined}>
       <div className={styles.head}>
         <h3 id={ids.title} className={styles.title}>{t('address.title')}</h3>
         {original ? (
-          <Badge tone={edited ? 'info' : 'neutral'} icon={edited ? PencilLine : UserRound} testId="address-provenance">
+          <span className={styles.chip} data-tone={edited ? 'warning' : undefined} data-testid="address-provenance">
             {edited ? t('address.editedByOperator') : t('address.fromCustomer')}
-          </Badge>
+          </span>
         ) : null}
       </div>
 
@@ -87,17 +109,13 @@ export function AddressFields({ value, onChange, original, editedBefore = false,
             required
             loading={tree.isPending}
             invalid={Boolean(errors.region)}
-            describedBy={errors.region ? `${ids.region}-help` : undefined}
+            describedBy={describedByOf('region', `${ids.region}-help`)}
             placeholder={tree.isPending ? t('address.loading') : t('address.regionPlaceholder')}
             label={t('address.region')}
             onChange={(regionSoato) => onChange({ ...value, regionSoato, districtSoato: regionSoato === value.regionSoato ? value.districtSoato : null })}
           />
-          {errors.region ? (
-            <p id={`${ids.region}-help`} className={styles.error} role="alert">
-              <CircleX aria-hidden />
-              <span>{errors.region}</span>
-            </p>
-          ) : null}
+          {error('region', `${ids.region}-help`)}
+          {wasNote('region', `${ids.region}-help`)}
         </div>
         <div className={styles.field}>
           <Label htmlFor={ids.district} required>{t('address.district')}</Label>
@@ -109,7 +127,7 @@ export function AddressFields({ value, onChange, original, editedBefore = false,
             required
             loading={tree.isPending}
             invalid={failed || Boolean(errors.district)}
-            describedBy={districtHelp}
+            describedBy={failed ? districtHelp : describedByOf('district', districtHelp) ?? districtHelp}
             placeholder={tree.isPending ? t('address.loading') : t('address.districtPlaceholder')}
             label={t('address.district')}
             searchLabel={t('address.search')}
@@ -142,15 +160,11 @@ export function AddressFields({ value, onChange, original, editedBefore = false,
               autoComplete="street-address"
               aria-required
               aria-invalid={Boolean(errors.street) || undefined}
-              aria-describedby={errors.street ? `${ids.street}-help` : undefined}
+              aria-describedby={describedByOf('street', `${ids.street}-help`)}
               onChange={(event) => onChange({ ...value, street: event.target.value })}
             />
-            {errors.street ? (
-              <p id={`${ids.street}-help`} className={styles.error} role="alert">
-                <CircleX aria-hidden />
-                <span>{errors.street}</span>
-              </p>
-            ) : null}
+            {error('street', `${ids.street}-help`)}
+            {wasNote('street', `${ids.street}-help`)}
           </div>
           <div className={styles.field}>
             <Label htmlFor={ids.apartment} note={t('address.optional')}>{t('address.apartment')}</Label>

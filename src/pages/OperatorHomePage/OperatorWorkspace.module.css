@@ -229,6 +229,30 @@
 .todayList dt { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
 .todayList dd { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
+/* ───────── Telefon (operator-buyurtma-formasi.mobil, karkas-E 4.7): ish joyi faqat kompyuterda ───────── */
+.phonePage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.phoneNote { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--color-warning-soft); }
+.phoneNote > svg { display: block; flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; color: var(--color-warning); }
+.phoneNote > div { flex: 1 1 auto; min-width: 0; }
+.phoneNote p { margin: 2px 0 0; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.phoneNote p:first-child { margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; color: var(--color-warning); }
+
+.phoneCard,
+.phoneState,
+.phoneToday { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; }
+.phoneCard { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 16px; text-align: center; }
+.phoneIcon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.phoneIcon > svg { display: block; width: 24px; height: 24px; }
+.phoneCard h2 { margin: 4px 0 0; font-size: 18px; line-height: 26px; font-weight: 700; }
+.phoneCard p { margin: 0; font-size: 15px; line-height: 23px; color: var(--color-text-secondary); }
+.phoneState { display: flex; flex-direction: column; padding: 4px 16px; }
+.phoneState > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; border-bottom: 1px solid var(--color-border); font-size: 15px; line-height: 22px; }
+.phoneState > div > span:first-child { color: var(--color-text-secondary); }
+.phoneState > div > :last-child { font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.phoneState > p { margin: 0; padding: 12px 0; font-size: 13px; line-height: 19px; color: var(--color-text-secondary); }
+.phoneToday { padding: 14px 16px 6px; }
+.phoneToday .todayHead h2 { font-size: 15px; line-height: 22px; font-weight: 700; }
+
 /* ───────── Faol lid yo'q va holatlar ───────── */
 .state {
   display: flex;
@@ -408,21 +432,8 @@
   vertical-align: baseline;
 }
 
-.formMark {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  margin-left: 8px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: var(--color-sunken);
-  box-shadow: inset 0 0 0 1px var(--color-border);
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  vertical-align: 1px;
-}
+/* «(formadan)», «(operator tuzatdi)», «(qisman rejim)» — kulrang matn (operator-lid-kartasi, DZ-12). */
+.formMark { color: var(--color-text-secondary); white-space: nowrap; }
 
 .section { display: flex; flex-direction: column; gap: 10px; }
 .section h3 { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; }
@@ -441,6 +452,8 @@
 
 .script li { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 6px; font-size: 15px; line-height: 24px; }
 .amount { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Skript o'zgaruvchisi (manzil, yetkazish turi) — qalin, qatorga bo'linadi. */
+.scriptValue { font-weight: 600; }
 .script li > span:first-child { font-size: 14px; line-height: 24px; font-weight: 600; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
 
 .collapsibles { display: flex; flex-direction: column; gap: 16px; }
@@ -501,6 +514,8 @@
 .historyBody { display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; row-gap: 4px; padding-bottom: 14px; font-size: 14px; line-height: 24px; }
 .history li:last-child .historyBody { padding-bottom: 0; }
 .historyBody > span:first-child { font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Manzil tuzatishi (FE-09 TC5): har maydon — eski → yangi. */
+.historyChanges { display: flex; flex: 1 0 100%; flex-direction: column; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
 
 /* ───────── Natija va buyurtma ───────── */
 .resultTop { display: flex; flex-direction: column; gap: 12px; }
@@ -535,6 +550,8 @@
 .tile:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
 .tile > .kbd { position: absolute; top: 6px; right: 6px; }
 .tile > svg { flex: 0 0 18px; width: 18px; height: 18px; }
+/* Yozuv belgining yonida qoladi va siqiladi — yangi qatorga tushmaydi (operator-lid-kartasi: belgi + matn bir qatorda). */
+.tile > span:not([class]) { flex: 1 1 0; min-width: 0; }
 .tile[aria-checked='true'] { border: 1.5px solid var(--color-action); background: var(--color-action-soft); font-weight: 600; }
 .tile[aria-checked='true'] > svg { color: var(--color-action); }
 .tile[aria-checked='true'] > .kbd { background: var(--color-surface); color: var(--color-action); }
@@ -570,16 +587,11 @@
 .lockedBox strong { display: block; font-weight: 600; }
 .lockedBox p { margin: 2px 0 0; }
 
-.fieldGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.qtyGrid { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .fieldLabel { display: block; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary); }
 .fieldLabelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .fieldLabelRow > span:last-child:not(:first-child) { font-size: 12px; line-height: 18px; color: var(--color-text-secondary); white-space: nowrap; }
-.selectWrap { position: relative; }
-.selectWrap > svg { position: absolute; top: 13px; right: 12px; color: var(--color-text-secondary); pointer-events: none; }
 
-.select,
 .input,
 .textarea {
   display: block;
@@ -595,11 +607,9 @@
   line-height: 22px;
 }
 
-.select { height: 44px; padding: 0 36px 0 14px; appearance: none; -webkit-appearance: none; cursor: pointer; }
 .input { height: 44px; padding: 0 14px; }
 .input[readonly] { background: var(--color-sunken); }
 .textarea { min-height: 68px; padding: 10px 14px; resize: vertical; }
-.select:focus,
 .input:focus,
 .textarea:focus { outline: 2px solid var(--color-focus-ring); outline-offset: 0; border-color: var(--color-action); }
 
@@ -639,14 +649,11 @@
 
 .segment[aria-checked='true'] { border-color: var(--color-border-strong); background: var(--color-surface); box-shadow: 0 1px 2px rgba(16, 23, 51, 0.06); color: var(--color-text); font-weight: 600; }
 .segment:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 1px; }
-.fieldHint { margin: 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
 
 .stepper { display: flex; align-items: stretch; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); overflow: hidden; }
 .stepper > button { display: flex; align-items: center; justify-content: center; flex: 0 0 42px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-text); cursor: pointer; }
 .stepper > button:disabled { color: var(--color-field-border); cursor: not-allowed; }
 .stepper > input { display: block; width: 44px; flex: 1 1 44px; min-width: 0; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); background: transparent; color: var(--color-text); font-family: inherit; font-size: 15px; line-height: 22px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
-.infoBox { display: flex; align-items: center; min-height: 44px; padding: 0 12px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); border: 1px solid var(--color-border); font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
-.infoBox strong { font-weight: 600; }
 
 /* «Keyingi urinish — avtomatik» (operator-natija 2) */
 .retryBox { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
@@ -733,6 +740,74 @@
 }
 
 .footerAction:hover:not(:disabled) { background: var(--color-action-hover); }
+
+/* FE-09 pastki qator: summa hisoblanmoqda — xira; hisoblanmadi — qizil qator va «Qayta hisoblash» (17-kadr);
+ * buyurtma yaratildi — yashil holat (20-kadr); tugma ostida o'chiqlik sababi (2, 3, 14-kadrlar). */
+.sum[data-stale] .sumBottom { opacity: 0.55; }
+
+.sumError {
+  flex: 1 1 520px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+  padding: 6px 8px 6px 14px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--color-danger-soft);
+}
+
+.sumError > svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; color: var(--color-danger); }
+.sumError > div { flex: 1 1 260px; min-width: 0; }
+.sumError p { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text); }
+.sumError p:first-child { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--color-danger); }
+
+.doneStatus {
+  flex: 1 1 420px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--color-success-soft);
+}
+
+.doneStatus > svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; margin-top: 1px; color: var(--color-success); }
+.doneStatus > div { min-width: 0; }
+.doneStatus p { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text); }
+.doneStatus p:first-child { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--color-success); }
+
+.footerActions { display: contents; }
+.footerReason { flex: 1 0 100%; margin: 0; font-size: 12px; line-height: 18px; color: var(--color-text-secondary); }
+.reasonShort { display: none; }
+
+.smallButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.smallButton:disabled { color: var(--color-text-faint); cursor: progress; }
+.smallButton > svg { display: block; flex: 0 0 16px; width: 16px; height: 16px; }
+
 .footerAction:disabled { opacity: 0.45; cursor: not-allowed; }
 .footerAction[aria-busy='true'] { opacity: 1; cursor: progress; }
 
@@ -770,4 +845,49 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/*
+ * Planshet (operator-buyurtma-formasi.planshet, operator-lid-kartasi.planshet, 768): ustunlar qatorga — «Keyingi lid» |
+ * «Bronlarim», lid kartasi, «Natija va buyurtma», «Rejalashtirilgan qo'ng'iroqlar» | «Bugun»; plitkalar 3 ustun;
+ * pastki panel ikki qator — summa, keyin tugma (ostida qisqa sabab).
+ */
+@container content (max-width: 919.98px) {
+  .workspace { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .workspace > .panel:not(.queue) { grid-column: 1 / -1; }
+  .queue { display: contents; }
+
+  .queue > .nextBlock,
+  .queue > .queueBlock,
+  .queue > .callbacks,
+  .queue > .today {
+    min-width: 0;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+  }
+
+  .queue > .nextBlock { order: 1; }
+  .queue > .queueBlock { order: 2; }
+  .workspace > .card, .workspace > .idle { order: 3; }
+  .workspace > .result { order: 4; }
+  .queue > .callbacks { order: 5; }
+  .queue > .today { order: 6; }
+  .queue > .callbacks .queueTitle { margin: -6px 0 4px; }
+  .queue > .callbacks .queueTitleLink { min-height: 44px; margin: 0; }
+  .queue > .today .todayHead { align-items: center; margin: -8px 0 0; }
+  .queue > .today .textLink { height: 44px; }
+
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .footer { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 24px; }
+  .footer > .sum, .footer > .sumError, .footer > .doneStatus { flex: none; }
+  .footerActions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-left: auto; }
+  .footerReason { flex: none; font-size: 12px; line-height: 16px; text-align: right; white-space: nowrap; }
+  .reasonLong { display: none; }
+  .reasonShort { display: inline; }
+  .smallButton { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 14px; line-height: 20px; }
 }

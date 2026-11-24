@@ -17,10 +17,11 @@ export const RESULT_TILES: ReadonlyArray<{ choice: ResultChoice; key: number }> 
   { choice: 'NO_ANSWER', key: 2 },
 ];
 
-/** «Buyurtma tasdiqlandi» faqat qoldiq va manzil bo'lsa (API lidida manzil keyin — FE-09). */
+/**
+ * «Buyurtma tasdiqlandi» qoldiq bo'lmasa yopiq. Manzilsiz lid (API) — forma ochiladi, operator manzilni
+ * kiritadi; kiritilmaguncha «Buyurtmani tasdiqlash» o'chiq (FE-09).
+ */
 export function confirmBlocked(card: LeadCard): TranslationKey | null {
-  if (card.stockShortage) return 'opw.stockClosed';
-  if (!card.address) return 'opw.addressMissing';
-  return null;
+  return card.stockShortage ? 'opw.stockClosed' : null;
 }
 

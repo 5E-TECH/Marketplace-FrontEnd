@@ -152,7 +152,7 @@ test('FE-03 TC2: tumanlar yuklanmasa — xato va «Qayta urinish»', async ({ pa
   });
   await page.reload();
   const address = page.getByTestId('address-new');
-  await expect(address.getByText('Tumanlarni yuklab bo‘lmadi. «Qayta urinish»ni bosing.')).toBeVisible({ timeout: 15_000 });
+  await expect(address.getByText('Ro‘yxat yuklanmadi')).toBeVisible({ timeout: 15_000 });
   await address.getByRole('button', { name: 'Qayta urinish' }).click();
   await expect(address.getByLabel('Viloyat').locator('option', { hasText: 'Toshkent shahri' })).toHaveCount(1);
   await expect(address.getByText('Avval viloyatni tanlang')).toBeVisible();

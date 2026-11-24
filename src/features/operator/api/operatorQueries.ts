@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useLiveQuery } from '../../../shared/api/liveQuery';
-import type { LeadCard, LeadResultInput, WhereDeliver } from '../model/operatorTypes';
+import type { LeadCard, LeadPrice, LeadResultAccepted, LeadResultInput, WhereDeliver } from '../model/operatorTypes';
 import {
   confirmLeadAddress,
   getLeadCard,
@@ -14,6 +14,7 @@ import {
   quoteLeadPrice,
   takeNextLead,
   updateOperatorState,
+  type LeadAddressInput,
   type OperatorState,
 } from './operatorApi';
 
@@ -23,6 +24,7 @@ export const operatorKeys = {
   leads: ['operator', 'leads'] as const,
   lead: (id: string) => ['operator', 'lead', id] as const,
   product: (id: string) => ['operator', 'lead', id, 'product'] as const,
+  quote: (id: string, quantity: number, whereDeliver: WhereDeliver) => ['operator', 'lead', id, 'quote', quantity, whereDeliver] as const,
   queue: ['operator', 'queue-summary'] as const,
   stats: (from: string, to: string) => ['operator', 'stats', from, to] as const,
   attempts: (from: string, to: string) => ['operator', 'attempts', from, to] as const,
@@ -45,10 +47,19 @@ export function useOperatorAttemptsQuery(from: string, to: string) {
   return useLiveQuery({ queryKey: operatorKeys.attempts(from, to), queryFn: ({ signal }) => getOperatorAttempts(from, to, 10, signal), intervalMs: 60_000 });
 }
 
-/** Buyurtma formasi: miqdor yoki yetkazish o'zgarsa — server summasi. */
-export function useLeadQuoteMutation() {
-  return useMutation({
-    mutationFn: ({ id, quantity, whereDeliver }: { id: string; quantity: number; whereDeliver: WhereDeliver }) => quoteLeadPrice(id, quantity, whereDeliver),
+/**
+ * Buyurtma formasi: miqdor yoki yetkazish o'zgarsa — server summasi (BE-09). Xato avtomatik qaytarilmaydi:
+ * operator «Qayta hisoblash» ni bosadi; yangi summa kelguncha oldingisi xira ko'rinadi, tasdiqlash yopiq.
+ */
+export function useLeadQuoteQuery(id: string, quantity: number, whereDeliver: WhereDeliver, enabled: boolean, initial: LeadPrice | null) {
+  return useQuery({
+    queryKey: operatorKeys.quote(id, quantity, whereDeliver),
+    queryFn: ({ signal }) => quoteLeadPrice(id, quantity, whereDeliver, signal),
+    enabled,
+    retry: false,
+    staleTime: 30_000,
+    // Birinchi o'zgarishda oldingi summa — lid kartasidagi narx.
+    placeholderData: (previous) => previous ?? initial ?? undefined,
   });
 }
 
@@ -133,19 +144,40 @@ export function useSubmitLeadResultMutation() {
   });
 }
 
-/** «Buyurtmani tasdiqlash»: avval manzil tasdig'i, keyin natija — server tasdiqsiz manzilni rad etadi. */
+export interface ConfirmOrderInput {
+  card: LeadCard;
+  address: LeadAddressInput;
+  quantity: number;
+  comment?: string;
+}
+
+/** Manzil tasdiqlanmagan yoki operator tuzatgan — avval saqlanadi (PATCH tasdiq ham, tuzatish ham). */
+export function addressNeedsSave(current: LeadCard['address'], next: LeadAddressInput): boolean {
+  return !current?.confirmedAt
+    || current.regionSoato !== next.regionSoato
+    || current.districtSoato !== next.districtSoato
+    || current.addressLine !== next.addressLine
+    || current.whereDeliver !== next.whereDeliver;
+}
+
+/**
+ * «Buyurtmani tasdiqlash» (FE-09): manzil formadagidek saqlanadi — tasdiq, tuzatish lid tarixiga; keyin natija.
+ * Server tasdiqsiz manzilni rad etadi (400 ADDRESS_NOT_CONFIRMED). Javob — natija va manzildan keyingi karta:
+ * muvaffaqiyat kartasi va lid tarixi shundan (tasdiqlangan lid serverda operatorga endi ko'rinmaydi).
+ */
 export function useConfirmOrderMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ card, comment, quantity, whereDeliver }: { card: LeadCard; comment?: string; quantity: number; whereDeliver: WhereDeliver }) => {
-      if (card.address && (!card.address.confirmedAt || card.address.whereDeliver !== whereDeliver)) {
-        const updated = await confirmLeadAddress(card.id, card.address, whereDeliver);
-        queryClient.setQueryData(operatorKeys.lead(card.id), updated);
+    mutationFn: async ({ card, address, quantity, comment }: ConfirmOrderInput): Promise<{ result: LeadResultAccepted; card: LeadCard }> => {
+      let saved = card;
+      if (addressNeedsSave(card.address, address)) {
+        saved = await confirmLeadAddress(card.id, address);
+        queryClient.setQueryData(operatorKeys.lead(card.id), saved);
       }
-      return submitLeadResult(card.id, { outcome: 'CONFIRMED', quantity, ...(comment ? { comment } : {}) });
+      const result = await submitLeadResult(card.id, { outcome: 'CONFIRMED', quantity, ...(comment ? { comment } : {}) });
+      return { result, card: saved };
     },
-    onSuccess: (_result, { card }) => {
-      queryClient.removeQueries({ queryKey: operatorKeys.lead(card.id), exact: true });
+    onSuccess: () => {
       refreshQueue(queryClient);
       void queryClient.invalidateQueries({ queryKey: ['operator', 'stats'] });
       void queryClient.invalidateQueries({ queryKey: ['operator', 'attempts'] });

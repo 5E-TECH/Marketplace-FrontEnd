@@ -61,7 +61,7 @@ const uz = {
   'address.districtHint': 'Avval viloyatni tanlang',
   'address.loading': 'Yuklanmoqda…',
   'address.loadingHint': 'Tumanlar ro‘yxati olinmoqda',
-  'address.loadFailed': 'Tumanlarni yuklab bo‘lmadi. «Qayta urinish»ni bosing.',
+  'address.loadFailed': 'Ro‘yxat yuklanmadi',
   'address.retry': 'Qayta urinish',
   'address.search': 'Tuman qidirish',
   'address.searchEmpty': '«{query}» bo‘yicha tuman yo‘q',
@@ -74,9 +74,10 @@ const uz = {
   'address.optional': 'ixtiyoriy',
   'address.regionRequired': 'Viloyatni tanlang',
   'address.districtRequired': 'Tuman yoki shaharni tanlang',
-  'address.streetRequired': 'Ko‘cha va uyni kiriting — eshikkacha yetkazishda majburiy',
+  'address.streetRequired': 'Ko‘cha va uyni kiriting',
   'address.fromCustomer': 'Mijoz yozgan',
   'address.editedByOperator': 'Operator tuzatdi',
+  'address.originalWas': 'Mijoz yozgani: «{value}». Tuzatish lid tarixiga yoziladi.',
 } as const;
 
 export type SharedUiTranslationKey = keyof typeof uz;
@@ -140,7 +141,7 @@ const ru: Record<SharedUiTranslationKey, string> = {
   'address.districtHint': 'Сначала выберите область',
   'address.loading': 'Загрузка…',
   'address.loadingHint': 'Загружаем список районов',
-  'address.loadFailed': 'Не удалось загрузить районы. Нажмите «Повторить».',
+  'address.loadFailed': 'Список не загрузился',
   'address.retry': 'Повторить',
   'address.search': 'Поиск района',
   'address.searchEmpty': 'По запросу «{query}» районов нет',
@@ -153,9 +154,10 @@ const ru: Record<SharedUiTranslationKey, string> = {
   'address.optional': 'необязательно',
   'address.regionRequired': 'Выберите область',
   'address.districtRequired': 'Выберите район или город',
-  'address.streetRequired': 'Укажите улицу и дом — обязательно для доставки до двери',
+  'address.streetRequired': 'Укажите улицу и дом',
   'address.fromCustomer': 'Указал клиент',
   'address.editedByOperator': 'Исправил оператор',
+  'address.originalWas': 'Клиент указал: «{value}». Исправление запишется в историю лида.',
 };
 
 const en: Record<SharedUiTranslationKey, string> = {
@@ -217,7 +219,7 @@ const en: Record<SharedUiTranslationKey, string> = {
   'address.districtHint': 'Select a region first',
   'address.loading': 'Loading…',
   'address.loadingHint': 'Loading the list of districts',
-  'address.loadFailed': 'Could not load districts. Press “Try again”.',
+  'address.loadFailed': 'The list did not load',
   'address.retry': 'Try again',
   'address.search': 'Search district',
   'address.searchEmpty': 'No district matches “{query}”',
@@ -230,9 +232,10 @@ const en: Record<SharedUiTranslationKey, string> = {
   'address.optional': 'optional',
   'address.regionRequired': 'Select a region',
   'address.districtRequired': 'Select a district or city',
-  'address.streetRequired': 'Enter the street and house — required for door delivery',
+  'address.streetRequired': 'Enter the street and house',
   'address.fromCustomer': 'Entered by customer',
   'address.editedByOperator': 'Corrected by operator',
+  'address.originalWas': 'Customer entered: “{value}”. The correction is recorded in the lead history.',
 };
 
 export const sharedUiTranslations = { uz, ru, en } as const;

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Skeleton } from 'antd';
-import { ArrowRight, ChevronRight, CircleX, Coffee, Headset, Inbox, Power, Timer } from 'lucide-react';
+import { ArrowRight, ChevronRight, CircleX, Coffee, Headset, Inbox, Monitor, Power, Timer } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { OperatorLead } from '../../features/operator/api/operatorApi';
@@ -21,17 +21,20 @@ import {
 import { clock, durationLabel, outcomeLabel, rejectLabel, statusLabel } from '../../features/operator/lib/leadFormat';
 import { isNoAnswer } from '../../features/operator/lib/leadRules';
 import { useNow } from '../../shared/lib/useNow';
-import type { LeadResultAccepted, LeadResultInput, LeadStatus, OperatorAttemptItem } from '../../features/operator/model/operatorTypes';
-import { getApiErrorCode, getApiErrorMessage, getApiRequestId } from '../../shared/api/apiError';
+import type { LeadCard, LeadResultAccepted, LeadResultInput, LeadStatus, OperatorAttemptItem } from '../../features/operator/model/operatorTypes';
+import { useCurrentUserQuery } from '../../features/auth/api/useCurrentUserQuery';
+import { getApiErrorCode, getApiErrorFields, getApiErrorMessage, getApiRequestId } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
 import { tashkentDate, tashkentDateTime } from '../../shared/lib/tashkentTime';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
-import { ActiveLead } from './ActiveLead';
+import { shortPersonName } from '../../shared/lib/personName';
+import { formatMoney } from '../../shared/ui/MoneyText/formatMoney';
+import { ActiveLead, type ConfirmOrderRequest, type OrderDone } from './ActiveLead';
 import { HelpDialog } from './HelpDialog';
-import { QueueColumn } from './QueueColumn';
-import type { OrderDraft } from './ResultPanel';
+import { QueueColumn, TodayStatsList } from './QueueColumn';
 import { confirmBlocked, RESULT_TILES, type DialogChoice, type ResultChoice } from './resultChoices';
 import styles from './OperatorWorkspace.module.css';
+import { DotLabel } from '../../shared/ui/Badge/Badge';
 import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 
 /** Ochiq lid sahifadan chiqib qaytganda ham ochiq turadi — natijasiz yopilmaydi. */
@@ -92,14 +95,17 @@ export default function OperatorHomePage() {
   const primaryRef = useRef<(() => void) | null>(null);
 
   const card = useLeadCardQuery(activeId);
-  const bookedLeftRaw = card.data?.id === activeId && card.data?.bookedUntil ? Date.parse(card.data.bookedUntil) - now : null;
+  // Buyurtma yaratildi (FE-09, 20-kadr): karta «Tasdiqlandi» holatida ochiq qoladi — bron va «yo'qoldi» qoidalari endi yo'q.
+  const [done, setDone] = useState<OrderDone | null>(null);
+  const bookedLeftRaw = !done && card.data?.id === activeId && card.data?.bookedUntil ? Date.parse(card.data.bookedUntil) - now : null;
   // Lid endi bu operatorda emas: bron tugagan, server 404 qaytargan yoki ro'yxatdan chiqqan (boshqa tab).
-  const gone = Boolean(activeId) && (
+  const gone = Boolean(activeId) && !done && (
     (card.isError && getApiErrorCode(card.error) === 'NOT_FOUND')
     || (bookedLeftRaw !== null && bookedLeftRaw <= 0)
     || (leads.data !== undefined && leads.dataUpdatedAt >= active.since && !leads.data.some((lead) => lead.id === activeId))
   );
-  const activeCard = activeId && !gone && card.data?.id === activeId ? card.data : null;
+  const activeCard = done?.card ?? (activeId && !gone && card.data?.id === activeId ? card.data : null);
+  const me = shortPersonName(useCurrentUserQuery().data?.name ?? '');
   const state = stateQuery.data?.state ?? 'OFFLINE';
   const max = stateQuery.data?.maxBookings ?? DEFAULT_MAX_BOOKINGS;
   const mine = leads.data ?? [];
@@ -117,6 +123,7 @@ export default function OperatorHomePage() {
     setDialog(null);
     setProductOpen(false);
     setResultError(null);
+    setDone(null);
     resetConfirm();
   }, [resetConfirm]);
 
@@ -138,16 +145,16 @@ export default function OperatorHomePage() {
     notification.warning({ title: t('opw.bookingMinuteLeft'), description: t('opw.bookingMinuteLeftText', { lead: `${activeCard.id} · ${activeCard.customerName}` }), placement: 'bottomRight', duration: 6 });
   }, [activeCard, bookedLeftRaw, notification, t]);
 
-  // Sahifani yopish ogohlantirishi (operator-karkas 5): ochiq lid bor bo'lsa brauzer so'raydi.
+  // Sahifani yopish ogohlantirishi (operator-karkas 5): natijasiz ochiq lid bor bo'lsa brauzer so'raydi.
   useEffect(() => {
-    if (!activeCard) return;
+    if (!activeCard || done) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = t('opw.leaveWarning');
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [activeCard, t]);
+  }, [activeCard, done, t]);
 
   const goOnline = () => stateMutation.mutate('ONLINE', { onError: (error) => void message.error(`${t('operator.stateFailed')}: ${getApiErrorMessage(error)}`) });
 
@@ -165,7 +172,7 @@ export default function OperatorHomePage() {
 
   const onNext = () => {
     if (takeNext.isPending) return;
-    if (activeCard) return requireResultFirst();
+    if (activeCard && !done) return requireResultFirst();
     if (blockedReason) return;
     setNextError(null);
     takeNext.mutate(undefined, {
@@ -184,7 +191,7 @@ export default function OperatorHomePage() {
 
   const onOpen = (id: string) => {
     if (id === activeId) return;
-    if (activeCard) return requireResultFirst();
+    if (activeCard && !done) return requireResultFirst();
     setActiveId(id);
   };
 
@@ -199,8 +206,6 @@ export default function OperatorHomePage() {
       description = isNoAnswer(outcome)
         ? t('opw.savedRetry', { lead, time: tashkentDateTime(result.nextAttemptAt) })
         : t('opw.savedCallback', { lead, time: tashkentDateTime(result.nextAttemptAt) });
-    } else if (result.status === 'CONFIRMED') {
-      description = t('opw.savedOrder', { lead, order: '' });
     } else {
       description = t('opw.savedStatus', { lead, status: statusLabel(result.status, t) });
     }
@@ -231,20 +236,50 @@ export default function OperatorHomePage() {
     });
   };
 
-  const onConfirmOrder = (draft: OrderDraft) => {
-    if (!activeCard || confirmBlocked(activeCard)) return;
+  /**
+   * «Buyurtmani tasdiqlash» (FE-09): manzil (tasdiq yoki tuzatish) va natija. Muvaffaqiyatda karta ochiq qoladi —
+   * «Buyurtma yaratildi»; maydon xatosi, «manzil tasdiqlanmadi» va «band qilinmadi» formada ko'rinadi.
+   */
+  const onConfirmOrder = (request: ConfirmOrderRequest) => {
+    if (!activeCard || done || confirmBlocked(activeCard)) return;
     setResultError(null);
-    confirmOrder.mutate({ card: activeCard, comment: draft.comment, quantity: draft.quantity, whereDeliver: draft.whereDeliver }, {
-      onSuccess: (result) => {
-        savedToast(result, 'CONFIRMED');
-        setActiveId(null);
+    confirmOrder.mutate({ card: activeCard, address: request.address, quantity: request.quantity, comment: request.comment }, {
+      onSuccess: ({ result, card: saved }) => {
+        const at = Date.now();
+        const iso = new Date(at).toISOString();
+        const confirmed: LeadCard = {
+          ...saved,
+          status: result.status,
+          quantity: request.quantity,
+          bookedUntil: null,
+          attempts: [...saved.attempts, { at: iso, operatorName: me, outcome: 'CONFIRMED', comment: request.comment || null }],
+          history: [...saved.history, { at: iso, fromStatus: saved.status, toStatus: result.status, actor: me, note: request.comment || null }],
+        };
+        storeActive(null);
+        setDone({ ...request, card: confirmed, result, at });
+        const price = request.price;
+        const fee = price ? (price.deliveryFee === 0 ? t('opo.free') : formatMoney(price.deliveryFee)) : null;
+        notification.success({
+          title: t('opo.doneTitle'),
+          description: t('opo.toastText', { lead: saved.id, name: saved.customerName, sum: price ? `${formatMoney(price.subtotal)} + ${fee} so‘m` : '—' }),
+          placement: 'bottomRight',
+          duration: 6,
+        });
       },
-      onError: (error) => onResultError(error, false),
+      onError: (error) => {
+        const code = getApiErrorCode(error);
+        // Forma o'zi ko'rsatadi (maydon ostida yoki ogohlantirish) — umumiy xabar shart emas.
+        if (code === 'ADDRESS_NOT_CONFIRMED' || code === 'OUT_OF_STOCK' || (code === 'VALIDATION_ERROR' && getApiErrorFields(error).length)) {
+          if (code === 'OUT_OF_STOCK') void queryClient.invalidateQueries({ queryKey: operatorKeys.product(activeCard.id) });
+          return;
+        }
+        onResultError(error, false);
+      },
     });
   };
 
   const choose = (choice: ResultChoice) => {
-    if (!activeCard || saving) return;
+    if (!activeCard || saving || done) return;
     setResultError(null);
     if (choice === 'CONFIRMED') {
       if (!confirmBlocked(activeCard) && selected !== 'NO_ANSWER') setSelected('CONFIRMED');
@@ -295,17 +330,35 @@ export default function OperatorHomePage() {
   }, [phone]);
 
   if (phone) {
-    // Telefonda ish joyi ochilmaydi (karkas «Faqat kompyuterda»), faqat bugungi statistika.
+    // Telefonda ish joyi ochilmaydi (karkas-E 4.7, operator-buyurtma-formasi.mobil): faol bron haqida eslatma,
+    // holat (telefondan o'zgarmaydi) va bugungi natija.
+    const live = bookings[0];
     return (
-      <section className={styles.panel} aria-labelledby="operator-today-title">
-        <div className={styles.today}>
+      <div className={styles.phonePage} data-testid="operator-phone">
+        {live ? (
+          <div className={styles.phoneNote} role="note">
+            <Headset aria-hidden />
+            <div>
+              <p>{t('opo.phoneActiveTitle')}</p>
+              <p>{t('opo.phoneActiveText', { lead: `${live.customerName} · ${live.id}`, until: clock(live.bookedUntil ?? '') })}</p>
+            </div>
+          </div>
+        ) : null}
+        <section className={styles.phoneCard} aria-labelledby="operator-desktop-only" data-testid="desktop-only">
+          <span className={styles.phoneIcon} aria-hidden><Monitor /></span>
+          <h2 id="operator-desktop-only">{t('shell.desktopOnlyTitle')}</h2>
+          <p>{t('shell.desktopOnlyText')}</p>
+        </section>
+        <section className={styles.phoneState} aria-label={t('opo.phoneStateLabel')}>
+          <div><span>{t('opo.phoneState')}</span><DotLabel tone={state === 'ONLINE' ? 'success' : state === 'BREAK' ? 'warning' : 'neutral'}>{t(state === 'ONLINE' ? 'operator.online' : state === 'BREAK' ? 'operator.break' : 'operator.offline')}</DotLabel></div>
+          <div><span>{t('opo.phoneBookings')}</span><strong>{bookings.length}/{max}</strong></div>
+          <p>{t('opo.phoneStateNote')}</p>
+        </section>
+        <section className={styles.phoneToday} aria-labelledby="operator-today-title">
           <div className={styles.todayHead}><h2 id="operator-today-title">{t('opw.todayTitle')}</h2></div>
-          <dl className={styles.todayList}>
-            <div><dt>{t('opw.attempts')}</dt><dd>{stats.data?.attempts ?? '—'}</dd></div>
-            <div><dt>{t('opw.confirmed')}</dt><dd>{stats.data?.confirmed ?? '—'}</dd></div>
-          </dl>
-        </div>
-      </section>
+          <TodayStatsList stats={stats.data} />
+        </section>
+      </div>
     );
   }
 
@@ -343,6 +396,8 @@ export default function OperatorHomePage() {
           onHelp={() => setHelpOpen(true)}
           onSubmit={onSubmit}
           onConfirmOrder={onConfirmOrder}
+          confirmError={confirmOrder.error}
+          done={done}
           primaryRef={primaryRef}
         />
         <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />

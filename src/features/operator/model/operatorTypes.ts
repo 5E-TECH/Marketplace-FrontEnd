@@ -2,12 +2,50 @@ import type { components } from '../../../generated/api-types';
 
 type Schemas = components['schemas'];
 
-export type LeadCard = Schemas['LeadCardDto'];
+export type WhereDeliver = Schemas['LeadPriceDto']['whereDeliver'];
+/** Yetkazishni ko'rsatish rejimi (TZ 2.4): alohida, qisman, bepul — admin mahsulot bo'yicha tanlaydi. */
+export type DeliveryMode = NonNullable<Schemas['PricePolicyDto']['deliveryMode']>;
+
+/**
+ * Narx obyekti (BE-09 / BE-13). Taklif maydonlari (FE-09, docs/api-taklif/fe-09-operator-buyurtma.md) —
+ * kelmasa ekran ularsiz ishlaydi: rejim belgisi, ikki yetkazish narxi, og'irlik izohi va oldindan to'lov.
+ */
+export type LeadPrice = Schemas['LeadPriceDto'] & {
+  deliveryMode?: DeliveryMode | null;
+  /** Posilkaning jami og'irligi (dona × og'irlik), gramm. */
+  weightGrams?: number | null;
+  /** Shu miqdor uchun ikkala yetkazish turi — «Markazgacha 30 000 · eshikkacha 50 000». */
+  deliveryOptions?: Record<WhereDeliver, number> | null;
+  /** `deliveryFee = base + extraKg × perExtraKg` — «40 000 + 3 × 4 000»; bepulda null. */
+  deliveryFormula?: { base: number; extraKg: number; perExtraKg: number; baseWeightGrams: number } | null;
+  /** Qora ro'yxatdagi mijoz: yetkazish puli oldindan (TZ 7). */
+  prepayment?: { amount: number; method: string } | null;
+};
+
+/** Operator tuzatgan manzil maydoni: eski va yangi qiymat (nomi bilan; yetkazish — `CENTER`/`ADDRESS`). */
+export interface LeadAddressChange {
+  field: 'region' | 'district' | 'addressLine' | 'whereDeliver';
+  from: string | null;
+  to: string;
+}
+
+/**
+ * Lid tarixi yozuvi. `changes` — taklif (BE-38): backend eski/yangi qiymatni saqlaydi, lekin kartaga bermaydi.
+ * Bo'sh ro'yxat — manzil o'zgarishsiz tasdiqlangan (yozuv ko'rsatilmaydi).
+ */
+export type LeadHistoryEntry = Schemas['LeadHistoryEntryDto'] & { changes?: LeadAddressChange[] | null };
+
+export type LeadCard = Omit<Schemas['LeadCardDto'], 'price' | 'history'> & {
+  price: LeadPrice | null;
+  history: LeadHistoryEntry[];
+};
+export type LeadAddress = NonNullable<LeadCard['address']>;
 export type LeadStatus = LeadCard['status'];
 export type LeadOutcome = Schemas['SubmitLeadResultDto']['outcome'];
 export type LeadRejectReason = NonNullable<Schemas['SubmitLeadResultDto']['rejectReason']>;
 export type LeadResultInput = Schemas['SubmitLeadResultDto'];
-export type LeadResultAccepted = Schemas['LeadResultAcceptedDto'];
+/** `stockAvailable` — taklif: band qilingandan keyin omborda qolgan dona («band qilindi: mavjud 119»). */
+export type LeadResultAccepted = Schemas['LeadResultAcceptedDto'] & { stockAvailable?: number | null };
 export type OperatorQueueSummary = Schemas['OperatorQueueSummaryDto'];
 
 /**
@@ -42,9 +80,6 @@ export interface OperatorAttemptsPage {
   total: number;
 }
 
-export type LeadPrice = Schemas['LeadPriceDto'];
-export type WhereDeliver = LeadPrice['whereDeliver'];
-
 /** Holat. `since` — taklif (BE-13): «Tanaffusdasiz · 6 daqiqa» («14:31 dan»). */
 export type OperatorStateInfo = Schemas['OperatorStateDto'] & { since?: string | null };
 
@@ -60,11 +95,13 @@ export interface LeadProductInfo {
   imageUrl: string | null;
   description: string | null;
   highlights: string[];
-  available: number;
+  /** Omborda sotuvga bor (band qilinmagan) dona; null — ombor javob bermadi. */
+  available: number | null;
   weightKg: number | null;
   contents: string | null;
   salePrice: number;
-  deliveryFee: { CENTER: number; ADDRESS: number };
+  /** 1 dona uchun ikki yetkazish turi; katalog javob bermasa null. */
+  deliveryFee: { CENTER: number; ADDRESS: number } | null;
   /** Mijoz ko'rgan sotuvchi sahifasi. */
   pageUrl: string | null;
   /** BAD, kosmetika va h.k. — operator aytishi shart bo'lgan ogohlantirish (TZ 7, 8). */
