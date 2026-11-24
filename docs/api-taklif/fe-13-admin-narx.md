@@ -38,6 +38,8 @@ Tartib — `queuedAt` (navbatga tushgan: yuborilgan yoki asosi o'zgargan vaqt) b
 ## 3. Bozor narxi: manba va oldindan ko'rish (taklif)
 
 - `POST …/market-check` body ga `source?: string` (≤ 300; «Qayerda ko'rildi») — javobda va hisobda qaytadi.
+  Hozirgi backend uni rad etadi (`forbidNonWhitelisted` → 400, `details[].field = "source"`) — frontend summani
+  manbasiz qayta yuboradi, summa saqlanadi; manba backend qo'shgandan keyin saqlana boshlaydi.
 - `preview: true` — natijani **saqlamasdan** qaytaradi («Bozor narxini kiritish» oynasida summa yozilayotganda).
   Hozirgi backend noma'lum maydonni rad etadi (400) — oyna natijasiz ishlaydi, «Saqlash» ishlaydi.
 

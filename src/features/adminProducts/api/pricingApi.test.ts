@@ -1,8 +1,12 @@
+import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '../../../mocks/db';
 import { mockTokenFor, mockUserByRole } from '../../../mocks/fixtures/users';
+import { server } from '../../../mocks/node';
 import { httpClient } from '../../../shared/api/httpClient';
 import { checkMarketPrice, decidePrice, getModerationSummary, getPriceQueue, getProductAudit, getProductPricing, previewMarketPrice, rejectProduct, setProductDeliveryMode } from './adminProductsApi';
+
+const asJson = (value: unknown): Record<string, unknown> => (value && typeof value === 'object' ? value as Record<string, unknown> : {});
 
 const asAdmin = () => {
   httpClient.defaults.headers.common.Authorization = `Bearer ${mockTokenFor(mockUserByRole('ADMIN'))}`;
@@ -65,6 +69,34 @@ describe('narx kalkulyatori va tasdiqlash + MSW', () => {
     const result = await checkMarketPrice({ id: '511', competitorTotal: 299_000, source: 'uzum.uz' });
     expect(result).toMatchObject({ verdict: 'MOS', maxBasePrice: 148_099, source: 'uzum.uz' });
     expect((await getProductPricing({ id: '511' })).market).toMatchObject({ competitorTotal: 299_000, verdict: 'MOS', source: 'uzum.uz' });
+  });
+
+  it('TC4: backend `source` ni hali bilmasa (forbidNonWhitelisted, 400) — summa manbasiz saqlanadi', async () => {
+    asAdmin();
+    const bodies: unknown[] = [];
+    server.use(http.post('*/api/v1/admin/products/:id/market-check', async ({ request }) => {
+      const body = asJson(await request.clone().json());
+      bodies.push(body);
+      if (!('source' in body)) return undefined;
+      const error = 'property source should not exist';
+      return HttpResponse.json({ statusCode: 400, message: [error], errorCode: 'VALIDATION_ERROR', details: [{ field: 'source', error }] }, { status: 400 });
+    }));
+    const result = await checkMarketPrice({ id: '511', competitorTotal: 285_000, source: 'uzum.uz' });
+    expect(result).toMatchObject({ verdict: 'QIMMAT', maxBasePrice: 134_369 });
+    expect(bodies).toEqual([{ competitorTotal: 285_000, source: 'uzum.uz' }, { competitorTotal: 285_000 }]);
+    expect((await getProductPricing({ id: '511' })).market).toMatchObject({ competitorTotal: 285_000, source: null });
+  });
+
+  it('TC4: boshqa 400 (summa xato) qayta yuborilmaydi', async () => {
+    asAdmin();
+    let calls = 0;
+    server.use(http.post('*/api/v1/admin/products/:id/market-check', () => {
+      calls += 1;
+      const error = 'competitorTotal must not be less than 1';
+      return HttpResponse.json({ statusCode: 400, message: [error], errorCode: 'VALIDATION_ERROR', details: [{ field: 'competitorTotal', error }] }, { status: 400 });
+    }));
+    await expect(checkMarketPrice({ id: '511', competitorTotal: 285_000, source: 'uzum.uz' })).rejects.toMatchObject({ response: { status: 400 } });
+    expect(calls).toBe(1);
   });
 
   it('yetkazish rejimi mahsulot uchun: alohida — tavsiya 251 000, manba PRODUCT; rad etish navbatdan chiqaradi', async () => {
