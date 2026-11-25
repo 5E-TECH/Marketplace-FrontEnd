@@ -27,6 +27,7 @@ import { addDays } from '../../shared/lib/tashkentTime';
 import { db, MOCK_PRODUCTS } from '../db';
 import { mockPricingParams, TARIFF } from '../fixtures/adminProducts';
 import { REGION_TREE } from '../fixtures/regions';
+import { createOrderFromLead, MOCK_OPERATORS, mockOperatorLoad } from '../orderStore';
 import { deliveryView, elchiTariffFor } from '../pricingCalculator';
 import { API, fail, ok, seeded } from '../utils';
 import { currentMockUser } from './auth';
@@ -230,6 +231,8 @@ interface OperatorStore {
   stock: Map<string, number>;
   /** Tasdiq paytida oxirgi donani boshqa buyurtma band qiladi (FE-09 19-kadr: ikki parallel tasdiq). */
   raceOnce: Set<string>;
+  /** Mijoz sahifada yozgan manzil (operator tuzatsa ham) — buyurtma kartasida «Mijoz yozgani» (FE-26 TC5). */
+  originals: Map<string, LeadCard['address']>;
 }
 
 /** Bugungi urinishlar namunasi (operator-bosh jadvalidagidek); «jami» statistika bilan bir xil — 38. */
@@ -290,6 +293,7 @@ function createStore(): OperatorStore {
   return {
     leads, owned: new Set(['L-1284', 'L-1255', 'L-1253']), returned: [], stateSince: ago(20), log: seedLog(),
     stock: new Map(offers().map((offer) => [offer.id, offer.stock])), raceOnce: new Set(['L-1233']),
+    originals: new Map([...leads.values()].map((lead) => [lead.id, lead.address])),
   };
 }
 
@@ -299,6 +303,78 @@ const current = () => (store ??= createStore());
 
 export function resetMockOperator(): void {
   store = null;
+}
+
+// ── FE-26: admin/nazoratchi lidlar va buyurtmalar shu store'dan o'qiydi ──
+
+/** Lid kelgan sotuvchi sahifasi (mock): dizayndagi Aziza — k7m2qa (Jasur T.), qolganlari barqaror tanlov. */
+const STREAMS = ['k7m2qa', 'p3v9tx', 'd2h6va', 'r9c4mn'] as const;
+const STREAM_OF: Record<string, string> = { 'L-1284': 'k7m2qa', 'L-1287': 'd2h6va', 'L-1291': 'h2q7vz' };
+export const mockStreamOf = (leadId: string) => STREAM_OF[leadId] ?? STREAMS[seeded(leadId, 0, STREAMS.length - 1)];
+
+export const mockOperatorLeads = (): LeadCard[] => all();
+/** Dilnoza R. — operator ish joyidagi holat; qolganlar — `MOCK_OPERATORS` dagi doimiy holat. */
+export const mockOperatorState = (id: string) => (id === 'U-0003' ? db.operator.state : MOCK_OPERATORS.find((item) => item.id === id)?.state ?? 'OFFLINE');
+
+/** queue-summary operatori + taklif maydonlari (`maxBookings`, `scheduledCalls`, `activity`) — o'tkazish oynasi. */
+export function mockQueueOperator(item: (typeof MOCK_OPERATORS)[number]) {
+  const load = mockOperatorLoad(item.id);
+  const mineNow = item.id === 'U-0003';
+  return {
+    operatorId: item.id,
+    name: item.name,
+    state: mockOperatorState(item.id),
+    activeBookings: (mineNow ? activeBookings() : item.bookings) + load.bookings,
+    maxBookings: db.operator.maxBookings,
+    scheduledCalls: (mineNow ? mine().filter((lead) => lead.status === 'CALLBACK').length : item.scheduled) + load.scheduled,
+    activity: item.activity ? { kind: item.activity.kind, leadId: item.activity.leadId, since: new Date(Date.now() - item.activity.seconds * 1000).toISOString() } : null,
+  };
+}
+export const mockOwnedByMe = (id: string) => current().owned.has(id);
+export const mockOriginalAddress = (id: string) => current().originals.get(id) ?? null;
+export const mockOfferOf = (productId: string) => offerOf(productId);
+export const mockStock = (productId: string) => current().stock.get(productId) ?? 0;
+
+/** Admin amali lidni o'zgartiradi (qayta ochish, o'tkazish, bronni bo'shatish). */
+export function updateMockOperatorLead(id: string, update: (lead: LeadCard) => LeadCard, owned?: boolean): LeadCard | null {
+  const lead = current().leads.get(id);
+  if (!lead) return null;
+  const next = update(lead);
+  current().leads.set(id, next);
+  if (owned === true) current().owned.add(id);
+  if (owned === false) current().owned.delete(id);
+  return next;
+}
+
+/** Bekor qilingan buyurtma: band tovar darhol bo'shaydi (BUY-3). */
+export function releaseMockStock(productId: string, quantity: number): void {
+  current().stock.set(productId, (current().stock.get(productId) ?? 0) + quantity);
+}
+
+/** «Buyurtma tasdiqlandi» — lid ma'lumotlari bilan buyurtma (FE-26: ro'yxat va kartada). */
+function confirmOrder(lead: LeadCard, quantity: number, operatorName: string) {
+  const offer = offerOf(lead.product.id);
+  const address = lead.address;
+  const original = current().originals.get(lead.id) ?? null;
+  return createOrderFromLead({
+    leadId: lead.id,
+    name: lead.customerName,
+    phone: `+998 90 ${lead.id.slice(2, 5)} ${lead.id.slice(-2)} ${seeded(lead.id, 10, 99)}`,
+    regionSoato: address?.regionSoato ?? '',
+    districtSoato: address?.districtSoato ?? '',
+    addressLine: address?.addressLine ?? '',
+    whereDeliver: address?.whereDeliver ?? 'CENTER',
+    original: original ? { regionSoato: original.regionSoato, districtSoato: original.districtSoato, addressLine: original.addressLine, whereDeliver: original.whereDeliver } : null,
+    operatorName: MOCK_OPERATORS.some((item) => item.name === operatorName) ? operatorName : OPERATOR,
+    product: { id: offer.id, name: offer.name, weightGrams: offer.weightGrams },
+    quantity,
+    unitPrice: lead.product.salePrice,
+    deliveryFee: lead.price?.deliveryFee ?? 0,
+    deliveryMode: offer.deliveryMode,
+    streamCode: mockStreamOf(lead.id),
+    leadCreatedAt: lead.createdAt,
+    blacklist: Boolean(lead.blacklistRejections),
+  });
 }
 
 /**
@@ -481,10 +557,7 @@ export const operatorHandlers = [
       newLeads: pool.filter((lead) => lead.status === 'NEW').length,
       dueCallbacks: pool.filter((lead) => isDue(lead, now)).length + mine().filter((lead) => isDue(lead, now)).length,
       booked: activeBookings(),
-      operators: [
-        { operatorId: 'U-0003', name: OPERATOR, state: db.operator.state, activeBookings: activeBookings() },
-        { operatorId: 'U-0031', name: 'Feruza Y.', state: 'BREAK', activeBookings: 0 },
-      ],
+      operators: MOCK_OPERATORS.map(mockQueueOperator),
     };
     return ok(summary);
   }),
@@ -581,7 +654,7 @@ export const operatorHandlers = [
       nextAttemptAt,
       rejectReason: outcome === 'REJECTED' ? body.rejectReason ?? null : lead.rejectReason,
       quantity: body.quantity ?? lead.quantity,
-      orderId: outcome === 'CONFIRMED' ? `O-${seeded(lead.id, 4000, 4999)}` : lead.orderId,
+      orderId: outcome === 'CONFIRMED' ? confirmOrder(lead, body.quantity ?? lead.quantity, operator).id : lead.orderId,
     });
     current().log.unshift({
       at: new Date(now).toISOString(), leadId: lead.id, customerName: lead.customerName, productName: lead.product.name, outcome,

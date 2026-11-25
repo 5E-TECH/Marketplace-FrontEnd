@@ -1,0 +1,256 @@
+/*
+ * Yozuv kartasi (lid kartasi, buyurtma kartasi — admin-lid-karta, admin-buyurtma-karta): «Hozir» bloki, yo'l, ko'rsatkichlar,
+ * bo'limlar, faktlar, jadval, tarix, telefon varag'i. Desktop — ikki ustun; planshet (container `content`) — bitta ustun;
+ * telefon — `data-layout=phone`. Sahifaga xos klasslar o'z modulida: `const styles = { ...record, ...own }`.
+ */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.page[data-layout='phone'] { gap: 16px; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { color: var(--color-text-secondary); }
+.tabular { font-variant-numeric: tabular-nums; }
+.skeleton { display: block; border-radius: 16px; background: var(--color-border); }
+
+.columns { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.main { display: flex; flex: 1 1 560px; flex-direction: column; gap: 20px; min-width: 0; }
+.side { display: flex; flex: 1 1 360px; flex-direction: column; gap: 20px; max-width: 420px; min-width: 0; }
+
+/* ── Tugmalar ── */
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.secondary svg { width: 16px; height: 16px; flex: none; }
+.secondary:hover:not(:disabled) { border-color: var(--color-border-hover); }
+.secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+.secondary:focus-visible, .iconButtonOutline:focus-visible, .textButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.iconButtonOutline { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; padding: 0; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-secondary); cursor: pointer; }
+.iconButtonOutline svg { width: 20px; height: 20px; }
+.iconButtonOutline[aria-expanded='true'] { background: var(--color-sunken); }
+
+.barButton { display: inline-flex; flex: 1 1 auto; align-items: center; justify-content: center; gap: 8px; min-width: 0; height: 52px; margin: 0; padding: 0 20px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 15px; font-weight: 600; line-height: 22px; white-space: nowrap; cursor: pointer; }
+.barButton svg { width: 18px; height: 18px; }
+
+.textButton { display: inline-flex; align-items: center; height: 24px; margin-top: 6px; padding: 0; border-radius: 4px; color: var(--color-action); font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: underline; white-space: nowrap; }
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 14px; font-weight: 600; line-height: 20px; text-decoration: none; white-space: nowrap; }
+.link > svg { width: 16px; height: 16px; }
+.link:hover { text-decoration: underline; }
+
+/* ── «Hozir» bloki ── */
+.now { display: flex; flex-direction: column; gap: 20px; padding: 20px 24px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); min-width: 0; }
+.nowHead { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.nowTitleRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.statusLine { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.nowTitle { margin: 0; font-size: 20px; line-height: 28px; font-weight: 700; }
+.nowSubRow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; min-width: 0; }
+.nowSub { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.nowSub strong { font-weight: 600; color: var(--color-text); }
+.nowActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.nowPhoneTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+
+/* Lid yo'li: gorizontal qadamlar (desktop, planshet) */
+.path { display: flex; align-items: flex-start; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.path > li { display: flex; flex: 1 1 0; flex-direction: column; gap: 8px; min-width: 0; }
+.path > li:last-child { flex: 0 0 150px; }
+.pathMark { display: flex; align-items: center; }
+
+.pathDot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.pathDot svg { width: 16px; height: 16px; stroke-width: 2.5; }
+.path > li[data-state='done'] .pathDot { border: 0; background: var(--color-nav); color: var(--color-white); }
+.path > li[data-state='current'] .pathDot { border-color: var(--color-nav); color: var(--color-nav); }
+.pathLine { flex: 1 1 auto; height: 2px; margin: 0 8px; border-radius: 2px; background: var(--color-border); }
+.pathLine[data-done] { background: var(--color-nav); }
+.pathText { display: flex; flex-direction: column; padding-right: 8px; }
+.pathText > span:first-child { color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; }
+.pathText > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.path > li[data-state='done'] .pathText > span:first-child { color: var(--color-text); }
+.path > li[data-state='current'] .pathText > span:first-child { color: var(--color-text); font-weight: 700; }
+
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 24px; margin: 0; padding: 16px 0 0; border-top: 1px solid var(--color-border); min-width: 0; }
+.metrics > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.metrics dt { color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.metrics dd { margin: 0; font-size: 15px; font-weight: 700; line-height: 22px; font-variant-numeric: tabular-nums; }
+.metrics dd + dd { color: var(--color-text-secondary); font-size: 12px; font-weight: 400; line-height: 16px; }
+.metrics a { color: var(--color-action); text-decoration: none; }
+.metrics a:hover { text-decoration: underline; }
+
+.hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.hint > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+
+/* ── Bo'limlar ── */
+.section { display: flex; flex-direction: column; gap: 14px; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); min-width: 0; }
+.sectionHead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; min-width: 0; }
+.sectionHead > div { flex: 1 1 260px; min-width: 0; }
+.sectionHead h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.sectionHead p { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.sectionFoot { margin: 0 -16px -16px; }
+.sectionFoot > a { display: flex; justify-content: space-between; min-height: 48px; padding: 0 16px; box-sizing: border-box; border-top: 1px solid var(--color-border); }
+.text { margin: 0; font-size: 14px; line-height: 21px; }
+.empty { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+.facts { margin: -10px 0; min-width: 0; }
+.facts > div { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); min-width: 0; }
+.facts > div:last-child { border-bottom: 0; }
+.facts dt { flex: 0 0 150px; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.facts[data-width='110'] dt { flex-basis: 110px; }
+.facts[data-width='170'] dt { flex-basis: 170px; }
+.facts[data-width='120'] dt { flex-basis: 120px; }
+.facts[data-width='140'] dt { flex-basis: 140px; }
+.facts[data-width='160'] dt { flex-basis: 160px; }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.factGroups { display: flex; flex-direction: column; margin: -10px 0; }
+.factGroups > .facts { margin: 0; }
+.factGroups > .facts + .facts { border-top: 1px solid var(--color-border); }
+.factNote { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 12px; font-weight: 500; line-height: 16px; }
+.phoneValue { display: inline-flex; align-items: center; gap: 6px; }
+.phoneValue button { margin: -6px 0; }
+.hidden { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-weight: 500; }
+.hidden svg { width: 14px; height: 14px; }
+.pageValue { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.code { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text); font-size: 13px; font-weight: 600; line-height: 18px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; vertical-align: middle; }
+
+.box { padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); min-width: 0; }
+.boxTitle { margin: 0 0 10px; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.box .facts dt { font-size: 13px; }
+
+/* Jadval */
+.tableScroll { overflow-x: auto; min-width: 0; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 18px; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+.table td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table .num { text-align: right; }
+.stack { display: flex; flex-direction: column; }
+.stack > span:first-child { font-size: 14px; font-weight: 500; line-height: 20px; }
+.stack > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.cellNote { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; white-space: normal; }
+
+.alert { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-danger-soft); }
+.alert > svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--color-danger); }
+.alert p { margin: 2px 0 0; font-size: 14px; line-height: 21px; }
+.alert p:first-child { margin: 0; color: var(--color-danger); font-weight: 700; line-height: 20px; }
+
+
+/* Lid tarixi */
+.timeline { margin: 0; padding: 0; list-style: none; min-width: 0; }
+.timeline > li { position: relative; display: flex; align-items: flex-start; gap: 12px; padding-bottom: 16px; min-width: 0; }
+.timeline > li[data-last] { padding-bottom: 0; }
+.timeAt { flex: 0 0 48px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.timeDot { flex: none; padding-top: 5px; }
+.timeDot > span { display: block; width: 10px; height: 10px; box-sizing: border-box; border-radius: 999px; background: var(--color-nav); }
+.timeline > li[data-state='current'] .timeDot > span { border: 2px solid var(--color-nav); background: var(--color-surface); }
+.timeline > li[data-state='pending'] .timeDot > span { border: 2px dashed var(--color-border-strong); background: var(--color-surface); }
+.timeLine { position: absolute; top: 17px; bottom: -1px; left: 64px; width: 2px; background: var(--color-border); }
+.timeLine[data-done] { background: var(--color-nav); }
+.timeText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.timeText > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.timeText > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.timeline > li[data-state='pending'] .timeText > span:first-child { color: var(--color-text-secondary); }
+.timeBadge { flex: none; }
+/* Boshqa kun yozuvlari («21.11, 17:37») — vaqt ustuni kengroq. */
+.timeline[data-wide] .timeAt { flex-basis: 88px; }
+.timeline[data-wide] .timeLine { left: 104px; }
+/* Ixcham tarix (buyurtma kartasi): vaqt ustuni 44 px, sana va vaqt ikki qatorda; xato/rad etilgan — qizil halqa. */
+.timeline[data-compact] > li { padding-bottom: 14px; }
+.timeline[data-compact] > li[data-last] { padding-bottom: 0; }
+.timeline[data-compact] .timeAt { flex-basis: 44px; font-size: 12px; }
+.timeline[data-compact] .timeLine { left: 60px; }
+.timeline > li[data-state='failed'] .timeDot > span { border: 2px solid var(--color-danger); background: var(--color-surface); }
+
+/* Manba: postback */
+.postbacks { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.postbacks > p { margin: 0; font-size: 13px; font-weight: 600; line-height: 18px; }
+.postback { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.postback .stack > span:first-child { font-weight: 600; font-variant-numeric: tabular-nums; }
+.postback .stack > span:last-child { font-size: 12px; line-height: 16px; }
+
+
+
+/* Telefon varag'i (⋯) va topilmadi */
+.sheetMenu { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.sheetMenu button { display: flex; align-items: center; gap: 12px; width: 100%; height: 48px; margin: 0; padding: 0 12px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text); font-family: inherit; font-size: 16px; font-weight: 500; line-height: 24px; text-align: left; cursor: pointer; }
+.sheetMenu button:hover:not([aria-disabled='true']) { background: var(--color-sunken); }
+.sheetMenu button[aria-disabled='true'] { opacity: 0.45; cursor: not-allowed; }
+.sheetMenu svg { width: 20px; height: 20px; color: var(--color-text-secondary); }
+.sheetHint { margin: -4px 0 4px 44px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.notFound { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 24px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); text-align: center; }
+.notFound > span { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.notFound > span svg { width: 24px; height: 24px; }
+.notFound h2 { margin: 4px 0 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.notFound p { max-width: 340px; margin: 0 0 8px; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+/* ── Planshet: bitta ustun, ko'rsatkichlar 2 ustunda ── */
+@container content (max-width: 919.98px) {
+  .side { max-width: none; flex-basis: 100%; }
+  .main { flex-basis: 100%; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ── Telefon ── */
+.page[data-layout='phone'] .now { gap: 14px; padding: 16px; }
+.page[data-layout='phone'] .nowTitle { font-size: 18px; line-height: 26px; }
+.page[data-layout='phone'] .nowSub { font-size: 13px; line-height: 19px; }
+.page[data-layout='phone'] .columns, .page[data-layout='phone'] .main, .page[data-layout='phone'] .side { gap: 16px; }
+.page[data-layout='phone'] .section { padding: 16px; }
+.page[data-layout='phone'] .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page[data-layout='phone'] .path { flex-direction: column; }
+.page[data-layout='phone'] .path > li { position: relative; flex: none; flex-direction: row; gap: 12px; padding-bottom: 12px; }
+.page[data-layout='phone'] .path > li:last-child { padding-bottom: 0; }
+.page[data-layout='phone'] .pathMark { display: block; padding-top: 2px; }
+.page[data-layout='phone'] .pathDot { width: 16px; height: 16px; font-size: 0; }
+.page[data-layout='phone'] .pathDot svg { width: 10px; height: 10px; }
+.page[data-layout='phone'] .path > li[data-state='current'] .pathDot { border-width: 4px; }
+.page[data-layout='phone'] .pathLine { position: absolute; top: 20px; bottom: -2px; left: 7px; width: 2px; height: auto; margin: 0; }
+.page[data-layout='phone'] .facts > div { flex-direction: column; gap: 2px; }
+.page[data-layout='phone'] .facts dt { flex-basis: auto; font-size: 13px; line-height: 18px; }
+.page[data-layout='phone'] .facts dd { font-size: 15px; line-height: 22px; }
+.page[data-layout='phone'] .phoneValue button { width: 44px; height: 44px; margin: -12px 0; }
+.page[data-layout='phone'] .timeline > li { flex-wrap: wrap; }
+.page[data-layout='phone'] .timeText { flex: 1 1 0; }
+
+/* Telefon: holat belgisi matn ostida; klik ma'lumoti ikki ustunda; summa qutisida nom va qiymat bir qatorda. */
+.page[data-layout='phone'] .timeBadge { flex-basis: 100%; padding: 4px 0 0 82px; }
+.page[data-layout='phone'] .timeline[data-wide] .timeBadge { padding-left: 122px; }
+.page[data-layout='phone'] .timeline[data-compact] .timeBadge { padding-left: 78px; }
+.page[data-layout='phone'] .facts[data-pairs] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; }
+.page[data-layout='phone'] .facts[data-pairs] > div:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+.page[data-layout='phone'] .box .facts > div { flex-direction: row; justify-content: space-between; gap: 16px; }
+.page[data-layout='phone'] .box .facts dt { font-size: 14px; line-height: 21px; }
+.page[data-layout='phone'] .box .facts dd { flex: none; font-size: 14px; line-height: 21px; text-align: right; }

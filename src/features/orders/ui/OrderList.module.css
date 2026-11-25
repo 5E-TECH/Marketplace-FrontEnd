@@ -1,0 +1,122 @@
+/* Buyurtmalar ro'yxati (admin-buyurtmalar, nazoratchi-buyurtmalar, operator-buyurtmalarim): tablar, jadval, kartalar. */
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── Guruhlangan holat tablari ── */
+.tabs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 22px; min-width: 0; }
+.group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.groupLabel { display: flex; align-items: center; gap: 6px; height: 16px; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; white-space: nowrap; }
+.groupTabs { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin: 0;
+  padding: 0 8px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab:not(:has(.count)) { padding-right: 16px; }
+.tab:hover:not([aria-selected='true'], :disabled) { border-color: var(--color-border-strong); }
+.tab:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+.tab:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; font-variant-numeric: tabular-nums; }
+.tab[aria-selected='true'] .count { background: var(--color-surface); color: var(--color-action); }
+
+/* ── Jadval ── */
+.tableScroll { overflow-x: auto; min-width: 0; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 18px; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+.table td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; text-align: left; white-space: nowrap; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr[data-clickable] { cursor: pointer; }
+.table tbody tr[data-clickable]:hover td { background: var(--color-row-hover); }
+.table tbody tr[data-fresh] td, .table tbody tr[data-active] td { background: var(--color-row-hover); }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.table .actions { width: 36px; padding-left: 4px; text-align: right; }
+
+.sort { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-text); font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.sort > svg { width: 14px; height: 14px; }
+.sort:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); border-radius: 4px; }
+
+.table .orderCell { padding-top: 6px; padding-bottom: 6px; font-variant-numeric: tabular-nums; }
+.orderLink { display: block; font-weight: 600; color: var(--color-action); text-decoration: none; }
+.orderButton { display: block; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 21px; text-align: left; cursor: pointer; font-variant-numeric: tabular-nums; }
+.orderButton:hover { text-decoration: underline; }
+.orderButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); border-radius: 4px; }
+.orderLink:hover { text-decoration: underline; }
+.cellNote { display: block; color: var(--color-text-secondary); font-size: 12px; font-weight: 500; line-height: 16px; }
+.stack { display: flex; flex-direction: column; }
+.stack > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.stack > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.plain > span:first-child { font-weight: 400; }
+.stream { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.stream > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 16px; }
+.code { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text); font-size: 13px; font-weight: 600; line-height: 18px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.amount { display: flex; flex-direction: column; align-items: flex-end; }
+.amount > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.table .statusCell { padding-top: 8px; padding-bottom: 8px; }
+.statusStack { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.statusStack > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.track { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+.iconButton, .iconButtonSmall { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButtonSmall { width: 32px; height: 32px; }
+.iconButton svg, .iconButtonSmall svg { width: 18px; height: 18px; }
+.iconButton:hover, .iconButton[aria-expanded='true'], .iconButtonSmall:hover, .iconButtonSmall[aria-expanded='true'] { background: var(--color-sunken); }
+.iconButton:focus-visible, .iconButtonSmall:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.bone { display: block; height: 12px; border-radius: 6px; background: var(--color-border); }
+.bone[data-shape='pill'] { height: 24px; border-radius: 999px; }
+.messageRow td { height: auto; padding: 0 14px; border-bottom: 0; white-space: normal; }
+
+/* ── Telefon kartalari ── */
+.cardList { overflow: hidden; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); min-width: 0; }
+.cardList > ul { margin: 0; padding: 0; list-style: none; }
+.cardList > ul > li { border-bottom: 1px solid var(--color-border); }
+.cardList > ul > li[data-fresh] { background: var(--color-row-hover); }
+.cardLink { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; color: var(--color-text); text-decoration: none; }
+.cardLink:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--color-focus-ring); }
+.cardTop, .cardBottom { display: flex; justify-content: space-between; gap: 8px; }
+.cardTop { align-items: center; }
+.cardBottom { align-items: baseline; }
+.cardId { font-size: 15px; font-weight: 700; line-height: 22px; font-variant-numeric: tabular-nums; }
+.cardName { font-size: 15px; font-weight: 600; line-height: 22px; }
+.cardName > span { font-weight: 400; color: var(--color-text-secondary); }
+.cardMeta { min-width: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.cardPrice { flex: none; font-size: 15px; font-weight: 700; line-height: 22px; font-variant-numeric: tabular-nums; }
+.cardLine { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardMore { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 16px 16px; }
+.cardMore > p { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums; }
+
+.secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; }
+.secondary svg { width: 16px; height: 16px; }
+
+/* ── Planshet: «Sahifa · sotuvchi» va trek yashiriladi; tugmalar 44 px; tablar aylanadi ── */
+@container content (max-width: 919.98px) {
+  .tabs { flex-wrap: nowrap; gap: 20px; margin: 0 -16px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+  .group { flex: none; }
+  .groupTabs { flex-wrap: nowrap; }
+  .tab { height: 44px; }
+  .table th { height: 48px; padding: 0 10px; }
+  .table td { height: 56px; padding: 0 10px; }
+  .table [data-col] { display: none; }
+  .table .actions { width: 44px; padding: 0 2px 0 0; }
+  .iconButton { width: 44px; height: 44px; border-radius: 12px; }
+}

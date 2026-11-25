@@ -1,0 +1,100 @@
+/* Jadval sahifalash (admin-lidlar pasti): oraliq, «Qatorlar:» va sahifa raqamlari. */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.range {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.range strong { font-weight: 600; color: var(--color-text); }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.size { display: flex; align-items: center; gap: 8px; }
+.size label { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+
+.select:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.select select {
+  height: 100%;
+  margin: 0;
+  padding: 0 34px 0 12px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  appearance: none;
+}
+
+.select svg { position: absolute; right: 10px; width: 16px; height: 16px; color: var(--color-text-secondary); pointer-events: none; }
+
+.nav { display: flex; align-items: center; gap: 6px; }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.button svg { width: 16px; height: 16px; }
+.button:hover:not(:disabled, [aria-current]) { border-color: var(--color-border-hover); }
+.button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.button:disabled { opacity: 0.45; cursor: not-allowed; }
+.button[aria-current='page'] { border-color: var(--color-action); background: var(--color-action); color: var(--color-white); }
+
+.gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 36px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Planshet (admin-lidlar.planshet): «Qatorlar» yo'q, tugmalar 44 px. */
+@container content (max-width: 919.98px) {
+  .size { display: none; }
+  .button { min-width: 44px; height: 44px; }
+  .gap { height: 44px; }
+}

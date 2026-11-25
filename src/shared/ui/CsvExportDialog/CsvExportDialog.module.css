@@ -1,0 +1,21 @@
+/* CSV eksport oynasi (admin-lidlar, admin-buyurtmalar «CSV eksport»). */
+.body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.box { padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.box p { margin: 0; font-size: 13px; line-height: 19px; font-variant-numeric: tabular-nums; }
+.box strong { font-weight: 600; }
+.fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.fieldset legend { margin: 0 0 4px; padding: 0; font-size: 13px; line-height: 18px; font-weight: 600; }
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.radios { display: flex; flex-direction: column; gap: 4px; }
+.option { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; line-height: 20px; cursor: pointer; }
+.option strong { font-weight: 600; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; font-weight: 600; line-height: 16px; }
+.error > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 1px; }
+.hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.hint > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+
+/* Telefon (admin-lidlar.mobil «CSV eksport»): ustunlar bir ustunda, katak 44. */
+@media (max-width: 767.98px) {
+  .columns { grid-template-columns: minmax(0, 1fr); }
+  .option { min-height: 44px; }
+}

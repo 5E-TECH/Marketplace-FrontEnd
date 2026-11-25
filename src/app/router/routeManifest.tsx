@@ -108,6 +108,11 @@ const pending = () => import('../../pages/PlaceholderPage/PlaceholderPage');
 const moderation = () => import('../../pages/AdminModerationPage/AdminModerationPage');
 const categories = () => import('../../pages/AdminCategoriesPage/AdminCategoriesPage');
 const profile = () => import('../../pages/ProfilePage/ProfilePage');
+// Admin va nazoratchi «Lidlar» — bitta sahifa, rolga qarab (FE-26).
+const leads = () => import('../../pages/AdminLeadsPage/AdminLeadsPage');
+const lead = () => import('../../pages/AdminLeadPage/AdminLeadPage');
+const orders = () => import('../../pages/AdminOrdersPage/AdminOrdersPage');
+const order = () => import('../../pages/AdminOrderPage/AdminOrderPage');
 
 export const appRoutes: readonly AppRoute[] = [
   // ── Sotuvchi (karkas-E 2.1) ────────────────────────────────────────────────
@@ -128,13 +133,15 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/operator', load: () => import('../../pages/OperatorHomePage/OperatorHomePage'), roles: ['OPERATOR_LEAD'], label: 'nav.operatorWorkspace', navIcon: <Headset /> },
   { path: '/operator/callbacks', load: () => import('../../pages/OperatorCallbacksPage/OperatorCallbacksPage'), roles: ['OPERATOR_LEAD'], label: 'nav.scheduledCalls', navIcon: <CalendarClock /> },
   { path: '/operator/calls', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myCalls', navIcon: <AudioLines /> },
-  { path: '/operator/orders', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myOrders', navIcon: <ShoppingBag /> },
+  { path: '/operator/orders', load: () => import('../../pages/OperatorOrdersPage/OperatorOrdersPage'), roles: ['OPERATOR_LEAD'], label: 'nav.myOrders', navIcon: <ShoppingBag /> },
   { path: '/operator/stats', load: pending, roles: ['OPERATOR_LEAD'], label: 'nav.myStatistics', navIcon: <ChartColumn /> },
 
   // ── Nazoratchi (2.3) ───────────────────────────────────────────────────────
   { path: '/supervisor', load: pending, roles: ['SUPERVISOR'], label: 'nav.queue', navIcon: <ListOrdered /> },
-  { path: '/supervisor/leads', load: pending, roles: ['SUPERVISOR'], label: 'nav.leads', navIcon: <Inbox /> },
-  { path: '/supervisor/orders', load: pending, roles: ['SUPERVISOR'], label: 'nav.orders', navIcon: <ShoppingBag /> },
+  { path: '/supervisor/leads', load: leads, roles: ['SUPERVISOR'], label: 'nav.leads', navIcon: <Inbox /> },
+  { path: '/supervisor/leads/:leadId', load: lead, roles: ['SUPERVISOR'], label: 'nav.leads', section: '/supervisor/leads' },
+  { path: '/supervisor/orders', load: orders, roles: ['SUPERVISOR'], label: 'nav.orders', navIcon: <ShoppingBag /> },
+  { path: '/supervisor/orders/:orderId', load: order, roles: ['SUPERVISOR'], label: 'nav.orders', section: '/supervisor/orders' },
   { path: '/supervisor/operators', load: pending, roles: ['SUPERVISOR'], label: 'nav.operators', navIcon: <Headset /> },
   { path: '/supervisor/recordings', load: pending, roles: ['SUPERVISOR'], label: 'nav.callRecordings', navIcon: <AudioLines /> },
 
@@ -161,8 +168,14 @@ export const appRoutes: readonly AppRoute[] = [
   // Telefonda navbatdagi mahsulot alohida sahifa (admin-moderatsiya.mobil); «Taqiqlangan tovarlar» — admin-taqiqlangan.
   { path: '/admin/moderation/banned', load: pending, roles: ADMIN_ROLES, label: 'moderation.banned', section: '/admin/moderation' },
   { path: '/admin/moderation/:productId', load: moderation, roles: ADMIN_ROLES, label: 'nav.moderation', section: '/admin/moderation' },
-  { path: '/admin/leads', load: pending, roles: ADMIN_ROLES, label: 'nav.leads', navIcon: <Inbox />, navGroup: 'navGroup.work' },
-  { path: '/admin/orders', load: pending, roles: ADMIN_ROLES, label: 'nav.orders', navIcon: <ShoppingBag />, navGroup: 'navGroup.work' },
+  { path: '/admin/leads', load: leads, roles: ADMIN_ROLES, label: 'nav.leads', navIcon: <Inbox />, navGroup: 'navGroup.work' },
+  // Lid kartasi — FE-26 (admin-lid-karta).
+  { path: '/admin/leads/:leadId', load: lead, roles: ADMIN_ROLES, label: 'nav.leads', section: '/admin/leads' },
+  // Buyurtmalar ro'yxati — FE-26 (admin-buyurtmalar); «Rad va qaytarishlar» bo'limi — keyingi qism.
+  { path: '/admin/orders', load: orders, roles: ADMIN_ROLES, label: 'nav.orders', navIcon: <ShoppingBag />, navGroup: 'navGroup.work' },
+  { path: '/admin/orders/returns', load: pending, roles: ADMIN_ROLES, label: 'nav.orders', section: '/admin/orders' },
+  // Buyurtma kartasi — FE-26 (admin-buyurtma-karta).
+  { path: '/admin/orders/:orderId', load: order, roles: ADMIN_ROLES, label: 'nav.orders', section: '/admin/orders' },
   { path: '/admin/products', load: () => import('../../pages/AdminProductsPage/AdminProductsPage'), roles: ADMIN_ROLES, label: 'nav.products', navIcon: <Package />, navGroup: 'navGroup.catalog' },
   // Mahsulot qo'shish (optovik nomidan) — FE-25; mahsulot kartasi — FE-12 (admin-mahsulot-karta).
   { path: '/admin/products/new', load: pending, roles: ADMIN_ROLES, label: 'products.add', section: '/admin/products' },

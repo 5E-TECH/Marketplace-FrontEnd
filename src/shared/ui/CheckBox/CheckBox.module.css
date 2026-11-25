@@ -1,0 +1,27 @@
+.box { position: relative; display: inline-flex; flex: none; width: 20px; height: 20px; }
+
+.input,
+.radio {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-field-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  appearance: none;
+}
+
+.input { border-radius: 6px; }
+.input:checked,
+.input:indeterminate { border-color: var(--color-action); background: var(--color-action); }
+.radio { border-radius: 999px; }
+.radio:checked { border-width: 2px; border-color: var(--color-action); }
+.input:focus-visible,
+.radio:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.input:disabled,
+.radio:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.mark { position: absolute; inset: 3px; width: 14px; height: 14px; color: var(--color-white); stroke-width: 3; pointer-events: none; }
+.dot { position: absolute; top: 5px; left: 5px; width: 10px; height: 10px; border-radius: 999px; background: var(--color-action); pointer-events: none; }

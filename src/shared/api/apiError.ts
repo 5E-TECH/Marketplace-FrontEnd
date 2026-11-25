@@ -24,6 +24,10 @@ type ApiErrorCode =
   | 'ADDRESS_NOT_CONFIRMED'
   | 'LANDING_NOT_OPEN'
   | 'OUT_OF_STOCK'
+  // Admin va nazoratchi (BE-35, BE-42): lidni o'tkazish va qayta ochish.
+  | 'LEAD_NOT_TRANSFERABLE'
+  | 'LEAD_NOT_REJECTED'
+  | 'ACTIVE_LEAD_EXISTS'
   // Ombor (BE-19): yig'ishda buyurtmada yo'q tovar skanerlandi.
   | 'WRONG_ITEM';
 
@@ -46,6 +50,9 @@ const API_ERROR_CODES: readonly ApiErrorCode[] = [
   'ADDRESS_NOT_CONFIRMED',
   'LANDING_NOT_OPEN',
   'OUT_OF_STOCK',
+  'LEAD_NOT_TRANSFERABLE',
+  'LEAD_NOT_REJECTED',
+  'ACTIVE_LEAD_EXISTS',
   'WRONG_ITEM',
 ];
 
@@ -119,6 +126,9 @@ const CODE_MESSAGES: Record<ApiErrorCode, string> = {
   ADDRESS_NOT_CONFIRMED: 'Manzil tasdiqlanmagan. Avval mijoz manzilini tasdiqlang.',
   LANDING_NOT_OPEN: 'Sahifa hozir ariza qabul qilmaydi.',
   OUT_OF_STOCK: 'Omborda bu tovar qolmagan.',
+  LEAD_NOT_TRANSFERABLE: 'Bu lidni o‘tkazib bo‘lmaydi: u navbatda yoki operatorda emas.',
+  LEAD_NOT_REJECTED: 'Faqat «Rad etildi» holatidagi lid qayta ochiladi.',
+  ACTIVE_LEAD_EXISTS: 'Shu raqam va mahsulotda faol lid bor — qayta ochib bo‘lmaydi.',
   WRONG_ITEM: 'Boshqa tovar skanerlandi — bu posilkada yo‘q.',
 };
 

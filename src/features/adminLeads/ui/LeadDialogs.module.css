@@ -1,0 +1,181 @@
+/* admin-lidlar oynalari: «Boshqa operatorga o'tkazish» (lidlar qutisi, onlayn operatorlar, «O'tkazilgandan keyin») va «Qayta ochish». */
+.body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.leads { padding: 10px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); min-width: 0; }
+.leads ul { list-style: none; margin: -8px 0; padding: 0; }
+.leads li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 20px; }
+.leads li:last-child { border-bottom: 0; }
+.leadName { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.leadName > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leadId { font-weight: 600; font-variant-numeric: tabular-nums; }
+.leadState { flex: none; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+.fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.fieldset legend { margin: 0 0 8px; padding: 0; font-size: 13px; line-height: 18px; font-weight: 600; }
+.required { color: var(--color-danger); }
+
+.operators { display: flex; flex-direction: column; gap: 8px; }
+
+.operator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.operator:hover { border-color: var(--color-border-strong); }
+.operator[data-selected] { border-color: var(--color-action); background: var(--color-action-soft); }
+.operator[data-disabled] { cursor: not-allowed; opacity: 0.6; }
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.operatorText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.operatorName { font-size: 14px; line-height: 20px; font-weight: 600; }
+.operatorMeta { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.load { display: flex; flex: none; flex-direction: column; align-items: flex-end; }
+.load > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.load > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+
+.skeleton { display: block; height: 56px; border-radius: 12px; background: var(--color-sunken); }
+
+.hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.hint > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; line-height: 16px; font-weight: 600; }
+.error > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 1px; }
+
+.after { padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); min-width: 0; }
+.after > p { margin: 0 0 6px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; }
+.after dl { margin: -10px 0; min-width: 0; }
+.after dl > div { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); min-width: 0; }
+.after dl > div:last-child { border-bottom: 0; }
+.after dt { flex: 0 0 150px; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.after dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.labelRow label { font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.labelRow > span { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+.select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.select[data-invalid] { border-color: var(--color-danger); }
+.select:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+
+.select select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 40px 0 14px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 21px;
+  cursor: pointer;
+  appearance: none;
+}
+
+.select select:invalid { color: var(--color-text-secondary); }
+.select > svg { position: absolute; right: 14px; width: 18px; height: 18px; color: var(--color-text-secondary); pointer-events: none; }
+
+.textarea {
+  display: block;
+  width: 100%;
+  height: 76px;
+  margin: 0;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 21px;
+  resize: vertical;
+}
+
+.textarea::placeholder { color: var(--color-text-faint); }
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }
+
+@media (max-width: 767.98px) {
+  .select select, .textarea { font-size: 16px; }
+  .after dt { flex-basis: 120px; }
+}
+
+/* «Qayta ochish»: lid ma'lumoti va eslatma qutisi. */
+.facts { margin: -10px 0; min-width: 0; }
+.facts > div { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); min-width: 0; }
+.facts > div:last-child { border-bottom: 0; }
+.facts dt { flex: 0 0 120px; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.box { padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); min-width: 0; }
+.box > p { margin: 0; font-size: 13px; line-height: 19px; font-variant-numeric: tabular-nums; }
+
+
+/* Ogohlantirish (operator suhbatda; bronni bo'shatish oqibati). */
+.note { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-warning-soft); }
+.note > svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--color-warning); }
+.note > div { min-width: 0; }
+.note p { margin: 2px 0 0; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.note p:first-child { margin: 0; line-height: 20px; font-weight: 700; color: var(--color-warning); }
+
+/* Tinglash: «Yuklab olish — faqat admin» va tugma bir qatorda. */
+.downloadRow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.secondaryButton svg { width: 16px; height: 16px; }
+.secondaryButton:hover { border-color: var(--color-border-hover); }
+.secondaryButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }

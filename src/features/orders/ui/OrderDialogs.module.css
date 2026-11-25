@@ -1,0 +1,83 @@
+/* Buyurtma oynalari: bekor qilish (admin-buyurtmalar «Bekor qilish — xavfli tasdiq»). */
+.body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.box { padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); min-width: 0; }
+.boxTitle { margin: 0 0 6px; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.facts { margin: -10px 0; min-width: 0; }
+.facts > div { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); min-width: 0; }
+.facts > div:last-child { border-bottom: 0; }
+.facts dt { flex: 0 0 120px; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.note { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 12px; font-weight: 500; line-height: 16px; }
+.hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.hint > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; }
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.labelRow label { font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+.required { color: var(--color-danger); }
+.fieldHint { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+.select { position: relative; display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); }
+.select select { flex: 1 1 auto; min-width: 0; height: 100%; margin: 0; padding: 0 40px 0 14px; border: 0; outline: 0; background: transparent; color: var(--color-text-secondary); font-family: inherit; font-size: 14px; line-height: 21px; cursor: not-allowed; appearance: none; }
+.select > svg { position: absolute; right: 14px; width: 18px; height: 18px; color: var(--color-text-secondary); pointer-events: none; }
+
+.textarea { display: block; width: 100%; height: 76px; margin: 0; padding: 10px 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; resize: vertical; }
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; font-weight: 600; line-height: 16px; }
+.error > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 1px; }
+
+/* Faol tanlov (manzil oynasi): oddiy matn rangi va ko'rsatkich. */
+.select[data-active] select { color: var(--color-text); cursor: pointer; }
+.select[data-active]:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+.select:has(select[aria-invalid='true']) { border-color: var(--color-danger); }
+.row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.muted { color: var(--color-text-secondary); font-weight: 500; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.labelText { font-size: 13px; font-weight: 600; line-height: 18px; }
+.optional { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+/* Yetkazish turi: ikki tugma-radio (manzil oynasi). */
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.choice { display: flex; align-items: center; justify-content: center; height: 44px; margin: 0; padding: 0 12px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; }
+.choice[aria-checked='true'] { border: 2px solid var(--color-action); background: var(--color-action-soft); color: var(--color-action); }
+.choice:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+/* Rasmlar (qaytarish): kichik tugma va ko'rinishlar. */
+.photos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.photo { position: relative; display: block; width: 56px; height: 56px; overflow: hidden; border: 1px solid var(--color-border); border-radius: 10px; }
+.photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.photo button { position: absolute; top: 2px; right: 2px; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 999px; background: rgba(16, 23, 51, 0.7); color: var(--color-white); cursor: pointer; }
+.photo button svg { width: 12px; height: 12px; }
+.smallButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; cursor: pointer; }
+.smallButton svg { width: 16px; height: 16px; }
+.smallButton:focus-within { box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+/* SMS tanlovi: radio qatorlar. */
+.radios { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.radios legend { margin: 0 0 6px; padding: 0; font-size: 13px; font-weight: 600; line-height: 18px; }
+.radio { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; cursor: pointer; }
+.radio:has(input:checked) { border-color: var(--color-action); background: var(--color-action-soft); }
+.radio[data-disabled] { cursor: not-allowed; opacity: 0.6; }
+.radio input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--color-action); }
+.radio > span { display: flex; flex-direction: column; min-width: 0; }
+.radio > span > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.radio > span > span:last-child { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+@media (max-width: 767.98px) {
+  .textarea, .select select { font-size: 16px; }
+  .row, .choices { grid-template-columns: minmax(0, 1fr); }
+  .facts dt { flex-basis: 100px; }
+}
+
+/* Ogohlantirish (omborchi yig'moqda, Elchi holati): sariq fon, qalin sarlavha. */
+.warn { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-warning-soft); }
+.warn > svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--color-warning); }
+.warn > div { min-width: 0; }
+.warn p { margin: 2px 0 0; font-size: 14px; line-height: 21px; }
+.warn p:first-child { margin: 0; color: var(--color-warning); font-weight: 700; line-height: 20px; }
+
+/* Qizil ogohlantirish (so'rovni yopish: bekor qilib bo'lmaydi). */
+.danger { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-danger-soft); }
+.danger > svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--color-danger); }
+.danger > div { min-width: 0; }
+.danger p { margin: 2px 0 0; font-size: 14px; line-height: 21px; }
+.danger p:first-child { margin: 0; color: var(--color-danger); font-weight: 700; line-height: 20px; }

@@ -1,13 +1,12 @@
 import { http } from 'msw';
-import type { components } from '../../generated/api-types';
 import { db } from '../db';
 import { OFFER_CATEGORIES } from '../fixtures/offers';
 import { REGION_TREE } from '../fixtures/regions';
+import { MOCK_AFFILIATES } from '../orderStore';
 import { MOCK_USERS } from '../fixtures/users';
 import { API, fail, ok, pageOf } from '../utils';
 import { currentMockUser } from './auth';
 
-type Schemas = components['schemas'];
 
 const ADMIN_ROLES = ['ADMIN', 'SUPERADMIN'];
 
@@ -41,22 +40,18 @@ export const commonHandlers = [
 
   http.get(`${API}/regions/tree`, () => ok(REGION_TREE)),
 
-  http.get(`${API}/admin/leads`, ({ request, cookies }) => {
-    const denied = requireUser(request, cookies, ADMIN_ROLES);
-    if (denied) return denied;
-    const rows: Schemas['AdminLeadListItemDto'][] = db.operator.leads.map((lead, index) => ({
-      id: lead.id, createdAt: new Date(Date.now() - (index + 1) * 25 * 60_000).toISOString(), status: lead.status, source: 'LANDING',
-      customerName: lead.customerName, phoneMasked: '+998 ** *** 45 67', productName: lead.productName,
-      affiliateName: 'Jasur T.', operatorName: lead.status === 'BOOKED' ? 'Dilnoza R.' : null, orderId: null,
-    }));
-    return ok(pageOf(rows, new URL(request.url)));
-  }),
-
   http.get(`${API}/admin/users`, ({ request, cookies }) => {
     const denied = requireUser(request, cookies, ADMIN_ROLES);
     if (denied) return denied;
-    const users = Object.values(MOCK_USERS).map((user) => ({ ...user, shopId: null, createdAt: '2026-11-01T08:00:00.000Z', updatedAt: '2026-11-10T08:00:00.000Z' }));
-    return ok(pageOf(users, new URL(request.url)));
+    const url = new URL(request.url);
+    const role = url.searchParams.get('role');
+    // FE-26: lid/buyurtma filtrlaridagi sotuvchilar (orderStore) ham ro'yxatda.
+    const extra = MOCK_AFFILIATES.filter((item) => !Object.values(MOCK_USERS).some((user) => user.id === item.id))
+      .map((item) => ({ ...Object.values(MOCK_USERS)[0], id: item.id, role: 'AFFILIATE' as const, name: item.fullName, phone: `+99890${item.id.slice(-4)}000` }));
+    const users = [...Object.values(MOCK_USERS), ...extra]
+      .filter((user) => !role || user.role === role)
+      .map((user) => ({ ...user, shopId: null, createdAt: '2026-11-01T08:00:00.000Z', updatedAt: '2026-11-10T08:00:00.000Z' }));
+    return ok(pageOf(users, url));
   }),
   http.get(`${API}/admin/users/:id`, ({ request, cookies, params }) => {
     const denied = requireUser(request, cookies, ADMIN_ROLES);

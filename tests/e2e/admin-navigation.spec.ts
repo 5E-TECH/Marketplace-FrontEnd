@@ -55,7 +55,7 @@ test('SUPERADMIN menyusi: guruhlar va M1 bandlari, har biri ochiladi va faol bo�
 
 test('sahifasi qurilmagan bandlar «Bo‘lim tayyorlanmoqda» holatini ko‘rsatadi', async ({ page }) => {
   await installAuthenticatedSession(page, superadmin);
-  await page.goto('/admin/leads');
+  await page.goto('/admin/sellers');
   await expect(page.getByTestId('placeholder-page')).toContainText('Bo‘lim tayyorlanmoqda');
 });
 
