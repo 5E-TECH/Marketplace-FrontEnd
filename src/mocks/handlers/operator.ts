@@ -206,6 +206,9 @@ function makeLead(seed: Seed): LeadCard {
     attempts,
     history,
     previousLeads: seed.previousLeads ?? [],
+    // BE-34: bitta tovarli lid — `items` bo'sh; tasdiqlash — operator qo'ng'irog'i.
+    items: [],
+    confirmMode: 'CALL',
     createdAt: created,
   };
 }
@@ -408,7 +411,7 @@ const isOpen = (lead: LeadCard) => lead.status === 'NEW' || lead.status === 'CAL
 const isDue = (lead: LeadCard, now: number) => lead.status === 'CALLBACK' && (!lead.nextAttemptAt || Date.parse(lead.nextAttemptAt) <= now);
 
 function stateDto(): OperatorStateInfo {
-  return { state: db.operator.state, activeBookings: activeBookings(), maxBookings: db.operator.maxBookings, since: current().stateSince };
+  return { state: db.operator.state, activeBookings: activeBookings(), maxBookings: db.operator.maxBookings, since: current().stateSince, callEnabled: false };
 }
 
 function withStatus(lead: LeadCard, toStatus: LeadStatus, actor: string, note: string | null = null): LeadCard {

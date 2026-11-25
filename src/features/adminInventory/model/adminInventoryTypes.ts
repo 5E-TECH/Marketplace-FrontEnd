@@ -41,6 +41,9 @@ export interface AdminStockItem extends AdminVariantInfo {
   reserved: number;
   available: number;
   lowStockThreshold: number;
+  /** BE-16/17: SKU shtrix-kodi va yacheykasi (mahsulot kartasidagi «Qoldiq» — bitta SKU bo'lsa). */
+  barcode: string | null;
+  cell: string | null;
 }
 
 export interface AdminStockMovement extends AdminVariantInfo {

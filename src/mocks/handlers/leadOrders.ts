@@ -186,6 +186,8 @@ function leadCard(id: string, admin: boolean): AdminLeadCard | null {
       ...(extraState.get(id)?.history ?? []),
     ],
     previousLeads: [],
+    items: [],
+    confirmMode: 'CALL',
     createdAt: row.createdAt,
   };
   const phone = mockFullPhone(id);

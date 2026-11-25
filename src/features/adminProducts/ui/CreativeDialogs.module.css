@@ -65,3 +65,16 @@
 @media (max-width: 767.98px) {
   .creativeThumb { width: 72px; }
 }
+
+/* admin-mahsulot-karta.holatlar 4 «Rasm va video qo'shish», «Sertifikat qo'shish» (FE-25): bir nechta fayl ro'yxati. */
+.dropWrap { position: relative; }
+.dropWrap:focus-within > .drop, .dropWrap:focus-within > .pickButton { outline: 2px solid var(--color-action); outline-offset: 2px; }
+.pickButton { display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; box-sizing: border-box; border: 1px solid var(--color-action); border-radius: 12px; background: var(--color-surface); color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; cursor: pointer; }
+.pickButton > svg { width: 18px; height: 18px; }
+.fileList { margin: 0; padding: 0; list-style: none; }
+.fileList > .fileRow:last-child { border-bottom: 0; }
+.lockName { display: inline-flex; align-items: center; gap: 6px; }
+.lockName > svg { width: 14px; height: 14px; flex: none; color: var(--color-text-secondary); }
+.field { min-width: 0; }
+.input { display: block; width: 100%; height: 44px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 16px; line-height: 24px; }
+.input:focus-visible { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }

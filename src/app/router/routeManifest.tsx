@@ -178,15 +178,19 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/admin/orders/:orderId', load: order, roles: ADMIN_ROLES, label: 'nav.orders', section: '/admin/orders' },
   { path: '/admin/products', load: () => import('../../pages/AdminProductsPage/AdminProductsPage'), roles: ADMIN_ROLES, label: 'nav.products', navIcon: <Package />, navGroup: 'navGroup.catalog' },
   // Mahsulot qo'shish (optovik nomidan) — FE-25; mahsulot kartasi — FE-12 (admin-mahsulot-karta).
-  { path: '/admin/products/new', load: pending, roles: ADMIN_ROLES, label: 'products.add', section: '/admin/products' },
+  { path: '/admin/products/new', load: () => import('../../pages/AdminProductNewPage/AdminProductNewPage'), roles: ADMIN_ROLES, label: 'apf.newTitle', section: '/admin/products' },
   { path: '/admin/products/:productId', load: () => import('../../pages/AdminProductDetailPage/AdminProductDetailPage'), roles: ADMIN_ROLES, label: 'nav.products', section: '/admin/products' },
   { path: '/admin/categories', load: categories, roles: ADMIN_ROLES, label: 'adminNav.categories', navIcon: <FolderTree />, navGroup: 'navGroup.catalog' },
   // Telefonda kategoriya tafsiloti — alohida sahifa («Orqaga»; admin-kategoriyalar holatlar Ph1).
   { path: '/admin/categories/:categoryId', load: categories, roles: ADMIN_ROLES, label: 'adminNav.categories', section: '/admin/categories' },
   { path: '/admin/inventory', load: () => import('../../pages/AdminInventoryPage/AdminInventoryPage'), roles: ADMIN_ROLES, label: 'nav.stock', navIcon: <Warehouse />, navGroup: 'navGroup.catalog' },
   { path: '/admin/sellers', load: pending, roles: ADMIN_ROLES, label: 'adminNav.sellerList', navIcon: <Store />, navGroup: 'navGroup.partners' },
-  // «Optoviklar»: yorliqlar — «Optoviklar» (FE-25) va «Postavkalar» (FE-16, admin-postavka); postavka tafsiloti — ichki sahifa.
+  // «Optoviklar»: yorliqlar — «Optoviklar» (FE-25, sukut), «Postavkalar» (FE-16, admin-postavka), «Yangi arizalar» (M2); postavka tafsiloti — ichki sahifa.
   { path: '/admin/wholesalers', load: () => import('../../pages/AdminWholesalersPage/AdminWholesalersPage'), roles: ADMIN_ROLES, label: 'nav.wholesalers', navIcon: <Building2 />, navGroup: 'navGroup.partners' },
+  // Yangi optovik va optovik kartasi (FE-25, admin-optovik-karta).
+  { path: '/admin/wholesalers/new', load: () => import('../../pages/AdminWholesalerFormPage/AdminWholesalerFormPage'), roles: ADMIN_ROLES, label: 'whf.newTitle', section: '/admin/wholesalers' },
+  { path: '/admin/wholesalers/:wholesalerId', load: () => import('../../pages/AdminWholesalerPage/AdminWholesalerPage'), roles: ADMIN_ROLES, label: 'nav.wholesalers', section: '/admin/wholesalers' },
+  { path: '/admin/wholesalers/:wholesalerId/edit', load: () => import('../../pages/AdminWholesalerFormPage/AdminWholesalerFormPage'), roles: ADMIN_ROLES, label: 'whf.editTitle', section: '/admin/wholesalers' },
   { path: '/admin/wholesalers/shipments/:shipmentId', load: () => import('../../pages/AdminShipmentPage/AdminShipmentPage'), roles: ADMIN_ROLES, label: 'nav.wholesalers', section: '/admin/wholesalers' },
   { path: '/admin/recordings', load: pending, roles: ADMIN_ROLES, label: 'nav.callRecordings', navIcon: <AudioLines />, navGroup: 'navGroup.control' },
   { path: '/admin/audit-logs', load: () => import('../../pages/AdminAuditPage/AdminAuditPage'), roles: ADMIN_ROLES, label: 'nav.auditJournal', navIcon: <History />, navGroup: 'navGroup.control' },

@@ -54,22 +54,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/echo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["EchoController_echo"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/register": {
         parameters: {
             query?: never;
@@ -81,6 +65,74 @@ export interface paths {
         put?: never;
         /** Yangi foydalanuvchini ro‘yxatdan o‘tkazish */
         post: operations["AuthController_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** SMS kod yuborish: REGISTER — sotuvchi ro‘yxati, LOGIN — sotuvchi va optovik kirishi (kod 5 daqiqa) */
+        post: operations["AuthController_sendOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** SMS kodni tekshirish: REGISTER → bir martalik `registrationToken`; LOGIN → kirish (`/auth/login` kabi, cookie) */
+        post: operations["AuthController_verifyOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register/wholesaler": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Optovik ro‘yxati (OPT-1): SMS tasdig‘idan keyin rekvizitlar, komissiya shartnomasi va rozilik; sessiya ochiladi, holat PENDING (admin tasdiqlaydi) */
+        post: operations["AuthController_registerWholesaler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register/affiliate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sotuvchi ro‘yxati: SMS tasdig‘idan keyin oferta va rozilik versiyasi bilan; sessiya darhol ochiladi */
+        post: operations["AuthController_registerAffiliate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -104,6 +156,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/2fa/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 2FA ni ulash: QR uchun sir va otpauth havola (parol bosqichidagi challengeToken bilan) */
+        post: operations["AuthController_setupTwoFactor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/2fa/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 2FA ni yoqish: birinchi kod → bir martalik tiklash kodlari (faqat shu javobda) va sessiya */
+        post: operations["AuthController_enableTwoFactor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/2fa/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Kirish: 2FA kodi yoki tiklash kodi → sessiya (3 xato → 15 daqiqa blok) */
+        post: operations["AuthController_verifyTwoFactor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/refresh": {
         parameters: {
             query?: never;
@@ -113,6 +216,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Sessiyani yangilash (refresh token cookie’dan yoki body’dan) */
         post: operations["AuthController_refresh"];
         delete?: never;
         options?: never;
@@ -129,6 +233,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Parolni tiklash kodi (SMS) */
         post: operations["AuthController_forgot"];
         delete?: never;
         options?: never;
@@ -145,6 +250,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** SMS kodi bilan yangi parol o‘rnatish */
         post: operations["AuthController_reset"];
         delete?: never;
         options?: never;
@@ -161,6 +267,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Telefon raqamini SMS kodi bilan tasdiqlash */
         post: operations["AuthController_verify"];
         delete?: never;
         options?: never;
@@ -177,6 +284,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Telefonni tasdiqlash kodini qayta yuborish */
         post: operations["AuthController_resend"];
         delete?: never;
         options?: never;
@@ -191,6 +299,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Mening sessiyalarim (yangisi tepada) */
         get: operations["AuthController_sessions"];
         put?: never;
         post?: never;
@@ -210,6 +319,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
+        /** Sessiyani bekor qilish */
         delete: operations["AuthController_revoke"];
         options?: never;
         head?: never;
@@ -267,24 +377,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/sellers/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Joriy sotuvchining do‘kon profilini olish */
-        get: operations["SellersController_getMyShop"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Joriy sotuvchining do‘kon profilini tahrirlash */
-        patch: operations["SellersController_updateMyShop"];
-        trace?: never;
-    };
     "/api/v1/categories": {
         parameters: {
             query?: never;
@@ -338,32 +430,18 @@ export interface paths {
         patch: operations["CategoriesController_update"];
         trace?: never;
     };
-    "/api/v1/products": {
+    "/api/v1/storefront/products": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /** Sotuvchining yangi mahsulotini yaratish */
-        post: operations["ProductsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/products/my": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Joriy sotuvchining mahsulotlarini olish */
-        get: operations["ProductsController_getMine"];
+        /**
+         * Sayt katalogi
+         * @description Kategoriya, qidiruv, narx oralig‘i (`minPrice`, `maxPrice`), «faqat mavjud» (`inStock=true`), saralash va sahifalash. Faqat sotuvdagi va narxi tasdiqlangan mahsulotlar.
+         */
+        get: operations["StorefrontController_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -372,88 +450,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/products/{id}": {
+    "/api/v1/storefront/products/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Joriy sotuvchining bitta mahsulotini olish */
-        get: operations["ProductsController_getOne"];
-        put?: never;
-        post?: never;
-        /** Joriy sotuvchining mahsulotini soft-delete qilish */
-        delete: operations["ProductsController_remove"];
-        options?: never;
-        head?: never;
-        /** Joriy sotuvchining mahsulotini tahrirlash */
-        patch: operations["ProductsController_update"];
-        trace?: never;
-    };
-    "/api/v1/products/{productId}/variants": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Mahsulot variantlarini olish */
-        get: operations["ProductVariantsController_list"];
-        put?: never;
-        /** Mahsulotga variant qo‘shish */
-        post: operations["ProductVariantsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/products/{productId}/variants/{variantId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Bitta mahsulot variantini olish */
-        get: operations["ProductVariantsController_getOne"];
-        put?: never;
-        post?: never;
-        /** Mahsulot variantini soft-delete qilish */
-        delete: operations["ProductVariantsController_remove"];
-        options?: never;
-        head?: never;
-        /** Mahsulot variantini tahrirlash */
-        patch: operations["ProductVariantsController_update"];
-        trace?: never;
-    };
-    "/api/v1/files/upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Mahsulot rasmini MinIO’ga yuklash va productga biriktirish */
-        post: operations["FilesController_upload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Do‘kon buyurtmalari (sotuvchi yoki operator) */
-        get: operations["SellerOrdersController_orders"];
+        /**
+         * Sayt mahsuloti
+         * @description «Shu bo‘limdan» javoni (`related`) bilan.
+         */
+        get: operations["StorefrontController_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -462,31 +470,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/seller/orders/{id}": {
+    "/api/v1/storefront/banners": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["SellerOrdersController_getOrder"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Buyurtmani tasdiqlash/holat yangilash */
-        patch: operations["SellerOrdersController_updateOrder"];
-        trace?: never;
-    };
-    "/api/v1/seller/orders/{id}/items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["SellerOrdersController_items"];
+        /** Sayt bannerlari (admin «Sayt kontenti») */
+        get: operations["StorefrontController_banners"];
         put?: never;
         post?: never;
         delete?: never;
@@ -495,24 +487,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/seller/orders/{id}/label": {
+    "/api/v1/storefront/cart": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Buyurtmaning 100x60 mm Elchi QR yorlig‘ini olish */
-        get: operations["SellerOrdersController_label"];
+        get: operations["StorefrontController_cart"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Savatni bo‘shatish (idempotent) */
+        delete: operations["StorefrontController_clearCart"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/seller/orders/labels": {
+    "/api/v1/storefront/cart/items": {
         parameters: {
             query?: never;
             header?: never;
@@ -522,33 +514,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bir nechta Elchi QR yorlig‘ini bitta PDFda olish
-         * @description Yorlig‘i chiqmagan buyurtmalar partiyani yiqitmaydi: ular `X-Labels-Skipped` headerida (URI-encoded JSON) sababi bilan qaytadi. Birortasi ham chiqmasa 409.
+         * Savatga mahsulot qo‘shish
+         * @description Narx — tasdiqlangan narx (savatga qo‘shilgandagi surat).
          */
-        post: operations["SellerOrdersController_labelsBatch"];
+        post: operations["StorefrontController_addItem"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/seller/orders/{id}/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["SellerOrdersController_history"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/orders/{id}/cancel": {
+    "/api/v1/storefront/cart/items/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -557,14 +533,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["SellerOrdersController_cancel"];
-        delete?: never;
+        post?: never;
+        delete: operations["StorefrontController_removeItem"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["StorefrontController_updateItem"];
         trace?: never;
     };
-    "/api/v1/seller/orders/{id}/confirm": {
+    "/api/v1/storefront/orders": {
         parameters: {
             query?: never;
             header?: never;
@@ -573,14 +549,18 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["SellerOrdersController_confirm"];
+        /**
+         * Savatdan buyurtma (lid)
+         * @description Savatdagi hamma tovar bitta so‘rovda — lid (manba SITE). Ism, telefon, viloyat, tuman, ko‘cha/uy majburiy (BE-38). `confirmMode`: CALL — operator qo‘ng‘iroq qiladi; SMS — havola bosilgach buyurtma operatorsiz. Qora ro‘yxat yoki dublikatda server CALL qiladi (javobdagi `confirmMode`). Muvaffaqiyatda savat bo‘shatiladi.
+         */
+        post: operations["StorefrontController_order"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/seller/orders/{id}/shipment": {
+    "/api/v1/storefront/orders/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -589,72 +569,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["SellerOrdersController_createShipment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/shipments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["SellerOrdersController_listShipments"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/shipments/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["SellerOrdersController_shipment"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/shipments/{id}/tracking": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["SellerOrdersController_tracking"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/dashboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Sotuvchi dashboard ko‘rsatkichlarini olish */
-        get: operations["SellerOrdersController_dashboard"];
-        put?: never;
-        post?: never;
+        /**
+         * SMS havola bilan buyurtmani tasdiqlash
+         * @description Havola bosilgach sayt sahifasi yuboradi. Takror — o‘sha javob. Muddat o‘tgan yoki operator olgan — 409 (SITE_CONFIRM_EXPIRED): operator qo‘ng‘iroq qilib tasdiqlaydi.
+         */
+        post: operations["StorefrontController_confirm"];
         delete?: never;
         options?: never;
         head?: never;
@@ -710,125 +629,6 @@ export interface paths {
         head?: never;
         /** Bitta xabarnomani o‘qilgan qilish */
         patch: operations["NotificationsController_markRead"];
-        trace?: never;
-    };
-    "/api/v1/admin/shops": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Do‘konlar ro‘yxati (status filtr + sahifalash) */
-        get: operations["AdminShopsController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/shops/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Do‘kon profili va asosiy statistikasi */
-        get: operations["AdminShopsController_detail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/shops/{id}/suspend": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** ACTIVE do‘konni vaqtincha to‘xtatish */
-        post: operations["AdminShopsController_suspend"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/shops/{id}/activate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** SUSPENDED do‘konni qayta faollashtirish */
-        post: operations["AdminShopsController_activate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/shops/{id}/feature": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Do‘konni bosh sahifada ko‘rsatish/yashirish */
-        post: operations["AdminShopsController_feature"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/shops/{id}/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Do‘konni tasdiqlash (active + user active + default ombor) */
-        post: operations["AdminShopsController_approve"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/shops/{id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Do‘konni rad etish (+ sotuvchiga xabar) */
-        post: operations["AdminShopsController_reject"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/admin/dashboard": {
@@ -944,6 +744,23 @@ export interface paths {
         put?: never;
         /** Foydalanuvchini blokdan chiqarish */
         post: operations["AdminUsersController_unblock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/2fa/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Xodim 2FA sini nolga tushirish (keyingi kirishda qayta ulaydi) */
+        post: operations["AdminUsersController_resetTwoFactor"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1246,7 +1063,7 @@ export interface paths {
         put?: never;
         /**
          * Elchi shipment status webhook receiver
-         * @description Tana Elchi shaklida (snake_case: `event_id`, `external_order_id`, `shipment_id`, `occurred_at`, Elchi status lug‘ati) ham, quyidagi normal shaklda ham qabul qilinadi — `normalizeElchiWebhook` ikkalasini bitta shaklga keltiradi. Elchi’ning ortiqcha moliyaviy maydonlari e’tiborsiz qoldiriladi. `webhook.test` ping’i va xaritalanmagan statuslar (`closed`, `paid`, `partly_paid`) 200 oladi, lekin hech qanday holat o‘zgarmaydi.
+         * @description Tana Elchi shaklida (snake_case: `event_id`, `external_order_id`, `shipment_id`, `occurred_at`, Elchi status lug‘ati) ham, quyidagi normal shaklda ham qabul qilinadi — `normalizeElchiWebhook` ikkalasini bitta shaklga keltiradi. Pul maydonlari (`collected_from_customer`, `market_paid_amount`, `elchi_fee`, `extra_cost`) va pul holatlari (`paid`, `partly_paid`, `closed`) qabul qilinadi (BE-21). Lid buyurtmasi (`mp-order:<id>`) holati faqat oldinga o‘zgaradi; orqaga xabar ham 201 oladi, holat o‘zgarmaydi, jurnalda REJECTED. `webhook.test` ping’i 201 oladi, hech narsa o‘zgarmaydi.
          */
         post: operations["ElchiWebhookController_receive"];
         delete?: never;
@@ -1317,6 +1134,46 @@ export interface paths {
         get: operations["AdminFinanceController_reconciliation[1]"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/cod-reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kunlik COD sverkasi (sana bo‘yicha; bo‘sh — kecha)
+         * @description Har kuni 09:00 (Toshkent) hisoblanadi. Mos kelmagan buyurtmalar ro‘yxati bilan; farq bo‘lsa moliya va nazoratchiga xabar ketgan.
+         */
+        get: operations["AdminFinanceController_codDailyCheck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/cod-reconciliation/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kunlik COD sverkasini qayta hisoblash
+         * @description Natija yangilanadi; farq xabari bir kun uchun bir marta.
+         */
+        post: operations["AdminFinanceController_codDailyCheckRun"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1410,7 +1267,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Admin uchun barcha mahsulotlar va moderatsiya filtrlari */
+        /**
+         * Admin uchun barcha mahsulotlar va moderatsiya filtrlari
+         * @description Omborchiga faqat `id`, `shopId`, `name`, `status`, `cpaEnabled`, `isBad`, `isBlocked`, `expiryTracked`, `weightGrams` — narx va sotuvchi haqisiz.
+         */
         get: operations["AdminProductsController_list"];
         put?: never;
         /**
@@ -1484,6 +1344,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Mahsulotni to‘xtatish (sotuvdan olinadi) */
         post: operations["AdminProductsController_suspend"];
         delete?: never;
         options?: never;
@@ -1517,8 +1378,67 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** To‘xtatilgan yoki yashirilgan mahsulotni qaytarish */
         post: operations["AdminProductsController_reactivate"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/products/{id}/creatives/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Yuklash uchun imzolangan POST (15 daqiqa)
+         * @description Fayl `multipart/form-data` bilan `url` ga yuboriladi: avval `fields` (o‘zgartirmasdan), oxirida `file`. Hajm va turni MinIO ham tekshiradi. Sozlamada yo‘q tur yoki katta hajm — 400.
+         */
+        post: operations["AdminCreativesController_uploadPolicy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/products/{id}/creatives": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mahsulot kreativlari (tartib bilan) */
+        get: operations["AdminCreativesController_list"];
+        put?: never;
+        /**
+         * Yuklangan faylni kreativ qilib saqlash
+         * @description Yuklash javobidagi `objectKey` yuboriladi. Fayl tekshiriladi (bor, hajmi, turi, birinchi baytlari); mos kelmasa o‘chiriladi va 400. Mos kelsa ochiq papkaga ko‘chiriladi. Takroriy tasdiq o‘sha kreativni qaytaradi. Bir mahsulotga 20 tagacha kreativ.
+         */
+        post: operations["AdminCreativesController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/products/{id}/creatives/{creativeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Kreativni o‘chirish (offerdan chiqadi, fayl ham o‘chiriladi) */
+        delete: operations["AdminCreativesController_remove"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1531,7 +1451,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Optoviklar ro‘yxati (nom yoki STIR bo‘yicha qidiruv) */
+        /**
+         * Optoviklar ro‘yxati (nom yoki STIR bo‘yicha qidiruv)
+         * @description Omborchiga faqat `id`, `name`, `status`, `tin`, `contractNumber`, `contractDate` — bank rekvizitlari, telefon va kabinet egasisiz.
+         */
         get: operations["AdminWholesalersController_list"];
         put?: never;
         /** Optovikni kiritish (foydalanuvchisiz) */
@@ -1623,7 +1546,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Bozor narxi tekshiruvi (NRX-5): «mos»/«qimmat» va optovik uchun eng yuqori bazaviy narx */
+        /**
+         * Bozor narxi tekshiruvi (NRX-5): «mos»/«qimmat» va optovik uchun eng yuqori bazaviy narx
+         * @description Summa va manba mahsulotda saqlanadi. `preview: true` — faqat natija, saqlanmaydi va auditga yozilmaydi (`checkedAt: null`).
+         */
         post: operations["AdminPricingController_market"];
         delete?: never;
         options?: never;
@@ -1713,7 +1639,25 @@ export interface paths {
         get: operations["AdminAuditController_list"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Audit jurnalini tozalash — taqiqlangan (405) */
+        delete: operations["AdminAuditController_removeAll"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Audit yozuvini o‘chirish — taqiqlangan (405) */
+        delete: operations["AdminAuditController_remove"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2118,57 +2062,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Xaridorning buyurtmalari */
-        get: operations["BuyerOrdersController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/orders/{orderId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Xaridor yoki guest buyurtmasining tafsilotlari */
-        get: operations["BuyerOrdersController_details"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/orders/{orderId}/tracking": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Xaridor yoki guest buyurtmasi va posilkalarini kuzatish */
-        get: operations["BuyerOrdersController_tracking"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/admin/inventory/inbound": {
         parameters: {
             query?: never;
@@ -2203,6 +2096,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/inventory/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Postavkalar ro‘yxati
+         * @description BE-25: bir nechta holat, qidiruv, kelish sanasi, qabul kuni; `counts` — holatlar soni.
+         */
+        get: operations["AdminInventoryController_shipments"];
+        put?: never;
+        /**
+         * Postavkani e’lon qilish (optovik nomidan)
+         * @description CPA mahsulotlarining yagona varianti; mahsulot shu optovikniki bo‘lishi shart. Holat «E’lon qilindi».
+         */
+        post: operations["AdminInventoryController_declareShipment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/inventory/shipments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Postavka kartasi */
+        get: operations["AdminInventoryController_shipment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/inventory/shipments/{id}/in-transit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Postavka «Yo‘lda» [taklif — ixtiyoriy] */
+        post: operations["AdminInventoryController_shipmentInTransit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/inventory/shipments/{id}/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Postavkani qabul qilish
+         * @description Har qator: qabul qilingan va brak soni, partiya, yaroqlilik muddati (BAD, kosmetika, oziq-ovqat), yacheyka. Qoldiqqa yaroqli soni kiradi; muddatga 60 kundan kam qolgan partiya sotilmaydi. Farq yoki brak — «Farq bor» va akt.
+         */
+        post: operations["AdminInventoryController_receiveShipment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/inventory/shipments/{id}/act.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Qabul (farq va brak) akti PDF — optovikka qo‘lda */
+        get: operations["AdminInventoryController_shipmentAct"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/inventory/lots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Yaroqlilik partiyalari */
+        get: operations["AdminInventoryController_lots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/inventory/stock": {
         parameters: {
             query?: never;
@@ -2231,154 +2236,6 @@ export interface paths {
         get: operations["AdminInventoryController_movements"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/orders/{orderId}/returns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Yetkazilgan tovarni qaytarish so‘rovi
-         * @description Faqat DELIVERED posilkadagi tovarlar, yetkazilgandan keyin `RETURN_WINDOW_DAYS` (default 10) kun ichida. Qisman qaytarish mumkin: har tovar uchun miqdor beriladi. Tovarlar turli do‘konlardan bo‘lsa, har posilka uchun alohida so‘rov yaratiladi.
-         */
-        post: operations["BuyerReturnsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/returns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Xaridorning qaytarish so‘rovlari */
-        get: operations["BuyerReturnsController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/returns/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Qaytarish so‘rovi va uning tarixi */
-        get: operations["BuyerReturnsController_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/returns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Do‘konga kelgan qaytarish so‘rovlari */
-        get: operations["SellerReturnsController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/returns/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Qaytarish so‘rovi va uning tarixi */
-        get: operations["SellerReturnsController_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/returns/{id}/review": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Ko‘rib chiqishga olish (tovar qabul qilindi, tekshirilmoqda)
-         * @description SUBMITTED → IN_REVIEW
-         */
-        post: operations["SellerReturnsController_review"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/returns/{id}/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Qaytarishni tasdiqlash
-         * @description SUBMITTED/IN_REVIEW → APPROVED. Pulni admin qaytaradi (`POST /admin/returns/:id/refund`).
-         */
-        post: operations["SellerReturnsController_approve"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/returns/{id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Qaytarishni rad etish (sabab majburiy)
-         * @description SUBMITTED/IN_REVIEW → REJECTED
-         */
-        post: operations["SellerReturnsController_reject"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2479,72 +2336,20 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/seller/finance/ledger": {
+    "/api/v1/admin/orders/{id}/returns": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Do‘kon ledger yozuvlari (sotuv, komissiya, payout, refund) */
-        get: operations["SellerFinanceController_ledger"];
+        get?: never;
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/finance/payouts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Do‘kon payout’lari */
-        get: operations["SellerFinanceController_payouts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/finance/summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
         /**
-         * Moliya jamlanmasi: balans, payout’lar, COD reconciliation
-         * @description `dateFrom`/`dateTo` faqat davr ko‘rsatkichlariga ta’sir qiladi (`paidPayoutAmount`, `cod`); balans va kutilayotgan payout — hozirgi holat.
+         * Qaytarish so‘rovini mijoz nomidan kiritish
+         * @description Faqat «Yetkazildi» buyurtma, EQ-10 dagi qaytarish muddati ichida (`RETURN_WINDOW_DAYS`), sabab majburiy (`OTHER` da izoh ham). Buyurtma RETURN_REQUESTED; tarixda kiritgan xodim.
          */
-        get: operations["SellerFinanceController_summary"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/seller/finance/payout-schedule": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Payout chastotasi va keyingi to‘lov kuni */
-        get: operations["SellerFinanceController_getPayoutSchedule"];
-        /** Payout chastotasini tanlash (DAILY | WEEKLY | MONTHLY) */
-        put: operations["SellerFinanceController_updatePayoutSchedule"];
-        post?: never;
+        post: operations["AdminOrderReturnsController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2677,6 +2482,26 @@ export interface paths {
         };
         /** Offerlar: mahsulot, narx, haq, EPC, tasdiq va sotilish foizi */
         get: operations["AffiliateStreamsController_listOffers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/offers/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Offer kartasi: tafsilot va kreativlar
+         * @description Ro‘yxat maydonlari va tafsilot (kategoriya, tavsif, og‘irlik, yetkazish, BAD, holat, kreativlar). Katalogda hali bo‘lmagan qismlar (yetkazish rejimi, narx taqsimoti, hamma sotuvchilar natijasi) — null. Yopiq offer — 404.
+         */
+        get: operations["AffiliateStreamsController_getOffer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2907,7 +2732,7 @@ export interface paths {
         put?: never;
         /**
          * Tasdiqlash
-         * @description 5 mln dan katta so‘rov ikki xil xodim tasdig‘idan keyin «Tasdiqlandi» bo‘ladi; bir xodim ikki marta tasdiqlay olmaydi.
+         * @description 5 mln dan katta so‘rov ikki xil xodim tasdig‘idan keyin «Tasdiqlandi» bo‘ladi; bir xodim ikki marta tasdiqlay olmaydi. Maqomi tasdiqlanmagan sotuvchi — 400.
          */
         post: operations["AdminWithdrawalsController_approve"];
         delete?: never;
@@ -2962,10 +2787,330 @@ export interface paths {
         };
         get?: never;
         /**
-         * O‘zini o‘zi band qilganlik belgisi (moliya tekshirgach qo‘lda)
-         * @description Belgisiz sotuvchining so‘rovi rad etiladi (T01:471).
+         * O‘zini o‘zi band qilganlik belgisi — arizasiz, qo‘lda
+         * @description Belgisiz sotuvchining so‘rovi rad etiladi (T01:471). Sotuvchi ariza yuborgan bo‘lsa — `admin/finance/self-employed` da tasdiqlanadi (bu yerda 409 ALREADY_PENDING).
          */
         put: operations["AdminWithdrawalsController_setSelfEmployed"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sotuvchi profili */
+        get: operations["AffiliateProfileController_profile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Ism va familiya (soliq hisoboti uchun)
+         * @description Ism o‘zgarsa tasdiqlangan yoki tekshirilayotgan maqom qayta tekshiruvga tushadi (PENDING), pul yechish yopiladi.
+         */
+        patch: operations["AffiliateProfileController_update"];
+        trace?: never;
+    };
+    "/api/v1/affiliate/agreements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ofertaning (yoki rozilikning) yangi versiyasini qabul qilish — versiya va vaqt saqlanadi */
+        post: operations["AffiliateProfileController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/self-employed/document": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O‘z ma’lumotnomam (oxirgi arizadagi fayl) */
+        get: operations["AffiliateSelfEmployedController_document"];
+        put?: never;
+        /**
+         * Maqom ma’lumotnomasini oldindan yuklash (PDF, JPG, PNG, 10 MB gacha)
+         * @description Fayl yopiq joyga tushadi va 1 kun ichida ariza bilan yuborilmasa o‘chadi. `documentId` faqat shu sotuvchiga ishlaydi.
+         */
+        post: operations["AffiliateSelfEmployedController_uploadDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/affiliate/self-employed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * JShShIR va ma’lumotnomani tekshiruvga yuborish
+         * @description Ma’lumotnoma ixtiyoriy. Moliya tasdiqlamaguncha pul yechish yopiq. Profilda ism va familiya bo‘lishi shart.
+         */
+        post: operations["AffiliateSelfEmployedController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** JShShIR arizalari: har sotuvchining oxirgisi, tekshiriladiganlari eskisi tepada; holatlar soni bilan */
+        get: operations["AdminSelfEmployedController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ariza: mavjud pul (tasdiqni kutayotgan to‘lov) va shu JShShIR bilan boshqa sotuvchilar */
+        get: operations["AdminSelfEmployedController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed/{id}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** To‘liq JShShIR (soliq ro‘yxatida tekshirish uchun) — auditga yoziladi */
+        post: operations["AdminSelfEmployedController_reveal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed/{id}/document": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Arizadagi ma’lumotnoma — auditga yoziladi */
+        get: operations["AdminSelfEmployedController_document"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Maqomni tasdiqlash — pul yechish ochiladi */
+        post: operations["AdminSelfEmployedController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rad etish — sabab majburiy, sabab va izoh sotuvchiga ko‘rinadi */
+        post: operations["AdminSelfEmployedController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/self-employed/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tasdiqlangan maqomni bekor qilish — pul yechish yopiladi */
+        post: operations["AdminSelfEmployedController_revoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/legal/documents/{type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hujjatning joriy versiyasi (effectiveAt null — «e’lon qilinadi») */
+        get: operations["LegalDocumentsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/legal/documents/{type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Yangi versiyani e’lon qilish (matn — yurist); sotuvchilar keyingi kirishda qabul qiladi */
+        put: operations["LegalDocumentsController_publish"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Moliya sozlamalari: amaldagi, rejalashtirilgan va oldingi qiymatlar */
+        get: operations["AdminFinanceSettingsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/settings/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Yangi qiymat (kuchga kirish vaqti bilan); izoh majburiy — auditga */
+        put: operations["AdminFinanceSettingsController_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/settings/{key}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hali kuchga kirmagan rejalashtirilgan qiymatni bekor qilish; izoh majburiy — auditga */
+        post: operations["AdminFinanceSettingsController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/moderation/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Moderatsiya hisoblagichlari: tasdiq va narx kutayotganlar, holatlar, qoldiq va partiyalar */
+        get: operations["AdminModerationController_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/moderation/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Narx navbati: narx qarori kutayotgan mahsulotlar
+         * @description `summary.pricesPending` bilan bir xil qoida; tavsiya narx — joriy sozlama va mahsulot sotuvchi haqi bilan. Eskisi oldin, sahifalashsiz.
+         */
+        get: operations["AdminModerationController_prices"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -3030,6 +3175,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/finance/settlements/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hisob-kitob sozlamalari: qaytarish muddati, to‘lovchi rekvizitlari */
+        get: operations["AdminSettlementsController_settings"];
+        /**
+         * Hisob-kitob sozlamalarini o‘zgartirish (superadmin) [taklif]
+         * @description Berilgan maydonlar tarixga yoziladi (kim, qachon); berilmagani o‘zgarmaydi. Bank fayli to‘lovchi hisob raqami, MFO va to‘lov maqsadi kodisiz chiqmaydi (409).
+         */
+        put: operations["AdminSettlementsController_updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/finance/settlements/{id}": {
         parameters: {
             query?: never;
@@ -3078,6 +3244,609 @@ export interface paths {
          * @description Faqat bank faylidan keyin (EXPORTED); ledgerga aynan fayldagi summa (WHOLESALER_PAID). Keyin qaytgan tovar qarzi keyingi aktdan ushlanadi. Takror — o‘sha natija.
          */
         post: operations["AdminSettlementsController_paid"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Elchi o‘tkazmasi kunlari: holat va kun jami (yangisi birinchi) */
+        get: operations["AdminReconciliationController_days"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Posilkalar: kun, holat (Farq bor, Hal qilindi, Mos, Kutilmoqda), buyurtma bo‘yicha qidiruv */
+        get: operations["AdminReconciliationController_items"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/items/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Hal qilindi deb yopish» — izoh majburiy
+         * @description Buyurtmaning ochiq farqi yopiladi; pul harakati yo‘q — yozuvlar HOLD da qoladi [taklif]. Keyin yangi o‘tkazma kelsa, farq yana ochiladi.
+         */
+        post: operations["AdminReconciliationController_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/elchi-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Elchi bilan avtomatik tekshiruv: kunning oxirgi tekshiruvi (sonlar)
+         * @description Har kuni 10:00 (Toshkent) [taklif] tizim Elchi’ga topshirilgan posilkalarning holati va pulini Elchi partner API sidan oladi va o‘zidagi bilan solishtiradi. Mos posilkalar faqat sanaladi, farqlilari — `elchi-check/items`. `finishedAt` null — tekshiruv ishlamoqda.
+         */
+        get: operations["AdminReconciliationController_elchiCheck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/elchi-check/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Elchi tekshiruvi farqlari: holat yoki pul farqi (DIFF), yopilgan (RESOLVED), Elchi’dan o‘qib bo‘lmagan (FAILED)
+         * @description Sabablar: NOT_FOUND — Elchi posilkani topmadi; STATUS — holat zid (masalan, Elchi «to‘landi», bizda «yetkazildi» — xabar kelmagan); UNKNOWN_STATUS; ORDER_REF — Elchi posilkasi boshqa buyurtmaga bog‘langan; NO_REMITTANCE — Elchi pul o‘tkazganini aytadi, moliyada yozuv yo‘q; COLLECTED — mijozdan yig‘ilgan summa farq qiladi; FEE — Elchi haqi; MARKET_PAID — o‘tkazilgan summa.
+         */
+        get: operations["AdminReconciliationController_elchiCheckItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/elchi-check/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Elchi tekshiruvini hozir ishga tushirish
+         * @description Tekshiruv fonda ishlaydi (posilkalar ko‘p bo‘lsa — daqiqalar); natija `GET elchi-check` da (`finishedAt` to‘lgach).
+         */
+        post: operations["AdminReconciliationController_elchiCheckRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/reconciliation/elchi-check/items/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Elchi tekshiruvi farqini izoh bilan yopish
+         * @description Pul harakati yo‘q. Keyingi tekshiruvda xuddi shu farq bo‘lsa — izoh ko‘chadi (yopiq qoladi); farq o‘zgarsa — yana ochiladi.
+         */
+        post: operations["AdminReconciliationController_elchiCheckResolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/act-responses/disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Optovik e’tirozlari (ochiqlari birinchi) */
+        get: operations["AdminActResponsesController_disputes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/act-responses/acts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Akt, optovik qabuli va e’tirozlar */
+        get: operations["AdminActResponsesController_act"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/act-responses/disputes/{id}/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** E’tirozga javob — optovik aktida ko‘rinadi */
+        post: operations["AdminActResponsesController_answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/settlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O‘z akt-sverkalarim */
+        get: operations["WholesalerSettlementsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/settlements/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Akt, qabul holati va e’tirozlar (moliya javobi bilan) */
+        get: operations["WholesalerSettlementsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/settlements/{id}/act.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Akt-sverka PDF */
+        get: operations["WholesalerSettlementsController_actPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/settlements/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aktni qabul qilish
+         * @description Bir marta; takror — o‘sha natija. Ochiq e’tiroz bo‘lsa — 409. To‘lov qabulni kutmaydi [taklif].
+         */
+        post: operations["WholesalerSettlementsController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/settlements/{id}/dispute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** E’tiroz bildirish — moliyaga boradi, javobi shu aktda ko‘rinadi */
+        post: operations["WholesalerSettlementsController_dispute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Optovik profili: rekvizitlar, holat (PENDING — admin ko‘rmoqda), shartnoma */
+        get: operations["WholesalerCabinetController_profile"];
+        put?: never;
+        /** Ro‘yxatni yakunlash yoki rad etilgan arizani qayta yuborish: rekvizitlar, shartnoma va rozilik (boshqa holatda yozuv o‘zgarmaydi) */
+        post: operations["WholesalerCabinetController_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Panel (OPT-3): mahsulotlar bo‘yicha omborda, bandda, yo‘lda (postavka), mijozga yo‘lda, sotilgan (moliyadan), qaytgan, brak; pul holati */
+        get: operations["WholesalerCabinetController_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/contract/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Elektron komissiya shartnomasi PDF — 10 daqiqalik imzolangan havola (TC4) */
+        post: operations["WholesalerCabinetController_contractLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/documents/upload-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hujjat yuklash (KYC, sertifikat): imzolangan POST — fayl yopiq joyga, PDF/JPEG/PNG, 10 MB gacha */
+        post: operations["WholesalerCabinetController_uploadPolicy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O‘z hujjatlarim */
+        get: operations["WholesalerCabinetController_documents"];
+        put?: never;
+        /** Yuklangan hujjatni tasdiqlash: tur va tarkib tekshiriladi, yopiq joyga ko‘chiriladi, yozuv ochiladi */
+        post: operations["WholesalerCabinetController_confirmDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/documents/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hujjatga 10 daqiqalik imzolangan havola */
+        post: operations["WholesalerCabinetController_documentLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O‘z mahsulotlarim (holat va admin izohi bilan) */
+        get: operations["WholesalerProductsController_list"];
+        put?: never;
+        /** Mahsulot taklifi: nom, tavsif, rasm, og‘irlik va o‘lcham, bazaviy narx (sertifikat — /wholesaler/documents) */
+        post: operations["WholesalerProductsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mahsulot kartasi */
+        get: operations["WholesalerProductsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/products/{id}/pricing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Narx hisobi (NRX-2): tavsiya narx, zararsizlik, qat’iy pastki chegara, taqsimot, platforma natijasi */
+        get: operations["WholesalerProductsController_pricing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O‘z postavkalarim va holati */
+        get: operations["WholesalerShipmentsController_list"];
+        put?: never;
+        /** Postavka arizasi: tovar, miqdor, kelish sanasi (OMB-1) */
+        post: operations["WholesalerShipmentsController_declare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/shipments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Postavka kartasi */
+        get: operations["WholesalerShipmentsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wholesaler/shipments/{id}/act.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Qabul akti PDF (farq va brak bilan) — qabul qilingandan keyin */
+        get: operations["WholesalerShipmentsController_act"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/wholesalers/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** O‘zi ro‘yxatdan o‘tgan optovik: tasdiq (ACTIVE) yoki rad (REJECTED, sabab majburiy) */
+        post: operations["AdminWholesalerCabinetController_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/wholesalers/{id}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin kiritgan optovikka kabinet: shu raqamga optovik foydalanuvchisi (SMS kod bilan kiradi) */
+        post: operations["AdminWholesalerCabinetController_linkOwner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/wholesalers/{id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Optovik hujjatlari (KYC, sertifikatlar) */
+        get: operations["AdminWholesalerCabinetController_documents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/wholesalers/{id}/documents/{documentId}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hujjatga 10 daqiqalik imzolangan havola */
+        post: operations["AdminWholesalerCabinetController_documentLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/wholesalers/{id}/contract/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Elektron komissiya shartnomasi PDF — imzolangan havola */
+        post: operations["AdminWholesalerCabinetController_contractLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/signed-files/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Yopiq hujjat (imzolangan havola, 10 daqiqa) */
+        get: operations["SignedFilesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Platforma ko‘rsatkichlari (TZ 9): kun, sotuvchi, operator yoki offer kesimida
+         * @description Davr — Toshkent kunlari, `to` kiradi, ko‘pi bilan 366 kun. Har ko‘rsatkich o‘z hodisasi kuni bo‘yicha (lid — kelgan, tasdiq — tasdiqlangan, sotuv — yetkazilgan kuni). Moliya qismi faqat kun kesimida, boshqa kesimda null.
+         */
+        get: operations["AdminMetricsController_metrics"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3133,6 +3902,46 @@ export interface paths {
          * @description Mahsulot, narx, suhbat skripti, «formadan» manzil, urinishlar, tarix va shu telefondagi oldingi lidlar (OPR-2, BE-42).
          */
         get: operations["OperatorLeadsController_getCard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads/{id}/product": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mahsulot ma’lumoti (lid kartasi paneli)
+         * @description Tavsif, afzalliklar, qutida nima bor, qoldiq, og‘irlik, ikki yetkazish narxi, sotuvchi sahifasi va BAD ogohlantirishi (BE-25, FE-08). Faqat shu operatordagi lid.
+         */
+        get: operations["OperatorLeadsController_getProduct"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mening urinishlarim (sukut — bugun, oxirgi 10 tasi)
+         * @description Yangisi birinchi; `total` — davrdagi jami (GET /operator/stats `attempts` bilan bir xil). BE-25, FE-08.
+         */
+        get: operations["OperatorLeadsController_attempts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3208,7 +4017,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Joriy holat va bronlar soni
+         * @description Sahifa yangilanganda ekran «Oflayn» dan boshlanmasin; `since` — holat boshlangan vaqt (BE-25, FE-08).
+         */
+        get: operations["OperatorLeadsController_getState"];
         /** Operator holati: ishda, tanaffus, chiqdi */
         put: operations["OperatorLeadsController_setState"];
         post?: never;
@@ -3226,8 +4039,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Navbat xulosasi (nazoratchi)
-         * @description Navbat hajmi va operatorlar holati (BE-13).
+         * Navbat xulosasi
+         * @description Navbat hajmi va operatorlar holati (BE-13). Operator ish joyi (BE-25, FE-08) — faqat navbat hajmi, `operators` bo‘sh.
          */
         get: operations["OperatorLeadsController_queueSummary"];
         put?: never;
@@ -3249,6 +4062,185 @@ export interface paths {
         get: operations["OperatorLeadsController_stats"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/leads/{id}/call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qo‘ng‘iroq: avval operator telefoni, keyin mijoz
+         * @description Lid shu operatorning bronida bo‘lishi kerak. Provayder 3 soniyada javob bermasa ham 201 — bosqich `GET /operator/calls/{id}` da (TEL-2).
+         */
+        post: operations["OperatorCallsController_start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/calls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mening qo‘ng‘iroqlarim (yangisi birinchi) */
+        get: operations["OperatorCallsController_mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/calls/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Qo‘ng‘iroq holati va taklif qilingan natija
+         * @description Faqat o‘z qo‘ng‘irog‘i. `suggestedOutcome` — javob bermadi, band, o‘chiq server holatidan (TEL-4).
+         */
+        get: operations["OperatorCallsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operator/calls/{id}/hangup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Qo‘ng‘iroqni tugatish */
+        post: operations["OperatorCallsController_hangup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Qo‘ng‘iroqlar hisoboti (yangisi birinchi)
+         * @description Operator, lid, davr (Toshkent) va yozuv holati bo‘yicha. `missingRecordings` va `recording=MISSING` — yozuvsiz qo‘ng‘iroqlar, hisobotda xato (TEL-3).
+         */
+        get: operations["CallsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calls/{id}/recording-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Yozuvni tinglash yoki yuklab olish havolasi (vaqtli)
+         * @description Audit yozuvi bilan birga beriladi: yozilmasa havola ham berilmaydi. `mode: DOWNLOAD` — faqat admin va superadmin.
+         */
+        post: operations["CallsController_recordingLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/call-recordings/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Qo‘ng‘iroq yozuvi (imzolangan havola, 10 daqiqa)
+         * @description `Range` qo‘llab-quvvatlanadi — pleyerda oldinga o‘tish uchun.
+         */
+        get: operations["CallRecordingsController_stream"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/operators/{id}/phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operator telefoni */
+        get: operations["AdminOperatorPhoneController_get"];
+        /**
+         * Operatorga telefon biriktirish
+         * @description Faqat operator yoki nazoratchi foydalanuvchiga. Bitta telefon — bitta operator.
+         */
+        put: operations["AdminOperatorPhoneController_set"];
+        post?: never;
+        /**
+         * Telefonni olib tashlash
+         * @description Operatorda «Qo‘ng‘iroq» tugmasi o‘chadi, natija qo‘lda kiritiladi.
+         */
+        delete: operations["AdminOperatorPhoneController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks/telephony": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Telefoniya provayderi hodisalari (BE-15)
+         * @description `status` — bosqich, `completed` — qo‘ng‘iroq tugadi, `recording` — yozuv tayyor. 503 bo‘lsa provayder qayta yuboradi; takror `eventId` xavfsiz.
+         */
+        post: operations["TelephonyWebhookController_receive"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3353,7 +4345,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Oldingi topshirish aktlari (yangisi tepada)
+         * @description FE-17 «Oldingi aktlar» bloki. Har akt — `GET /warehouse/handover-acts/{id}` bilan bir xil shakl (posilkalar bilan).
+         */
+        get: operations["WarehouseController_acts"];
         put?: never;
         /**
          * Elchi’ga topshirish akti (skanerlangan QR lar)
@@ -3392,6 +4388,57 @@ export interface paths {
         };
         /** Topshirish akti PDF (imzo uchun) */
         get: operations["WarehouseController_actPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/warehouse/returns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Omborga qaytayotgan posilkalar (saralanadi) */
+        get: operations["WarehouseReturnsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/warehouse/returns/{orderId}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Qaytgan posilkani saralash */
+        post: operations["WarehouseReturnsController_grade"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/warehouse/returns/{orderId}/defect-act.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Brak akti PDF (har posilka uchun) — optovikka qo‘lda */
+        get: operations["WarehouseReturnsController_defectAct"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3694,6 +4741,95 @@ export interface components {
             errorCode: string;
             details?: components["schemas"]["ApiErrorDetailDto"][];
         };
+        SendOtpDto: {
+            /** @example +998973152286 */
+            phone: string;
+            /**
+             * @example REGISTER
+             * @enum {string}
+             */
+            purpose: "REGISTER" | "LOGIN";
+        };
+        OtpSendResultDto: {
+            /**
+             * @description Kod necha soniya amal qiladi
+             * @example 300
+             */
+            expiresIn: number;
+            /**
+             * @description DELAYED — SMS provayder javob bermadi, server qayta yuboradi
+             * @example SENT
+             * @enum {string}
+             */
+            delivery: "SENT" | "DELAYED";
+        };
+        VerifyOtpDto: {
+            /** @example +998973152286 */
+            phone: string;
+            /**
+             * @example REGISTER
+             * @enum {string}
+             */
+            purpose: "REGISTER" | "LOGIN";
+            /** @example 305918 */
+            code: string;
+        };
+        RegisterWholesalerDto: {
+            /** @example Gadget Trade MChJ */
+            name: string;
+            /**
+             * @example LEGAL_ENTITY
+             * @enum {string}
+             */
+            legalType: "LEGAL_ENTITY" | "SOLE_PROPRIETOR";
+            /**
+             * @description STIR, 9 raqam
+             * @example 305123456
+             */
+            tin: string;
+            /** @example Kapitalbank */
+            bankName: string;
+            /**
+             * @description Hisob raqami, 20 raqam
+             * @example 20208000900123456001
+             */
+            bankAccount: string;
+            /**
+             * @description Bank MFO, 5 raqam
+             * @example 01158
+             */
+            bankMfo: string;
+            /** @example Toshkent, Chilonzor 5 */
+            address?: string;
+            /** @example Maishiy texnika optovigi */
+            description?: string;
+            /** @description OTP tasdig‘idan keyingi bir martalik token */
+            registrationToken: string;
+            /**
+             * @description Qabul qilingan komissiya shartnomasi versiyasi
+             * @example 1.0
+             */
+            contractVersion: string;
+            /**
+             * @description Shaxsiy ma’lumotlarga rozilik versiyasi
+             * @example 1.0
+             */
+            consentVersion: string;
+        };
+        RegisterAffiliateDto: {
+            /** @description OTP tasdig‘idan keyingi bir martalik token */
+            registrationToken: string;
+            /**
+             * @description Qabul qilingan sotuvchi ofertasi versiyasi
+             * @example 1.0
+             */
+            offerVersion: string;
+            /**
+             * @description Shaxsiy ma’lumotlarga rozilik versiyasi
+             * @example 1.0
+             */
+            consentVersion: string;
+        };
         LoginDto: {
             /**
              * @description Ro‘yxatdan o‘tgan telefon raqami
@@ -3712,6 +4848,42 @@ export interface components {
              * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
              */
             accessToken?: string;
+        };
+        TwoFactorChallengeDto: {
+            /** @description Parol bosqichidan keyingi token (5 daqiqa), sessiya emas */
+            challengeToken: string;
+        };
+        TwoFactorSetupResultDto: {
+            /**
+             * @description Qo‘lda kiritish uchun
+             * @example JBSWY3DPEHPK3PXP
+             */
+            secret: string;
+            /**
+             * @description QR shu matndan chiziladi
+             * @example otpauth://totp/Elchi%20Marketplace%3A%2B998901234567?secret=JBSWY3DPEHPK3PXP&issuer=Elchi%20Marketplace&algorithm=SHA1&digits=6&period=30
+             */
+            otpauthUrl: string;
+        };
+        TwoFactorEnableDto: {
+            /** @description Parol bosqichidan keyingi token (5 daqiqa), sessiya emas */
+            challengeToken: string;
+            /**
+             * @description Authenticator ilovasidagi 6 raqam
+             * @example 305918
+             */
+            code: string;
+        };
+        TwoFactorVerifyDto: {
+            /** @description Parol bosqichidan keyingi token (5 daqiqa), sessiya emas */
+            challengeToken: string;
+            /** @example 305918 */
+            code?: string;
+            /**
+             * @description Telefon yo‘q bo‘lsa — bir martalik tiklash kodi
+             * @example K7QM2XPA4D
+             */
+            recoveryCode?: string;
         };
         RefreshTokenDto: {
             /** @description Cookie ishlatilmasa refresh token body orqali yuboriladi */
@@ -3735,6 +4907,57 @@ export interface components {
             /** @example 123456 */
             code: string;
         };
+        CurrentUserDto: {
+            /** @example 42 */
+            id: string;
+            /**
+             * @example AFFILIATE
+             * @enum {string}
+             */
+            role: "AFFILIATE" | "WHOLESALER" | "OPERATOR_LEAD" | "SUPERVISOR" | "WAREHOUSE" | "FINANCE" | "ADMIN" | "SUPERADMIN";
+            /** @example Akmal */
+            name: string;
+            /** @example +998901112233 */
+            phone: string;
+            /** @example akmal@example.com */
+            email: string | null;
+            /** @example null */
+            avatarUrl: string | null;
+            /** @example true */
+            isActive: boolean;
+            /** @example false */
+            isDeleted: boolean;
+            /**
+             * Format: date-time
+             * @example 2026-07-25T10:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-07-25T10:00:00.000Z
+             */
+            updatedAt: string;
+            /** @example Akmal */
+            firstName: string | null;
+            /** @example Karimov */
+            lastName: string | null;
+            /**
+             * @description Bloklangan — hamma token 401
+             * @example false
+             */
+            isBlocked: boolean;
+            /**
+             * @description Token versiyasi: blok yoki rol o‘zgarsa oshadi (eski tokenlar bekor)
+             * @example 3
+             */
+            authVersion: number;
+            /**
+             * Format: date-time
+             * @description 2FA ulangan vaqt (BE-26); ulanmagan — null
+             * @example null
+             */
+            totpEnabledAt: string | null;
+        };
         UpdateProfileDto: {
             /** @example Ali Valiyev */
             name?: string;
@@ -3756,66 +4979,6 @@ export interface components {
              */
             data: Record<string, unknown> | null;
         };
-        SellerShopDto: {
-            /** @example 15 */
-            id: string;
-            /** @example 42 */
-            ownerUserId: string | null;
-            /** @example Ali Market */
-            name: string;
-            /** @example ali-market-1234567 */
-            slug: string;
-            /**
-             * @example PENDING
-             * @enum {string}
-             */
-            status: "PENDING" | "ACTIVE" | "SUSPENDED" | "REJECTED";
-            /** @example Maishiy texnika do‘koni */
-            description: unknown;
-            /** @example null */
-            logoUrl: string | null;
-            /** @example null */
-            bannerUrl: string | null;
-            /** @example +998901234567 */
-            phone: unknown;
-            /** @example 1 */
-            regionId: unknown;
-            /** @example 10 */
-            districtId: unknown;
-            /** @example Toshkent shahri */
-            address: unknown;
-            /** @example 0 */
-            rating: number;
-            /** @example 0 */
-            ordersCount: number;
-            /** @example false */
-            isFeatured: boolean;
-        };
-        SellerShopResponseDto: {
-            /** @example 200 */
-            statusCode: number;
-            /** @example OK */
-            message: string;
-            data: components["schemas"]["SellerShopDto"];
-        };
-        UpdateSellerShopDto: {
-            /** @example Ali Market */
-            name?: string;
-            /** @example Maishiy texnika do‘koni */
-            description?: string;
-            /** @example https://cdn.example.com/logo.png */
-            logoUrl?: string;
-            /** @example https://cdn.example.com/banner.png */
-            bannerUrl?: string;
-            /** @example +998901234567 */
-            phone?: string;
-            /** @example 1 */
-            regionId?: string;
-            /** @example 10 */
-            districtId?: string;
-            /** @example Toshkent shahri, Chilonzor tumani */
-            address?: string;
-        };
         CategoryTreeDto: {
             /** @example 7 */
             id: string;
@@ -3831,15 +4994,25 @@ export interface components {
             sortOrder: number;
             /** @example true */
             isActive: boolean;
+            /**
+             * @description Toifaning o‘z belgisi; null — ota toifadan
+             * @example null
+             */
+            isBad: boolean | null;
+            /**
+             * @description Toifaning o‘z belgisi; null — ota toifadan
+             * @example null
+             */
+            expiryTracked: boolean | null;
             children: components["schemas"]["CategoryTreeDto"][];
         };
         CreateCategoryDto: {
             /** @example Mobil telefonlar */
             name: string;
             /** @example 1 */
-            parentId?: unknown;
+            parentId?: string | null;
             /** @example https://cdn.example.com/categories/phones.svg */
-            iconUrl?: unknown;
+            iconUrl?: string | null;
             /**
              * @default 0
              * @example 10
@@ -3850,6 +5023,21 @@ export interface components {
              * @example true
              */
             isActive?: boolean;
+            /**
+             * @description Berilmasa — nomdan hosil qilinadi; takrori 409
+             * @example mobil-telefonlar
+             */
+            slug?: string;
+            /**
+             * @description BAD toifasi (TZ 8): mahsulotlarida «Dori vositasi emas». null — ota toifadan, eng yuqorida «yo‘q»
+             * @example null
+             */
+            isBad?: boolean | null;
+            /**
+             * @description Postavkada partiya muddati kuzatiladi (OMB-3). null — ota toifadan; BAD toifasida doim kuzatiladi
+             * @example null
+             */
+            expiryTracked?: boolean | null;
         };
         CategoryDto: {
             /** @example 7 */
@@ -3866,14 +5054,24 @@ export interface components {
             sortOrder: number;
             /** @example true */
             isActive: boolean;
+            /**
+             * @description Toifaning o‘z belgisi; null — ota toifadan
+             * @example null
+             */
+            isBad: boolean | null;
+            /**
+             * @description Toifaning o‘z belgisi; null — ota toifadan
+             * @example null
+             */
+            expiryTracked: boolean | null;
         };
         UpdateCategoryDto: {
             /** @example Mobil telefonlar */
             name?: string;
             /** @example 1 */
-            parentId?: unknown;
+            parentId?: string | null;
             /** @example https://cdn.example.com/categories/phones.svg */
-            iconUrl?: unknown;
+            iconUrl?: string | null;
             /**
              * @default 0
              * @example 10
@@ -3884,151 +5082,81 @@ export interface components {
              * @example true
              */
             isActive?: boolean;
-        };
-        CreateProductDto: {
-            /** @example iPhone 16 Pro */
-            name: string;
-            /** @example 1 */
-            categoryId?: unknown;
-            /** @example Titanium, 256 GB */
-            description?: unknown;
-            /** @example 140000 */
-            price?: number;
             /**
-             * @description Optovikning bazaviy narxi (B), butun so‘m (OPT-2, TZ 2.1)
-             * @example 140000
+             * @description Berilmasa — nomdan hosil qilinadi; takrori 409
+             * @example mobil-telefonlar
              */
-            basePrice: number;
+            slug?: string;
             /**
-             * @description Sotuvchi haqi (A), so‘m, har offer uchun (TZ 1-bo‘lim 8-qaror)
-             * @example 65000
-             */
-            affiliateFee?: unknown;
-            /**
-             * @description Bir dona og‘irligi, gramm (OPT-2, BUY-4)
-             * @example 450
-             */
-            weightGrams: number;
-            /**
-             * @description Uzunlik, mm
-             * @example 200
-             */
-            lengthMm: number;
-            /**
-             * @description Kenglik, mm
-             * @example 120
-             */
-            widthMm: number;
-            /**
-             * @description Balandlik, mm
-             * @example 80
-             */
-            heightMm: number;
-            /** @example 15999000 */
-            oldPrice?: unknown;
-            /**
-             * @description Asosiy rasm URL (yoki images massivida kamida bitta rasm bo‘lishi shart)
-             * @example https://cdn.example.com/iphone.jpg
-             */
-            imageUrl?: unknown;
-            /**
-             * @description Mahsulot rasmlari (agar imageUrl bo‘sh bo‘lsa, kamida bitta rasm talab qilinadi)
-             * @example [
-             *       "https://cdn.example.com/iphone-1.jpg"
-             *     ]
-             */
-            images?: string[];
-            /**
-             * @example {
-             *       "brand": "Apple",
-             *       "storage": "256 GB"
-             *     }
-             */
-            attributes?: unknown;
-        };
-        ProductDto: {
-            /** @example 12 */
-            id: string;
-            /** @example 5 */
-            shopId: string;
-            /** @example 42 */
-            ownerUserId: string | null;
-            /** @example 1 */
-            categoryId: unknown;
-            /** @example iPhone 16 Pro */
-            name: string;
-            /** @example iphone-16-pro */
-            slug: string;
-            /** @example Titanium, 256 GB */
-            description: unknown;
-            /** @example 14999000 */
-            price: number;
-            /** @example 15999000 */
-            oldPrice: unknown;
-            /** @example null */
-            imageUrl: unknown;
-            images: string[];
-            /**
-             * @example {
-             *       "brand": "Apple"
-             *     }
-             */
-            attributes: unknown;
-            /** @example false */
-            hasVariants: boolean;
-            /** @enum {string} */
-            status: "DRAFT" | "PENDING_REVIEW" | "ACTIVE" | "REJECTED" | "ARCHIVED" | "OUT_OF_STOCK";
-            /** @example null */
-            moderationNote: string | null;
-            /** @example 140000 */
-            basePrice: number | null;
-            /** @example 65000 */
-            affiliateFee: number | null;
-            /** @example 450 */
-            weightGrams: number | null;
-            /** @example 200 */
-            lengthMm: number | null;
-            /** @example 120 */
-            widthMm: number | null;
-            /** @example 80 */
-            heightMm: number | null;
-            /**
-             * @description BE-09: tasdiqlangan narx
-             * @example 262000
-             */
-            approvedPrice: number | null;
-            /**
-             * @description BE-09: oxirgi narx qarori holati
-             * @example GREEN
-             */
-            priceStatus: string | null;
-            /**
-             * @description BE-09: raqobatchida mijoz jami (NRX-5)
+             * @description BAD toifasi (TZ 8): mahsulotlarida «Dori vositasi emas». null — ota toifadan, eng yuqorida «yo‘q»
              * @example null
              */
-            marketTotal: number | null;
-            /** @example true */
-            cpaEnabled: boolean;
-            /** @example false */
-            isBad: boolean;
-            /** @example false */
-            isBlocked: boolean;
-            /** @example 4.75 */
-            rating: number;
+            isBad?: boolean | null;
             /**
-             * Format: date-time
-             * @example 2026-08-14T10:00:00.000Z
+             * @description Postavkada partiya muddati kuzatiladi (OMB-3). null — ota toifadan; BAD toifasida doim kuzatiladi
+             * @example null
              */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2026-08-14T10:00:00.000Z
-             */
-            updatedAt: string;
+            expiryTracked?: boolean | null;
         };
-        Object: Record<string, unknown>;
-        MyProductsPageDto: {
-            items: components["schemas"]["ProductDto"][];
+        StorefrontCategoryRefDto: {
+            /** @example 7 */
+            id: string;
+            /** @example Quloqchinlar */
+            name: string;
+        };
+        StorefrontAttributeDto: {
+            /** @example Aloqa */
+            name: string;
+            /** @example Bluetooth 5.3 */
+            value: string;
+        };
+        StorefrontProductDto: {
+            /** @example 12 */
+            id: string;
+            /** @example Simsiz quloqchin X1 */
+            name: string;
+            /** @example Shovqinni pasaytiradi */
+            subtitle: string | null;
+            /** @example Batareya 30 soat… */
+            description: string | null;
+            /**
+             * @example [
+             *       "https://elchimarket.uz/media/p/12-1.webp"
+             *     ]
+             */
+            images: string[];
+            /** @example null */
+            videoUrl: string | null;
+            category: components["schemas"]["StorefrontCategoryRefDto"] | null;
+            attributes: components["schemas"]["StorefrontAttributeDto"][];
+            /**
+             * @description Biologik faol qo‘shimcha — «Dori vositasi emas» yozuvi
+             * @example false
+             */
+            isBad: boolean;
+            /**
+             * @description Tasdiqlangan narx, so‘m
+             * @example 249000
+             */
+            price: number;
+            /**
+             * @description Markazgacha yetkazish, so‘m
+             * @example 25000
+             */
+            deliveryToCenter: number;
+            /**
+             * @description Eshikkacha yetkazish, so‘m
+             * @example 35000
+             */
+            deliveryToAddress: number;
+            /**
+             * @description Omborda bor; null — ombor javob bermadi (noma’lum)
+             * @example true
+             */
+            inStock: boolean | null;
+        };
+        StorefrontProductsPageDto: {
+            items: components["schemas"]["StorefrontProductDto"][];
             /** @example 25 */
             total: number;
             /** @example 1 */
@@ -4038,247 +5166,162 @@ export interface components {
             /** @example 2 */
             totalPages: number;
         };
-        UpdateProductDto: {
-            /** @example iPhone 16 Pro */
-            name?: string;
-            /** @example 1 */
-            categoryId?: unknown;
-            /** @example Titanium, 256 GB */
-            description?: unknown;
-            /** @example 140000 */
-            price?: number;
+        StorefrontProductDetailsDto: {
+            /** @example 12 */
+            id: string;
+            /** @example Simsiz quloqchin X1 */
+            name: string;
+            /** @example Shovqinni pasaytiradi */
+            subtitle: string | null;
+            /** @example Batareya 30 soat… */
+            description: string | null;
             /**
-             * @description Optovikning bazaviy narxi (B), butun so‘m (OPT-2, TZ 2.1)
-             * @example 140000
-             */
-            basePrice?: number;
-            /**
-             * @description Sotuvchi haqi (A), so‘m, har offer uchun (TZ 1-bo‘lim 8-qaror)
-             * @example 65000
-             */
-            affiliateFee?: unknown;
-            /**
-             * @description Bir dona og‘irligi, gramm (OPT-2, BUY-4)
-             * @example 450
-             */
-            weightGrams?: number;
-            /**
-             * @description Uzunlik, mm
-             * @example 200
-             */
-            lengthMm?: number;
-            /**
-             * @description Kenglik, mm
-             * @example 120
-             */
-            widthMm?: number;
-            /**
-             * @description Balandlik, mm
-             * @example 80
-             */
-            heightMm?: number;
-            /** @example 15999000 */
-            oldPrice?: unknown;
-            /**
-             * @description Asosiy rasm URL (yoki images massivida kamida bitta rasm bo‘lishi shart)
-             * @example https://cdn.example.com/iphone.jpg
-             */
-            imageUrl?: unknown;
-            /**
-             * @description Mahsulot rasmlari (agar imageUrl bo‘sh bo‘lsa, kamida bitta rasm talab qilinadi)
              * @example [
-             *       "https://cdn.example.com/iphone-1.jpg"
+             *       "https://elchimarket.uz/media/p/12-1.webp"
              *     ]
              */
-            images?: string[];
+            images: string[];
+            /** @example null */
+            videoUrl: string | null;
+            category: components["schemas"]["StorefrontCategoryRefDto"] | null;
+            attributes: components["schemas"]["StorefrontAttributeDto"][];
             /**
-             * @example {
-             *       "brand": "Apple",
-             *       "storage": "256 GB"
-             *     }
+             * @description Biologik faol qo‘shimcha — «Dori vositasi emas» yozuvi
+             * @example false
              */
-            attributes?: unknown;
-        };
-        CreateProductVariantDto: {
-            /** @example IPHONE-16-BLACK-256 */
-            sku: string;
-            /** @example Qora-256 Gb */
-            name?: unknown;
+            isBad: boolean;
             /**
-             * @example {
-             *       "color": "Qora",
-             *       "storage": "256 Gb"
-             *     }
+             * @description Tasdiqlangan narx, so‘m
+             * @example 249000
              */
-            attributes?: unknown;
-            /** @example 16000000 */
-            price?: unknown;
-            /** @example 17000000 */
-            oldPrice?: unknown;
-            /** @example 4780012345678 */
-            barcode?: unknown;
-            /** @example https://cdn.example.com/products/iphone-black.jpg */
-            imageUrl?: unknown;
+            price: number;
             /**
-             * @default true
+             * @description Markazgacha yetkazish, so‘m
+             * @example 25000
+             */
+            deliveryToCenter: number;
+            /**
+             * @description Eshikkacha yetkazish, so‘m
+             * @example 35000
+             */
+            deliveryToAddress: number;
+            /**
+             * @description Omborda bor; null — ombor javob bermadi (noma’lum)
              * @example true
              */
-            isActive?: boolean;
+            inStock: boolean | null;
+            /** @description «Shu bo‘limdan» — shu kategoriyadagi boshqa mahsulotlar */
+            related: components["schemas"]["StorefrontProductDto"][];
         };
-        ProductVariantDto: {
-            /** @example 25 */
+        StorefrontBannerDto: {
+            /** @example 3 */
             id: string;
-            /** @example 35 */
-            productId: string;
-            /** @example IPHONE-16-BLACK-256 */
-            sku: string;
-            /** @example Qora-256 Gb */
-            name: unknown;
-            /**
-             * @example {
-             *       "color": "Qora",
-             *       "storage": "256 Gb"
-             *     }
-             */
-            attributes: unknown;
-            /** @example 16000000 */
-            price: unknown;
-            /** @example 17000000 */
-            oldPrice: unknown;
-            /** @example 4780012345678 */
-            barcode: unknown;
-            /** @example https://cdn.example.com/products/iphone-black.jpg */
-            imageUrl: unknown;
-            /** @example true */
-            isActive: boolean;
+            /** @example 50% chegirma */
+            title: string;
+            /** @example https://api.elchimarket.uz/media/marketplace-media/banners/1727000000000-uuid.jpg */
+            imageUrl: string;
+            /** @example /katalog/telefon */
+            linkUrl: string | null;
+            /** @example 10 */
+            sortOrder: number;
         };
-        UpdateProductVariantDto: {
-            /** @example IPHONE-16-BLACK-256 */
-            sku?: string;
-            /** @example Qora-256 Gb */
-            name?: unknown;
-            /**
-             * @example {
-             *       "color": "Qora",
-             *       "storage": "256 Gb"
-             *     }
-             */
-            attributes?: unknown;
-            /** @example 16000000 */
-            price?: unknown;
-            /** @example 17000000 */
-            oldPrice?: unknown;
-            /** @example 4780012345678 */
-            barcode?: unknown;
-            /** @example https://cdn.example.com/products/iphone-black.jpg */
-            imageUrl?: unknown;
-            /**
-             * @default true
-             * @example true
-             */
-            isActive?: boolean;
-        };
-        ProductImageUploadResultDto: {
-            /** @example products/1722250000000-uuid.jpg */
-            objectName: string;
-            /** @example marketplace-media */
-            bucket: string;
-            /** @example http://localhost:9000/marketplace-media/products/1722250000000-uuid.jpg */
-            url: string;
-            /** @example image/jpeg */
-            mimeType: string;
-            /** @example 245678 */
-            size: number;
-            /** @example 12 */
-            productId: string;
-            /** @example false */
-            isCover: boolean;
-        };
-        SellerOrderItemDto: {
+        StorefrontCartLineDto: {
             /** @example 31 */
             id: string;
             /** @example 12 */
-            salesOrderId: string;
-            /** @example Ali Valiyev */
-            buyerName: unknown;
-            /** @example 450000 */
-            subtotal: number;
-            /** @example 25000 */
-            deliveryFee: number;
-            /** @example 450000 */
-            codAmount: number;
-            /** @enum {string} */
-            status: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
-            /** @example 987 */
-            elchiShipmentId: unknown;
-            /** @example https://elchi.uz/track/987 */
-            trackingUrl: unknown;
-            /** @example 2 */
-            itemsCount: number;
-            /**
-             * Format: date-time
-             * @example 2026-07-30T09:00:00.000Z
-             */
-            createdAt: string;
-        };
-        SellerOrdersPageDto: {
-            items: components["schemas"]["SellerOrderItemDto"][];
-            /** @example 42 */
-            total: number;
+            productId: string;
+            /** @example Simsiz quloqchin X1 */
+            productName: string;
+            /** @example null */
+            imageUrl: string | null;
             /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 3 */
-            totalPages: number;
-        };
-        ShippingLabelsBatchDto: {
+            quantity: number;
             /**
-             * @example [
-             *       "101",
-             *       "102"
-             *     ]
+             * @description Savatga qo‘shilgandagi tasdiqlangan narx
+             * @example 249000
              */
-            orderIds: string[];
+            unitPrice: number;
+            /** @example 249000 */
+            lineTotal: number;
         };
-        CreateShipmentDto: {
-            /** @example +998901112233 */
-            customerPhone?: string;
+        StorefrontCartDto: {
+            items: components["schemas"]["StorefrontCartLineDto"][];
+            /** @example 249000 */
+            totalAmount: number;
+            /** @example 1 */
+            totalQuantity: number;
         };
-        UpdateSellerOrderStatusDto: {
-            /** @enum {string} */
-            status: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
-        };
-        SellerDashboardDto: {
-            /** @example 42 */
-            ordersTotal: number;
-            /** @example 5400000 */
-            revenue: number;
-            /** @example 3 */
-            pendingShipments: number;
-            /** @example 30 */
-            delivered: number;
-            /** @example 5 */
-            lowStockCount: number;
+        StorefrontCartItemDto: {
+            /** @example 12 */
+            productId: string;
             /**
-             * @example [
-             *       {
-             *         "productId": "88",
-             *         "name": "Telefon",
-             *         "sold": 21
-             *       }
-             *     ]
+             * @default 1
+             * @example 1
              */
-            topProducts: string[];
+            quantity?: number;
+        };
+        UpdateStorefrontCartItemDto: {
+            /** @example 2 */
+            quantity: number;
+        };
+        SiteOrderDto: {
+            /** @example Aziza */
+            name: string;
+            /** @example +998901234567 */
+            phone: string;
             /**
-             * @example [
-             *       {
-             *         "date": "2026-07-20",
-             *         "amount": 320000
-             *       }
-             *     ]
+             * @description Viloyat SOATO kodi
+             * @example 1726
              */
-            salesByDay: string[];
+            regionSoato: string;
+            /**
+             * @description Tuman yoki shahar SOATO kodi
+             * @example 1726266
+             */
+            districtSoato: string;
+            /**
+             * @description Ko‘cha, uy; faqat bo‘shliq — bo‘sh hisoblanadi (TC2: 400, maydon nomi bilan)
+             * @example Turkiston ko‘chasi, 27-uy
+             */
+            addressLine: string;
+            /**
+             * @example ADDRESS
+             * @enum {string}
+             */
+            whereDeliver: "ADDRESS" | "CENTER";
+            /**
+             * @description CALL — operator qo‘ng‘iroq qiladi; SMS — havola bosilgach buyurtma operatorsiz. Qora ro‘yxat yoki dublikat bo‘lsa server CALL qiladi
+             * @example CALL
+             * @enum {string}
+             */
+            confirmMode: "CALL" | "SMS";
+            /**
+             * @description Oferta va maxfiylik matni versiyasi
+             * @example 2026-11-16
+             */
+            consentVersion: string;
+            /** @description Yashirin maydon (bot himoyasi): to‘ldirilsa lid yozilmaydi, javob baribir 201 */
+            website?: string;
+        };
+        SiteOrderCreatedDto: {
+            /** @example 7001 */
+            leadId: string;
+            /**
+             * @description Haqiqiy usul: SMS so‘ralgan bo‘lsa ham qora ro‘yxat yoki dublikatda — CALL
+             * @enum {string}
+             */
+            confirmMode: "CALL" | "SMS";
+        };
+        SiteOrderConfirmDto: {
+            /**
+             * @description SMS havoladagi bir martalik kod
+             * @example q3Jf…
+             */
+            token: string;
+        };
+        SiteOrderConfirmedDto: {
+            /** @example CONFIRMED */
+            status: string;
         };
         NotificationDto: {
             /** @example 42 */
@@ -4292,7 +5335,9 @@ export interface components {
             /** @example false */
             isRead: boolean;
             /** @example {} */
-            data: unknown;
+            data: {
+                [key: string]: unknown;
+            };
             /** Format: date-time */
             createdAt: string;
         };
@@ -4306,33 +5351,6 @@ export interface components {
             page: number;
             /** @example 20 */
             limit: number;
-        };
-        AdminShopDetailStatsDto: {
-            /** @example 12 */
-            products: number;
-            /** @example 28 */
-            orders: number;
-            /** @example 2 */
-            warehouses: number;
-        };
-        AdminShopDetailDto: {
-            /** @example 15 */
-            id: string;
-            /** @example 42 */
-            ownerUserId: string | null;
-            /** @example Ali Market */
-            name: string;
-            /** @enum {string} */
-            status: "PENDING" | "ACTIVE" | "SUSPENDED" | "REJECTED";
-            stats: components["schemas"]["AdminShopDetailStatsDto"];
-        };
-        FeatureShopDto: {
-            /** @example true */
-            featured: boolean;
-        };
-        RejectShopDto: {
-            /** @example Hujjatlar to‘liq emas */
-            reason?: string;
         };
         AdminDashboardShopsDto: {
             /** @example 12 */
@@ -4397,6 +5415,57 @@ export interface components {
             /** @example 2700000 */
             revenue: number;
         };
+        AdminUserDto: {
+            /** @example 42 */
+            id: string;
+            /**
+             * @example AFFILIATE
+             * @enum {string}
+             */
+            role: "AFFILIATE" | "WHOLESALER" | "OPERATOR_LEAD" | "SUPERVISOR" | "WAREHOUSE" | "FINANCE" | "ADMIN" | "SUPERADMIN";
+            /** @example Akmal */
+            name: string;
+            /** @example +998901112233 */
+            phone: string;
+            /** @example akmal@example.com */
+            email: string | null;
+            /** @example null */
+            avatarUrl: string | null;
+            /** @example true */
+            isActive: boolean;
+            /** @example false */
+            isDeleted: boolean;
+            /**
+             * Format: date-time
+             * @example 2026-07-25T10:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-07-25T10:00:00.000Z
+             */
+            updatedAt: string;
+            /** @example Akmal */
+            firstName: string | null;
+            /** @example Karimov */
+            lastName: string | null;
+            /**
+             * @description Bloklangan — hamma token 401
+             * @example false
+             */
+            isBlocked: boolean;
+            /**
+             * @description Token versiyasi: blok yoki rol o‘zgarsa oshadi (eski tokenlar bekor)
+             * @example 3
+             */
+            authVersion: number;
+            /**
+             * Format: date-time
+             * @description 2FA ulangan vaqt (BE-26); ulanmagan — null
+             * @example null
+             */
+            totpEnabledAt: string | null;
+        };
         UpdateUserRoleDto: {
             /**
              * @example OPERATOR_LEAD
@@ -4423,6 +5492,15 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
             user: components["schemas"]["ImpersonatedUserDto"];
+        };
+        ShippingLabelsBatchDto: {
+            /**
+             * @example [
+             *       "101",
+             *       "102"
+             *     ]
+             */
+            orderIds: string[];
         };
         AdminShipmentTokensSyncDto: {
             /**
@@ -4531,17 +5609,40 @@ export interface components {
             type: string;
             /** @example 77012 */
             shipmentId: string;
-            /** @example 55 */
+            /**
+             * @description Lid buyurtmasi — `mp-order:<buyurtma>` (BE-20); eski do‘kon buyurtmasi — posilka raqami
+             * @example mp-order:55
+             */
             externalOrderId: string;
             /**
              * @example sold
              * @enum {string}
              */
-            status: "shipment_created" | "received" | "on_the_road" | "delivered" | "sold" | "cancelled" | "canceled" | "returned" | "settled";
+            status: "shipment_created" | "received" | "on_the_road" | "delivered" | "sold" | "cancelled" | "canceled" | "returned" | "settled" | "paid" | "partly_paid" | "closed";
             /** @example 499000 */
             codCollected?: number;
             /** @example 2026-08-27T08:00:00.000Z */
             occurredAt: string;
+            /**
+             * @description Kuryer mijozdan yig‘gan naqd (`collected_from_customer`)
+             * @example 499000
+             */
+            collectedFromCustomer?: number;
+            /**
+             * @description Elchi marketga shu paytgacha to‘lagan jami (`market_paid_amount`, snapshot)
+             * @example 449000
+             */
+            marketPaidAmount?: number;
+            /**
+             * @description Elchi haqi (`elchi_fee`)
+             * @example 50000
+             */
+            elchiFee?: number;
+            /**
+             * @description Kuryer yozgan qo‘shimcha xarajat (`extra_cost`), masalan bekor qilishda
+             * @example 20000
+             */
+            extraCost?: number;
         };
         FinanceLedgerEntryDto: {
             /** @example 501 */
@@ -4664,6 +5765,51 @@ export interface components {
              */
             outstandingCommission: number;
         };
+        CodDailyCheckMismatchDto: {
+            /** @example 55 */
+            orderId: string;
+            /** @example 1251134 */
+            shipmentId?: string | null;
+            /** @example paid */
+            elchiStatus: string;
+            /** @example 265000 */
+            expected: number;
+            /** @example 255000 */
+            received: number;
+            /** @example -10000 */
+            diff: number;
+        };
+        CodDailyCheckDto: {
+            /** @example 2026-12-01 */
+            date: string;
+            /** @description Mos (HOLD → AVAILABLE) */
+            matched: number;
+            /** @description Qisman to‘langan (partly_paid) */
+            partial: number;
+            /** @description Mos emas — ogohlantirish */
+            mismatch: number;
+            /** @description Buyurtma hodisasi hali kelmagan */
+            pending: number;
+            /** @description Kutilgan jami, so‘m */
+            expectedTotal: number;
+            /** @description Kelgan jami, so‘m */
+            receivedTotal: number;
+            mismatches: components["schemas"]["CodDailyCheckMismatchDto"][];
+            /** Format: date-time */
+            computedAt: string;
+            /**
+             * Format: date-time
+             * @description Moliya va nazoratchiga xabar yuborilgan vaqt
+             */
+            alertedAt?: string | null;
+        };
+        CodDailyCheckQueryDto: {
+            /**
+             * @description Sana (Toshkent); bo‘sh — kecha
+             * @example 2026-12-01
+             */
+            date?: string;
+        };
         FinanceCommissionDto: {
             /** @example 1 */
             id: string;
@@ -4708,9 +5854,9 @@ export interface components {
             /** @example iPhone 16 Pro */
             name: string;
             /** @example 1 */
-            categoryId?: unknown;
+            categoryId?: string | null;
             /** @example Titanium, 256 GB */
-            description?: unknown;
+            description?: string | null;
             /** @example 140000 */
             price?: number;
             /**
@@ -4722,7 +5868,7 @@ export interface components {
              * @description Sotuvchi haqi (A), so‘m, har offer uchun (TZ 1-bo‘lim 8-qaror)
              * @example 65000
              */
-            affiliateFee?: unknown;
+            affiliateFee?: number | null;
             /**
              * @description Bir dona og‘irligi, gramm (OPT-2, BUY-4)
              * @example 450
@@ -4744,12 +5890,12 @@ export interface components {
              */
             heightMm: number;
             /** @example 15999000 */
-            oldPrice?: unknown;
+            oldPrice?: number | null;
             /**
              * @description Asosiy rasm URL (yoki images massivida kamida bitta rasm bo‘lishi shart)
              * @example https://cdn.example.com/iphone.jpg
              */
-            imageUrl?: unknown;
+            imageUrl?: string | null;
             /**
              * @description Mahsulot rasmlari (agar imageUrl bo‘sh bo‘lsa, kamida bitta rasm talab qilinadi)
              * @example [
@@ -4763,7 +5909,9 @@ export interface components {
              *       "storage": "256 GB"
              *     }
              */
-            attributes?: unknown;
+            attributes?: {
+                [key: string]: unknown;
+            };
             /**
              * @description Offer sotuvchilarga ochiq (sukut: ha)
              * @example true
@@ -4775,18 +5923,135 @@ export interface components {
              */
             isBad?: boolean;
             /**
+             * @description BE-41: MXIK (IKPU) kodi, 17 raqam — fiskal chek qatori; CPA mahsulotida tasdiqdan oldin majburiy
+             * @example 03304001001000000
+             */
+            mxikCode?: string | null;
+            /**
+             * @description BE-41: qadoq (o‘lchov birligi) kodi, faqat raqam — fiskal chek qatori; CPA mahsulotida tasdiqdan oldin majburiy
+             * @example 1500012
+             */
+            packageCode?: string | null;
+            /**
              * @description Optovik ID si (OPT-1: shartnomasi kiritilgan bo‘lishi kerak)
              * @example 15
              */
             wholesalerId: string;
         };
+        ProductDto: {
+            /** @example 12 */
+            id: string;
+            /** @example 5 */
+            shopId: string;
+            /** @example 42 */
+            ownerUserId: string | null;
+            /** @example 1 */
+            categoryId: string | null;
+            /** @example iPhone 16 Pro */
+            name: string;
+            /** @example iphone-16-pro */
+            slug: string;
+            /** @example Titanium, 256 GB */
+            description: string | null;
+            /** @example 14999000 */
+            price: number;
+            /** @example 15999000 */
+            oldPrice: number | null;
+            /** @example null */
+            imageUrl: string | null;
+            images: string[];
+            /**
+             * @example {
+             *       "brand": "Apple"
+             *     }
+             */
+            attributes: {
+                [key: string]: unknown;
+            };
+            /** @example false */
+            hasVariants: boolean;
+            /** @enum {string} */
+            status: "DRAFT" | "PENDING_REVIEW" | "ACTIVE" | "REJECTED" | "ARCHIVED" | "OUT_OF_STOCK";
+            /** @example null */
+            moderationNote: string | null;
+            /** @example 140000 */
+            basePrice: number | null;
+            /** @example 65000 */
+            affiliateFee: number | null;
+            /** @example 450 */
+            weightGrams: number | null;
+            /** @example 200 */
+            lengthMm: number | null;
+            /** @example 120 */
+            widthMm: number | null;
+            /** @example 80 */
+            heightMm: number | null;
+            /**
+             * @description BE-09: tasdiqlangan narx
+             * @example 262000
+             */
+            approvedPrice: number | null;
+            /**
+             * @description BE-09: oxirgi narx qarori holati
+             * @example GREEN
+             */
+            priceStatus: string | null;
+            /**
+             * @description BE-09: raqobatchida mijoz jami (NRX-5)
+             * @example null
+             */
+            marketTotal: number | null;
+            /** @example true */
+            cpaEnabled: boolean;
+            /** @example false */
+            isBad: boolean;
+            /**
+             * @description BE-25: postavkada muddat kuzatiladi (OMB-3) — BAD mahsulot yoki toifa belgisi. Faqat admin ro‘yxati va kartasida
+             * @example false
+             */
+            expiryTracked?: boolean;
+            /**
+             * @description BE-25 (TZ 8): toifasi BAD — o‘z `isBad` belgisi bo‘lmasa ham sahifada «Dori vositasi emas». Faqat admin ro‘yxati va kartasida
+             * @example false
+             */
+            badByCategory?: boolean;
+            /** @example false */
+            isBlocked: boolean;
+            /**
+             * @description BE-27: yashirish sababi
+             * @example null
+             */
+            blockReason: string | null;
+            /**
+             * @description BE-41: MXIK (IKPU) kodi — fiskal chek qatori
+             * @example 03304001001000000
+             */
+            mxikCode: string | null;
+            /**
+             * @description BE-41: qadoq kodi — fiskal chek qatori
+             * @example 1500012
+             */
+            packageCode: string | null;
+            /** @example 4.75 */
+            rating: number;
+            /**
+             * Format: date-time
+             * @example 2026-08-14T10:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-08-14T10:00:00.000Z
+             */
+            updatedAt: string;
+        };
         AdminUpdateProductDto: {
             /** @example iPhone 16 Pro */
             name?: string;
             /** @example 1 */
-            categoryId?: unknown;
+            categoryId?: string | null;
             /** @example Titanium, 256 GB */
-            description?: unknown;
+            description?: string | null;
             /** @example 140000 */
             price?: number;
             /**
@@ -4798,7 +6063,7 @@ export interface components {
              * @description Sotuvchi haqi (A), so‘m, har offer uchun (TZ 1-bo‘lim 8-qaror)
              * @example 65000
              */
-            affiliateFee?: unknown;
+            affiliateFee?: number | null;
             /**
              * @description Bir dona og‘irligi, gramm (OPT-2, BUY-4)
              * @example 450
@@ -4820,12 +6085,12 @@ export interface components {
              */
             heightMm?: number;
             /** @example 15999000 */
-            oldPrice?: unknown;
+            oldPrice?: number | null;
             /**
              * @description Asosiy rasm URL (yoki images massivida kamida bitta rasm bo‘lishi shart)
              * @example https://cdn.example.com/iphone.jpg
              */
-            imageUrl?: unknown;
+            imageUrl?: string | null;
             /**
              * @description Mahsulot rasmlari (agar imageUrl bo‘sh bo‘lsa, kamida bitta rasm talab qilinadi)
              * @example [
@@ -4839,7 +6104,9 @@ export interface components {
              *       "storage": "256 GB"
              *     }
              */
-            attributes?: unknown;
+            attributes?: {
+                [key: string]: unknown;
+            };
             /**
              * @description Offer sotuvchilarga ochiq (sukut: ha)
              * @example true
@@ -4850,6 +6117,16 @@ export interface components {
              * @example false
              */
             isBad?: boolean;
+            /**
+             * @description BE-41: MXIK (IKPU) kodi, 17 raqam — fiskal chek qatori; CPA mahsulotida tasdiqdan oldin majburiy
+             * @example 03304001001000000
+             */
+            mxikCode?: string | null;
+            /**
+             * @description BE-41: qadoq (o‘lchov birligi) kodi, faqat raqam — fiskal chek qatori; CPA mahsulotida tasdiqdan oldin majburiy
+             * @example 1500012
+             */
+            packageCode?: string | null;
         };
         RejectProductDto: {
             /** @example Og‘irlik hujjatdagidan farq qiladi */
@@ -4858,6 +6135,77 @@ export interface components {
         HideProductDto: {
             /** @example Mahsulot rasmi yoki tavsifi qoidalarga zid */
             reason: string;
+        };
+        CreativeUploadRequestDto: {
+            /**
+             * @example VIDEO
+             * @enum {string}
+             */
+            type: "IMAGE" | "VIDEO";
+            /**
+             * @description Fayl turi (MIME)
+             * @example video/mp4
+             */
+            contentType: string;
+            /**
+             * @description Fayl hajmi, bayt
+             * @example 83886080
+             */
+            size: number;
+        };
+        CreativeUploadPolicyDto: {
+            /**
+             * @description Fayl `multipart/form-data` bilan shu manzilga POST qilinadi
+             * @example https://api.elchimarket.uz/media/marketplace-media
+             */
+            url: string;
+            /**
+             * @description Formaga shu maydonlar (o‘zgartirmasdan) va oxirida `file` qo‘shiladi
+             * @example {
+             *       "key": "creatives/12/…mp4",
+             *       "Content-Type": "video/mp4"
+             *     }
+             */
+            fields: {
+                [key: string]: string;
+            };
+            /**
+             * @description Tasdiqlashda shu kalit yuboriladi
+             * @example creative-uploads/12/7b0c…mp4
+             */
+            objectKey: string;
+            /** @example 2026-11-21T10:15:00.000Z */
+            expiresAt: string;
+            /**
+             * @description Ruxsat etilgan eng katta hajm, bayt
+             * @example 104857600
+             */
+            maxSize: number;
+        };
+        CreativeConfirmDto: {
+            /**
+             * @description Yuklash javobidagi `objectKey`
+             * @example creative-uploads/12/7b0c3e1a-….mp4
+             */
+            objectKey: string;
+        };
+        CreativeDto: {
+            /** @example 31 */
+            id: string;
+            /** @example 12 */
+            productId: string;
+            /** @enum {string} */
+            type: "IMAGE" | "VIDEO";
+            /** @example https://api.elchimarket.uz/media/marketplace-media/creatives/12/….mp4 */
+            url: string;
+            /** @example video/mp4 */
+            mimeType: string;
+            /** @example 83886080 */
+            size: number;
+            /** @example 0 */
+            position: number;
+            /** Format: date-time */
+            createdAt: string;
         };
         CreateWholesalerDto: {
             /** @example Gadget Trade MChJ */
@@ -4933,6 +6281,14 @@ export interface components {
              * @example null
              */
             ownerUserId: string | null;
+            /**
+             * @description Elektron shartnoma versiyasi (o‘zi ro‘yxatdan o‘tgan optovik, BE-30); qog‘oz shartnomada null
+             * @example 1.0
+             */
+            contractVersion: string | null;
+            contractAcceptedAt: string | null;
+            /** @description Ro‘yxat rad etilgan sabab (BE-30) */
+            moderationNote: string | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -5012,85 +6368,124 @@ export interface components {
             reason?: string;
         };
         PriceDecisionViewDto: {
+            /** @example 58 */
             id: string;
+            /** @example 42 */
             productId: string;
+            /** @example 249000 */
             price: number;
+            /** @example 140000 */
             basePrice: number;
+            /** @example 65000 */
             affiliateFee: number;
+            /** @example 262000 */
             recommended: number;
-            /** @enum {string} */
+            /**
+             * @example ORANGE
+             * @enum {string}
+             */
             status: "GREEN" | "YELLOW" | "ORANGE" | "RED";
+            /** @example Raqobatchi narxi past, pilot uchun */
             reason: string | null;
+            /** @example 3 */
             decidedBy: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @example 2026-11-21T10:02:00.000Z
+             */
             createdAt: string;
         };
         MarketCheckDto: {
             /** @example 290000 */
             competitorTotal: number;
+            /**
+             * @description BE-25 (FE-13): qayerda ko‘rildi
+             * @example Uzum Market, 2026-12-01
+             */
+            source?: string;
+            /**
+             * @description BE-25 (FE-13): true — natija saqlanmaydi (oldindan ko‘rish)
+             * @example false
+             */
+            preview?: boolean;
         };
         ProductPricePolicyDto: {
+            /**
+             * @description BE-27: izoh — kim so‘radi va sabab; faqat auditga yoziladi
+             * @example Superadmin so‘rovi (Shodiyor, 2026-11-22): Elchi tarifi oshdi
+             */
+            comment?: string;
             /** @enum {string|null} */
             deliveryMode?: "SEPARATE" | "PARTIAL" | "FREE" | null;
             /**
              * @description Ko‘rinadigan yetkazish, markazgacha
              * @example 30000
              */
-            visibleCenter?: unknown;
+            visibleCenter?: number | null;
             /**
              * @description Ko‘rinadigan yetkazish, eshikkacha
              * @example 50000
              */
-            visibleAddress?: unknown;
+            visibleAddress?: number | null;
         };
         PricePolicyDto: {
+            /**
+             * @description BE-27: izoh — kim so‘radi va sabab; faqat auditga yoziladi
+             * @example Superadmin so‘rovi (Shodiyor, 2026-11-22): Elchi tarifi oshdi
+             */
+            comment?: string;
             /**
              * @description K, sotilish 70% (2 xonagacha kasr)
              * @example 29688
              */
-            kSale70?: unknown;
+            kSale70?: number | null;
             /**
              * @description K, sotilish 100% (2 xonagacha kasr)
              * @example 15232
              */
-            kSale100?: unknown;
+            kSale100?: number | null;
             /**
              * @description M
              * @example 9000
              */
-            targetMargin?: unknown;
+            targetMargin?: number | null;
             /** @example 0.04 */
-            taxRate?: unknown;
+            taxRate?: number | null;
             /** @example 0.0185 */
-            paymentRate?: unknown;
+            paymentRate?: number | null;
             /** @example 12000 */
-            callCenterFee?: unknown;
+            callCenterFee?: number | null;
             /** @example 1.29 */
-            affiliateCoef?: unknown;
+            affiliateCoef?: number | null;
             /**
              * @description Sotuvchining reklama xarajati
              * @example 50420
              */
-            adCost?: unknown;
+            adCost?: number | null;
             /**
              * @description Ustama chegarasi, %
              * @example 10
              */
-            markupCapPercent?: unknown;
+            markupCapPercent?: number | null;
             /** @enum {string|null} */
             deliveryMode?: "SEPARATE" | "PARTIAL" | "FREE" | null;
             /**
              * @description Ko‘rinadigan yetkazish, markazgacha
              * @example 30000
              */
-            visibleCenter?: unknown;
+            visibleCenter?: number | null;
             /**
              * @description Ko‘rinadigan yetkazish, eshikkacha
              * @example 50000
              */
-            visibleAddress?: unknown;
+            visibleAddress?: number | null;
         };
         ElchiTariffDto: {
+            /**
+             * @description BE-27: izoh — kim so‘radi va sabab; faqat auditga yoziladi
+             * @example Superadmin so‘rovi (Shodiyor, 2026-11-22): Elchi tarifi oshdi
+             */
+            comment?: string;
             /** @example 40000 */
             centerBase: number;
             /** @example 3000 */
@@ -5118,7 +6513,9 @@ export interface components {
              *       "shopName": "Do‘kon nomi"
              *     }
              */
-            variables: unknown;
+            variables: {
+                [key: string]: string;
+            };
             title: string;
             body: string;
             /** @description false — standart matn */
@@ -5182,28 +6579,52 @@ export interface components {
             previewToken: string;
         };
         BroadcastDto: {
+            /** @example 12 */
             id: string;
-            /** @enum {string} */
+            /**
+             * @example sellers
+             * @enum {string}
+             */
             audience: "all" | "sellers" | "buyers";
+            /**
+             * @example [
+             *       "sms"
+             *     ]
+             */
             channels: ("sms" | "email")[];
+            /** @example Yangi aksiya */
             title: string;
+            /** @example Bugundan 20% chegirma! */
             body: string;
+            /** @example 42 */
             recipientsCount: number;
+            /** @example 42 */
             sentCount: number;
-            /** @enum {string} */
+            /**
+             * @example DONE
+             * @enum {string}
+             */
             status: "QUEUED" | "SENDING" | "DONE" | "FAILED";
+            /** @example 1 */
             createdBy: string | null;
+            /** @example 2026-11-20T08:00:00.000Z */
             createdAt: string;
+            /** @example 2026-11-20T08:00:41.000Z */
             finishedAt: string | null;
+            /** @example null */
             lastError: string | null;
             /** @description true — shu token bilan allaqachon yuborilgan (ikki marta bosish) */
             idempotent?: boolean;
         };
         BroadcastsPageDto: {
             items: components["schemas"]["BroadcastDto"][];
+            /** @example 1 */
             total: number;
+            /** @example 1 */
             page: number;
+            /** @example 20 */
             limit: number;
+            /** @example 1 */
             totalPages: number;
         };
         AdminTeamMemberDto: {
@@ -5271,7 +6692,7 @@ export interface components {
              */
             supportPhone: string;
             /** @example 17 */
-            updatedBy: unknown;
+            updatedBy: string | null;
             /**
              * Format: date-time
              * @example 2026-09-08T12:00:00.000Z
@@ -5471,179 +6892,6 @@ export interface components {
              */
             satoCode: string;
         };
-        BuyerOrderListItemProductDto: {
-            /**
-             * @description sales_order_item ID — `POST /products/:productId/reviews` dagi `orderItemId`
-             * @example 31
-             */
-            id: string;
-            /** @example 7 */
-            productId: string;
-            /** @example Mahsulot */
-            name: string;
-            /** @example 1 */
-            quantity: number;
-            /** @example 100000 */
-            unitPrice: number;
-            /** @example null */
-            imageUrl?: unknown;
-            /**
-             * @description Shu mahsulot tegishli sotuvchi sub-buyurtmasining holati. Sharh faqat `DELIVERED` bo‘lganda qabul qilinadi (ko‘p sotuvchili buyurtmada `orderStatus` bundan farq qilishi mumkin).
-             * @example DELIVERED
-             * @enum {string}
-             */
-            sellerOrderStatus: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
-        };
-        BuyerOrderListItemDto: {
-            /** @example 42 */
-            orderId: string;
-            /** @example 2026-09-15T10:00:00.000Z */
-            createdAt: unknown;
-            /** @example CONFIRMED */
-            orderStatus: string;
-            /**
-             * @example cod
-             * @enum {string}
-             */
-            paymentMethod: "online" | "cod";
-            /**
-             * @description Online to‘lov provayderi; COD yoki to‘lovsiz buyurtmada null.
-             * @example PAYME
-             */
-            paymentProvider?: string | null;
-            /**
-             * @description COD buyurtmada yoki to‘lov hali boshlanmagan bo‘lsa null.
-             * @example PAID
-             * @enum {string|null}
-             */
-            paymentStatus?: "PENDING" | "PAID" | "CANCELLED" | "FAILED" | "REFUNDED" | null;
-            /** @example 100000 */
-            subtotal: number;
-            /** @example 15000 */
-            deliveryFee: number;
-            /** @example 115000 */
-            totalAmount: number;
-            items: components["schemas"]["BuyerOrderListItemProductDto"][];
-        };
-        BuyerOrdersPageDto: {
-            items: components["schemas"]["BuyerOrderListItemDto"][];
-            /** @example 1 */
-            total: number;
-            /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 1 */
-            totalPages: number;
-        };
-        BuyerOrderItemDto: {
-            /** @example 88 */
-            productId: string;
-            /** @example Telefon */
-            productName: string;
-            /** @example 5 */
-            variantId: string;
-            /** @example 2 */
-            quantity: number;
-            /** @example 225000 */
-            unitPrice: number;
-            /** @example 450000 */
-            lineTotal: number;
-        };
-        BuyerOrderShopDto: {
-            /** @example 31 */
-            id: string;
-            /** @example 15 */
-            shopId: string;
-            /** @example 450000 */
-            subtotal: number;
-            /** @example 25000 */
-            deliveryFee: number;
-            /** @example ON_THE_ROAD */
-            status: string;
-            /** @example 987 */
-            elchiShipmentId?: unknown;
-            /** @example https://elchi.uz/track/987 */
-            trackingUrl?: unknown;
-            items: components["schemas"]["BuyerOrderItemDto"][];
-        };
-        BuyerOrderDetailsDto: {
-            /** @example 42 */
-            id: string;
-            /** @example Ali */
-            buyerName?: unknown;
-            /** @example CONFIRMED */
-            status: string;
-            /** @example cod */
-            paymentMethod: string;
-            /** @example 475000 */
-            totalAmount: number;
-            /** @example 25000 */
-            deliveryFee: number;
-            /** @example Toshkent, Amir Temur 1 */
-            deliveryAddress?: unknown;
-            /** @example 2026-09-14T10:00:00.000Z */
-            createdAt: unknown;
-            /** @example 2026-09-14T10:30:00.000Z */
-            updatedAt: unknown;
-            sellerOrders: components["schemas"]["BuyerOrderShopDto"][];
-        };
-        BuyerOrderPaymentDto: {
-            /**
-             * @description payment.id
-             * @example 7
-             */
-            id: string;
-            /**
-             * @example PAYME
-             * @enum {string}
-             */
-            provider: "PAYME" | "CLICK";
-            /** @example 125000 */
-            amount: number;
-            /**
-             * @example PAID
-             * @enum {string}
-             */
-            status: "PENDING" | "PAID" | "CANCELLED" | "FAILED" | "REFUNDED";
-            /**
-             * @description Faqat CANCELLED/FAILED holatida to‘ladi.
-             * @example Tranzaksiya vaqt tugashi sababli bekor qilindi
-             */
-            failureReason?: string | null;
-            /** @example 2026-09-16T10:05:00.000Z */
-            updatedAt: string;
-        };
-        BuyerShipmentTrackingDto: {
-            /** @example 7 */
-            shipmentId: string;
-            /** @example 3 */
-            shopId: string;
-            /** @example Elchi do‘koni */
-            shopName: string;
-            /** @example OUT_FOR_DELIVERY */
-            shipmentStatus: string;
-            /** @example https://elchi.uz/track/7 */
-            trackingUrl?: unknown;
-            /** @example 2026-09-14T10:30:00.000Z */
-            updatedAt: unknown;
-        };
-        BuyerOrderTrackingDto: {
-            /** @example 42 */
-            orderId: string;
-            /** @example IN_TRANSIT */
-            orderStatus: string;
-            /**
-             * @description Yetkazish provayderi bergan taxminiy vaqt; mavjud bo‘lmasa null
-             * @example 2026-09-16T12:00:00.000Z
-             */
-            estimatedDeliveryAt?: unknown;
-            /** @example 2026-09-14T10:30:00.000Z */
-            updatedAt: unknown;
-            /** @description COD buyurtmada yoki to‘lov hali boshlanmagan bo‘lsa null. */
-            payment?: components["schemas"]["BuyerOrderPaymentDto"] | null;
-            shipments: components["schemas"]["BuyerShipmentTrackingDto"][];
-        };
         AdminStockInboundDto: {
             /** @example 501 */
             variantId: string;
@@ -5665,18 +6913,214 @@ export interface components {
             /** @example Inventarizatsiya: 1 dona kam */
             reason: string;
             idempotencyKey?: string;
+            /** @example 9 */
+            lotId?: string;
+            /** @example false */
+            goodStock?: boolean;
+        };
+        DeclareInboundItemDto: {
+            /**
+             * @description CPA mahsulot
+             * @example 42
+             */
+            productId: string;
+            /** @example 100 */
+            quantity: number;
+        };
+        DeclareInboundDto: {
+            /**
+             * @description Optovik (komitent)
+             * @example 15
+             */
+            wholesalerId: string;
+            /**
+             * @description Kutilgan kelish sanasi
+             * @example 2026-12-01
+             */
+            expectedAt: string;
+            /** @example Haftalik postavka */
+            note?: string;
+            items: components["schemas"]["DeclareInboundItemDto"][];
+        };
+        InboundShipmentItemDto: {
+            /** @example 7 */
+            id: string;
+            /** @example 42 */
+            productId: string;
+            /** @example Vitamin D3 2000 IU, 60 kapsula */
+            productName: string;
+            /** @example 901 */
+            variantId: string;
+            /** @example VIT-D3-60 */
+            sku: string;
+            /** @example 4780012345678 */
+            barcode?: string | null;
+            /** @example 100 */
+            declaredQty: number;
+            /** @example 98 */
+            receivedQty?: number | null;
+            /** @example 2 */
+            defectiveQty?: number | null;
+            /** @example P-2026-11 */
+            batch?: string | null;
+            /** @example 2027-06-30 */
+            expiryDate?: string | null;
+            /** @example B-02-1 */
+            cell?: string | null;
+            /**
+             * @description BE-25 (OMB-3): muddat kuzatiladi — BAD mahsulot yoki toifa belgisi. Katalog javob bermasa null. Optovik kabinetida yo‘q
+             * @example true
+             */
+            expiryTracked?: boolean | null;
+        };
+        InboundShipmentDto: {
+            /** @example 14 */
+            id: string;
+            /** @example PS-000014 */
+            number: string;
+            /** @example 15 */
+            wholesalerId: string;
+            /** @example Gadget Trade MChJ */
+            wholesalerName?: string | null;
+            /**
+             * @example DISCREPANCY
+             * @enum {string}
+             */
+            status: "DECLARED" | "IN_TRANSIT" | "RECEIVED" | "DISCREPANCY";
+            /** @example 2026-12-01 */
+            expectedAt: string;
+            /** @example Haftalik postavka */
+            note?: string | null;
+            /** @example 3 */
+            declaredBy: string;
+            /** @example Nodira K. */
+            declaredByName?: string | null;
+            /**
+             * @description Kiritgan odam roli: optovik, omborchi, admin yoki superadmin
+             * @example ADMIN
+             * @enum {string|null}
+             */
+            declaredByRole?: "AFFILIATE" | "WHOLESALER" | "OPERATOR_LEAD" | "SUPERVISOR" | "WAREHOUSE" | "FINANCE" | "ADMIN" | "SUPERADMIN" | null;
+            /** @example 5 */
+            receivedBy?: string | null;
+            /** @example Jasur T. */
+            receivedByName?: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-12-01T06:40:00.000Z
+             */
+            receivedAt?: string | null;
+            /** @example 2 dona qadog‘i yirtilgan */
+            receiveComment?: string | null;
+            items: components["schemas"]["InboundShipmentItemDto"][];
+            /**
+             * Format: date-time
+             * @example 2026-11-28T10:05:00.000Z
+             */
+            createdAt: string;
+        };
+        InboundShipmentPageDto: {
+            items: components["schemas"]["InboundShipmentDto"][];
+            /** @example 1 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /**
+             * @description BE-25: holatlar soni — `status` dan boshqa filtrlar bo‘yicha (yorliqlar)
+             * @example {
+             *       "DECLARED": 3,
+             *       "IN_TRANSIT": 1,
+             *       "RECEIVED": 12,
+             *       "DISCREPANCY": 2
+             *     }
+             */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        ReceiveInboundItemDto: {
+            /**
+             * @description Postavka qatori
+             * @example 7
+             */
+            itemId: string;
+            /**
+             * @description Kelgan (brak bilan birga)
+             * @example 98
+             */
+            receivedQty: number;
+            /**
+             * @description Shundan brak
+             * @example 2
+             */
+            defectiveQty: number;
+            /** @example P-2026-11 */
+            batch?: string;
+            /**
+             * @description Yaroqlilik muddati (BAD, kosmetika, oziq-ovqat)
+             * @example 2027-06-30
+             */
+            expiryDate?: string;
+            /**
+             * @description Yacheyka manzili
+             * @example B-02-1
+             */
+            cell: string;
+        };
+        ReceiveInboundDto: {
+            items: components["schemas"]["ReceiveInboundItemDto"][];
+            /** @example 2 dona qadog‘i yirtilgan */
+            comment?: string;
+        };
+        StockLotDto: {
+            /** @example 31 */
+            id: string;
+            /** @example 901 */
+            variantId: string;
+            /** @example VIT-D3-60 */
+            sku: string;
+            /** @example Vitamin D3 2000 IU, 60 kapsula */
+            productName: string;
+            /** @example P-2026-11 */
+            batch?: string | null;
+            /** @example 2027-06-30 */
+            expiryDate: string;
+            /**
+             * @description Muddat − 60 kun; shundan keyin sotilmaydi
+             * @example 2027-05-01
+             */
+            sellableUntil: string;
+            /** @example 96 */
+            quantity: number;
+            /** @example false */
+            blocked: boolean;
+            /** @example 15 */
+            wholesalerId: string;
+            /**
+             * @description BE-25: katalog javob bermasa null
+             * @example Gadget Trade MChJ
+             */
+            wholesalerName?: string | null;
+            /**
+             * Format: date-time
+             * @description BE-25 (OMB-3): sotuvdan chiqqani haqida admin va superadminga xabar vaqti; hali yuborilmagan — null
+             * @example null
+             */
+            notifiedAt: string | null;
         };
         AdminStockItemDto: {
             /** @example 88 */
             variantId: string;
             /** @example 12 */
-            productId: unknown;
+            productId: string | null;
             /** @example iPhone 16 Pro */
-            productName: unknown;
+            productName: string | null;
             /** @example Qora / 256 GB */
-            variantName: unknown;
+            variantName: string | null;
             /** @example IPHONE-16-BLACK-256 */
-            sku: unknown;
+            sku: string | null;
             /**
              * @description true — katalogda variant topilmadi (o‘chirilgan). Qator baribir qaytadi.
              * @example false
@@ -5684,6 +7128,10 @@ export interface components {
             catalogMissing: boolean;
             /** @example 15 */
             shopId: string | null;
+            /** @example Gadget Trade MChJ */
+            shopName: string | null;
+            /** @example 4780012345678 */
+            barcode: string | null;
             /** @example 3 */
             warehouseId: string;
             /** @example Asosiy ombor */
@@ -5698,6 +7146,10 @@ export interface components {
             available: number;
             /** @example 5 */
             lowStockThreshold: number;
+            /** @example B-02-1 */
+            cell: string | null;
+            /** @example 0 */
+            blocked: number;
         };
         AdminCatalogWarningDto: {
             /** @example null */
@@ -5726,13 +7178,13 @@ export interface components {
             /** @example 88 */
             variantId: string;
             /** @example 12 */
-            productId: unknown;
+            productId: string | null;
             /** @example iPhone 16 Pro */
-            productName: unknown;
+            productName: string | null;
             /** @example Qora / 256 GB */
-            variantName: unknown;
+            variantName: string | null;
             /** @example IPHONE-16-BLACK-256 */
-            sku: unknown;
+            sku: string | null;
             /**
              * @description true — katalogda variant topilmadi (o‘chirilgan). Qator baribir qaytadi.
              * @example false
@@ -5748,10 +7200,10 @@ export interface components {
             quantity: number;
             onHandAfter: number;
             reservedAfter: number;
-            referenceType: unknown;
-            referenceId: unknown;
-            reason: unknown;
-            actorId: unknown;
+            referenceType: string | null;
+            referenceId: string | null;
+            reason: string | null;
+            actorId: string | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -5762,29 +7214,6 @@ export interface components {
             limit: number;
             totalPages: number;
             warnings: components["schemas"]["AdminCatalogWarningDto"][];
-        };
-        ReturnRequestItemInputDto: {
-            /**
-             * @description sales_order_item ID — `GET /orders` javobidagi `items[].id`
-             * @example 31
-             */
-            orderItemId: string;
-            /** @example 1 */
-            quantity: number;
-        };
-        CreateReturnRequestDto: {
-            /** @description Qaytariladigan tovarlar. Turli do‘konlarning tovarlari bo‘lsa, har posilka uchun alohida so‘rov yaratiladi. */
-            items: components["schemas"]["ReturnRequestItemInputDto"][];
-            /**
-             * @example DEFECTIVE
-             * @enum {string}
-             */
-            reason: "DEFECTIVE" | "DAMAGED" | "INCOMPLETE" | "WRONG_ITEM" | "NOT_AS_DESCRIBED" | "CHANGED_MIND" | "OTHER";
-            /**
-             * @description `OTHER` sababida majburiy
-             * @example Ekranda chiziq bor
-             */
-            comment?: string;
         };
         ReturnRequestItemDto: {
             /** @example 5 */
@@ -5855,10 +7284,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             items: components["schemas"]["ReturnRequestItemDto"][];
-        };
-        CreateReturnRequestsResultDto: {
-            /** @description Har posilka (do‘kon) uchun bitta so‘rov */
-            items: components["schemas"]["ReturnRequestDto"][];
         };
         ReturnRequestsPageDto: {
             items: components["schemas"]["ReturnRequestDto"][];
@@ -5934,10 +7359,6 @@ export interface components {
             items: components["schemas"]["ReturnRequestItemDto"][];
             history: components["schemas"]["ReturnRequestHistoryDto"][];
         };
-        ReturnReviewDto: {
-            /** @example Tovar qabul qilindi, tekshirilmoqda */
-            comment?: string;
-        };
         ReturnApproveDto: {
             /** @example Tovar qabul qilindi, tekshirilmoqda */
             comment?: string;
@@ -5960,67 +7381,28 @@ export interface components {
             /** @example Karta orqali qaytarildi, chek #123 */
             comment?: string;
         };
-        SellerFinanceSummaryDto: {
-            /** @example 7 */
-            shopId: string;
+        ReturnRequestItemInputDto: {
             /**
-             * @description Joriy ledger balansi: musbat — platforma sotuvchiga qarzdor, manfiy — sotuvchining komissiya qarzi (keyingi payout’dan ushlanadi). Davrga bog‘liq emas
-             * @example 1180000
+             * @description sales_order_item ID — `GET /orders` javobidagi `items[].id`
+             * @example 31
              */
-            balance: number;
-            /**
-             * @description To‘lanishi kutilayotgan payout’lar (PENDING + APPROVED), hozirgi holat
-             * @example 450000
-             */
-            pendingPayoutAmount: number;
-            /**
-             * @description Ushlab turilgan payout’lar (HELD)
-             * @example 0
-             */
-            heldPayoutAmount: number;
-            /**
-             * @description Davr ichida to‘langan payout’lar (paid_at bo‘yicha)
-             * @example 2300000
-             */
-            paidPayoutAmount: number;
-            /** @description COD reconciliation — /admin/finance/reports bilan bir xil, davr bo‘yicha */
-            cod: components["schemas"]["FinanceReconciliationReportDto"];
-            /**
-             * @example WEEKLY
-             * @enum {string}
-             */
-            payoutSchedule: "DAILY" | "WEEKLY" | "MONTHLY";
-            /** @example 2026-10-05 */
-            nextPayoutDate: string;
+            orderItemId: string;
+            /** @example 1 */
+            quantity: number;
         };
-        PayoutScheduleDto: {
+        CreateReturnRequestDto: {
+            /** @description Qaytariladigan tovarlar. Turli do‘konlarning tovarlari bo‘lsa, har posilka uchun alohida so‘rov yaratiladi. */
+            items: components["schemas"]["ReturnRequestItemInputDto"][];
             /**
-             * @example WEEKLY
+             * @example DEFECTIVE
              * @enum {string}
              */
-            frequency: "DAILY" | "WEEKLY" | "MONTHLY";
+            reason: "DEFECTIVE" | "DAMAGED" | "INCOMPLETE" | "WRONG_ITEM" | "NOT_AS_DESCRIBED" | "CHANGED_MIND" | "OTHER";
             /**
-             * @description Do‘kon hali tanlamagan — platforma default’i (WEEKLY)
-             * @example true
+             * @description `OTHER` sababida majburiy
+             * @example Ekranda chiziq bor
              */
-            isDefault: boolean;
-            /**
-             * @description Bugungi tushum o‘tadigan eng yaqin to‘lov kuni (Asia/Tashkent, bugundan keyin): DAILY — ertaga, WEEKLY — dushanba, MONTHLY — oyning 1-kuni
-             * @example 2026-10-05
-             */
-            nextPayoutDate: string;
-            /**
-             * Format: date-time
-             * @example null
-             */
-            updatedAt: string | null;
-        };
-        UpdatePayoutScheduleDto: {
-            /**
-             * @example WEEKLY
-             * @enum {string}
-             */
-            frequency: "DAILY" | "WEEKLY" | "MONTHLY";
+            comment?: string;
         };
         VariantReportRowDto: {
             /**
@@ -6093,7 +7475,9 @@ export interface components {
              *       "NOT_NEEDED": 22
              *     }
              */
-            rejectReasons: unknown;
+            rejectReasons: {
+                [key: string]: number;
+            };
         };
         VariantReportDto: {
             /** @example 2027-01-01 */
@@ -6331,6 +7715,11 @@ export interface components {
              */
             consentVersion: string;
             /**
+             * @description BE-34: SMS bilan tasdiq faqat asosiy saytda; sotuvchi sahifasi lidini har doim operator tasdiqlaydi — qiymat e’tiborga olinmaydi (TC8)
+             * @enum {string}
+             */
+            confirmMode?: "CALL" | "SMS";
+            /**
              * @description POST /clicks javobi
              * @example 90311
              */
@@ -6439,6 +7828,68 @@ export interface components {
             limit: number;
             /** @example 3 */
             totalPages: number;
+        };
+        AffiliateOfferCreativeDto: {
+            /** @example 31 */
+            id: string;
+            /** @enum {string} */
+            type: "IMAGE" | "VIDEO";
+            /** @example https://api.elchimarket.uz/media/marketplace-media/creatives/12/….mp4 */
+            url: string;
+            /** @description Admin izohi (hozir yo‘q) */
+            caption: string | null;
+            /**
+             * @description Video tayyorlanmoqda (hozir doim false — fayl yuklanganda tekshiriladi)
+             * @example false
+             */
+            processing: boolean;
+            /**
+             * @description Kutubxonaga qo‘shilgan vaqt (moderatsiya yo‘q)
+             * @example 2026-11-21T10:00:00.000Z
+             */
+            approvedAt: string;
+        };
+        AffiliateOfferDetailDto: {
+            /** @example 12 */
+            productId: string;
+            name: string;
+            imageUrl: string | null;
+            approvedPrice: number;
+            maxSalePrice: number;
+            affiliateFee: number;
+            epc: number | null;
+            approveRate: number | null;
+            saleRate: number | null;
+            stock: number;
+            hasVideo: boolean;
+            categoryName: string | null;
+            subtitle: string | null;
+            description: string | null;
+            /** @description Qutida (offer matnidan) */
+            boxContents: string | null;
+            weightKg: number | null;
+            /**
+             * @description Hozir null — katalog snapshotida yo‘q
+             * @enum {string|null}
+             */
+            deliveryMode: "SEPARATE" | "PARTIAL" | "FREE" | null;
+            centerDeliveryFee: number;
+            addressDeliveryFee: number;
+            isBad: boolean;
+            /**
+             * @description Qoldiq 0 — OUT_OF_STOCK (yopiq offer — 404)
+             * @enum {string}
+             */
+            state: "OPEN" | "OUT_OF_STOCK";
+            stoppedAt: string | null;
+            stopReason: string | null;
+            /** @example 2026-11-20 */
+            onSaleSince: string;
+            /** @description Hamma sotuvchilar natijasi — hozir null */
+            results: unknown;
+            /** @description Narx taqsimoti — hozir null */
+            priceSplit: unknown;
+            creatives: components["schemas"]["AffiliateOfferCreativeDto"][];
         };
         CreateAffiliateStreamDto: {
             /** @example 501 */
@@ -6933,6 +8384,406 @@ export interface components {
              */
             updatedAt: string;
         };
+        AffiliateAgreementDto: {
+            /** @enum {string} */
+            type: "affiliate-offer" | "personal-data-consent" | "wholesaler-contract";
+            /** @example 1.0 */
+            version: string;
+            /** @example 2026-11-22T04:14:00.000Z */
+            acceptedAt: string;
+            /**
+             * @description Shu turdagi joriy (eng so‘nggi qabul qilingan) versiya
+             * @example true
+             */
+            current: boolean;
+        };
+        SelfEmployedInfoDto: {
+            /**
+             * @example PENDING
+             * @enum {string}
+             */
+            status: "NOT_SUBMITTED" | "PENDING" | "VERIFIED" | "REJECTED" | "REVOKED";
+            /** @example 4018 */
+            pinflLast4: string | null;
+            /**
+             * @description Faoliyat turi (TZ 8, 34-band); yuborilmagan bo‘lsa — null
+             * @example SMM va internet-marketing
+             */
+            activity: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-11-25T12:05:00.000Z
+             */
+            submittedAt: string | null;
+            /**
+             * Format: date-time
+             * @description Tasdiqlangan, rad etilgan yoki bekor qilingan vaqt
+             * @example null
+             */
+            checkedAt: string | null;
+            /**
+             * @description Rad yoki bekor qilish sababi (matn)
+             * @example null
+             */
+            reason: string | null;
+            /**
+             * @description Tekshiruvchi izohi
+             * @example null
+             */
+            comment: string | null;
+            /** @example maqom-malumotnoma.pdf */
+            documentName: string | null;
+        };
+        AffiliateProfileDto: {
+            /** @example 1001 */
+            id: string;
+            /** @example  */
+            firstName: string;
+            /** @example  */
+            lastName: string;
+            /** @example +998973152286 */
+            phone: string;
+            /** @example 2026-11-22T04:14:00.000Z */
+            registeredAt: string;
+            /** @example 2026-11-22T04:14:00.000Z */
+            lastLoginAt: string | null;
+            agreements: components["schemas"]["AffiliateAgreementDto"][];
+            /**
+             * @description Joriy e’lon qilingan, lekin hali qabul qilinmagan versiyalar — qayta qabul kerak
+             * @example [
+             *       {
+             *         "type": "affiliate-offer",
+             *         "version": "1.1"
+             *       }
+             *     ]
+             */
+            pendingAgreements: string[];
+            /** @description Moliya javob bermasa — yo‘q */
+            selfEmployed?: components["schemas"]["SelfEmployedInfoDto"];
+            /**
+             * @description Karta — BE-32 (hozircha null)
+             * @example null
+             */
+            card?: unknown;
+        };
+        UpdateAffiliateProfileDto: {
+            /** @example Jasur */
+            firstName: string;
+            /** @example Tursunov */
+            lastName: string;
+        };
+        AcceptAgreementDto: {
+            /** @enum {string} */
+            type: "affiliate-offer" | "personal-data-consent" | "wholesaler-contract";
+            /** @example 1.1 */
+            version: string;
+        };
+        SelfEmployedDocumentDto: {
+            /** @example 0f0e8f3a-1b2c-4d5e-8f90-a1b2c3d4e5f6.pdf */
+            documentId: string;
+            /** @example maqom-malumotnoma.pdf */
+            name: string;
+        };
+        SubmitSelfEmployedDto: {
+            /**
+             * @description JShShIR, 14 raqam (PINFL_INVALID). Shifrlangan saqlanadi, javoblarda faqat oxirgi 4 raqam
+             * @example 30101195600018
+             */
+            pinfl: string;
+            /**
+             * @description Oldindan yuklangan ma’lumotnoma (`POST affiliate/self-employed/document`); ixtiyoriy
+             * @example 0f0e8f3a-1b2c-4d5e-8f90-a1b2c3d4e5f6.pdf
+             */
+            documentId?: string;
+        };
+        SelfEmployedApplicationDto: {
+            /** @example 12 */
+            id: string;
+            /** @example 77 */
+            affiliateId: string;
+            /**
+             * @description Yuborilgandagi
+             * @example Sevara Yusupova
+             */
+            fullName: string;
+            /**
+             * @description SUPERSEDED — ism o‘zgargan, o‘rniga yangi ariza (ro‘yxatda chiqmaydi)
+             * @enum {string}
+             */
+            status: "PENDING" | "VERIFIED" | "REJECTED" | "REVOKED" | "SUPERSEDED";
+            /** @enum {string} */
+            source: "SELLER" | "NAME_CHANGE" | "MANUAL";
+            /** @example 3365 */
+            pinflLast4: string | null;
+            /** @example SMM va internet-marketing */
+            activity: string;
+            /** Format: date-time */
+            submittedAt: string;
+            /** Format: date-time */
+            checkedAt: string | null;
+            /** @example 15 */
+            checkedBy: string | null;
+            /**
+             * @example null
+             * @enum {string|null}
+             */
+            reason: "PINFL_NOT_FOUND" | "STATUS_INACTIVE" | "ACTIVITY_MISMATCH" | "DOCUMENT_UNREADABLE" | "NAME_MISMATCH" | "NAME_CHANGED" | null;
+            /** @example null */
+            reasonText: string | null;
+            /** @example null */
+            comment: string | null;
+            /** @example maqom-malumotnoma.pdf */
+            documentName: string | null;
+        };
+        SelfEmployedCountsDto: {
+            /** @example 4 */
+            PENDING: number;
+            /** @example 12 */
+            VERIFIED: number;
+            /** @example 1 */
+            REJECTED: number;
+            /** @example 0 */
+            REVOKED: number;
+        };
+        SelfEmployedPageDto: {
+            items: components["schemas"]["SelfEmployedApplicationDto"][];
+            /** @example 4 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            counts: components["schemas"]["SelfEmployedCountsDto"];
+        };
+        SelfEmployedDetailDto: {
+            /** @example 12 */
+            id: string;
+            /** @example 77 */
+            affiliateId: string;
+            /**
+             * @description Yuborilgandagi
+             * @example Sevara Yusupova
+             */
+            fullName: string;
+            /**
+             * @description SUPERSEDED — ism o‘zgargan, o‘rniga yangi ariza (ro‘yxatda chiqmaydi)
+             * @enum {string}
+             */
+            status: "PENDING" | "VERIFIED" | "REJECTED" | "REVOKED" | "SUPERSEDED";
+            /** @enum {string} */
+            source: "SELLER" | "NAME_CHANGE" | "MANUAL";
+            /** @example 3365 */
+            pinflLast4: string | null;
+            /** @example SMM va internet-marketing */
+            activity: string;
+            /** Format: date-time */
+            submittedAt: string;
+            /** Format: date-time */
+            checkedAt: string | null;
+            /** @example 15 */
+            checkedBy: string | null;
+            /**
+             * @example null
+             * @enum {string|null}
+             */
+            reason: "PINFL_NOT_FOUND" | "STATUS_INACTIVE" | "ACTIVITY_MISMATCH" | "DOCUMENT_UNREADABLE" | "NAME_MISMATCH" | "NAME_CHANGED" | null;
+            /** @example null */
+            reasonText: string | null;
+            /** @example null */
+            comment: string | null;
+            /** @example maqom-malumotnoma.pdf */
+            documentName: string | null;
+            /**
+             * @description Shu sotuvchining oxirgi arizasimi (eskirganini tasdiqlab bo‘lmaydi)
+             * @example true
+             */
+            current: boolean;
+            /**
+             * @description Mavjud pul, so‘m — tasdiqni kutayotgan to‘lov
+             * @example 130000
+             */
+            available: number;
+            /**
+             * @description Shu JShShIR bilan tekshirilayotgan yoki tasdiqlangan boshqa sotuvchilar [taklif — faqat ogohlantirish]
+             * @example []
+             */
+            samePinflAffiliateIds: string[];
+        };
+        PinflDto: {
+            /** @example 30101195600018 */
+            pinfl: string;
+        };
+        RejectSelfEmployedDto: {
+            /** @enum {string} */
+            reason: "PINFL_NOT_FOUND" | "STATUS_INACTIVE" | "ACTIVITY_MISMATCH" | "DOCUMENT_UNREADABLE" | "NAME_MISMATCH";
+            /**
+             * @description Sotuvchiga ko‘rinadi
+             * @example Hujjatda boshqa faoliyat turi.
+             */
+            comment?: string;
+        };
+        RevokeSelfEmployedDto: {
+            /** @enum {string} */
+            reason: "PINFL_NOT_FOUND" | "STATUS_INACTIVE" | "ACTIVITY_MISMATCH" | "DOCUMENT_UNREADABLE" | "NAME_MISMATCH";
+            /**
+             * @description Sotuvchiga ko‘rinadi
+             * @example Hujjatda boshqa faoliyat turi.
+             */
+            comment?: string;
+        };
+        LegalSummaryItemDto: {
+            /** @example Haq */
+            term: string;
+            /** @example faqat mijoz to‘lagan buyurtma uchun, so‘mda yoziladi. */
+            text: string;
+        };
+        LegalSectionDto: {
+            /** @example s1 */
+            id: string;
+            /** @example 1. Atamalar va taraflar */
+            title: string;
+            /** @example … */
+            body: string;
+        };
+        LegalDocumentDto: {
+            /**
+             * @example affiliate-offer
+             * @enum {string}
+             */
+            type: "affiliate-offer" | "personal-data-consent" | "wholesaler-contract";
+            /** @example 1.0 */
+            version: string;
+            /**
+             * @description Kuchga kirish vaqti; null — matn hali e’lon qilinmagan (ekranda «e’lon qilinadi»), bunday hujjat bilan ro‘yxat yopiq
+             * @example null
+             */
+            effectiveAt: string | null;
+            summary: components["schemas"]["LegalSummaryItemDto"][];
+            sections: components["schemas"]["LegalSectionDto"][];
+        };
+        PublishLegalDocumentDto: {
+            /** @example 1.1 */
+            version: string;
+            /**
+             * @description Kuchga kirish vaqti; berilmasa — darhol (e’lon paytidan)
+             * @example 2026-12-01T00:00:00+05:00
+             */
+            effectiveAt?: string | null;
+            summary: components["schemas"]["LegalSummaryItemDto"][];
+            sections: components["schemas"]["LegalSectionDto"][];
+        };
+        FinanceSettingValueDto: {
+            /**
+             * @description Butun so‘m
+             * @example 20000
+             */
+            value: number;
+            /** @example 2026-12-01T00:00:00.000Z */
+            effectiveFrom: string;
+            /**
+             * @description Kim kiritdi (`user:<id>` yoki migratsiya)
+             * @example user:7
+             */
+            changedBy: string | null;
+        };
+        FinanceSettingStateDto: {
+            /**
+             * @example refusal_fee
+             * @enum {string}
+             */
+            key: "refusal_fee" | "withdrawal_min";
+            current: components["schemas"]["FinanceSettingValueDto"] | null;
+            /** @description Kelajakda kuchga kiradiganlar (eng yaqini birinchi) */
+            scheduled: components["schemas"]["FinanceSettingValueDto"][];
+            /** @description Oldingi qiymatlar, yangisi birinchi (ko‘pi bilan 20) */
+            history: components["schemas"]["FinanceSettingValueDto"][];
+        };
+        UpdateFinanceSettingDto: {
+            /**
+             * @description Butun so‘m
+             * @example 20000
+             */
+            value: number;
+            /**
+             * @description Kuchga kirish vaqti; berilmasa — hozir. Faqat sana — Toshkent kuni boshi. O‘tmish vaqti — 400
+             * @example 2026-12-01T00:00:00+05:00
+             */
+            effectiveFrom?: string;
+            /**
+             * @description Izoh majburiy: kim so‘radi va sabab
+             * @example Moliya bo‘limi so‘rovi (Dilnoza, 2026-11-22): Elchi tarifi oshdi
+             */
+            comment: string;
+        };
+        CancelFinanceSettingDto: {
+            /** @example 2026-12-01T00:00:00.000Z */
+            effectiveFrom: string;
+            /** @example Xato kiritilgan (Dilnoza, 2026-11-22) */
+            comment: string;
+        };
+        ModerationSummaryDto: {
+            /**
+             * @description Tasdiq kutayotgan mahsulotlar (PENDING_REVIEW)
+             * @example 1
+             */
+            productsPending: number;
+            /**
+             * @description Narx qarori kutayotgan CPA mahsulotlari: tasdiqlangan narx yo‘q yoki amalda emas (BE-09)
+             * @example 3
+             */
+            pricesPending: number;
+            /**
+             * @description Holat bo‘yicha (o‘chirilmaganlar); BLOCKED — yashirilgan, ACTIVE — sotuvda va yashirilmagan
+             * @example {
+             *       "ALL": 7,
+             *       "PENDING_REVIEW": 1,
+             *       "ACTIVE": 4,
+             *       "REJECTED": 1,
+             *       "BLOCKED": 0,
+             *       "DRAFT": 1
+             *     }
+             */
+            byStatus: {
+                [key: string]: number;
+            };
+            /**
+             * @description Sotuvdagi CPA mahsulotlari, qoldig‘i 0; null — ombor javob bermadi
+             * @example 1
+             */
+            outOfStock: number | null;
+            /**
+             * @description Sotuvdan chiqqan, omborda turgan partiyalar (muddat − 60 kun o‘tgan, BE-17 OMB-3) [taklif]; null — ombor javob bermadi
+             * @example 0
+             */
+            expirySoon: number | null;
+        };
+        PriceQueueItemDto: {
+            /** @example 511 */
+            productId: string;
+            /** @example Simsiz quloqchinlar */
+            name: string;
+            /** @example Namuna Savdo MChJ */
+            shopName: string | null;
+            /** @example 140000 */
+            basePrice: number | null;
+            /**
+             * @description Tavsiya narx (joriy rejimda). Bazaviy narx, og‘irlik yoki sozlama yo‘q — hisoblanmaydi, null
+             * @example 262000
+             */
+            recommended: number | null;
+            /** @enum {string|null} */
+            deliveryMode: "SEPARATE" | "PARTIAL" | "FREE" | null;
+            /**
+             * @description Mahsulot oxirgi o‘zgargan vaqt [taklif]; tartib — eskisi oldin
+             * @example 2027-01-06T05:05:00.000Z
+             */
+            queuedAt: string;
+        };
+        PriceQueueDto: {
+            items: components["schemas"]["PriceQueueItemDto"][];
+            /** @example 1 */
+            total: number;
+        };
         WholesalerSettlementItemDto: {
             /** @example 9001 */
             orderId: string;
@@ -7058,6 +8909,846 @@ export interface components {
              */
             items: number;
         };
+        SettlementSettingsDto: {
+            /**
+             * @description Qaytarish muddati, kun (EQ-10); bo‘sh — dushanbalik akt tuzilmaydi
+             * @example 10
+             */
+            returnWindowDays: number | null;
+            /** @example Elchi Marketplace MChJ */
+            payerName: string | null;
+            /** @example 305000000 */
+            payerTin: string | null;
+            /** @example 20208000900100000001 */
+            payerAccount: string | null;
+            /** @example 00450 */
+            payerMfo: string | null;
+            /**
+             * @description To‘lov maqsadi kodi
+             * @example 00668
+             */
+            paymentPurposeCode: string | null;
+        };
+        UpdateSettlementSettingsDto: {
+            /**
+             * @description Kun, 0–365
+             * @example 10
+             */
+            returnWindowDays?: number;
+            /** @example Elchi Marketplace MChJ */
+            payerName?: string;
+            /**
+             * @description STIR, 9 raqam
+             * @example 305000000
+             */
+            payerTin?: string;
+            /**
+             * @description Hisob raqami, 20 raqam
+             * @example 20208000900100000001
+             */
+            payerAccount?: string;
+            /**
+             * @description MFO, 5 raqam
+             * @example 00450
+             */
+            payerMfo?: string;
+            /**
+             * @description To‘lov maqsadi kodi, 5 raqam [taklif]
+             * @example 00668
+             */
+            paymentPurposeCode?: string;
+        };
+        RemittanceDayDto: {
+            /** @example 2027-01-13 */
+            day: string;
+            /**
+             * @description Kun holati: ochiq farq bo‘lsa DIFF, aks holda kutilayotgan bo‘lsa PENDING, hal qilingan bo‘lsa RESOLVED, aks holda MATCHED
+             * @enum {string}
+             */
+            state: "DIFF" | "RESOLVED" | "MATCHED" | "PENDING";
+            /**
+             * @description Buyurtmalar (posilkalar) soni
+             * @example 16
+             */
+            orders: number;
+            /** @example 1 */
+            diffCount: number;
+            /** @example 1 */
+            resolvedCount: number;
+            /** @example 14 */
+            matchedCount: number;
+            /** @example 0 */
+            pendingCount: number;
+            /**
+             * @description Yig‘ilgan (Elchi), so‘m
+             * @example 3303000
+             */
+            collected: number;
+            /**
+             * @description Elchi haqi, so‘m
+             * @example 504000
+             */
+            elchiFee: number;
+            /**
+             * @description Rad to‘lovi, so‘m
+             * @example 80000
+             */
+            refusalFee: number;
+            /**
+             * @description Elchi hisobi: o‘tkazma (yetkazilgan) − rad to‘lovi, so‘m
+             * @example 2719000
+             */
+            elchiTotal: number;
+            /**
+             * @description Tizim hisobi: kutilgan o‘tkazma (yetkazilgan) − rad to‘lovi, so‘m
+             * @example 2723000
+             */
+            systemTotal: number;
+            /**
+             * @description Ochiq (hal qilinmagan) farq, so‘m: Elchi − tizim
+             * @example -4000
+             */
+            openDiff: number;
+        };
+        RemittanceResolutionDto: {
+            /** @example Elchi 1 kg ortiqcha hisoblagan — Elchi bilan kelishildi */
+            comment: string;
+            /**
+             * @description Kim yopdi (foydalanuvchi ID)
+             * @example 17
+             */
+            by: string;
+            /**
+             * Format: date-time
+             * @example 2027-01-14T06:20:00.000Z
+             */
+            at: string;
+        };
+        RemittanceItemDto: {
+            /**
+             * @description O‘tkazma qatori ID si
+             * @example 311
+             */
+            id: string;
+            /** @example 9001 */
+            orderId: string;
+            /** @example L-1049 */
+            orderNumber: string | null;
+            /** @example 55102 */
+            shipmentId: string | null;
+            /**
+             * @description Elchi holati
+             * @example paid
+             */
+            elchiStatus: string;
+            /**
+             * @description DELIVERED — yetkazilgan (o‘tkazma), REFUSED — rad (rad to‘lovi); jurnal hali yo‘q bo‘lsa null
+             * @example DELIVERED
+             */
+            kind: string | null;
+            /** @example 292000 */
+            collectedFromCustomer: number | null;
+            /** @example 44000 */
+            elchiFee: number | null;
+            /**
+             * @description Elchi o‘tkazgan
+             * @example 248000
+             */
+            marketPaidAmount: number | null;
+            /** @example null */
+            refusalFee: number | null;
+            /**
+             * @description Tizim hisobi
+             * @example 252000
+             */
+            expectedAmount: number | null;
+            /**
+             * @description Elchi − tizim, o‘tkazma ma’nosida: rad to‘lovi ko‘p ushlansa manfiy (DZ-07)
+             * @example -4000
+             */
+            diff: number | null;
+            /**
+             * @description BE-22 holati: PENDING, MATCHED, PARTIAL, MISMATCH
+             * @example MISMATCH
+             */
+            matchState: string;
+            /** @enum {string} */
+            state: "DIFF" | "RESOLVED" | "MATCHED" | "PENDING";
+            /**
+             * Format: date-time
+             * @example 2027-01-13T11:05:00.000Z
+             */
+            receivedAt: string;
+            resolution: components["schemas"]["RemittanceResolutionDto"] | null;
+        };
+        RemittanceItemPageDto: {
+            items: components["schemas"]["RemittanceItemDto"][];
+            /** @example 16 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 10 */
+            limit: number;
+            /** @example 2 */
+            totalPages: number;
+        };
+        ResolveRemittanceDto: {
+            /**
+             * @description Izoh majburiy (FE-19 TC2)
+             * @example Elchi 1 kg ortiqcha hisoblagan — Elchi bilan kelishildi
+             */
+            comment: string;
+        };
+        ElchiCheckRunDto: {
+            /** @example 41 */
+            id: string;
+            /**
+             * @description Tekshiruv kuni (Toshkent)
+             * @example 2026-12-03
+             */
+            date: string;
+            /**
+             * @example CRON
+             * @enum {string}
+             */
+            trigger: "CRON" | "MANUAL";
+            /**
+             * Format: date-time
+             * @example 2026-12-03T05:00:00.000Z
+             */
+            startedAt: string;
+            /**
+             * Format: date-time
+             * @description Tugamagan (yoki yiqilgan) — null
+             * @example 2026-12-03T05:00:42.000Z
+             */
+            finishedAt: string | null;
+            /**
+             * @description Tekshirilgan posilkalar
+             * @example 312
+             */
+            checked: number;
+            /**
+             * @description Mos — ro‘yxatga chiqmaydi
+             * @example 307
+             */
+            matched: number;
+            /**
+             * @description Ochiq farqlar
+             * @example 3
+             */
+            diffCount: number;
+            /**
+             * @description Izoh bilan yopilgan farqlar: moliya yopgani va oldingi tekshiruvda yopilgan xuddi shu farq (izoh ko‘chadi)
+             * @example 1
+             */
+            resolvedCount: number;
+            /**
+             * @description Elchi’dan o‘qib bo‘lmagan (keyingi tekshiruvda qayta)
+             * @example 1
+             */
+            failed: number;
+            /**
+             * @description Posilkalar chegaradan ko‘p edi — bir qismi tekshirilmadi
+             * @example false
+             */
+            truncated: boolean;
+            /**
+             * @description Tekshiruv butunlay bajarilmadi (masalan, Elchi yoki checkout javob bermadi)
+             * @example null
+             */
+            error: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-12-03T05:00:43.000Z
+             */
+            alertedAt: string | null;
+        };
+        ElchiCheckResolutionDto: {
+            /** @example Elchi bilan gaplashildi — webhook qayta yuboriladi */
+            comment: string;
+            /** @example 6 */
+            by: string;
+            /**
+             * Format: date-time
+             * @example 2026-12-03T07:15:00.000Z
+             */
+            at: string;
+            /**
+             * @description true — oldingi tekshiruvdagi xuddi shu farqning izohi (o‘zgarmagan farq qayta ochilmaydi)
+             * @example false
+             */
+            carried: boolean;
+        };
+        ElchiCheckItemDto: {
+            /** @example 905 */
+            id: string;
+            /** @example 41 */
+            runId: string;
+            /** @example 1042 */
+            orderId: string;
+            /** @example L-1042 */
+            orderNumber: string;
+            /** @example 880113 */
+            shipmentId: string;
+            /**
+             * @example DIFF
+             * @enum {string}
+             */
+            state: "DIFF" | "RESOLVED" | "FAILED";
+            /**
+             * @example [
+             *       "STATUS",
+             *       "NO_REMITTANCE"
+             *     ]
+             */
+            reasons: ("NOT_FOUND" | "ORDER_REF" | "STATUS" | "UNKNOWN_STATUS" | "NO_REMITTANCE" | "COLLECTED" | "FEE" | "MARKET_PAID" | "EXTRA_COST" | "REFUSAL_FEE")[];
+            /**
+             * @example DELIVERED
+             * @enum {string}
+             */
+            orderStatus: "CONFIRMED" | "PICKING" | "PACKED" | "HANDED_TO_ELCHI" | "IN_TRANSIT" | "DELIVERED" | "REMITTED" | "RETURN_REQUESTED" | "SETTLED" | "REFUSED" | "RETURNING" | "RETURNED_GRADED" | "CANCELLED";
+            /**
+             * @description Elchi holati; topilmagan — null
+             * @example paid
+             */
+            elchiStatus: string | null;
+            /**
+             * @description Buyurtma COD si (mijozdan olinadigan)
+             * @example 292000
+             */
+            codAmount: number;
+            /**
+             * @description Elchi: mijozdan yig‘ilgan
+             * @example 292000
+             */
+            elchiCollected: number | null;
+            /**
+             * @description Elchi: haqi
+             * @example 25000
+             */
+            elchiFee: number | null;
+            /**
+             * @description Elchi: bizga o‘tkazgani
+             * @example 267000
+             */
+            elchiMarketPaid: number | null;
+            /**
+             * @description Elchi: kuryer qo‘shimcha xarajati (o‘tkazmadan ushlanadi; rad etilganda — rad to‘lovi)
+             * @example 0
+             */
+            elchiExtraCost: number | null;
+            /**
+             * @description Moliyada yozilgan o‘tkazma (Elchi webhooki): mijozdan yig‘ilgan; yozuv yo‘q — null
+             * @example null
+             */
+            recordedCollected: number | null;
+            /** @example null */
+            recordedFee: number | null;
+            /** @example null */
+            recordedMarketPaid: number | null;
+            /**
+             * @description Moliyada yozilgan rad to‘lovi (Elchi webhooki)
+             * @example null
+             */
+            recordedRefusalFee: number | null;
+            /**
+             * @description FAILED da — xato matni
+             * @example null
+             */
+            error: string | null;
+            resolution: components["schemas"]["ElchiCheckResolutionDto"] | null;
+            /**
+             * Format: date-time
+             * @example 2026-12-03T05:00:40.000Z
+             */
+            checkedAt: string;
+        };
+        ElchiCheckItemPageDto: {
+            /** @description Qaysi tekshiruv ko‘rsatilmoqda */
+            run: components["schemas"]["ElchiCheckRunDto"] | null;
+            items: components["schemas"]["ElchiCheckItemDto"][];
+            /** @example 3 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        SettlementDisputeDto: {
+            /** @example 3 */
+            id: string;
+            /** @example 12 */
+            settlementId: string;
+            /** @example AS-000012 */
+            settlementNumber: string;
+            /** @example 501 */
+            wholesalerId: string;
+            /** @example Quloqchin 2 donasi aktda yo‘q */
+            comment: string;
+            /**
+             * @description Optovik foydalanuvchisi
+             * @example 77
+             */
+            createdBy: string;
+            /**
+             * Format: date-time
+             * @example 2027-01-11T06:00:00.000Z
+             */
+            createdAt: string;
+            /** @enum {string} */
+            status: "OPEN" | "ANSWERED";
+            /** @example null */
+            answer: string | null;
+            /** @example null */
+            answeredBy: string | null;
+            /**
+             * Format: date-time
+             * @example null
+             */
+            answeredAt: string | null;
+        };
+        SettlementDisputePageDto: {
+            items: components["schemas"]["SettlementDisputeDto"][];
+            /** @example 1 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        WholesalerActDto: {
+            settlement: components["schemas"]["WholesalerSettlementDto"];
+            /**
+             * Format: date-time
+             * @description Optovik aktni qabul qilgan vaqt
+             * @example null
+             */
+            acceptedAt: string | null;
+            /** @example null */
+            acceptedBy: string | null;
+            /**
+             * @description Qabul qilingan summa, so‘m. Bank faylida summa o‘zgarsa qabul amalda emas (null) — qayta qabul yoki e’tiroz
+             * @example null
+             */
+            acceptedAmount: number | null;
+            /** @description Eskisi birinchi */
+            disputes: components["schemas"]["SettlementDisputeDto"][];
+        };
+        SettlementCommentDto: {
+            /** @example Quloqchin 2 donasi aktda yo‘q */
+            comment: string;
+        };
+        WholesalerProfileDto: {
+            /** @example 15 */
+            id: string;
+            /** @example Gadget Trade MChJ */
+            name: string;
+            /** @example gadget-trade-mchj-15 */
+            slug: string;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "SUSPENDED" | "REJECTED";
+            /** @enum {string|null} */
+            legalType: "LEGAL_ENTITY" | "SOLE_PROPRIETOR" | null;
+            /** @example 305123456 */
+            tin: string | null;
+            /** @example Kapitalbank */
+            bankName: string | null;
+            /** @example 20208000900123456001 */
+            bankAccount: string | null;
+            /** @example 01158 */
+            bankMfo: string | null;
+            /** @example K-2026/014 */
+            contractNumber: string | null;
+            /** @example 2026-11-20 */
+            contractDate: string | null;
+            /** @example +998901234567 */
+            phone: string | null;
+            address: string | null;
+            description: string | null;
+            /**
+             * @description Optovik kabineti foydalanuvchisi (BE-30)
+             * @example null
+             */
+            ownerUserId: string | null;
+            /**
+             * @description Elektron shartnoma versiyasi (o‘zi ro‘yxatdan o‘tgan optovik, BE-30); qog‘oz shartnomada null
+             * @example 1.0
+             */
+            contractVersion: string | null;
+            contractAcceptedAt: string | null;
+            /** @description Ro‘yxat rad etilgan sabab (BE-30) */
+            moderationNote: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CompleteWholesalerProfileDto: {
+            /** @example Gadget Trade MChJ */
+            name: string;
+            /**
+             * @example LEGAL_ENTITY
+             * @enum {string}
+             */
+            legalType: "LEGAL_ENTITY" | "SOLE_PROPRIETOR";
+            /**
+             * @description STIR, 9 raqam
+             * @example 305123456
+             */
+            tin: string;
+            /** @example Kapitalbank */
+            bankName: string;
+            /**
+             * @description Hisob raqami, 20 raqam
+             * @example 20208000900123456001
+             */
+            bankAccount: string;
+            /**
+             * @description Bank MFO, 5 raqam
+             * @example 01158
+             */
+            bankMfo: string;
+            /** @example Toshkent, Chilonzor 5 */
+            address?: string;
+            /** @example Maishiy texnika optovigi */
+            description?: string;
+            /** @example 1.0 */
+            contractVersion: string;
+            /** @example 1.0 */
+            consentVersion: string;
+        };
+        WholesalerStockRowDto: {
+            /** @example 42 */
+            productId: string;
+            /** @example Simsiz quloqchin */
+            productName: string;
+            /** @example 901 */
+            variantId: string;
+            /** @example Q-1 */
+            sku: string;
+            /**
+             * @description Omborda (jismonan)
+             * @example 120
+             */
+            onHand: number;
+            /**
+             * @description Bandda
+             * @example 8
+             */
+            reserved: number;
+            /**
+             * @description Sotuvda bor (omborda − band − muddati sabab to‘silgan)
+             * @example 110
+             */
+            available: number;
+            /**
+             * @description Yo‘lda — e’lon qilingan, hali qabul qilinmagan postavka
+             * @example 50
+             */
+            inTransit: number;
+            /**
+             * @description Mijozga yo‘lda — Elchi’ga topshirilgan, taqdiri hali aniq emas (yetkazilmagan yoki qaytib kelmoqda): topshirilgan − sotilgan − qaytgan (sotiladigan va brak) [taklif]
+             * @example 6
+             */
+            outForDelivery: number;
+            /**
+             * @description Sotilgan — yetkazilgan va teskari yozilmagan dona, moliya hisobidan: pul (ushlab turilgan, to‘lanadigan, to‘langan) shu sotuvlardan
+             * @example 34
+             */
+            sold: number;
+            /**
+             * @description Qaytgan (saralangan)
+             * @example 3
+             */
+            returned: number;
+            /**
+             * @description Brak (qabulda va qaytgan saralashda)
+             * @example 2
+             */
+            defective: number;
+        };
+        WholesalerStockTotalsDto: {
+            /**
+             * @description Omborda (jismonan)
+             * @example 120
+             */
+            onHand: number;
+            /**
+             * @description Bandda
+             * @example 8
+             */
+            reserved: number;
+            /**
+             * @description Sotuvda bor (omborda − band − muddati sabab to‘silgan)
+             * @example 110
+             */
+            available: number;
+            /**
+             * @description Yo‘lda — e’lon qilingan, hali qabul qilinmagan postavka
+             * @example 50
+             */
+            inTransit: number;
+            /**
+             * @description Mijozga yo‘lda — Elchi’ga topshirilgan, taqdiri hali aniq emas (yetkazilmagan yoki qaytib kelmoqda): topshirilgan − sotilgan − qaytgan (sotiladigan va brak) [taklif]
+             * @example 6
+             */
+            outForDelivery: number;
+            /**
+             * @description Sotilgan — yetkazilgan va teskari yozilmagan dona, moliya hisobidan: pul (ushlab turilgan, to‘lanadigan, to‘langan) shu sotuvlardan
+             * @example 34
+             */
+            sold: number;
+            /**
+             * @description Qaytgan (saralangan)
+             * @example 3
+             */
+            returned: number;
+            /**
+             * @description Brak (qabulda va qaytgan saralashda)
+             * @example 2
+             */
+            defective: number;
+        };
+        WholesalerMoneyDto: {
+            /**
+             * @description Ushlab turilgan — Elchi puli hali kelmagan sotuvlar
+             * @example 1250000
+             */
+            held: number;
+            /**
+             * @description To‘lanadigan
+             * @example 980000
+             */
+            payable: number;
+            /**
+             * @description To‘langan
+             * @example 4300000
+             */
+            paid: number;
+        };
+        WholesalerDashboardDto: {
+            stock: components["schemas"]["WholesalerStockRowDto"][];
+            stockTotals: components["schemas"]["WholesalerStockTotalsDto"];
+            money: components["schemas"]["WholesalerMoneyDto"];
+        };
+        SignedLinkDto: {
+            /** @example /api/v1/signed-files/eyJ….c2ln */
+            url: string;
+            expiresAt: string;
+        };
+        PrivateUploadPolicyDto: {
+            /** @enum {string} */
+            kind: "KYC" | "CERTIFICATE";
+            /** @example guvohnoma.pdf */
+            fileName: string;
+            /** @enum {string} */
+            contentType: "application/pdf" | "image/jpeg" | "image/png";
+            /**
+             * @description Bayt
+             * @example 524288
+             */
+            size: number;
+        };
+        PrivateUploadPolicyResultDto: {
+            url: string;
+            fields: {
+                [key: string]: string;
+            };
+            /** @example private-uploads/15/1f0c….pdf */
+            objectKey: string;
+            expiresAt: string;
+            maxSize: number;
+        };
+        ConfirmWholesalerDocumentDto: {
+            /** @enum {string} */
+            kind: "KYC" | "CERTIFICATE";
+            /** @example private-uploads/15/1f0c….pdf */
+            objectKey: string;
+            /** @example guvohnoma.pdf */
+            fileName: string;
+            /**
+             * @description Sertifikat qaysi mahsulotga (CERTIFICATE da majburiy)
+             * @example 42
+             */
+            productId?: string;
+        };
+        WholesalerDocumentDto: {
+            /** @example 7 */
+            id: string;
+            /** @example 15 */
+            wholesalerId: string;
+            /** @enum {string} */
+            kind: "KYC" | "CERTIFICATE";
+            /** @example 42 */
+            productId: string | null;
+            /** @example guvohnoma.pdf */
+            fileName: string;
+            /** @enum {string} */
+            contentType: "application/pdf" | "image/jpeg" | "image/png";
+            /** @example 524288 */
+            size: number;
+            createdAt: string;
+        };
+        CreateProductDto: {
+            /** @example iPhone 16 Pro */
+            name: string;
+            /** @example 1 */
+            categoryId?: string | null;
+            /** @example Titanium, 256 GB */
+            description?: string | null;
+            /** @example 140000 */
+            price?: number;
+            /**
+             * @description Optovikning bazaviy narxi (B), butun so‘m (OPT-2, TZ 2.1)
+             * @example 140000
+             */
+            basePrice: number;
+            /**
+             * @description Sotuvchi haqi (A), so‘m, har offer uchun (TZ 1-bo‘lim 8-qaror)
+             * @example 65000
+             */
+            affiliateFee?: number | null;
+            /**
+             * @description Bir dona og‘irligi, gramm (OPT-2, BUY-4)
+             * @example 450
+             */
+            weightGrams: number;
+            /**
+             * @description Uzunlik, mm
+             * @example 200
+             */
+            lengthMm: number;
+            /**
+             * @description Kenglik, mm
+             * @example 120
+             */
+            widthMm: number;
+            /**
+             * @description Balandlik, mm
+             * @example 80
+             */
+            heightMm: number;
+            /** @example 15999000 */
+            oldPrice?: number | null;
+            /**
+             * @description Asosiy rasm URL (yoki images massivida kamida bitta rasm bo‘lishi shart)
+             * @example https://cdn.example.com/iphone.jpg
+             */
+            imageUrl?: string | null;
+            /**
+             * @description Mahsulot rasmlari (agar imageUrl bo‘sh bo‘lsa, kamida bitta rasm talab qilinadi)
+             * @example [
+             *       "https://cdn.example.com/iphone-1.jpg"
+             *     ]
+             */
+            images?: string[];
+            /**
+             * @example {
+             *       "brand": "Apple",
+             *       "storage": "256 GB"
+             *     }
+             */
+            attributes?: {
+                [key: string]: unknown;
+            };
+        };
+        WholesalerShipmentDeclareDto: {
+            /**
+             * @description Kutilgan kelish sanasi
+             * @example 2026-12-01
+             */
+            expectedAt: string;
+            /** @example Haftalik postavka */
+            note?: string;
+            items: components["schemas"]["DeclareInboundItemDto"][];
+        };
+        ReviewWholesalerDto: {
+            /**
+             * @example APPROVE
+             * @enum {string}
+             */
+            decision: "APPROVE" | "REJECT";
+            /**
+             * @description Rad etishda majburiy
+             * @example STIR soliq bazasida topilmadi
+             */
+            note?: string;
+        };
+        LinkWholesalerOwnerDto: {
+            /**
+             * @description Optovik kabinetiga SMS kod bilan kiradigan raqam
+             * @example +998901110015
+             */
+            phone: string;
+            /** @example Akmal Karimov */
+            name: string;
+        };
+        PlatformLeadMetricsRowDto: {
+            /** @description Kun, sotuvchi, operator yoki offer (mahsulot) ID si; jami — TOTAL */
+            key: string;
+            /** @description Operator kesimida null */
+            clicks: number | null;
+            leads: number | null;
+            invalid: number | null;
+            /** @description Dublikat (birlashtirilgan) */
+            duplicates: number | null;
+            validLeads: number | null;
+            /** @description «Aloqa bo‘lmadi» */
+            noContact: number | null;
+            /** @description Operator kesimida: urinishlar */
+            attempts: number | null;
+            confirmed: number;
+            /** @description Kunlik sotuv: mijoz olgan buyurtmalar */
+            delivered: number;
+            refused: number;
+            /** @description (barcha − yaroqsiz − dublikat) / barcha, % */
+            validLeadRate: number | null;
+            /** @description Tasdiqlangan / yaroqli, % (operatorda — ishlagan yaroqli) */
+            approveRate: number | null;
+            /** @description Olgan / (olgan + rad), % */
+            saleRate: number | null;
+            /** @description «Aloqa bo‘lmadi» / yaroqli, % */
+            lostLeadRate: number | null;
+            /** @description Birinchi qo‘ng‘iroq, median, daqiqa */
+            firstCallMedianMinutes: number | null;
+            /** @description O‘rtacha chek: tovar narxi (yetkazishsiz), so‘m */
+            averageCheck: number | null;
+            /** @description Sotuvchi daromadi, so‘m — ledgerdan (BE-28 bilan bir xil): yetkazilgan kunda +, qaytarilgan kunda −; asosiy sayt sotuvi kirmaydi */
+            affiliateIncome: number | null;
+            /** @description EPC: daromad / kliklar, so‘m */
+            epc: number | null;
+        };
+        PlatformLeadMetricsDto: {
+            rows: components["schemas"]["PlatformLeadMetricsRowDto"][];
+            totals: components["schemas"]["PlatformLeadMetricsRowDto"];
+        };
+        PlatformFinanceMetricsRowDto: {
+            key: string;
+            /** @description Hissa bitta sotuvdan [taklif]: platforma ulushi / sotuvlar */
+            contributionPerSale: number | null;
+            /** @description Platforma ulushi yig‘indisi (yetkazilgan, rad to‘lovi, qaytarish), so‘m */
+            platformShare: number;
+            /** @description Sverka farqi: hal qilinmagan, so‘m (Elchi − tizim) */
+            reconciliationDiff: number;
+            /** @description Pul yechish: so‘rovdan to‘lovgacha, median, soat */
+            withdrawalMedianHours: number | null;
+        };
+        PlatformFinanceMetricsDto: {
+            rows: components["schemas"]["PlatformFinanceMetricsRowDto"][];
+            totals: components["schemas"]["PlatformFinanceMetricsRowDto"];
+        };
+        PlatformMetricsDto: {
+            from: string;
+            to: string;
+            /** @enum {string} */
+            groupBy: "DAY" | "AFFILIATE" | "OPERATOR" | "OFFER";
+            leads: components["schemas"]["PlatformLeadMetricsDto"];
+            /** @description Faqat kun kesimida */
+            finance: components["schemas"]["PlatformFinanceMetricsDto"] | null;
+        };
         LeadProductRefDto: {
             /** @example 501 */
             id: string;
@@ -7068,6 +9759,21 @@ export interface components {
              * @example 262000
              */
             salePrice: number;
+        };
+        LeadCardItemDto: {
+            /** @example 501 */
+            productId: string;
+            /** @example Simsiz quloqchin */
+            name: string;
+            /** @example 1 */
+            quantity: number;
+            /**
+             * @description Saytdagi (tasdiqlangan) narx, bir dona
+             * @example 251000
+             */
+            unitPrice: number;
+            /** @example 251000 */
+            lineTotal: number;
         };
         LeadAddressDto: {
             /** @example 1726 */
@@ -7124,6 +9830,55 @@ export interface components {
              * @example 292000
              */
             totalAmount: number;
+            /**
+             * @description BE-25 (FE-09): yetkazish rejimi; katalog hisoblay olmasa null
+             * @example PARTIAL
+             * @enum {string|null}
+             */
+            deliveryMode?: "SEPARATE" | "PARTIAL" | "FREE" | null;
+            /**
+             * @description BE-25: posilkaning jami og‘irligi, gramm
+             * @example 4200
+             */
+            weightGrams?: number | null;
+            /**
+             * @description BE-25: shu miqdor uchun ikkala yetkazish turi; ko‘p tovarli posilkada null
+             * @example {
+             *       "CENTER": 30000,
+             *       "ADDRESS": 50000
+             *     }
+             */
+            deliveryOptions?: {
+                CENTER?: number;
+                ADDRESS?: number;
+            } | null;
+            /**
+             * @description BE-25: deliveryFee = base + extraKg × perExtraKg («40 000 + 3 × 4 000 = 52 000»). Bepul rejim va ko‘p tovarli posilkada null
+             * @example {
+             *       "base": 40000,
+             *       "extraKg": 3,
+             *       "perExtraKg": 4000,
+             *       "baseWeightGrams": 3000
+             *     }
+             */
+            deliveryFormula?: {
+                base?: number;
+                extraKg?: number;
+                perExtraKg?: number;
+                baseWeightGrams?: number;
+            } | null;
+        };
+        LeadAttemptCallDto: {
+            /** @example 501 */
+            id: string;
+            /** @example 2027-01-14T09:32:00.000Z */
+            startedAt: string;
+            /** @example true */
+            answered: boolean;
+            /** @example 118 */
+            durationSeconds: number | null;
+            /** @enum {string} */
+            recording: "NONE" | "LIVE" | "PENDING" | "READY" | "MISSING";
         };
         LeadAttemptDto: {
             /**
@@ -7140,6 +9895,19 @@ export interface components {
             outcome: "CONFIRMED" | "NO_ANSWER" | "BUSY" | "PHONE_OFF" | "CALL_LATER" | "THINKING" | "REJECTED" | "INVALID" | "DUPLICATE";
             /** @example null */
             comment: string | null;
+            /** @description BE-15 (TEL-3): qo‘ng‘iroq — boshlanish, javob, davomiylik, yozuv holati; qo‘ng‘iroqsiz urinishda null */
+            call?: components["schemas"]["LeadAttemptCallDto"] | null;
+        };
+        LeadHistoryChangeDto: {
+            /**
+             * @example district
+             * @enum {string}
+             */
+            field: "region" | "district" | "addressLine" | "whereDeliver";
+            /** @example Qo‘qon shahri */
+            from: string | null;
+            /** @example Farg‘ona shahri */
+            to: string | null;
         };
         LeadHistoryEntryDto: {
             /**
@@ -7167,6 +9935,8 @@ export interface components {
              * @example null
              */
             note: string | null;
+            /** @description BE-25 (FE-09 TC5): manzil saqlanganda o‘zgargan maydonlar — bitta saqlash bitta yozuv. Bo‘sh — o‘zgarishsiz tasdiqlandi; manzilga aloqasi yo‘q yozuvda null */
+            changes?: components["schemas"]["LeadHistoryChangeDto"][] | null;
         };
         LeadPreviousDto: {
             /** @example 6550 */
@@ -7220,6 +9990,14 @@ export interface components {
              * @example 1
              */
             quantity: number;
+            /** @description BE-34: saytdan buyurtma tovarlari (bitta tovarli lidda bo‘sh). Ko‘p tovarda `price` — butun posilka jami */
+            items: components["schemas"]["LeadCardItemDto"][];
+            /**
+             * @description BE-34: tasdiqlash usuli — SMS bo‘lsa mijozga havola ketgan, muddati o‘tgach operatorga
+             * @example CALL
+             * @enum {string}
+             */
+            confirmMode: "CALL" | "SMS";
             /** @description Sotuvchi sahifasi va sayt lidida doim bor. Bo‘sh faqat API lidida bo‘lishi mumkin (BE-43, EQ-04) */
             address: components["schemas"]["LeadAddressDto"] | null;
             /** @description Joriy miqdor va yetkazish turi bo‘yicha server hisobi (FE-09). Bo‘sh — yetkazish turi hali yo‘q (faqat manzilsiz API lidi): avval PATCH leads/:id/address yoki POST leads/:id/quote */
@@ -7286,6 +10064,121 @@ export interface components {
              * @example false
              */
             reminderDue: boolean;
+            /**
+             * @description Oxirgi urinish natijasi; urinish yo‘q — null
+             * @example THINKING
+             * @enum {string|null}
+             */
+            lastOutcome: "CONFIRMED" | "NO_ANSWER" | "BUSY" | "PHONE_OFF" | "CALL_LATER" | "THINKING" | "REJECTED" | "INVALID" | "DUPLICATE" | null;
+            /**
+             * @description Oxirgi urinish izohi
+             * @example Turmush o‘rtog‘i bilan maslahatlashadi
+             */
+            lastComment: string | null;
+            /**
+             * @description Oxirgi urinish vaqti
+             * @example 2026-12-01T10:20:00.000Z
+             */
+            lastAttemptAt: string | null;
+        };
+        OperatorLeadProductDto: {
+            /** @example 501 */
+            id: string;
+            /** @example Simsiz quloqchinlar */
+            name: string;
+            /** @example Elektronika */
+            category: string | null;
+            /** @example null */
+            imageUrl: string | null;
+            /** @example Kundalik foydalanish uchun simsiz quloqchinlar */
+            description: string | null;
+            /**
+             * @description Offer matnlaridagi afzalliklar (admin kiritadi, BE-11)
+             * @example [
+             *       "Telefonga Bluetooth orqali ulanadi"
+             *     ]
+             */
+            highlights: string[];
+            /**
+             * @description Omborda sotuvga bor (band qilinmagan) dona; null — ombor javob bermadi
+             * @example 120
+             */
+            available: number | null;
+            /** @example 0.3 */
+            weightKg: number | null;
+            /**
+             * @description Qutida nima bor (offer matnlari)
+             * @example quloqchinlar (juft), g‘ilof, kabel
+             */
+            contents: string | null;
+            /**
+             * @description Lid sahifasidagi narx, so‘m
+             * @example 262000
+             */
+            salePrice: number;
+            /**
+             * @description 1 dona uchun ikki yetkazish turi narxi, so‘m; katalog javob bermasa null
+             * @example {
+             *       "CENTER": 30000,
+             *       "ADDRESS": 50000
+             *     }
+             */
+            deliveryFee: {
+                [key: string]: number;
+            } | null;
+            /**
+             * @description Mijoz ko‘rgan sotuvchi sahifasi; API va sayt lidida null
+             * @example https://elchi.uz/p3v9tx
+             */
+            pageUrl: string | null;
+            /**
+             * @description Operator aytishi shart bo‘lgan ogohlantirish: BAD — «Dori vositasi emas» (8-bo‘lim); bo‘lmasa null
+             * @example null
+             */
+            warning: string | null;
+        };
+        OperatorAttemptItemDto: {
+            /** @example 2026-12-01T09:33:00.000Z */
+            at: string;
+            /** @example 7001 */
+            leadId: string;
+            /** @example Dildora */
+            customerName: string;
+            /** @example Oshxona tarozisi */
+            productName: string;
+            /**
+             * @example REJECTED
+             * @enum {string}
+             */
+            outcome: "CONFIRMED" | "NO_ANSWER" | "BUSY" | "PHONE_OFF" | "CALL_LATER" | "THINKING" | "REJECTED" | "INVALID" | "DUPLICATE";
+            /** @example null */
+            comment: string | null;
+            /**
+             * @description Faqat REJECTED urinishida
+             * @example NOT_NEEDED
+             * @enum {string|null}
+             */
+            rejectReason: "TOO_EXPENSIVE" | "NOT_NEEDED" | "BOUGHT_ELSEWHERE" | "OTHER" | null;
+            /**
+             * @description Keyingi qo‘ng‘iroq vaqti («Keyinroq qiling · ertaga 14:00», «Javob bermadi · 14:31»)
+             * @example null
+             */
+            nextAttemptAt: string | null;
+            /**
+             * @description Suhbat davomiyligi (BE-15); suhbat bo‘lmagan yoki telefoniya ulanmagan — null
+             * @example null
+             */
+            durationSeconds: number | null;
+            /** @description BE-15: urinishdagi qo‘ng‘iroq; qo‘ng‘iroqsiz — null */
+            call?: components["schemas"]["LeadAttemptCallDto"] | null;
+        };
+        OperatorAttemptsPageDto: {
+            items: components["schemas"]["OperatorAttemptItemDto"][];
+            /**
+             * @description Davrdagi jami urinishlar — GET /operator/stats `attempts` bilan bir xil
+             * @example 38
+             */
+            total: number;
         };
         SubmitLeadResultDto: {
             /**
@@ -7349,13 +10242,6 @@ export interface components {
              */
             whereDeliver: "ADDRESS" | "CENTER";
         };
-        UpdateOperatorStateDto: {
-            /**
-             * @example ONLINE
-             * @enum {string}
-             */
-            state: "ONLINE" | "BREAK" | "OFFLINE";
-        };
         OperatorStateDto: {
             /**
              * @example ONLINE
@@ -7369,6 +10255,23 @@ export interface components {
              * @example 5
              */
             maxBookings: number;
+            /**
+             * @description Shu holat boshlangan vaqt (FE-08: «Tanaffusdasiz · 6 daqiqa»); holat hali tanlanmagan — null
+             * @example 2026-12-01T09:31:00.000Z
+             */
+            since: string | null;
+            /**
+             * @description BE-15: «Qo‘ng‘iroq» tugmasi ishlaydi — telefoniya ulangan va operatorga telefon biriktirilgan. false — natija qo‘lda
+             * @example false
+             */
+            callEnabled: boolean;
+        };
+        UpdateOperatorStateDto: {
+            /**
+             * @example ONLINE
+             * @enum {string}
+             */
+            state: "ONLINE" | "BREAK" | "OFFLINE";
         };
         OperatorQueueOperatorDto: {
             /** @example 41 */
@@ -7413,6 +10316,154 @@ export interface components {
              */
             firstCallMedianMinutes: number | null;
         };
+        LeadCallDto: {
+            /** @example 501 */
+            id: string;
+            /** @example 7001 */
+            leadId: string;
+            /** @example 41 */
+            operatorId: string;
+            /** @example Dilnoza R. */
+            operatorName: string;
+            /** @example Aziza */
+            customerName: string;
+            /**
+             * @example OFFICE
+             * @enum {string}
+             */
+            channel: "OFFICE" | "APP_VOIP" | "APP_BRIDGE";
+            /**
+             * @example ENDED
+             * @enum {string}
+             */
+            status: "REQUESTED" | "RINGING_OPERATOR" | "RINGING_CUSTOMER" | "CONNECTED" | "ENDED" | "FAILED";
+            /**
+             * @description Operator tugmani bosgan vaqt
+             * @example 2027-01-14T09:32:00.000Z
+             */
+            requestedAt: string;
+            /**
+             * @description Mijoz javob bergan vaqt; javob bo‘lmasa null
+             * @example 2027-01-14T09:32:10.000Z
+             */
+            answeredAt: string | null;
+            /** @example null */
+            endedAt: string | null;
+            /**
+             * @description Suhbat davomiyligi, soniya
+             * @example 118
+             */
+            durationSeconds: number | null;
+            /** @enum {string|null} */
+            endReason: "ANSWERED" | "NO_ANSWER" | "BUSY" | "UNREACHABLE" | "OPERATOR_NO_ANSWER" | "CANCELLED" | "FAILED" | null;
+            /**
+             * @description TEL-4: server holatidan taklif — NO_ANSWER, BUSY yoki PHONE_OFF; boshqa holatda null
+             * @example NO_ANSWER
+             * @enum {string|null}
+             */
+            suggestedOutcome: "CONFIRMED" | "NO_ANSWER" | "BUSY" | "PHONE_OFF" | "CALL_LATER" | "THINKING" | "REJECTED" | "INVALID" | "DUPLICATE" | null;
+            /**
+             * @description NONE — suhbat bo‘lmagan; LIVE — suhbat ketmoqda; PENDING — yozuv kutilmoqda; MISSING — yozuvsiz, hisobotda xato (TEL-3)
+             * @example READY
+             * @enum {string}
+             */
+            recording: "NONE" | "LIVE" | "PENDING" | "READY" | "MISSING";
+            /**
+             * @description Natija kiritilgan urinish; hali natijasiz — null
+             * @example 9001
+             */
+            attemptId: string | null;
+        };
+        CallPageDto: {
+            items: components["schemas"]["LeadCallDto"][];
+            /** @example 41 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /**
+             * @description TEL-3: yozuvsiz qo‘ng‘iroqlar soni — `recording` dan boshqa filtrlar bo‘yicha (hisobotda xato)
+             * @example 1
+             */
+            missingRecordings: number;
+        };
+        RecordingLinkRequestDto: {
+            /**
+             * @description DOWNLOAD — faqat admin va superadmin (TEL-7)
+             * @default LISTEN
+             * @enum {string}
+             */
+            mode?: "LISTEN" | "DOWNLOAD";
+        };
+        OperatorPhoneDto: {
+            /** @example 41 */
+            operatorId: string;
+            /** @enum {string} */
+            kind: "EXTENSION" | "MOBILE";
+            /** @example 101 */
+            value: string;
+            /** @example 3 */
+            updatedBy: string;
+            /** @example 2027-01-10T06:00:00.000Z */
+            updatedAt: string;
+        };
+        SetOperatorPhoneDto: {
+            /**
+             * @example EXTENSION
+             * @enum {string}
+             */
+            kind: "EXTENSION" | "MOBILE";
+            /**
+             * @description EXTENSION — ichki raqam (2–10 raqam); MOBILE — +998XXXXXXXXX
+             * @example 101
+             */
+            value: string;
+        };
+        TelephonyWebhookDto: {
+            /**
+             * @description Hodisa ID si (takrorsiz)
+             * @example evt-8f1c
+             */
+            eventId: string;
+            /**
+             * @description Qo‘ng‘iroqni boshlashda berilgan `callRef`
+             * @example 3f0e2f5c-7a1e-4c55-9b0a-0d4c9b1f2a10
+             */
+            callRef: string;
+            /**
+             * @example completed
+             * @enum {string}
+             */
+            type: "status" | "completed" | "recording";
+            /** @example 2027-01-14T09:36:00.000Z */
+            at: string;
+            /**
+             * @description `type: status` da majburiy
+             * @enum {string}
+             */
+            status?: "RINGING_OPERATOR" | "RINGING_CUSTOMER" | "CONNECTED";
+            /**
+             * @description `type: completed` da majburiy
+             * @enum {string}
+             */
+            endReason?: "ANSWERED" | "NO_ANSWER" | "BUSY" | "UNREACHABLE" | "OPERATOR_NO_ANSWER" | "CANCELLED" | "FAILED";
+            /**
+             * @description Mijoz javob bergan vaqt; ANSWERED da majburiy
+             * @example 2027-01-14T09:33:10.000Z
+             */
+            answeredAt?: string;
+            /**
+             * @description Suhbat davomiyligi, soniya; ANSWERED da majburiy
+             * @example 118
+             */
+            durationSeconds?: number;
+            /**
+             * @description `type: recording` da majburiy; provayderdagi yozuv kaliti (URL emas)
+             * @example rec-5521
+             */
+            recordingRef?: string;
+        };
         WarehouseScanDto: {
             /**
              * @description Tovar shtrix-kodi yoki SKU
@@ -7423,6 +10474,54 @@ export interface components {
         WarehouseHandoverDto: {
             /** @description Skanerlangan posilka QR tokenlari (yorliqdagi QR) */
             qrTokens: string[];
+        };
+        GradeReturnItemDto: {
+            /** @example 901 */
+            variantId: string;
+            /**
+             * @description Sotiladigan (qoldiqqa qaytadi)
+             * @example 1
+             */
+            sellable: number;
+            /**
+             * @description Brak (optovikka qaytariladi)
+             * @example 0
+             */
+            defective: number;
+        };
+        GradeReturnDto: {
+            items: components["schemas"]["GradeReturnItemDto"][];
+            /** @example Qadog‘i ezilgan */
+            comment?: string;
+        };
+        ReturnInspectionDto: {
+            /** @example 1284 */
+            orderId: string;
+            /** @example 1190 */
+            parcelId?: string | null;
+            /**
+             * @example [
+             *       {
+             *         "variantId": "901",
+             *         "sellable": 1,
+             *         "defective": 1
+             *       }
+             *     ]
+             */
+            items: {
+                variantId?: string;
+                sellable?: number;
+                defective?: number;
+            }[];
+            /** @example Qadog‘i ezilgan */
+            comment?: string | null;
+            /** @example 5 */
+            inspectedBy: string;
+            /**
+             * Format: date-time
+             * @example 2026-12-08T09:30:00.000Z
+             */
+            inspectedAt: string;
         };
         AdminLeadListItemDto: {
             /** @example 7001 */
@@ -7634,7 +10733,9 @@ export interface components {
              *       "confirmed": 7
              *     }
              */
-            evidence: unknown;
+            evidence: {
+                [key: string]: unknown;
+            };
             /**
              * @description Qoidaning keyingi chorasi (tizim taklifi)
              * @enum {string|null}
@@ -7690,7 +10791,9 @@ export interface components {
             /** @example 51 lid, yaroqli 55% (28 / 51) — chegara 60% */
             reason: string;
             /** @example {} */
-            evidence: unknown;
+            evidence: {
+                [key: string]: unknown;
+            };
             /**
              * @description Kim; bo‘sh — tizim
              * @example 7
@@ -7729,7 +10832,9 @@ export interface components {
              *       "confirmed": 7
              *     }
              */
-            evidence: unknown;
+            evidence: {
+                [key: string]: unknown;
+            };
             /**
              * @description Qoidaning keyingi chorasi (tizim taklifi)
              * @enum {string|null}
@@ -7841,23 +10946,6 @@ export interface operations {
             };
         };
     };
-    EchoController_echo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     AuthController_register: {
         parameters: {
             query?: never;
@@ -7897,6 +10985,204 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthErrorResponseDto"];
                 };
+            };
+        };
+    };
+    AuthController_sendOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendOtpDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpSendResultDto"];
+                };
+            };
+            /** @description PHONE_OPERATOR_INVALID — raqam O‘zbekiston mobil operatoriniki emas */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description ACCOUNT_NOT_FOUND (LOGIN) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PHONE_ALREADY_REGISTERED (REGISTER) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description OTP_BLOCKED — 3 xatodan keyin 15 daqiqa; `retryAfterSeconds`, `Retry-After` */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_verifyOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyOtpDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description OTP_INVALID — kod noto‘g‘ri; `attemptsLeft` */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description OTP_EXPIRED — muddati o‘tgan yoki so‘ralmagan */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description OTP_BLOCKED — `retryAfterSeconds` */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_registerWholesaler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterWholesalerDto"];
+            };
+        };
+        responses: {
+            /** @description profileCompleted false — foydalanuvchi yaratildi, optovik yozuvi ochilmadi (masalan, STIR band): kabinetda POST /wholesaler/profile */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description OFFER_NOT_ACCEPTED — shartnoma yoki rozilikning joriy versiyasi qabul qilinmagan */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description PHONE_ALREADY_REGISTERED; shartnoma matni hali e’lon qilinmagan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description REGISTRATION_EXPIRED — telefonni qayta tasdiqlang */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_registerAffiliate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAffiliateDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description OFFER_NOT_ACCEPTED — oferta yoki rozilikning joriy versiyasi qabul qilinmagan */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description PHONE_ALREADY_REGISTERED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description REGISTRATION_EXPIRED — telefonni qayta tasdiqlang */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -7944,6 +11230,108 @@ export interface operations {
             };
         };
     };
+    AuthController_setupTwoFactor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorChallengeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TwoFactorSetupResultDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description 2FA allaqachon ulangan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AuthController_enableTwoFactor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorEnableDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AuthController_verifyTwoFactor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorVerifyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
     AuthController_refresh: {
         parameters: {
             query?: never;
@@ -7957,11 +11345,25 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Yangi tokenlar HttpOnly cookie’da; access token body’da ham (sukut), `AUTH_TOKENS_IN_BODY=false` bo‘lsa — `{}` */
             200: {
+                headers: {
+                    /** @description HttpOnly accessToken va refreshToken cookie */
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginSuccessResponseDto"];
+                };
+            };
+            /** @description Refresh token yaroqsiz yoki muddati o‘tgan (cookie’lar tozalanadi) */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
             };
         };
     };
@@ -7978,11 +11380,14 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Kod SMS da yuborildi (`expiresIn` — soniya). Raqam ro‘yxatda bo‘lmasa ham javob bir xil — raqamlar tekshirib chiqilmasin */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -7999,11 +11404,14 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Parol yangilandi, eski sessiyalar bekor */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -8024,7 +11432,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -8041,11 +11451,14 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Kod SMS da yuborildi (`expiresIn` — soniya). Raqam ro‘yxatda bo‘lmasa ham javob bir xil — raqamlar tekshirib chiqilmasin */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -8058,11 +11471,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description `active` — bekor qilinmagan va muddati o‘tmagan; `current` hozircha har doim false */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -8081,7 +11497,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description ID UUID emas, sessiya topilmadi yoki allaqachon bekor qilingan */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
             };
         };
     };
@@ -8098,7 +11525,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CurrentUserDto"];
+                };
             };
         };
     };
@@ -8115,12 +11544,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Yangilangan profil (passwordHash qaytmaydi) */
+            /** @description Yangilangan profil (parol xeshi qaytmaydi) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CurrentUserDto"];
+                };
             };
         };
     };
@@ -8144,108 +11575,6 @@ export interface operations {
             };
             /** @description Access token yaroqsiz */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    SellersController_getMyShop: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SellerShopResponseDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            /** @description Boshqa foydalanuvchi do‘koniga ruxsat yo‘q */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            /** @description Sotuvchining do‘koni topilmadi */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    SellersController_updateMyShop: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateSellerShopDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SellerShopResponseDto"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            /** @description Boshqa foydalanuvchi do‘koniga ruxsat yo‘q */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            /** @description Sotuvchining do‘koni topilmadi */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8442,69 +11771,18 @@ export interface operations {
             };
         };
     };
-    ProductsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateProductDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductDto"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    ProductsController_getMine: {
+    StorefrontController_list: {
         parameters: {
             query?: {
                 search?: string;
-                status?: "DRAFT" | "PENDING_REVIEW" | "ACTIVE" | "REJECTED" | "ARCHIVED" | "OUT_OF_STOCK";
                 categoryId?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                minPrice?: number;
+                maxPrice?: number;
+                /** @description Faqat omborda bor mahsulotlar */
+                inStock?: boolean;
+                sort?: "createdAt:asc" | "createdAt:desc" | "price:asc" | "price:desc" | "name:asc" | "name:desc";
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -8517,140 +11795,24 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MyProductsPageDto"];
+                    "application/json": components["schemas"]["StorefrontProductsPageDto"];
                 };
             };
-        };
-    };
-    ProductsController_getOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    ProductsController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    ProductsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateProductDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductDto"];
-                };
-            };
+            /** @description Filtr noto‘g‘ri (min > max) */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
+                content?: never;
             };
         };
     };
-    ProductVariantsController_list: {
+    StorefrontController_get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                productId: number;
+                id: string;
             };
             cookie?: never;
         };
@@ -8661,23 +11823,180 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductVariantDto"][];
+                    "application/json": components["schemas"]["StorefrontProductDetailsDto"];
+                };
+            };
+            /** @description Mahsulot topilmadi yoki sotuvda emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StorefrontController_banners: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontBannerDto"][];
                 };
             };
         };
     };
-    ProductVariantsController_create: {
+    StorefrontController_cart: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description Mehmon savati kaliti (sayt yaratadi, 16–128 belgi: harf, raqam, - _) */
+                "x-session-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCartDto"];
+                };
+            };
+        };
+    };
+    StorefrontController_clearCart: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Mehmon savati kaliti (sayt yaratadi, 16–128 belgi: harf, raqam, - _) */
+                "x-session-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCartDto"];
+                };
+            };
+        };
+    };
+    StorefrontController_addItem: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Mehmon savati kaliti (sayt yaratadi, 16–128 belgi: harf, raqam, - _) */
+                "x-session-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorefrontCartItemDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCartDto"];
+                };
+            };
+            /** @description Mahsulot saytda sotuvda emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StorefrontController_removeItem: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Mehmon savati kaliti (sayt yaratadi, 16–128 belgi: harf, raqam, - _) */
+                "x-session-id": string;
+            };
             path: {
-                productId: number;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCartDto"];
+                };
+            };
+        };
+    };
+    StorefrontController_updateItem: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Mehmon savati kaliti (sayt yaratadi, 16–128 belgi: harf, raqam, - _) */
+                "x-session-id": string;
+            };
+            path: {
+                id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateProductVariantDto"];
+                "application/json": components["schemas"]["UpdateStorefrontCartItemDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCartDto"];
+                };
+            };
+        };
+    };
+    StorefrontController_order: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Mehmon savati kaliti (sayt yaratadi, 16–128 belgi: harf, raqam, - _) */
+                "x-session-id": string;
+                "user-agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteOrderDto"];
             };
         };
         responses: {
@@ -8686,551 +12005,59 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductVariantDto"];
+                    "application/json": components["schemas"]["SiteOrderCreatedDto"];
                 };
             };
+            /** @description Maydon noto‘g‘ri (maydon nomi bilan) yoki savat bo‘sh (SITE_CART_EMPTY) */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
+                content?: never;
             };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
+            /** @description Savatdagi mahsulot saytda sotuvda emas (SITE_PRODUCT_UNAVAILABLE) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
+                content?: never;
             };
         };
     };
-    ProductVariantsController_getOne: {
+    StorefrontController_confirm: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                productId: number;
-                variantId: number;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteOrderConfirmDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductVariantDto"];
+                    "application/json": components["schemas"]["SiteOrderConfirmedDto"];
                 };
             };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
+            /** @description Havola noto‘g‘ri */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
+                content?: never;
             };
-        };
-    };
-    ProductVariantsController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: number;
-                variantId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
+            /** @description Havola muddati o‘tgan */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    ProductVariantsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: number;
-                variantId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateProductVariantDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductVariantDto"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    FilesController_upload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file: string;
-                    /** @example 12 */
-                    productId: string;
-                    /** @default false */
-                    isCover?: boolean;
-                };
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductImageUploadResultDto"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    SellerOrdersController_orders: {
-        parameters: {
-            query?: {
-                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
-                dateFrom?: string;
-                dateTo?: string;
-                search?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SellerOrdersPageDto"];
-                };
-            };
-        };
-    };
-    SellerOrdersController_getOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
                 content?: never;
-            };
-        };
-    };
-    SellerOrdersController_updateOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateSellerOrderStatusDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_items: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_label: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Chop etishga tayyor PDF yorliq */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": string;
-                };
-            };
-        };
-    };
-    SellerOrdersController_labelsBatch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ShippingLabelsBatchDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_history: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_cancel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_confirm: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_createShipment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateShipmentDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_listShipments: {
-        parameters: {
-            query?: {
-                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
-                dateFrom?: string;
-                dateTo?: string;
-                search?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_shipment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_tracking: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerOrdersController_dashboard: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SellerDashboardDto"];
-                };
             };
         };
     };
@@ -9267,11 +12094,17 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description O‘qilgan qilingan xabarnomalar soni */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @example 3 */
+                        updated?: number;
+                    };
+                };
             };
         };
     };
@@ -9290,174 +12123,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationDto"];
+                };
             };
-        };
-    };
-    AdminShopsController_list: {
-        parameters: {
-            query?: {
-                status?: "PENDING" | "ACTIVE" | "SUSPENDED" | "REJECTED";
-                search?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description { items, total, page, limit, totalPages } */
-            200: {
+            /** @description Xabarnoma topilmadi (boshqa foydalanuvchiniki ham) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    AdminShopsController_detail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminShopDetailDto"];
-                };
-            };
-        };
-    };
-    AdminShopsController_suspend: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminShopsController_activate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminShopsController_feature: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FeatureShopDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminShopsController_approve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    AdminShopsController_reject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RejectShopDto"];
-            };
-        };
-        responses: {
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
             };
         };
     };
@@ -9503,8 +12178,8 @@ export interface operations {
                 /** @description Bloklanganlar filtri */
                 blocked?: boolean;
                 search?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -9512,12 +12187,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description { items, total, page, limit, totalPages } */
+            /** @description { items, total, page, limit, totalPages }; items — foydalanuvchi kartasi (AdminUserDto shakli) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             401: {
                 headers: {
@@ -9548,6 +12225,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserDto"];
+                };
+            };
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9555,6 +12240,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthErrorResponseDto"];
                 };
+            };
+            /** @description Foydalanuvchi topilmadi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -9573,12 +12265,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Yangilangan foydalanuvchi */
+            /** @description Yangilangan foydalanuvchi (qisqa ko‘rinish) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             403: {
                 headers: {
@@ -9630,6 +12324,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Bloklangan foydalanuvchi; sotuvchi bo‘lsa sahifalari to‘xtaydi */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserDto"];
+                };
+            };
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9637,6 +12340,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthErrorResponseDto"];
                 };
+            };
+            /** @description O‘zini bloklash yoki foydalanuvchi topilmadi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -9651,6 +12361,53 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description Foydalanuvchi topilmadi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminUsersController_resetTwoFactor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example true */
+                        reset?: boolean;
+                    };
+                };
+            };
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9671,8 +12428,8 @@ export interface operations {
                 shopId?: string;
                 dateFrom?: string;
                 dateTo?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -9680,12 +12437,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description { items, total, page, limit, totalPages } */
+            /** @description { items, total, page, limit, totalPages }; ro‘yxatda telefon niqoblangan */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             401: {
                 headers: {
@@ -9716,6 +12475,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Buyurtma, posilkalar (`sellerOrders`) va tovarlar; lid buyurtmasida `lead` (narx nusxasi, holat jurnali), eski buyurtmada `lead: null` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9723,6 +12491,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthErrorResponseDto"];
                 };
+            };
+            /** @description Buyurtma topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -10054,8 +12829,8 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -10149,7 +12924,31 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Qabul qilindi (201). `result`: APPLIED — holat o‘zgardi, NOOP — o‘zgarish yo‘q, REJECTED — orqaga yoki ruxsatsiz o‘tish (holat o‘zgarmaydi, jurnalda), IGNORED — e’tiborsiz holat; lid buyurtmasida `status` — buyurtmaning hozirgi holati (`LeadOrderStatus`). `duplicate: true` — shu `event_id` avval qayta ishlangan. `ignored` — sinov ping’i (`webhook.test`), hech narsa o‘zgarmaydi */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example true */
+                        received: boolean;
+                        /**
+                         * @example APPLIED
+                         * @enum {string}
+                         */
+                        result?: "APPLIED" | "NOOP" | "REJECTED" | "IGNORED";
+                        /** @example DELIVERED */
+                        status?: string;
+                        /** @example true */
+                        duplicate?: boolean;
+                        /** @example webhook.test */
+                        ignored?: string;
+                    };
+                };
+            };
+            /** @description Imzo yo‘q yoki noto‘g‘ri, yoki hodisa vaqti ruxsat etilgan oynadan tashqarida */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10248,6 +13047,58 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FinanceReconciliationReportDto"];
+                };
+            };
+        };
+    };
+    AdminFinanceController_codDailyCheck: {
+        parameters: {
+            query?: {
+                /** @description Sana (Toshkent); bo‘sh — kecha */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodDailyCheckDto"];
+                };
+            };
+            /** @description Bu kun uchun sverka hali yo‘q */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminFinanceController_codDailyCheckRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodDailyCheckQueryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodDailyCheckDto"];
                 };
             };
         };
@@ -10438,8 +13289,8 @@ export interface operations {
                 blocked?: boolean;
                 shopId?: string;
                 search?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -10447,11 +13298,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description { items, total, page, limit, totalPages }; optovik rekvizitlari (STIR, bank, shartnoma) berilmaydi */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10585,7 +13439,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProductDto"];
+                };
             };
         };
     };
@@ -10608,7 +13464,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProductDto"];
+                };
             };
         };
     };
@@ -10624,6 +13482,144 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDto"];
+                };
+            };
+        };
+    };
+    AdminCreativesController_uploadPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreativeUploadRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreativeUploadPolicyDto"];
+                };
+            };
+            /** @description Fayl turi yoki hajmi ruxsat etilmagan */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Mahsulot topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Kreativlar chegarasi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminCreativesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreativeDto"][];
+                };
+            };
+        };
+    };
+    AdminCreativesController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreativeConfirmDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreativeDto"];
+                };
+            };
+            /** @description Fayl yo‘q yoki mos emas */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Kreativlar chegarasi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminCreativesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                creativeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description O‘chirilgan kreativ ID si */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Kreativ topilmadi */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10742,7 +13738,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10761,11 +13759,14 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `decision` — saqlangan qaror; qolgan maydonlar — narx hisobi (`evaluation` yuborilgan narx bo‘yicha, `approvedPrice` va `priceStatus` qarordan oldingi holat) */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10809,7 +13810,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10832,7 +13835,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10849,7 +13854,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10870,7 +13877,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10885,11 +13894,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Daraja hali saqlanmagan bo‘lsa — hamma maydon `null` */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10912,7 +13924,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10925,11 +13939,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Yangisi birinchi (`effectiveFrom` kamayish tartibida) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10950,7 +13967,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -10960,10 +13979,14 @@ export interface operations {
                 /** @description Amalni bajargan user ID */
                 actorId?: string;
                 action?: string;
+                /** @description BE-27: ob’ekt turi (yozuvdagi `entityType`, masalan Product, User, FinanceSetting) */
+                entityType?: string;
+                /** @description BE-27: ob’ekt ID si (`entityType` bilan birga — «shu mahsulot auditi») */
+                entityId?: string;
                 dateFrom?: string;
                 dateTo?: string;
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -10971,12 +13994,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description { items, total, page, limit, totalPages } */
+            /** @description Yangisi tepada; `actorName` — amalni qilgan foydalanuvchi ismi (jamoadan o‘chirilgani ham), tizim amalida null */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Filtr yoki sahifalash qiymati noto‘g‘ri */
             400: {
@@ -11000,6 +14025,77 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthErrorResponseDto"];
                 };
+            };
+        };
+    };
+    AdminAuditController_removeAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description Audit jurnali o‘zgartirilmaydi va o‘chirilmaydi */
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAuditController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Audit yozuvi ID si */
+                id: unknown;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description Audit jurnali o‘zgartirilmaydi va o‘chirilmaydi */
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -11364,12 +14460,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description { id, removed: true } */
+            /** @description A’zo o‘chirildi (sessiyalari bekor) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Oxirgi SUPERADMIN himoyalangan */
             409: {
@@ -11534,8 +14632,8 @@ export interface operations {
     AdminIntegrationController_shipments: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 /** @description created — Elchi posilkasi bor; missing — Elchi’ga topshirilmagan, lekin topshirilishi kerak (buyurtma tasdiqlangan/to‘langan, sub-buyurtma yakunlanmagan); all — hammasi */
                 shipmentState?: "all" | "created" | "missing";
                 shopId?: string;
@@ -11550,24 +14648,28 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description { items: [{ id, salesOrderId, shopId, shipmentId|null, status, orderStatus, paymentMethod, codAmount, buyerName, createdAt, updatedAt, ... }], total, page, limit, totalPages } */
+            /** @description Posilka (`shipmentId` — Elchi raqami, yaratilmagan bo‘lsa null) va buyurtma holati; summa butun so‘m */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
     AdminIntegrationController_webhooks: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 eventId?: string;
                 shipmentId?: string;
                 sellerOrderId?: string;
-                status?: "PENDING" | "CONFIRMED" | "SHIPMENT_CREATED" | "RECEIVED" | "ON_THE_ROAD" | "DELIVERED" | "CANCELLED" | "RETURNED";
+                orderId?: string;
+                status?: string;
+                result?: "APPLIED" | "NOOP" | "REJECTED" | "IGNORED";
                 dateFrom?: string;
                 dateTo?: string;
             };
@@ -11577,12 +14679,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description { items, total, page, limit, totalPages } */
+            /** @description `result`: APPLIED, NOOP, REJECTED, IGNORED (webhook javobidagi kabi); `payload` — Elchi yuborgan xabar */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -11954,76 +15058,6 @@ export interface operations {
             };
         };
     };
-    BuyerOrdersController_list: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BuyerOrdersPageDto"];
-                };
-            };
-        };
-    };
-    BuyerOrdersController_details: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Guest checkoutda ishlatilgan session identifikatori */
-                "X-Session-Id"?: string;
-            };
-            path: {
-                orderId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BuyerOrderDetailsDto"];
-                };
-            };
-        };
-    };
-    BuyerOrdersController_tracking: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Guest checkoutda ishlatilgan session identifikatori */
-                "X-Session-Id"?: string;
-            };
-            path: {
-                orderId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BuyerOrderTrackingDto"];
-                };
-            };
-        };
-    };
     AdminInventoryController_inbound: {
         parameters: {
             query?: never;
@@ -12041,7 +15075,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -12062,7 +15098,204 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    AdminInventoryController_shipments: {
+        parameters: {
+            query?: {
+                /** @description Bir yoki bir nechta holat: `status=DECLARED,IN_TRANSIT` yoki takroriy parametr */
+                status?: ("DECLARED" | "IN_TRANSIT" | "RECEIVED" | "DISCREPANCY")[];
+                /** @description Postavka raqami (`PS-000014` yoki 14), mahsulot nomi, SKU, shtrix-kod yoki optovik nomi (BE-25) */
+                search?: string;
+                /** @description Kutilgan kelish sanasi, dan (BE-25) */
+                expectedFrom?: string;
+                /** @description Kutilgan kelish sanasi, gacha (shu kun ham) */
+                expectedTo?: string;
+                /** @description Qabul qilingan kun (Toshkent) */
+                receivedOn?: string;
+                wholesalerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentPageDto"];
+                };
+            };
+        };
+    };
+    AdminInventoryController_declareShipment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclareInboundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentDto"];
+                };
+            };
+            /** @description Mahsulot topilmadi yoki boshqa optovikniki */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content?: never;
+            };
+        };
+    };
+    AdminInventoryController_shipment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentDto"];
+                };
+            };
+            /** @description Postavka topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminInventoryController_shipmentInTransit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentDto"];
+                };
+            };
+            /** @description Postavka holati boshqa */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminInventoryController_receiveShipment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceiveInboundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentDto"];
+                };
+            };
+        };
+    };
+    AdminInventoryController_shipmentAct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF fayl: `qabul-akti_PS-000014.pdf` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            /** @description Postavka hali qabul qilinmagan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminInventoryController_lots: {
+        parameters: {
+            query?: {
+                /** @description BLOCKED — sotuvdan chiqqan (60 kundan kam qolgan) */
+                state?: "BLOCKED" | "SELLABLE" | "ALL";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockLotDto"][];
+                };
             };
         };
     };
@@ -12073,9 +15306,9 @@ export interface operations {
                 variantId?: string;
                 productId?: string;
                 search?: string;
-                lowOnly?: components["schemas"]["Object"];
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                lowOnly?: boolean;
+                page?: number;
+                limit?: number;
                 shopId?: string;
                 /** @description true — faqat faol, false — faqat o‘chirilgan omborlar */
                 warehouseActive?: boolean;
@@ -12115,8 +15348,8 @@ export interface operations {
     AdminInventoryController_movements: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 /** @description true — faqat faol, false — faqat o‘chirilgan omborlar */
                 warehouseActive?: boolean;
                 shopId?: string;
@@ -12137,6 +15370,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "items": [
+                     *         {
+                     *           "id": "9101",
+                     *           "variantId": "9001",
+                     *           "productId": "501",
+                     *           "productName": "Simsiz quloqchinlar",
+                     *           "variantName": null,
+                     *           "sku": "SQ-501",
+                     *           "catalogMissing": false,
+                     *           "shopId": "12",
+                     *           "warehouseId": "1",
+                     *           "warehouseName": "HQ ombor",
+                     *           "warehouseActive": true,
+                     *           "type": "INBOUND",
+                     *           "quantity": 120,
+                     *           "onHandAfter": 120,
+                     *           "reservedAfter": 0,
+                     *           "referenceType": "INBOUND_SHIPMENT",
+                     *           "referenceId": "31",
+                     *           "reason": "Postavka № 31",
+                     *           "actorId": "8",
+                     *           "createdAt": "2026-11-22T10:00:00.000Z"
+                     *         }
+                     *       ],
+                     *       "total": 1,
+                     *       "page": 1,
+                     *       "limit": 20,
+                     *       "totalPages": 1,
+                     *       "warnings": []
+                     *     }
+                     */
                     "application/json": components["schemas"]["AdminStockMovementsPageDto"];
                 };
             };
@@ -12155,266 +15421,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthErrorResponseDto"];
                 };
-            };
-        };
-    };
-    BuyerReturnsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                orderId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateReturnRequestDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateReturnRequestsResultDto"];
-                };
-            };
-            /** @description Posilka yetkazilmagan, muddat o‘tgan, miqdor ortiq yoki tovar buyurtmaga tegishli emas */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-            /** @description Buyurtma boshqa xaridorniki */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Buyurtma topilmadi */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BuyerReturnsController_list: {
-        parameters: {
-            query?: {
-                status?: "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED" | "REFUNDED";
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestsPageDto"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthErrorResponseDto"];
-                };
-            };
-        };
-    };
-    BuyerReturnsController_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestDetailsDto"];
-                };
-            };
-            /** @description So‘rov topilmadi yoki boshqaniki */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerReturnsController_list: {
-        parameters: {
-            query?: {
-                status?: "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED" | "REFUNDED";
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestsPageDto"];
-                };
-            };
-        };
-    };
-    SellerReturnsController_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestDetailsDto"];
-                };
-            };
-            /** @description So‘rov topilmadi yoki boshqa do‘konniki */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerReturnsController_review: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReturnReviewDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestDetailsDto"];
-                };
-            };
-            /** @description Holat o‘tishga yo‘l qo‘ymaydi */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerReturnsController_approve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReturnApproveDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestDetailsDto"];
-                };
-            };
-            /** @description Holat o‘tishga yo‘l qo‘ymaydi */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SellerReturnsController_reject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReturnRejectDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRequestDetailsDto"];
-                };
-            };
-            /** @description Sabab yo‘q yoki holat mos emas */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -12609,117 +15615,38 @@ export interface operations {
             };
         };
     };
-    SellerFinanceController_ledger: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                dateFrom?: string;
-                dateTo?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FinanceLedgerPageDto"];
-                };
-            };
-        };
-    };
-    SellerFinanceController_payouts: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                status?: "PENDING" | "APPROVED" | "HELD" | "PAID";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FinancePayoutPageDto"];
-                };
-            };
-        };
-    };
-    SellerFinanceController_summary: {
-        parameters: {
-            query?: {
-                dateFrom?: string;
-                dateTo?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SellerFinanceSummaryDto"];
-                };
-            };
-        };
-    };
-    SellerFinanceController_getPayoutSchedule: {
+    AdminOrderReturnsController_create: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PayoutScheduleDto"];
-                };
+            path: {
+                id: string;
             };
-        };
-    };
-    SellerFinanceController_updatePayoutSchedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdatePayoutScheduleDto"];
+                "application/json": components["schemas"]["CreateReturnRequestDto"];
             };
         };
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PayoutScheduleDto"];
+                    "application/json": components["schemas"]["ReturnRequestDetailsDto"];
                 };
             };
-            /** @description Noma’lum chastota */
+            /** @description Sababsiz, muddat o‘tgan, buyurtma «Yetkazildi» emas yoki tovar noto‘g‘ri */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bu buyurtmada ochiq so‘rov bor */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12769,11 +15696,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description CSV fayl (UTF-8 BOM, «;»): `s1-s3-sinov_<from>_<to>.csv`, qatorlari JSON hisobotdagi `rows` bilan bir xil */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "text/csv": string;
+                };
             };
         };
     };
@@ -12973,6 +15903,34 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AffiliateOffersPageDto"];
                 };
+            };
+        };
+    };
+    AffiliateStreamsController_getOffer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateOfferDetailDto"];
+                };
+            };
+            /** @description Offer topilmadi yoki yopiq */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -13369,7 +16327,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description INVALID_STATE: holat mos emas yoki shu xodim tasdiqlagan */
+            /** @description INVALID_STATE: holat mos emas yoki shu xodim tasdiqlagan; NAME_CHANGED: ism tasdiqlangandan farq qiladi — maqom qayta tekshiruvda */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -13477,6 +16435,706 @@ export interface operations {
             };
         };
     };
+    AffiliateProfileController_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateProfileDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AffiliateProfileController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAffiliateProfileDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateProfileDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AffiliateProfileController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptAgreementDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AffiliateProfileDto"];
+                };
+            };
+            /** @description OFFER_NOT_ACCEPTED — joriy versiya emas */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AffiliateSelfEmployedController_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Hujjat yuklanmagan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AffiliateSelfEmployedController_uploadDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedDocumentDto"];
+                };
+            };
+            /** @description FILE_REQUIRED — fayl yo‘q; FILE_TYPE_INVALID — tur yoki tarkib mos emas */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description FILE_TOO_LARGE — 10 MB dan katta */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AffiliateSelfEmployedController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitSelfEmployedDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedInfoDto"];
+                };
+            };
+            /** @description PINFL_INVALID, DOCUMENT_NOT_FOUND, PROFILE_NAME_REQUIRED — profilda ism yo‘q */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description ALREADY_PENDING — tekshirilmoqda; ALREADY_VERIFIED — tasdiqlangan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description SELF_EMPLOYED_SECRET_KEY sozlanmagan */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminSelfEmployedController_list: {
+        parameters: {
+            query?: {
+                /** @description Berilmasa — hammasi */
+                status?: "PENDING" | "VERIFIED" | "REJECTED" | "REVOKED";
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedPageDto"];
+                };
+            };
+        };
+    };
+    AdminSelfEmployedController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedDetailDto"];
+                };
+            };
+            /** @description Ariza topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminSelfEmployedController_reveal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinflDto"];
+                };
+            };
+            /** @description Ariza yoki JShShIR yo‘q */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ariza eskirgan yoki shifr kaliti almashgan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminSelfEmployedController_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ariza yoki hujjat yo‘q */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminSelfEmployedController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedDetailDto"];
+                };
+            };
+            /** @description Ariza tekshiruvda emas yoki eskirgan; NAME_CHANGED — profildagi ism arizadagidan farq qiladi, ariza hozirgi ism bilan yangilandi (navbatdan qayta oching) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminSelfEmployedController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectSelfEmployedDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedDetailDto"];
+                };
+            };
+            /** @description Ariza tekshiruvda emas */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminSelfEmployedController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevokeSelfEmployedDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfEmployedDetailDto"];
+                };
+            };
+            /** @description Maqom tasdiqlangan emas */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LegalDocumentsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "affiliate-offer" | "personal-data-consent" | "wholesaler-contract";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LegalDocumentsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "affiliate-offer" | "personal-data-consent" | "wholesaler-contract";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishLegalDocumentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description Bu versiya allaqachon e’lon qilingan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminFinanceSettingsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinanceSettingStateDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AdminFinanceSettingsController_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: "refusal_fee" | "withdrawal_min";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFinanceSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Qiymat yoki vaqt noto‘g‘ri, izoh yo‘q */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description Shu vaqtga allaqachon kiritilgan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminFinanceSettingsController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: "refusal_fee" | "withdrawal_min";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelFinanceSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinanceSettingValueDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            /** @description Rejalashtirilgan qiymat topilmadi yoki allaqachon kuchga kirgan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminModerationController_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModerationSummaryDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AdminModerationController_prices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriceQueueDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthErrorResponseDto"];
+                };
+            };
+        };
+    };
     AdminSettlementsController_list: {
         parameters: {
             query?: {
@@ -13515,6 +17173,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description CSV fayl (UTF-8 BOM, «;»): `bank-topshiriqnoma_<sana>.csv`, har akt — bitta qator */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
             /** @description Bu davrda to‘lanadigan akt yo‘q */
             404: {
                 headers: {
@@ -13543,6 +17210,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettlementRunResultDto"];
+                };
+            };
+        };
+    };
+    AdminSettlementsController_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettlementSettingsDto"];
+                };
+            };
+        };
+    };
+    AdminSettlementsController_updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSettlementSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettlementSettingsDto"];
                 };
             };
         };
@@ -13586,6 +17295,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description PDF fayl: `akt-sverka_<akt raqami>_<davr oxiri>.pdf` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
             /** @description Akt topilmadi */
             404: {
                 headers: {
@@ -13623,6 +17341,1079 @@ export interface operations {
             };
             /** @description INVALID_STATE: akt bank fayliga chiqmagan (READY, NETTED, VOID) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminReconciliationController_days: {
+        parameters: {
+            query: {
+                /** @description Toshkent kuni (kiradi) */
+                from: string;
+                /** @description Toshkent kuni (kiradi) */
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemittanceDayDto"][];
+                };
+            };
+        };
+    };
+    AdminReconciliationController_items: {
+        parameters: {
+            query?: {
+                /** @description Toshkent kuni */
+                day?: string;
+                state?: "DIFF" | "RESOLVED" | "MATCHED" | "PENDING";
+                /** @description Buyurtma ID si yoki raqami (aniq) */
+                search?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemittanceItemPageDto"];
+                };
+            };
+        };
+    };
+    AdminReconciliationController_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveRemittanceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemittanceItemDto"];
+                };
+            };
+            /** @description O‘tkazma qatori topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Farq yo‘q yoki allaqachon hal qilingan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminReconciliationController_elchiCheck: {
+        parameters: {
+            query?: {
+                /** @description Kun (Toshkent) — o‘sha kunning oxirgi tekshiruvi; bo‘sh — eng oxirgi tekshiruv */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ElchiCheckRunDto"];
+                };
+            };
+            /** @description Bu kun (yoki umuman) tekshiruv bo‘lmagan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminReconciliationController_elchiCheckItems: {
+        parameters: {
+            query?: {
+                /** @description Kun (Toshkent) — o‘sha kunning oxirgi tekshiruvi; bo‘sh — eng oxirgi tekshiruv */
+                date?: string;
+                /** @description Aniq tekshiruv (bo‘lsa `date` e’tiborsiz) */
+                runId?: string;
+                state?: "DIFF" | "RESOLVED" | "FAILED";
+                /** @description Buyurtma ID si, raqami yoki Elchi raqami */
+                search?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ElchiCheckItemPageDto"];
+                };
+            };
+        };
+    };
+    AdminReconciliationController_elchiCheckRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Tekshiruv hozir ishlamoqda */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminReconciliationController_elchiCheckResolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveRemittanceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ElchiCheckItemDto"];
+                };
+            };
+            /** @description Tekshiruv qatori topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Farq yo‘q, allaqachon yopilgan yoki posilka keyin qayta tekshirilgan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminActResponsesController_disputes: {
+        parameters: {
+            query?: {
+                status?: "OPEN" | "ANSWERED";
+                /** @description Akt ID si */
+                settlementId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettlementDisputePageDto"];
+                };
+            };
+        };
+    };
+    AdminActResponsesController_act: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerActDto"];
+                };
+            };
+            /** @description Akt topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminActResponsesController_answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettlementCommentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettlementDisputeDto"];
+                };
+            };
+            /** @description E’tiroz topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Allaqachon javob berilgan */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerSettlementsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                status?: "READY" | "EXPORTED" | "PAID" | "NETTED" | "VOID";
+                /** @description Davr oxiri (yakshanba) */
+                periodEnd?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerSettlementPageDto"];
+                };
+            };
+            /** @description Foydalanuvchi optovikka bog‘lanmagan */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerSettlementsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerActDto"];
+                };
+            };
+            /** @description Boshqa optovik akti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerSettlementsController_actPdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Boshqa optovik akti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerSettlementsController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerActDto"];
+                };
+            };
+            /** @description Boshqa optovik akti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ochiq e’tiroz bor yoki tovarlar qaytgan akt (VOID) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerSettlementsController_dispute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettlementCommentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerActDto"];
+                };
+            };
+            /** @description Boshqa optovik akti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Akt qabul qilingan, ochiq e’tiroz bor yoki tovarlar qaytgan akt (VOID) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerCabinetController_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerProfileDto"];
+                };
+            };
+            /** @description Optovik yozuvi yo‘q — POST /wholesaler/profile */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerCabinetController_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteWholesalerProfileDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerProfileDto"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerProfileDto"];
+                };
+            };
+        };
+    };
+    WholesalerCabinetController_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerDashboardDto"];
+                };
+            };
+        };
+    };
+    WholesalerCabinetController_contractLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedLinkDto"];
+                };
+            };
+            /** @description Optovik yozuvi yo‘q */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerCabinetController_uploadPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivateUploadPolicyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateUploadPolicyResultDto"];
+                };
+            };
+        };
+    };
+    WholesalerCabinetController_documents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerDocumentDto"][];
+                };
+            };
+        };
+    };
+    WholesalerCabinetController_confirmDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmWholesalerDocumentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerDocumentDto"];
+                };
+            };
+        };
+    };
+    WholesalerCabinetController_documentLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedLinkDto"];
+                };
+            };
+            /** @description Boshqa optovikning hujjati */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerProductsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Yangisi tepada; rad etilganda sababi `moderationNote` da */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    WholesalerProductsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductDto"];
+            };
+        };
+        responses: {
+            /** @description Taklif qilingan mahsulot — admin tasdig‘igacha PENDING_REVIEW (sotuvga chiqmaydi) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Komissiya shartnomasi yo‘q yoki optovik rad etilgan/to‘xtatilgan */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerProductsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Boshqa optovikning mahsuloti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Mahsulot topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerProductsController_pricing: {
+        parameters: {
+            query?: {
+                /** @description Shu narxda taqsimot (sukut: tasdiqlangan yoki tavsiya) */
+                price?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `calculation` — narx hisobi, `evaluation` — narx bahosi: so‘ralgan `price`, bo‘lmasa tasdiqlangan narx, u ham bo‘lmasa tavsiya narx bo‘yicha; ichki siyosat va Elchi tarifi berilmaydi */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Boshqa optovikning mahsuloti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Mahsulot topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerShipmentsController_list: {
+        parameters: {
+            query?: {
+                /** @description Bir yoki bir nechta holat: `status=DECLARED,IN_TRANSIT` yoki takroriy parametr */
+                status?: ("DECLARED" | "IN_TRANSIT" | "RECEIVED" | "DISCREPANCY")[];
+                /** @description Postavka raqami (`PS-000014` yoki 14), mahsulot nomi, SKU, shtrix-kod yoki optovik nomi (BE-25) */
+                search?: string;
+                /** @description Kutilgan kelish sanasi, dan (BE-25) */
+                expectedFrom?: string;
+                /** @description Kutilgan kelish sanasi, gacha (shu kun ham) */
+                expectedTo?: string;
+                /** @description Qabul qilingan kun (Toshkent) */
+                receivedOn?: string;
+                wholesalerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentPageDto"];
+                };
+            };
+        };
+    };
+    WholesalerShipmentsController_declare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WholesalerShipmentDeclareDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentDto"];
+                };
+            };
+            /** @description Optovik tasdiqlanmagan yoki boshqa optovik mahsuloti */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerShipmentsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundShipmentDto"];
+                };
+            };
+            /** @description Boshqa optovik postavkasi */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WholesalerShipmentsController_act: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Boshqa optovik postavkasi */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminWholesalerCabinetController_review: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewWholesalerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerProfileDto"];
+                };
+            };
+            /** @description Optovik PENDING holatida emas */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminWholesalerCabinetController_linkOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkWholesalerOwnerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerProfileDto"];
+                };
+            };
+            /** @description Raqam boshqa foydalanuvchiniki yoki optovikning boshqa egasi bor */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminWholesalerCabinetController_documents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WholesalerDocumentDto"][];
+                };
+            };
+        };
+    };
+    AdminWholesalerCabinetController_documentLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedLinkDto"];
+                };
+            };
+        };
+    };
+    AdminWholesalerCabinetController_contractLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedLinkDto"];
+                };
+            };
+        };
+    };
+    SignedFilesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Imzosiz, buzilgan yoki muddati o‘tgan havola */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminMetricsController_metrics: {
+        parameters: {
+            query: {
+                /** @description Toshkent kuni (kiradi) */
+                from: string;
+                /** @description Toshkent kuni (kiradi) */
+                to: string;
+                groupBy?: "DAY" | "AFFILIATE" | "OPERATOR" | "OFFER";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformMetricsDto"];
+                };
+            };
+            /** @description ADMIN va SUPERADMIN dan boshqa rol */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13703,6 +18494,66 @@ export interface operations {
             };
             /** @description Lid topilmadi yoki bu operatorda emas */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_getProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorLeadProductDto"];
+                };
+            };
+            /** @description Lid topilmadi yoki bu operatorda emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorLeadsController_attempts: {
+        parameters: {
+            query?: {
+                /** @description Toshkent sanasi; sukut — bugun */
+                from?: string;
+                /** @description Toshkent sanasi; sukut — from */
+                to?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorAttemptsPageDto"];
+                };
+            };
+            /** @description Sana yoki limit noto‘g‘ri */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13813,6 +18664,25 @@ export interface operations {
             };
         };
     };
+    OperatorLeadsController_getState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorStateDto"];
+                };
+            };
+        };
+    };
     OperatorLeadsController_setState: {
         parameters: {
             query?: never;
@@ -13879,6 +18749,358 @@ export interface operations {
             };
         };
     };
+    OperatorCallsController_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCallDto"];
+                };
+            };
+            /** @description Lid topilmadi yoki bu operatorda emas */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description OPERATOR_PHONE_MISSING — telefon biriktirilmagan; CALL_ACTIVE — operatorda yoki shu lidda tugamagan qo‘ng‘iroq bor; CALL_REQUEST_EXPIRED — so‘rov eskirdi */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TELEPHONY_FAILED — provayder qo‘ng‘iroqni boshlamadi */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TELEPHONY_NOT_CONFIGURED — telefoniya ulanmagan */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorCallsController_mine: {
+        parameters: {
+            query?: {
+                /** @description Toshkent kuni */
+                from?: string;
+                /** @description Toshkent kuni (shu kun ham) */
+                to?: string;
+                operatorId?: string;
+                leadId?: string;
+                /** @description MISSING — yozuvsiz qo‘ng‘iroqlar (xato) */
+                recording?: "NONE" | "LIVE" | "PENDING" | "READY" | "MISSING";
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallPageDto"];
+                };
+            };
+        };
+    };
+    OperatorCallsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCallDto"];
+                };
+            };
+            /** @description Qo‘ng‘iroq topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperatorCallsController_hangup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCallDto"];
+                };
+            };
+            /** @description Qo‘ng‘iroq topilmadi */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CallsController_list: {
+        parameters: {
+            query?: {
+                /** @description Toshkent kuni */
+                from?: string;
+                /** @description Toshkent kuni (shu kun ham) */
+                to?: string;
+                operatorId?: string;
+                leadId?: string;
+                /** @description MISSING — yozuvsiz qo‘ng‘iroqlar (xato) */
+                recording?: "NONE" | "LIVE" | "PENDING" | "READY" | "MISSING";
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallPageDto"];
+                };
+            };
+        };
+    };
+    CallsController_recordingLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingLinkRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedLinkDto"];
+                };
+            };
+            /** @description Boshqa operatorning yozuvi yoki yuklab olish ruxsati yo‘q */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Qo‘ng‘iroq yo‘q; RECORDING_NOT_READY — yozuv yo‘q */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CallRecordingsController_stream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "audio/mpeg": string;
+                };
+            };
+            /** @description Imzosiz, buzilgan yoki muddati o‘tgan havola */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminOperatorPhoneController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorPhoneDto"];
+                };
+            };
+            /** @description Telefon biriktirilmagan */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminOperatorPhoneController_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetOperatorPhoneDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorPhoneDto"];
+                };
+            };
+            /** @description Raqam noto‘g‘ri yoki foydalanuvchi operator emas */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Telefon boshqa operatorda */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminOperatorPhoneController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    TelephonyWebhookController_receive: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telephony-Signature": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelephonyWebhookDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Imzo yo‘q yoki noto‘g‘ri */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     OperatorOrdersController_cancel: {
         parameters: {
             query?: never;
@@ -13937,11 +19159,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Sahifalashsiz, 1 000 qatorgacha; oshsa `truncated: true`. Topshirilgan va bekor qilingan vazifalar chiqmaydi. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -13960,6 +19185,14 @@ export interface operations {
             };
         };
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
             /** @description WRONG_ITEM — boshqa tovar; INVALID_STATE — vazifa holati */
             409: {
                 headers: {
@@ -13980,6 +19213,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
             /** @description INVALID_STATE — hali yig‘ilmagan */
             409: {
                 headers: {
@@ -14000,6 +19241,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Chop etishga tayyor PDF yorliq */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
             /** @description Buyurtma topilmadi */
             404: {
                 headers: {
@@ -14016,6 +19266,28 @@ export interface operations {
             };
         };
     };
+    WarehouseController_acts: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     WarehouseController_handover: {
         parameters: {
             query?: never;
@@ -14029,12 +19301,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Akt: raqam, sana, posilkalar */
-            200: {
+            /** @description Akt: raqam, sana, posilkalar. Xuddi shu QR to‘plami qayta yuborilsa — o‘sha akt */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Akt tuzilmadi: qaysi posilka va nima uchun */
             409: {
@@ -14056,6 +19330,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
             /** @description Akt topilmadi */
             404: {
                 headers: {
@@ -14076,8 +19358,98 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description PDF fayl (imzo uchun) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
             /** @description Akt topilmadi */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WarehouseReturnsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description «Qaytmoqda» holatidagi lid buyurtmalari, eng eskisi birinchi, 200 tagacha */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    WarehouseReturnsController_grade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GradeReturnDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReturnInspectionDto"];
+                };
+            };
+            /** @description Buyurtma «Qaytmoqda» holatida emas */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WarehouseReturnsController_defectAct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF fayl: `brak-akti_<buyurtma ID>.pdf` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            /** @description Bu posilkada brak yo‘q */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

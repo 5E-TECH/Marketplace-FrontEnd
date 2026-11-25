@@ -5,6 +5,9 @@ import { operatorOrderTranslations } from './operatorOrderTranslations';
 import { adminLeadsTranslations } from './adminLeadsTranslations';
 import { ordersTranslations } from './ordersTranslations';
 import { orderCardTranslations } from './orderCardTranslations';
+import { wholesalerCardTranslations } from './wholesalerCardTranslations';
+import { wholesalersTranslations } from './wholesalersTranslations';
+import { productFormTranslations } from './productFormTranslations';
 import { adminProductsTranslations } from './adminProductsTranslations';
 import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
@@ -70,6 +73,9 @@ export const translations = {
     ...adminLeadsTranslations.uz,
     ...ordersTranslations.uz,
     ...orderCardTranslations.uz,
+    ...wholesalersTranslations.uz,
+    ...wholesalerCardTranslations.uz,
+    ...productFormTranslations.uz,
     ...operatorWorkspaceTranslations.uz,
     ...statusTranslations.uz,
     ...sharedUiTranslations.uz,
@@ -120,6 +126,9 @@ export const translations = {
     ...adminLeadsTranslations.ru,
     ...ordersTranslations.ru,
     ...orderCardTranslations.ru,
+    ...wholesalersTranslations.ru,
+    ...wholesalerCardTranslations.ru,
+    ...productFormTranslations.ru,
     ...operatorWorkspaceTranslations.ru,
     ...statusTranslations.ru,
     ...sharedUiTranslations.ru,
@@ -170,6 +179,9 @@ export const translations = {
     ...adminLeadsTranslations.en,
     ...ordersTranslations.en,
     ...orderCardTranslations.en,
+    ...wholesalersTranslations.en,
+    ...wholesalerCardTranslations.en,
+    ...productFormTranslations.en,
     ...operatorWorkspaceTranslations.en,
     ...statusTranslations.en,
     ...sharedUiTranslations.en,

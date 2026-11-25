@@ -1,79 +1,63 @@
-import { useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useInboundWholesalersQuery, useShipmentCounts } from '../../features/inbound/api/inboundQueries';
-import type { InboundShipment } from '../../features/inbound/model/inboundTypes';
+import { PackagePlus, Plus } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useShipmentCounts } from '../../features/inbound/api/inboundQueries';
+import { useWholesalersQuery } from '../../features/wholesalers/api/wholesalersQueries';
+import { tabCounts } from '../../features/wholesalers/lib/wholesalerRules';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { LoadError } from '../../shared/ui/LoadError/LoadError';
-import PlaceholderPage from '../PlaceholderPage/PlaceholderPage';
-import { DeclareForm } from './components/DeclareForm';
-import { ShipmentList } from './components/ShipmentList';
-import { ShipmentFlow, WholesalerSummary } from './components/SideCards';
+import { useMediaQuery } from '../../shared/lib/useMediaQuery';
+import { ShipmentsTab } from './components/ShipmentsTab';
+import { WholesalersTab } from './components/WholesalersTab';
+import { parsePageTab, type PageTab } from './model/wholesalerList';
 import styles from './AdminWholesalersPage.module.css';
 
-type Tab = 'wholesalers' | 'shipments';
-
 /**
- * «Optoviklar» (admin): yorliqlar «Optoviklar» va «Postavkalar». «Postavkalar» — FE-16 (admin-postavka):
- * optovik nomidan e'lon formasi, tanlangan optovik, ariza yo'li va hamma postavkalar ro'yxati.
- * «Optoviklar» ro'yxati va optovik kartasi — FE-25 (admin-optoviklar); u kelguncha sukut — «Postavkalar».
- * «Yangi arizalar» (optovikning o'z ro'yxatdan o'tishi, BE-30) — M2, M1 da yo'q.
+ * «Optoviklar» (admin): yorliqlar «Optoviklar» (FE-25, admin-optoviklar — sukut), «Postavkalar» (FE-16,
+ * admin-postavka) va «Yangi arizalar» (M2: optovik kabinetda o'zi ro'yxatdan o'tgan, BE-30). Sahifa amallari —
+ * «Postavka arizasi» va «Optovik qo'shish» (telefonda — «⋮» varag'i va pastki panel).
  */
 export default function AdminWholesalersPage() {
   const { t } = useTranslation();
+  const phone = useMediaQuery('(max-width: 767.98px)');
   const [params, setParams] = useSearchParams();
-  const tab: Tab = params.get('tab') === 'wholesalers' ? 'wholesalers' : 'shipments';
-  const wholesalersQuery = useInboundWholesalersQuery();
-  const counts = useShipmentCounts();
-  const wholesalers = useMemo(() => wholesalersQuery.data ?? [], [wholesalersQuery.data]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [highlight, setHighlight] = useState<string[]>([]);
-  const formRef = useRef<HTMLDivElement>(null);
-  // Sukut: shartnomasi bor birinchi optovik (pilotda bitta — Namuna Savdo).
-  const wholesaler = wholesalers.find((item) => item.id === selectedId) ?? wholesalers.find((item) => item.contractSigned) ?? wholesalers[0] ?? null;
+  const tab = parsePageTab(params.get('tab'));
+  const list = useWholesalersQuery();
+  const shipments = useShipmentCounts();
+  const counts = tabCounts(list.data ?? []);
 
-  const tabs = (
-    <div className={styles.tabs} role="tablist" aria-label={t('inb.tabsAria')}>
-      {([['wholesalers', 'inb.tab.wholesalers', wholesalers.length], ['shipments', 'inb.tab.shipments', counts?.ALL ?? 0]] as const).map(([key, label, count]) => (
-        <button key={key} type="button" role="tab" className={styles.tab} aria-selected={tab === key} onClick={() => setParams(key === 'shipments' ? {} : { tab: key }, { replace: true })}>
-          {t(label)}
-          <span className={styles.count}>{count}</span>
-        </button>
-      ))}
-    </div>
-  );
+  const goTab = (key: PageTab) => setParams(key === 'wholesalers' ? {} : { tab: key }, { replace: true });
+  const declare = (wholesalerId?: string) => setParams({ tab: 'shipments', declare: '1', ...(wholesalerId ? { wholesaler: wholesalerId } : {}) });
+  const showActions = tab === 'wholesalers' && !phone && Boolean(list.data?.length);
 
-  if (tab === 'wholesalers') {
-    return (
-      <div className={styles.page}>
-        {tabs}
-        <PlaceholderPage />
-      </div>
-    );
-  }
-
-  const onDeclared = (created: InboundShipment) => setHighlight([created.id]);
-  const focusForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    formRef.current?.querySelector<HTMLElement>('select, button[role="combobox"]')?.focus({ preventScroll: true });
-  };
+  const tabs: [PageTab, string, number | null][] = [
+    ['wholesalers', t('inb.tab.wholesalers'), list.data ? counts.ALL : null],
+    ['shipments', t('inb.tab.shipments'), shipments?.ALL ?? null],
+    ['applications', t('whs.tab.applications'), list.data ? counts.PENDING : null],
+  ];
 
   return (
-    <div className={styles.page} data-testid="admin-shipments">
-      {tabs}
-      {wholesalersQuery.isError && !wholesalersQuery.data ? (
-        <LoadError error={wholesalersQuery.error} onRetry={() => void wholesalersQuery.refetch()} />
-      ) : (
-        <div className={styles.top}>
-          <div className={styles.formColumn} ref={formRef}>
-            <DeclareForm key={wholesaler?.id ?? 'none'} wholesalers={wholesalers} wholesaler={wholesaler} onWholesalerChange={setSelectedId} onDeclared={onDeclared} />
-          </div>
-          <div className={styles.side}>
-            <WholesalerSummary wholesaler={wholesaler} />
-            <ShipmentFlow />
-          </div>
+    <div className={styles.page} data-testid={tab === 'shipments' ? 'admin-shipments' : 'admin-wholesalers'} data-layout={phone ? 'phone' : undefined}>
+      <div className={styles.toolbar}>
+        <div className={styles.tabs} role="tablist" aria-label={t('inb.tabsAria')}>
+          {tabs.map(([key, label, count]) => (
+            <button key={key} type="button" role="tab" className={styles.tab} aria-selected={tab === key} onClick={() => goTab(key)}>
+              {label}
+              {count === null ? null : <span className={styles.count}>{count}</span>}
+            </button>
+          ))}
         </div>
+        {showActions ? (
+          <div className={styles.actions}>
+            <button type="button" className={styles.secondaryAction} onClick={() => declare()}><PackagePlus aria-hidden />{t('whs.declare')}</button>
+            <Link to="/admin/wholesalers/new" className={styles.primaryAction}><Plus aria-hidden />{t('whs.add')}</Link>
+          </div>
+        ) : null}
+      </div>
+
+      {tab === 'shipments' ? (
+        <ShipmentsTab key={params.get('wholesaler') ?? 'all'} wholesalerId={params.get('wholesaler')} focus={params.get('declare') === '1'} />
+      ) : (
+        <WholesalersTab key={tab} phone={phone} onDeclare={declare} applications={tab === 'applications'} />
       )}
-      <ShipmentList wholesalers={wholesalers} highlight={highlight} onCreate={focusForm} />
     </div>
   );
 }

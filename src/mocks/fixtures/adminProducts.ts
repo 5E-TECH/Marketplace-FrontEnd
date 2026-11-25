@@ -88,14 +88,16 @@ const daysAgo = (days: number, hour = 10) => {
 };
 
 const image = (productId: string, index: number) => `https://cdn.elchi.example/products/${productId}-${index}.jpg`;
+/** BE-41: fiskal chek kodlari — sotuvdagi CPA mahsulotida bor (namuna MXIK 17 raqam, qadoq kodi). */
+const fiscal = (productId: string) => ({ mxikCode: `03304001${productId.padStart(6, '0')}001`, packageCode: '1500012' });
 
 function base(id: string, name: string, slug: string): Omit<MockAdminProduct, 'status' | 'categoryId' | 'basePrice' | 'weightGrams'> {
   return {
     id, shopId: MOCK_SHOP.id, ownerUserId: 'U-0002', name, slug, description: null, price: 0, oldPrice: null, imageUrl: null, images: [],
     attributes: {}, hasVariants: false, moderationNote: null, affiliateFee: 65_000, lengthMm: null, widthMm: null, heightMm: null,
-    approvedPrice: null, priceStatus: null, marketTotal: null, cpaEnabled: true, isBad: false, isBlocked: false, rating: 0,
+    approvedPrice: null, priceStatus: null, marketTotal: null, cpaEnabled: true, isBad: false, isBlocked: false, rating: 0, mxikCode: null, packageCode: null,
     createdAt: daysAgo(30), updatedAt: daysAgo(1), shop: MOCK_SHOP, subtitle: null, submittedAt: null, statusChangedAt: null,
-    blockReason: null, statusChangedBy: null, expiryTracked: false, certificate: null, deliveryMode: 'PARTIAL', deliveryModeSource: 'GLOBAL', fixedMaxSalePrice: null,
+    blockReason: null, statusChangedBy: null, createdByName: 'Nodira Karimova', expiryTracked: false, certificate: null, deliveryMode: 'PARTIAL', deliveryModeSource: 'GLOBAL', fixedMaxSalePrice: null,
     marketSource: null, marketCheckedAt: null, priceQueuedAt: null,
     stock: null, results: null, hasVideo: false,
   };
@@ -114,7 +116,7 @@ function fromOffer(offer: MockOffer, onSaleDays: number): MockAdminProduct {
   const results = offer.results;
   return {
     ...base(offer.productId, offer.name, SLUGS[offer.productId]),
-    status: 'ACTIVE', categoryId: offer.categoryId, description: offer.description, subtitle: offer.subtitle,
+    status: 'ACTIVE', categoryId: offer.categoryId, description: offer.description, subtitle: offer.subtitle, ...fiscal(offer.productId),
     images: Array.from({ length: Math.max(1, offer.creatives.length - 1) }, (_, index) => image(offer.productId, index + 1)),
     basePrice: offer.priceSplit?.wholesale ?? null, affiliateFee: offer.affiliateFee, approvedPrice: offer.approvedPrice, price: offer.approvedPrice,
     priceStatus: 'GREEN', weightGrams: offer.weightKg === null ? null : Math.round(offer.weightKg * 1000), lengthMm: length, widthMm: width, heightMm: height,
@@ -139,7 +141,7 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
       status: 'PENDING_REVIEW', categoryId: '12', basePrice: 100_000, weightGrams: 1_600, lengthMm: 320, widthMm: 140, heightMm: 170,
       description: 'Keramik taglikli bug‘li dazmol: bug‘ zarbasi va vertikal bug‘lash, shaffof suv idishi. Ko‘ylak va pardani ilgan holida ham dazmollaydi.',
       subtitle: 'Bug‘ zarbasi va vertikal bug‘lash',
-      images: [image('506', 1), image('506', 2), image('506', 3)], createdAt: minutesAgo(26 * 60), submittedAt: minutesAgo(190), statusChangedAt: minutesAgo(190), priceQueuedAt: minutesAgo(190),
+      images: [image('506', 1), image('506', 2), image('506', 3)], createdAt: minutesAgo(26 * 60), submittedAt: minutesAgo(190), statusChangedAt: minutesAgo(190), priceQueuedAt: minutesAgo(190), ...fiscal('506'),
       certificate: { name: 'Muvofiqlik sertifikati.pdf', url: 'https://cdn.elchi.example/certificates/506.pdf', uploadedAt: minutesAgo(192) },
     },
     {
@@ -147,7 +149,7 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
       status: 'REJECTED', categoryId: '15', basePrice: 60_000, weightGrams: 150, lengthMm: 60, widthMm: 60, heightMm: 110, isBad: true, expiryTracked: true,
       description: 'Magniy va B6 vitamini: charchoqni kamaytiradi va uyquni davolaydi. 60 kapsula.',
       moderationNote: 'Tavsifda «uyquni davolaydi» deyilgan — kasallikni davolash va’dasi taqiqlangan. Matnni tuzatib, qayta yuboring.',
-      images: [image('507', 1)], submittedAt: minutesAgo(30 * 60), statusChangedAt: minutesAgo(26 * 60 + 50), statusChangedBy: 'Nodira Karimova',
+      images: [image('507', 1)], submittedAt: minutesAgo(30 * 60), statusChangedAt: minutesAgo(26 * 60 + 50), updatedAt: minutesAgo(26 * 60 + 50), statusChangedBy: 'Nodira Karimova',
       certificate: { name: 'Davlat ro‘yxatidan o‘tganlik guvohnomasi.pdf', url: 'https://cdn.elchi.example/certificates/507.pdf', uploadedAt: minutesAgo(31 * 60) },
     },
     {
@@ -162,7 +164,7 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
       description: 'Ionli soch quritgich: 3 harorat va 2 tezlik, sovuq havo tugmasi, ikki konsentrator.', subtitle: '2 000 Vt, ionlash, 3 harorat rejimi',
       images: [image('509', 1), image('509', 2)], submittedAt: minutesAgo(70), statusChangedAt: minutesAgo(70), createdAt: minutesAgo(5 * 60),
       certificate: { name: 'Muvofiqlik sertifikati.pdf', url: 'https://cdn.elchi.example/certificates/509.pdf', uploadedAt: minutesAgo(72) },
-      stock: { available: 40, onHand: 40, reserved: 0, incoming: 0 }, hasVideo: true,
+      stock: { available: 40, onHand: 40, reserved: 0, incoming: 0 }, hasVideo: true, ...fiscal('509'),
     },
     {
       ...base('510', 'Elektr ustara', 'elektr-ustara'),
@@ -170,7 +172,7 @@ export function mockAdminProducts(offers: readonly MockOffer[] = mockOffers()): 
       approvedPrice: 219_000, price: 219_000, priceStatus: 'GREEN', fixedMaxSalePrice: 240_000,
       description: 'Uch boshli elektr ustara: quruq va nam soqol olish, 60 daqiqa quvvat.', subtitle: 'Quruq va nam soqol, 60 daqiqa',
       images: [image('510', 1), image('510', 2)], submittedAt: daysAgo(4), statusChangedAt: daysAgo(3),
-      stock: { available: 30, onHand: 30, reserved: 0, incoming: 0 }, hasVideo: false,
+      stock: { available: 30, onHand: 30, reserved: 0, incoming: 0 }, hasVideo: false, ...fiscal('510'),
     },
     // Narx navbati (FE-13, admin-narx): moderatsiyadan o'tgan, narxi hali tasdiqlanmagan — sotuvchilarga yopiq.
     priceQueued('511', 'Bolalar quloqchinlari', 'bolalar-quloqchinlari', 140_000, 300, 300, 'Bolalar uchun simsiz quloqchinlar: ovoz chegarasi 85 dB, 20 soat quvvat.'),

@@ -22,7 +22,7 @@ import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import { PageActionBar } from '../../shared/ui/PageActionBar/PageActionBar';
 import { PillSelect, type PillOption } from '../../shared/ui/PillSelect/PillSelect';
 import { ProductCards, ProductsTable, type RowAction } from './components/ProductsTable';
-import { isOutOfStock, PRODUCT_TABS, sortProducts, type Attention, type Channel } from './model/productRows';
+import { isOutOfStock, PRODUCT_TABS, sortProducts, visibleInTab, type Attention, type Channel } from './model/productRows';
 import styles from './AdminProductsPage.module.css';
 
 const parseTab = (value: string | null): ProductListTab => (PRODUCT_TABS as readonly string[]).includes(value ?? '') ? (value as ProductListTab) : 'ALL';
@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
   const wholesalers = useWholesalerOptionsQuery();
   const categoryNames = useAdminCategoryNames();
   const reactivate = useReactivateProductMutation();
-  const rows = useMemo(() => sortProducts(query.data?.items ?? []), [query.data]);
+  const rows = useMemo(() => sortProducts((query.data?.items ?? []).filter(visibleInTab(tab))), [query.data, tab]);
   const categoryName = (id: string | null) => (id ? categoryNames.get(id) ?? null : null);
   const filtered = Boolean(search.trim() || shopId || categoryId || channel || attention);
 
@@ -81,6 +81,12 @@ export default function AdminProductsPage() {
   const channelOptions: PillOption[] = [{ value: '', label: all }, { value: 'cpa', label: t('products.channel.cpa') }, { value: 'site', label: t('products.channel.site') }];
 
   const counts = summary.data?.byStatus;
+  // «Hammasi» — arxivsiz (BE-27 `ALL` arxivni ham sanaydi); «Arxiv» soni — taklif, kelmasa ko'rsatilmaydi.
+  const tabCount = (key: ProductListTab): number | undefined => {
+    if (key === 'ARCHIVED') return counts?.ARCHIVED;
+    if (key === 'ALL') return (counts?.ALL ?? 0) - (counts?.ARCHIVED ?? 0);
+    return counts?.[key] ?? 0;
+  };
   const outOfStock = rows.find(isOutOfStock);
   // Navbatdagi eng eskisi (moderatsiya navbati tartibi bilan bir xil).
   const inReview = rows
@@ -128,6 +134,9 @@ export default function AdminProductsPage() {
     if (tab === 'BLOCKED' && !filtered) {
       return <Empty title={t('products.noBlockedTitle')} text={t('products.noBlockedText')} actions={<button type="button" className={styles.secondary} onClick={() => update({ tab: undefined })}>{t('products.showAll')}</button>} />;
     }
+    if (tab === 'ARCHIVED' && !filtered) {
+      return <Empty title={t('apf.archiveEmptyTitle')} text={t('apf.archiveEmptyText')} actions={<button type="button" className={styles.secondary} onClick={() => update({ tab: undefined })}>{t('products.showAll')}</button>} />;
+    }
     if (filtered || tab !== 'ALL') {
       const title = search.trim() ? t('products.noResultsTitle', { query: search.trim() }) : t('products.noResultsFilters');
       return (
@@ -159,7 +168,7 @@ export default function AdminProductsPage() {
           {PRODUCT_TABS.map((key) => (
             <button key={key} type="button" role="tab" className={styles.tab} aria-selected={tab === key} onClick={() => update({ tab: key === 'ALL' ? undefined : key })}>
               {t(`products.tab.${key}` as TranslationKey)}
-              <span className={styles.count}>{counts?.[key] ?? 0}</span>
+              {tabCount(key) === undefined ? null : <span className={styles.count}>{tabCount(key)}</span>}
             </button>
           ))}
         </div>

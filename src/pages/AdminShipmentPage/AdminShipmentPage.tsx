@@ -8,7 +8,7 @@ import { useMediaQuery } from '../../shared/lib/useMediaQuery';
 import { tashkentDateTime } from '../../shared/lib/tashkentTime';
 import { LoadError } from '../../shared/ui/LoadError/LoadError';
 import { PageLoader } from '../../shared/ui/PageLoader/PageLoader';
-import { usePageTitle } from '../../shared/ui/PageHeader/pageTitle';
+import { usePageBack, usePageTitle } from '../../shared/ui/PageHeader/pageTitle';
 import { StatusBadge } from '../../shared/ui/StatusBadge/StatusBadge';
 import styles from './AdminShipmentPage.module.css';
 
@@ -38,6 +38,8 @@ export default function AdminShipmentPage() {
   const query = useShipmentQuery(shipmentId);
   const shipment = query.data;
   usePageTitle(shipment?.number ?? null);
+  // «Optoviklar» sahifasining sukut yorlig'i — optoviklar ro'yxati (FE-25); postavka «Postavkalar» yorlig'idan ochiladi.
+  usePageBack({ path: '/admin/wholesalers?tab=shipments', label: t('inb.tab.shipments') });
 
   if (query.isPending) return <PageLoader compact />;
   if (!shipment) return <LoadError error={query.error} onRetry={() => void query.refetch()} title={t('inb.detail.notFound')} />;

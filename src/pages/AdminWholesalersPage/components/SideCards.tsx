@@ -49,7 +49,7 @@ function Summary({ wholesaler }: { wholesaler: InboundWholesaler }) {
       </dl>
       <p className={styles.note}>{t(wholesaler.hasCabinet ? 'inb.summary.cabinetText' : 'inb.summary.noCabinetText')}</p>
       <div>
-        <Link className={styles.more} to="/admin/wholesalers?tab=wholesalers">{t('inb.summary.card')}<ChevronRight aria-hidden /></Link>
+        <Link className={styles.more} to={`/admin/wholesalers/${encodeURIComponent(wholesaler.id)}`}>{t('inb.summary.card')}<ChevronRight aria-hidden /></Link>
       </div>
     </section>
   );

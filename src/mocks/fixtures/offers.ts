@@ -9,9 +9,9 @@ type Schemas = components['schemas'];
  * Rasm va video yo'q — kartada «[mahsulot fotosi]» o'rinbosari chiqadi.
  */
 export const OFFER_CATEGORIES: Schemas['CategoryTreeDto'][] = [
-  { id: '11', name: 'Elektronika', slug: 'elektronika', parentId: null, iconUrl: null, sortOrder: 0, isActive: true, children: [] },
-  { id: '12', name: 'Uy-ro‘zg‘or', slug: 'uy-rozgor', parentId: null, iconUrl: null, sortOrder: 1, isActive: true, children: [] },
-  { id: '13', name: 'Bolalar uchun', slug: 'bolalar-uchun', parentId: null, iconUrl: null, sortOrder: 2, isActive: true, children: [] },
+  { id: '11', name: 'Elektronika', slug: 'elektronika', parentId: null, iconUrl: null, sortOrder: 0, isActive: true, isBad: null, expiryTracked: null, children: [] },
+  { id: '12', name: 'Uy-ro‘zg‘or', slug: 'uy-rozgor', parentId: null, iconUrl: null, sortOrder: 1, isActive: true, isBad: null, expiryTracked: null, children: [] },
+  { id: '13', name: 'Bolalar uchun', slug: 'bolalar-uchun', parentId: null, iconUrl: null, sortOrder: 2, isActive: true, isBad: null, expiryTracked: null, children: [] },
 ];
 
 const CAPTIONS = ['asosiy', 'g‘ilofda', 'quloqda', 'qutida'];

@@ -9,15 +9,10 @@ import { Dialog, DialogCancel, DialogPrimary } from '../../../shared/ui/Dialog/D
 import { SafeImage } from '../../../shared/ui/SafeImage/SafeImage';
 import { requestCreativeUpload, uploadCreativeFile } from '../api/adminProductsApi';
 import { useConfirmCreativeMutation, useDeleteCreativeMutation } from '../api/adminProductsQueries';
+import { CREATIVE_LIMITS } from '../lib/creativeLimits';
 import { creativeLabel } from '../lib/productFormat';
 import type { AdminProduct, Creative, CreativeType } from '../model/adminProductTypes';
 import styles from './CreativeDialogs.module.css';
-
-/** BE-08 sozlamasi (`CREATIVE_*_TYPES`, `*_MAX_MB`) — server ham tekshiradi; bu yerda — darhol javob. */
-const LIMITS: Record<CreativeType, { mimes: readonly string[]; maxMb: number; accept: string }> = {
-  VIDEO: { mimes: ['video/mp4', 'video/webm'], maxMb: 100, accept: 'video/mp4,video/webm' },
-  IMAGE: { mimes: ['image/jpeg', 'image/png', 'image/webp'], maxMb: 10, accept: 'image/jpeg,image/png,image/webp' },
-};
 
 const AD_RULES = ['moderation.rule.cure', 'moderation.rule.reviews', 'moderation.rule.discount'] as const;
 
@@ -49,7 +44,7 @@ export function CreativeUploadDialog({ product, creatives, onClose }: { product:
   useEffect(() => () => abort.current?.abort(), []);
 
   const start = async (file: File) => {
-    const limit = LIMITS[type];
+    const limit = CREATIVE_LIMITS[type];
     if (!limit.mimes.includes(file.type)) {
       setState({ kind: 'invalid', file, message: t('upload.badType') });
       return;
@@ -171,7 +166,7 @@ export function CreativeUploadDialog({ product, creatives, onClose }: { product:
         <input
           id={inputId}
           type="file"
-          accept={LIMITS[type].accept}
+          accept={CREATIVE_LIMITS[type].accept}
           className={styles.visuallyHidden}
           onChange={(event) => {
             const file = event.target.files?.[0];

@@ -20,8 +20,10 @@ export interface AdminProductExtras {
   /** Holatni o'zgartirgan admin («14.01.2027, 14:37 · Nodira K.»). */
   statusChangedBy?: string | null;
   blockReason?: string | null;
-  expiryTracked?: boolean;
+  expiryTracked?: boolean | null;
   certificate?: ProductCertificate | null;
+  /** Taklif (fe-25 §9): kim kiritgan («Kiritgan: Nodira K. · 06.01.2027, 10:05» — optovik nomidan admin). */
+  createdByName?: string | null;
 }
 
 export interface ProductCertificate {
@@ -48,6 +50,8 @@ export interface AdminProductListExtras {
   /** «Narx — mijoz ko'radi»: tasdiqlangan narx yoki (`recommended`) tavsiya; `ProductDto.price` — eski storefront narxi. */
   listPrice?: { customer: number; recommended: boolean; delivery: number; deliveryMode: DeliveryMode } | null;
   hasVideo?: boolean;
+  /** Taklif (fe-25 §6): Elchi'da yo'lda, yetkazilgan (sotilgan) va qaytgan dona — optovik kartasidagi jadval. */
+  sales?: { inTransit: number; sold: number; returned: number } | null;
 }
 
 /** Hamma sotuvchi, sotuvga chiqqandan beri (taklif). Ro'yxatda — birinchi to'rttasi, kartada — hammasi. */
@@ -82,14 +86,18 @@ export interface AdminProductsPage {
   totalPages: number;
 }
 
-/** «Mahsulotlar» yorliqlari: holat yoki «To'xtatilgan» (`isBlocked`). */
-export type ProductListTab = 'ALL' | 'PENDING_REVIEW' | 'ACTIVE' | 'REJECTED' | 'BLOCKED' | 'DRAFT';
+/**
+ * «Mahsulotlar» yorliqlari: holat yoki «To'xtatilgan» (`isBlocked`). «Arxiv» (FE-25) — arxivlangan mahsulotlar
+ * «Hammasi» dan yashiriladi va shu yorliqda topiladi (arxivlash oynasi: «Arxiv» filtri bilan topiladi).
+ */
+export type ProductListTab = 'ALL' | 'PENDING_REVIEW' | 'ACTIVE' | 'REJECTED' | 'BLOCKED' | 'DRAFT' | 'ARCHIVED';
 
 /** Taklif, 2-bo'lim: `GET /admin/moderation/summary`. */
 export interface ModerationSummary {
   productsPending: number;
   pricesPending: number;
-  byStatus: Record<ProductListTab, number>;
+  /** BE-27: `ALL` — arxiv bilan; `ARCHIVED` — taklif (fe-25 §10), kelmasa «Arxiv» yorlig'ida son ko'rsatilmaydi. */
+  byStatus: Record<Exclude<ProductListTab, 'ARCHIVED'>, number> & { ARCHIVED?: number };
   outOfStock: number;
   expirySoon: number;
 }

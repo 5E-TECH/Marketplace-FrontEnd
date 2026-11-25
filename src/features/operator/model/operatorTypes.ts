@@ -22,18 +22,14 @@ export type LeadPrice = Schemas['LeadPriceDto'] & {
   prepayment?: { amount: number; method: string } | null;
 };
 
-/** Operator tuzatgan manzil maydoni: eski va yangi qiymat (nomi bilan; yetkazish — `CENTER`/`ADDRESS`). */
-export interface LeadAddressChange {
-  field: 'region' | 'district' | 'addressLine' | 'whereDeliver';
-  from: string | null;
-  to: string;
-}
+/** Operator tuzatgan manzil maydoni: eski va yangi qiymat (nomi bilan; yetkazish — `CENTER`/`ADDRESS`). BE-25 `LeadHistoryChangeDto`. */
+export type LeadAddressChange = Schemas['LeadHistoryChangeDto'];
 
 /**
- * Lid tarixi yozuvi. `changes` — taklif (BE-38): backend eski/yangi qiymatni saqlaydi, lekin kartaga bermaydi.
- * Bo'sh ro'yxat — manzil o'zgarishsiz tasdiqlangan (yozuv ko'rsatilmaydi).
+ * Lid tarixi yozuvi (BE-25): `changes` — manzil saqlanganda o'zgargan maydonlar; bo'sh ro'yxat — manzil o'zgarishsiz
+ * tasdiqlangan (yozuv ko'rsatilmaydi), manzilga aloqasi yo'q yozuvda `null`.
  */
-export type LeadHistoryEntry = Schemas['LeadHistoryEntryDto'] & { changes?: LeadAddressChange[] | null };
+export type LeadHistoryEntry = Schemas['LeadHistoryEntryDto'];
 
 export type LeadCard = Omit<Schemas['LeadCardDto'], 'price' | 'history'> & {
   price: LeadPrice | null;

@@ -30,6 +30,8 @@ export function auditChange(entry: ProductAuditEntry, t: Translate): string {
   const { meta } = entry;
   switch (entry.action) {
     case 'product.certificate': return t('audit.product.certificate', { file: text(meta.fileName) });
+    case 'product.certificate.delete': return t('audit.product.certificateDelete');
+    case 'product.archive': return t('audit.product.archive');
     case 'product.submit': return t('audit.product.submit', { from: statusName(t, meta.from), to: statusName(t, meta.to) });
     case 'product.approve': return t('audit.product.approve', { from: statusName(t, meta.from ?? 'PENDING_REVIEW'), to: statusName(t, 'ACTIVE') });
     case 'product.reject': return t('audit.product.reject', { reason: text(meta.reason) });

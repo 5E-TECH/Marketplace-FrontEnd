@@ -49,15 +49,6 @@ const isBlocked = (lot: MockLot, today = tashkentDate()) => saleUntil(lot.expiry
 const lotDto = (lot: MockLot) => ({ ...lot, sellableUntil: saleUntil(lot.expiryDate), blocked: isBlocked(lot) });
 const blockedOf = (variantId: string) => inbound().lots.filter((lot) => lot.variantId === variantId && isBlocked(lot)).reduce((sum, lot) => sum + lot.quantity, 0);
 
-/** Optovik (BE-07 `WholesalerDto`): omborchi ham o'qiydi — taklif (arizasiz postavka). */
-export function wholesalerDtos() {
-  return inbound().wholesalers.map((item) => ({
-    id: item.id, name: item.name, slug: `optovik-${item.id}`, status: item.status, legalType: 'LEGAL_ENTITY', tin: item.tin,
-    bankName: 'Asaka bank', bankAccount: '20208000900123456001', bankMfo: '00873', contractNumber: item.contractNumber, contractDate: item.contractDate,
-    phone: '+998712000002', address: 'Toshkent sh.', description: null, ownerUserId: item.ownerUserId, createdAt: '2027-01-05T05:00:00.000Z',
-  }));
-}
-
 /** Admin mahsulotlari ro'yxatiga qo'shimcha: boshqa optoviklarning (Namuna Farm) SKU lari — `shopId` bo'yicha. */
 export function inboundProductRecords(shopId: string) {
   return inbound().skus.filter((item) => item.wholesalerId === shopId).map((item) => ({

@@ -149,7 +149,7 @@ export function DeclareForm({ wholesalers, wholesaler, onWholesalerChange, onDec
         {wholesaler && locked ? (
           <>
             <p className={styles.error} id={`${id}-wholesaler-hint`}><CircleX aria-hidden />{t('inb.form.noContract')}</p>
-            <Link className={styles.contractLink} to="/admin/wholesalers">{t('inb.form.contractLink')}<ChevronRight aria-hidden /></Link>
+            <Link className={styles.contractLink} to={`/admin/wholesalers/${encodeURIComponent(wholesaler.id)}?dialog=contract`}>{t('inb.form.contractLink')}<ChevronRight aria-hidden /></Link>
           </>
         ) : wholesaler ? <p className={styles.hint} id={`${id}-wholesaler-hint`}>{wholesalerHint(wholesaler)}</p> : null}
       </div>
