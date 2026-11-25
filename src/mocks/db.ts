@@ -6,6 +6,7 @@ import { mockInbound } from './fixtures/inbound';
 import { mockOffers } from './fixtures/offers';
 import { resetRegisteredMockAccounts } from './fixtures/users';
 import { resetMockOperator } from './handlers/operator';
+import { resetMockOrders } from './orderStore';
 import { resetMockOtp } from './handlers/sellerAuth';
 import { resetMockProfiles } from './handlers/sellerProfile';
 import { addDays, seeded, tashkentDate } from './utils';
@@ -137,4 +138,5 @@ export function resetMockDb(): void {
   resetMockOtp();
   resetMockProfiles();
   resetMockOperator();
+  resetMockOrders();
 }

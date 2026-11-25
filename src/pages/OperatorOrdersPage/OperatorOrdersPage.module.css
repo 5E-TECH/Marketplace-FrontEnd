@@ -1,0 +1,86 @@
+/* «Mening buyurtmalarim» (operator-buyurtmalarim): desktop va planshet; telefonda — ish joyi qopqog'i. */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tabular { font-variant-numeric: tabular-nums; }
+.muted { color: var(--color-text-secondary); }
+
+.card { display: flex; flex-direction: column; gap: 16px; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; min-width: 0; }
+.head > div { flex: 1 1 360px; min-width: 0; }
+.head h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.head p { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: none; white-space: nowrap; }
+.link svg { width: 16px; height: 16px; }
+.link:hover { text-decoration: underline; }
+
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.filtersEnd { margin-left: auto; }
+.search { position: relative; display: block; flex: 0 1 290px; min-width: 0; }
+.search > svg { position: absolute; top: 50%; left: 16px; width: 18px; height: 18px; transform: translateY(-50%); color: var(--color-text-secondary); pointer-events: none; }
+.search input { display: block; width: 100%; height: 40px; margin: 0; padding: 0 16px 0 42px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; }
+.search input::placeholder { color: var(--color-text-faint); }
+.search input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+
+.ghost, .secondarySmall, .cancelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ghost svg, .secondarySmall svg, .cancelButton svg { width: 16px; height: 16px; flex: none; }
+.ghost:hover:not(:disabled) { background: var(--color-sunken); }
+.ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+.secondarySmall, .cancelButton { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.cancelButton:hover, .secondarySmall:hover { border-color: var(--color-border-hover); }
+.ghost:focus-visible, .secondarySmall:focus-visible, .cancelButton:focus-visible, .locked:focus-visible, .link:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); border-radius: 10px; }
+
+/* «Bekor qilish» ustunidagi qulf: sababi maslahatda. */
+.locked { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; cursor: help; }
+.locked svg { width: 14px; height: 14px; flex: none; }
+
+.message { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 0 16px; }
+.messageIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.messageIcon svg { width: 20px; height: 20px; }
+.messageText { display: flex; flex: 1 1 300px; flex-direction: column; min-width: 0; }
+.messageText > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.messageText > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.note { max-width: 960px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.note strong { font-weight: 600; color: var(--color-text); }
+
+/* Planshet: tugmalar 44 px. */
+@container content (max-width: 919.98px) {
+  .card { padding: 16px; }
+  .search { flex: 1 1 260px; }
+  .search input { height: 44px; font-size: 16px; }
+  .filters .pill { height: 44px; }
+  .filters .pill button { width: 44px; height: 44px; margin: -1px -1px -1px 0; }
+  .ghost, .secondarySmall, .cancelButton { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 14px; }
+}
+
+/* Telefon: ish joyi faqat kompyuterda (operator-buyurtmalarim.mobil). */
+.phonePage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.phoneCard { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); text-align: center; }
+.phoneCard h2 { margin: 4px 0 0; font-size: 18px; font-weight: 700; line-height: 26px; }
+.phoneCard p { margin: 0; color: var(--color-text-secondary); font-size: 15px; line-height: 23px; }
+.phoneIcon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.phoneIcon svg { width: 24px; height: 24px; }
+.phoneState { display: flex; flex-direction: column; padding: 4px 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.phoneState > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; border-bottom: 1px solid var(--color-border); }
+.phoneState > div > span:first-child { color: var(--color-text-secondary); font-size: 15px; line-height: 22px; }
+.phoneState strong { font-size: 15px; font-weight: 600; line-height: 22px; font-variant-numeric: tabular-nums; }
+.phoneState > p { margin: 0; padding: 12px 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }

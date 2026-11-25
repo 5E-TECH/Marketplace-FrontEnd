@@ -2,6 +2,9 @@ import type { Language } from '../../features/preferences/model/preferencesSlice
 import { adminTranslations } from './adminTranslations';
 import { adminPriceTranslations } from './adminPriceTranslations';
 import { operatorOrderTranslations } from './operatorOrderTranslations';
+import { adminLeadsTranslations } from './adminLeadsTranslations';
+import { ordersTranslations } from './ordersTranslations';
+import { orderCardTranslations } from './orderCardTranslations';
 import { adminProductsTranslations } from './adminProductsTranslations';
 import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
@@ -64,6 +67,9 @@ export const translations = {
     ...adminProductsTranslations.uz,
     ...adminPriceTranslations.uz,
     ...operatorOrderTranslations.uz,
+    ...adminLeadsTranslations.uz,
+    ...ordersTranslations.uz,
+    ...orderCardTranslations.uz,
     ...operatorWorkspaceTranslations.uz,
     ...statusTranslations.uz,
     ...sharedUiTranslations.uz,
@@ -111,6 +117,9 @@ export const translations = {
     ...adminProductsTranslations.ru,
     ...adminPriceTranslations.ru,
     ...operatorOrderTranslations.ru,
+    ...adminLeadsTranslations.ru,
+    ...ordersTranslations.ru,
+    ...orderCardTranslations.ru,
     ...operatorWorkspaceTranslations.ru,
     ...statusTranslations.ru,
     ...sharedUiTranslations.ru,
@@ -158,6 +167,9 @@ export const translations = {
     ...adminProductsTranslations.en,
     ...adminPriceTranslations.en,
     ...operatorOrderTranslations.en,
+    ...adminLeadsTranslations.en,
+    ...ordersTranslations.en,
+    ...orderCardTranslations.en,
     ...operatorWorkspaceTranslations.en,
     ...statusTranslations.en,
     ...sharedUiTranslations.en,

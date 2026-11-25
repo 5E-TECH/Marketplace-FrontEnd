@@ -1,0 +1,94 @@
+/* «Mijoz so'rovlari» (nazoratchi-buyurtmalar): desktop — uch ustunli qator; telefon — ustma-ust, buyurtma kulrang qutida. */
+.card { display: flex; flex-direction: column; gap: 4px; padding: 20px 20px 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.head > div { min-width: 0; }
+.titleRow { display: flex; align-items: center; gap: 10px; }
+.titleRow h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.head p { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: var(--color-warning-soft); color: var(--color-warning); font-size: 12px; font-weight: 700; line-height: 16px; font-variant-numeric: tabular-nums; }
+.muted { color: var(--color-text-secondary); }
+
+.list { margin: 6px 0 0; padding: 0; list-style: none; }
+.list > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 312px; align-items: center; gap: 12px 24px; padding: 14px 0; border-bottom: 1px solid var(--color-border); min-width: 0; }
+.list > li:last-child { border-bottom: 0; }
+
+.what { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+.what > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.what > div > span:first-child { font-size: 14px; font-weight: 700; line-height: 20px; }
+.what > div > span:nth-child(2) { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.what > div > span:nth-child(n + 3) { font-size: 13px; line-height: 18px; }
+.what strong { font-weight: 700; }
+.icon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--color-info-soft); color: var(--color-info); }
+.icon[data-kind='CANCEL'] { background: var(--color-danger-soft); color: var(--color-danger); }
+.icon svg { width: 20px; height: 20px; }
+
+.order { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 14px; line-height: 20px; }
+.order a { font-weight: 600; color: var(--color-action); text-decoration: none; font-variant-numeric: tabular-nums; }
+.order a:hover { text-decoration: underline; }
+.order strong { font-weight: 600; }
+.statusRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.statusRow > span:last-child:not(:first-child) { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.meta { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+
+.actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
+.danger, .secondary, .ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.danger { background: var(--color-danger-soft); color: var(--color-danger); }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.ghost { background: transparent; color: var(--color-text-secondary); }
+.ghost:hover { background: var(--color-sunken); }
+.danger:focus-visible, .secondary:focus-visible, .ghost:focus-visible, .link:focus-visible, .orderBox:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.late, .done, .closedState { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; line-height: 18px; }
+.late { color: var(--color-danger); }
+.done { color: var(--color-success); }
+.closedState { color: var(--color-text-secondary); }
+.late svg, .done svg, .danger svg, .secondary svg { width: 16px; height: 16px; flex: none; }
+.link svg { width: 16px; height: 16px; }
+
+.link { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; height: 36px; margin: 0; padding: 0 6px; border: 0; border-radius: 10px; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; cursor: pointer; }
+.empty, .note { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); }
+.empty { align-items: center; gap: 10px; padding: 12px 0 4px; font-size: 14px; line-height: 21px; }
+.note { padding-top: 10px; font-size: 13px; line-height: 18px; }
+.empty svg, .note svg { flex: 0 0 16px; width: 16px; height: 16px; }
+.note svg { margin-top: 1px; }
+.skeleton { grid-template-columns: 1fr 1fr 200px; }
+.skeleton > span { display: block; height: 40px; border-radius: 10px; background: var(--color-border); }
+
+/* Planshet: amallar ikkinchi qatorda. */
+@container content (max-width: 919.98px) {
+  .list > li { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .actions { grid-column: 1 / -1; justify-content: flex-start; }
+  .danger, .secondary, .ghost { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 14px; }
+}
+
+/* Telefon: ustma-ust; buyurtma — kulrang havola-quti; tugmalar to'liq kenglikda. */
+.card[data-layout='phone'] { padding: 16px; }
+.card[data-layout='phone'] .list { margin-top: 4px; }
+.card[data-layout='phone'] .list > li { display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 0; }
+.card[data-layout='phone'] .what { gap: 12px; }
+.card[data-layout='phone'] .what > div > span:first-child { font-size: 15px; line-height: 22px; }
+.card[data-layout='phone'] .what > div > span:nth-child(n + 3) { font-size: 14px; line-height: 20px; }
+.card[data-layout='phone'] .actions { flex-direction: column; align-items: stretch; }
+.card[data-layout='phone'] .danger, .card[data-layout='phone'] .secondary, .card[data-layout='phone'] .ghost { height: 44px; border-radius: 12px; font-size: 14px; line-height: 20px; }
+.orderBox { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); color: var(--color-text); text-decoration: none; min-width: 0; }
+.orderTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.orderTop strong { font-size: 15px; font-weight: 700; line-height: 22px; font-variant-numeric: tabular-nums; }
+.orderTop svg { width: 18px; height: 18px; color: var(--color-text-secondary); }
+.orderBox > .muted { font-size: 13px; line-height: 18px; }
+.footLink { align-self: stretch; justify-content: space-between; height: 48px; margin: 10px -16px -16px; padding: 0 16px; border-top: 1px solid var(--color-border); border-radius: 0; font-size: 14px; line-height: 20px; }

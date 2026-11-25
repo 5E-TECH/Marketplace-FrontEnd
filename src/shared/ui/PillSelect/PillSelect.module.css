@@ -47,3 +47,26 @@
   pointer-events: none;
 }
 
+
+/* Faol filtr (admin-lidlar): ko'k chegara va fon, o'ngda 30 px «✕» — chevron o'rnida. */
+.pill[data-active] { padding-right: 4px; border-color: var(--color-action); background: var(--color-action-soft); }
+
+.clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 0 0 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-action);
+  cursor: pointer;
+}
+
+.clear svg { width: 16px; height: 16px; }
+.clear:hover { background: var(--color-surface); }
+.clear:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }

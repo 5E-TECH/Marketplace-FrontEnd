@@ -1,4 +1,4 @@
-import { Archive, Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, Package, Pencil, TriangleAlert, type LucideIcon } from 'lucide-react';
+import { Archive, Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, Package, Pencil, TriangleAlert, Undo2, type LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '../../i18n/translations';
 import type { BadgeTone } from '../Badge/Badge';
 
@@ -34,7 +34,7 @@ export const STATUS_FAMILIES = {
     MERGED: { tone: 'neutral' },
     NO_CONTACT: { tone: 'neutral' },
   },
-  /** Buyurtma va posilka (BUY-2, T5) — 13 holat; RETURN_REQUESTED nomi TZ'da yo'q. */
+  /** Buyurtma va posilka (BUY-2, T5) — 13 holat; RETURN_REQUESTED — «Qaytarish so'raldi» (admin-buyurtmalar, FE-26). */
   order: {
     CONFIRMED: { tone: 'info' },
     PICKING: { tone: 'warning' },
@@ -48,7 +48,7 @@ export const STATUS_FAMILIES = {
     RETURNING: { tone: 'danger' },
     RETURNED_GRADED: { tone: 'neutral' },
     CANCELLED: { tone: 'danger' },
-    RETURN_REQUESTED: { tone: 'unnamed' },
+    RETURN_REQUESTED: { tone: 'warning', icon: Undo2 },
   },
   /** Narx qarori (TZ 2.6, A.8) — 4 holat; Qizil saqlanmaydi. */
   price: {

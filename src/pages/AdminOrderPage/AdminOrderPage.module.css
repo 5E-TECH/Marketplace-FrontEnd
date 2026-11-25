@@ -1,0 +1,76 @@
+/* Buyurtma kartasi (admin-buyurtma-karta) — faqat buyurtmaga xos klasslar; umumiylari shared/ui/RecordCard. */
+.leadLink { font-weight: 600; color: var(--color-action); text-decoration: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.leadLink:hover { text-decoration: underline; }
+.total { font-size: 16px; font-weight: 700; line-height: 22px; }
+.postbackBox { padding: 10px 14px; border-radius: 12px; background: var(--color-sunken); }
+.sectionTitle { margin: 0; font-size: 18px; font-weight: 700; line-height: 26px; }
+
+/* Xavfli tugma (bekor qilish): qizil matn — umumiy secondary va barButton bilan birga. */
+.danger, .danger svg { color: var(--color-danger); }
+
+/* «Hozir» ichidagi vaziyat: posilka yaratilmadi, webhook kelmagan, qaytarish so'rovi. */
+.situation { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.warn { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-warning-soft); }
+.warn > svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--color-warning); }
+.warn > div { min-width: 0; }
+.warn p { margin: 2px 0 0; font-size: 14px; line-height: 21px; }
+.warn p:first-child { margin: 0; color: var(--color-warning); font-weight: 700; line-height: 20px; }
+
+/* Telefon raqami: niqob + «Ko'rsatish». */
+.reveal { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.smallButton { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; margin: -6px 0; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; cursor: pointer; }
+.smallButton svg { width: 14px; height: 14px; }
+.smallButton:focus-visible, .iconLink:focus-visible, .linkButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+/* Bo'lim sarlavhasidagi ikonka-havola (Elchi kabineti) va matn-tugma (SMS «Qayta yuborish»). */
+.iconLink { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: -6px -6px 0 0; border-radius: 10px; color: var(--color-text-secondary); }
+.iconLink svg { width: 18px; height: 18px; }
+.iconLink:hover { background: var(--color-sunken); }
+.linkButton { display: inline-flex; align-items: center; height: 24px; margin: 0; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--color-action); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; white-space: nowrap; cursor: pointer; }
+.linkButton:hover { text-decoration: underline; }
+
+/* Telefon varag'idagi havola bandlari (lid, Elchi kabineti). */
+.sheetLink { display: flex; align-items: center; gap: 12px; width: 100%; height: 48px; padding: 0 12px; box-sizing: border-box; border-radius: 10px; color: var(--color-text); font-size: 16px; font-weight: 500; line-height: 24px; text-decoration: none; }
+.sheetLink:hover { background: var(--color-sunken); }
+.sheetLink svg { width: 20px; height: 20px; color: var(--color-text-secondary); }
+
+[data-layout='phone'] .smallButton { height: 44px; margin: 0; }
+[data-layout='phone'] .linkButton { height: 44px; margin: -10px 0; }
+
+/* Telefon: narx taqsimoti — kulrang qutida ro'yxat; pul yozuvlari — kartalar (dizayn .mobil). */
+.splitBox { padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.splitBox > p { margin: 0 0 6px; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.splitBox dl { margin: 0; }
+.splitBox dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 14px; line-height: 21px; }
+.splitBox dl > div[data-total] { margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--color-border); font-weight: 700; }
+.splitBox dd { display: inline-flex; gap: 10px; margin: 0; font-variant-numeric: tabular-nums; }
+.splitBox dd > span { min-width: 44px; color: var(--color-text-secondary); text-align: right; }
+.moneyList { margin: 0; padding: 0; list-style: none; }
+.moneyList > li { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.moneyList > li:first-child { padding-top: 0; }
+.moneyList > li[data-total] { padding-bottom: 0; border-bottom: 0; }
+.moneyList > li > span { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.moneyList > li > span:nth-child(2) { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.moneyList > li > span:nth-child(3) > span:last-child { color: var(--color-text-secondary); font-size: 13px; }
+[data-layout='phone'] .iconLink { width: 44px; height: 44px; }
+
+/*
+ * Planshet (admin-buyurtma-karta.planshet): «Hozir» blokida yo'l chapda vertikal, ko'rsatkichlar o'ngda bitta ustunda,
+ * ular orasida chiziq. Telefonda — odatdagidek ustma-ust (umumiy RecordCard qoidalari).
+ */
+@container content (max-width: 919.98px) {
+  .nowSplit { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 0; }
+  .nowSplit > * { grid-column: 1 / -1; }
+  .nowSplit > ol { grid-column: 1; flex-direction: column; padding: 16px 24px 0 0; border-top: 1px solid var(--color-border); }
+  .nowSplit > ol > li { position: relative; flex: none; flex-direction: row; gap: 12px; padding-bottom: 12px; }
+  .nowSplit > ol > li:last-child { flex: none; padding-bottom: 0; }
+  .nowSplit > ol > li > span:first-child { display: block; padding-top: 2px; }
+  .nowSplit > ol > li > span:first-child > span:first-child { width: 16px; height: 16px; font-size: 0; }
+  .nowSplit > ol > li > span:first-child > span:first-child svg { width: 10px; height: 10px; }
+  .nowSplit > ol > li[data-state='current'] > span:first-child > span:first-child { border-width: 4px; }
+  .nowSplit > ol > li > span:first-child > span:nth-child(2) { position: absolute; top: 20px; bottom: -2px; left: 7px; width: 2px; height: auto; margin: 0; }
+  .nowSplit > dl { grid-column: 2; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 14px; margin-top: 0; padding: 16px 0 0 24px; border-left: 1px solid var(--color-border); }
+  [data-layout='phone'] .nowSplit { display: flex; }
+  [data-layout='phone'] .nowSplit > ol { padding: 0; border-top: 0; }
+  [data-layout='phone'] .nowSplit > dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; padding: 16px 0 0; border-left: 0; }
+}

@@ -47,7 +47,8 @@ test('eski admin sahifalari uzilgan: admin karkasi ichida 404', async ({ page })
   test.setTimeout(60_000);
   await installAuthenticatedSession(page, admin);
   await mockAdminEndpoints(page);
-  for (const path of ['/admin/overview', '/admin/shops', '/admin/delivery', '/admin/returns', '/admin/finance', '/admin/notifications', '/admin/banners', '/admin/system-settings', '/admin/orders/91']) {
+  // `/admin/orders/:orderId` — FE-26 buyurtma kartasi (admin-buyurtma-karta), endi qonuniy marshrut.
+  for (const path of ['/admin/overview', '/admin/shops', '/admin/delivery', '/admin/returns', '/admin/finance', '/admin/notifications', '/admin/banners', '/admin/system-settings']) {
     await page.goto(path);
     await expect(page.getByTestId('admin-layout')).toBeVisible();
     await expect(page.getByTestId('not-found-page')).toBeVisible();

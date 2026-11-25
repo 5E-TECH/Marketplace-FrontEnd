@@ -22,6 +22,12 @@ interface PrintDialogProps {
   reprint?: boolean;
   /** Oldindan ko'rish ostidagi izoh: o'lcham, format. */
   previewCaption?: ReactNode;
+  /** Ma'lumot ostidagi qo'shimcha maydon (masalan, qayta chop etish sababi). */
+  children?: ReactNode;
+  /** Chop etish va PDF tugmalari yopiq (majburiy maydon to'ldirilmagan). */
+  blocked?: boolean;
+  /** Chop etish yoki PDF dan oldin (audit yozuvi); `false` — to'xtaydi. */
+  beforeOutput?: () => Promise<boolean>;
   onClose: () => void;
   /** Chop etish oynasi ochildi yoki PDF yuklab olindi — hujjat qo'lda (masalan, «Qadoqlandi» ochiladi). */
   onDone?: () => void;
@@ -35,11 +41,12 @@ type State = { status: 'loading' } | { status: 'ready'; file: FetchedFile; url: 
  * hujjat har ochilishda qayta olinadi. Brauzerda printer ro'yxati yo'q: «Chop etish» tizimning
  * chop etish oynasini ochadi — printer va nusxa o'sha yerda (dizayn: «Ofis kompyuterida…»). Telefonda — faqat PDF.
  */
-export function PrintDialog({ open, title, description, load, facts = [], note = null, reprint = false, previewCaption, onClose, onDone, testId }: PrintDialogProps) {
+export function PrintDialog({ open, title, description, load, facts = [], note = null, reprint = false, previewCaption, children, blocked = false, beforeOutput, onClose, onDone, testId }: PrintDialogProps) {
   const { t } = useTranslation();
   const phone = useMediaQuery('(max-width: 767.98px)');
   const frame = useRef<HTMLIFrameElement>(null);
   const [state, setState] = useState<State>({ status: 'loading' });
+  const [busy, setBusy] = useState(false);
   const loader = useRef(load);
   useEffect(() => {
     loader.current = load;
@@ -64,18 +71,27 @@ export function PrintDialog({ open, title, description, load, facts = [], note =
   }, [open]);
 
   const ready = state.status === 'ready' ? state : null;
-  const download = () => {
-    if (!ready) return;
-    saveBlob(ready.file.blob, ready.file.fileName);
-    onDone?.();
+  const output = async (run: () => boolean) => {
+    if (beforeOutput) {
+      setBusy(true);
+      const go = await beforeOutput();
+      setBusy(false);
+      if (!go) return;
+    }
+    if (run()) onDone?.();
   };
-  const print = () => {
+  const download = () => void output(() => {
+    if (!ready) return false;
+    saveBlob(ready.file.blob, ready.file.fileName);
+    return true;
+  });
+  const print = () => void output(() => {
     const view = frame.current?.contentWindow;
-    if (!view) return;
+    if (!view) return false;
     view.focus();
     view.print();
-    onDone?.();
-  };
+    return true;
+  });
 
   return (
     <Dialog
@@ -90,9 +106,9 @@ export function PrintDialog({ open, title, description, load, facts = [], note =
       footer={(
         <>
           {phone ? <Button size="large" onClick={onClose}>{t('print.close')}</Button> : null}
-          <Button size="large" icon={<Download size={16} />} disabled={!ready} onClick={download}>{t('print.pdf')}</Button>
+          <Button size="large" icon={<Download size={16} />} disabled={!ready || blocked || busy} onClick={download}>{t('print.pdf')}</Button>
           {phone ? null : (
-            <Button size="large" type="primary" icon={<Printer size={16} />} disabled={!ready} onClick={print}>
+            <Button size="large" type="primary" icon={<Printer size={16} />} disabled={!ready || blocked} loading={busy} onClick={print}>
               {t(reprint ? 'print.reprint' : 'print.print')}
             </Button>
           )}
@@ -113,6 +129,7 @@ export function PrintDialog({ open, title, description, load, facts = [], note =
               {facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
             </dl>
           ) : null}
+          {children}
           {note ? (
             <div className={styles.note} role="note">
               <Info aria-hidden />
