@@ -1,0 +1,106 @@
+/* Optovik (FE-25) formalari va oynalari: maydonlar, fayl tanlash, faktlar, qadamlar (admin-optovik-karta.holatlar). */
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+.field { min-width: 0; }
+.label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+.label > span { color: var(--color-danger); }
+.control { display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); }
+.control:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.control[aria-invalid='true'] { border-color: var(--color-danger); }
+.control[data-disabled] { background: var(--color-sunken); color: var(--color-text-secondary); }
+.control > input, .control > select { flex: 1 1 auto; min-width: 0; height: 100%; margin: 0; padding: 0 14px; border: 0; outline: 0; background: transparent; color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; appearance: none; }
+.control > input::placeholder { color: var(--color-text-faint); }
+.control > svg { flex: none; width: 18px; height: 18px; margin-right: 14px; color: var(--color-text-secondary); pointer-events: none; }
+.control > .unit { flex: none; padding: 0 14px 0 0; color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; }
+.textarea { display: block; width: 100%; min-height: 72px; margin: 0; padding: 10px 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; resize: vertical; }
+.textarea::placeholder { color: var(--color-text-faint); }
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }
+.hint { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; font-weight: 600; line-height: 16px; }
+.error > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 1px; }
+.note { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* Fayl: tashlash maydoni (desktop) yoki «Fayl tanlash» (telefon) va tanlangan fayl qatori. */
+.drop { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 16px; box-sizing: border-box; border: 1.5px dashed var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-size: 14px; line-height: 21px; text-align: center; cursor: pointer; }
+.drop[data-dragging] { border-color: var(--color-action); background: var(--color-action-soft); }
+.drop[aria-invalid='true'] { border-color: var(--color-danger); }
+.dropIcon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--color-surface); color: var(--color-text); box-shadow: inset 0 0 0 1px var(--color-border); }
+.dropIcon > svg { width: 20px; height: 20px; }
+.drop strong { color: var(--color-action); font-weight: 600; text-decoration: underline; }
+.limits { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.pickButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; box-sizing: border-box; border: 1px solid var(--color-action); border-radius: 12px; background: var(--color-surface); color: var(--color-action); font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; }
+.pickButton > svg { width: 18px; height: 18px; }
+.fileRow { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; box-sizing: border-box; }
+.fileIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.fileIcon > svg { width: 18px; height: 18px; }
+.fileBody { display: flex; flex: 1 1 auto; flex-direction: column; gap: 3px; min-width: 0; }
+.fileTop { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0; }
+.fileName { min-width: 0; font-size: 14px; font-weight: 600; line-height: 20px; overflow-wrap: anywhere; }
+.fileTop > svg { width: 14px; height: 14px; color: var(--color-text-secondary); }
+.fileMeta { flex: none; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.fileState { display: inline-flex; align-items: flex-start; gap: 6px; color: var(--color-success); font-size: 12px; font-weight: 600; line-height: 16px; }
+.fileState > svg { width: 14px; height: 14px; flex: none; }
+.iconButton { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+
+/* Faktlar: chapda nom, o'ngda qiymat (dizayn: gap 10, qiymat o'ngga tekislangan). */
+.facts { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.facts > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-width: 0; }
+.facts dt { flex: none; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.facts dd { min-width: 0; margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.tbd { color: var(--color-text-secondary); font-weight: 400; }
+
+.smsBox { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 12px; background: var(--color-sunken); }
+.smsBox > p:first-child { margin: 0; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.smsBox > p:last-child { margin: 0; font-size: 14px; line-height: 21px; }
+
+.steps { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.steps > li { position: relative; display: flex; gap: 12px; padding-bottom: 16px; }
+.steps > li:last-child { padding-bottom: 0; }
+.steps > li:not(:last-child)::before { position: absolute; top: 32px; bottom: 2px; left: 13px; width: 2px; border-radius: 2px; background: var(--color-border); content: ''; }
+.stepNumber { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 28px; box-sizing: border-box; border: 2px solid var(--color-border-strong); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font-size: 13px; font-weight: 700; line-height: 18px; }
+.stepBody { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 4px; }
+.stepBody > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.stepBody > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* To'xtatish oqibatlari — kulrang blok, chevronli qatorlar. */
+.effects { display: flex; flex-direction: column; margin: 0; padding: 4px 16px; border-radius: 12px; background: var(--color-sunken); list-style: none; }
+.effects > li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.effects > li:last-child { border-bottom: 0; }
+.effects > li > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 2px; color: var(--color-text-secondary); }
+.effects > li > span { display: flex; flex-direction: column; min-width: 0; }
+.effects > li > span > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.effects > li > span > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* Akt tanlash — radio kartalar; yuborish yo'li — belgilash qutilari. */
+.groupLabel { margin: 0 0 8px; font-size: 13px; font-weight: 600; line-height: 18px; }
+.options { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }
+.option { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); cursor: pointer; }
+.option[data-checked] { border: 1.5px solid var(--color-action); background: var(--color-action-soft); }
+.option input { display: block; flex: none; width: 20px; height: 20px; margin: 0; box-sizing: border-box; border: 1.5px solid var(--color-field-border); border-radius: 999px; background: var(--color-surface); cursor: pointer; appearance: none; }
+.option input:checked { border: 6px solid var(--color-action); }
+.option > span { display: flex; flex-direction: column; min-width: 0; }
+.option > span > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.option > span > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.checks { display: flex; flex-direction: column; gap: 10px; }
+.check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.check > input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--color-action); cursor: pointer; }
+.check > span { display: flex; flex-direction: column; min-width: 0; }
+.check > span > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.check > span > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* Bank rekviziti o'zgarishi: hozirgi → so'ralgan jadvali. */
+.compare { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.compare th { padding: 0 0 8px; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; text-align: left; }
+.compare td { padding: 10px 0; border-top: 1px solid var(--color-border); }
+.compare td:first-child { width: 70px; color: var(--color-text-secondary); font-size: 13px; }
+.changed { font-weight: 700; }
+.changed > span { margin-left: 6px; color: var(--color-warning); font-size: 12px; font-weight: 600; }
+.warning { display: flex; gap: 10px; padding: 14px 16px; border-radius: 12px; background: var(--color-warning-soft); }
+.warning > svg { flex: 0 0 18px; width: 18px; height: 18px; color: var(--color-warning); }
+.warning > div > p { margin: 0; font-size: 13px; line-height: 20px; }
+.warning > div > p:first-child { color: var(--color-warning); font-size: 14px; font-weight: 600; }

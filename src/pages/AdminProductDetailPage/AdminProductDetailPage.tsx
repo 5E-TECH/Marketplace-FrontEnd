@@ -1,10 +1,11 @@
 import { App, Dropdown } from 'antd';
-import { Eye, ImageIcon, MoreHorizontal, PauseCircle, PlayCircle, TriangleAlert } from 'lucide-react';
+import { Archive, Eye, ImageIcon, MoreHorizontal, PauseCircle, PlayCircle, TriangleAlert } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAdminProductQuery, useProductPricingQuery, useProductStockQuery, useReactivateProductMutation } from '../../features/adminProducts/api/adminProductsQueries';
 import type { AdminProductListItem, ProductStockSummary } from '../../features/adminProducts/model/adminProductTypes';
 import { productBadgeCode } from '../../features/adminProducts/ui/adminProductModerationConfig';
+import { ArchiveProductDialog } from '../../features/adminProducts/ui/ArchiveProductDialog';
 import { ProductAudit } from '../../features/adminProducts/ui/ProductAudit';
 import { PriceWorkbench } from '../../features/adminProducts/ui/price/PriceWorkbench';
 import { SellerPreviewDialog } from '../../features/adminProducts/ui/SellerPreviewDialog';
@@ -13,7 +14,8 @@ import { useAdminCategoryNames } from '../../features/categories/api/categoryQue
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
-import { tashkentDay } from '../../shared/lib/tashkentTime';
+import { shortPersonName } from '../../shared/lib/personName';
+import { tashkentDateTime, tashkentDay } from '../../shared/lib/tashkentTime';
 import { useLeaveGuard } from '../../shared/lib/useLeaveGuard';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
 import { Dialog, DialogCancel, DialogPrimary } from '../../shared/ui/Dialog/Dialog';
@@ -49,7 +51,8 @@ export default function AdminProductDetailPage() {
   const pricing = useProductPricingQuery(productId).data;
   const categoryNames = useAdminCategoryNames();
   const reactivate = useReactivateProductMutation();
-  const [dialog, setDialog] = useState<'stop' | 'asSeller' | null>(null);
+  const [dialog, setDialog] = useState<'stop' | 'asSeller' | 'archive' | null>(null);
+  const [sheet, setSheet] = useState(false);
   // Skript va Landing matnlari saqlanmagan bo'lsa — yorliq almashtirish va havolalar so'raydi.
   const [dirty, setDirty] = useState(false);
   const [pendingTab, setPendingTab] = useState<CardTab | null>(null);
@@ -72,7 +75,13 @@ export default function AdminProductDetailPage() {
   const categoryName = product.categoryId ? categoryNames.get(product.categoryId) ?? null : null;
   const since = product.statusChangedAt ?? product.updatedAt;
   const onSale = product.status === 'ACTIVE' && !product.isBlocked;
-  const meta = [product.shop?.name, categoryName, product.slug, t(onSale ? 'card.onSaleSince' : 'card.statusSince', { date: tashkentDay(since) })].filter(Boolean).join(' · ');
+  const meta = [
+    product.shop?.name,
+    categoryName,
+    product.slug,
+    onSale ? t('card.onSaleSince', { date: tashkentDay(since) }) : t(`apf.since.${productBadgeCode(product)}` as TranslationKey, { date: tashkentDateTime(since) }),
+    product.createdByName ? t('apf.metaBy', { who: shortPersonName(product.createdByName) }) : null,
+  ].filter(Boolean).join(' · ');
   // «Sotuvchi sifatida ko'rish» ro'yxat elementi shaklini kutadi: qoldiq va narx kartaning o'z so'rovlaridan.
   const asListItem: AdminProductListItem = {
     ...product,
@@ -102,7 +111,10 @@ export default function AdminProductDetailPage() {
     else applyTab(next);
   };
 
-  /** «⋯»: to'xtatish yoki qayta yoqish; telefonda «Sotuvchi sifatida ko'rish» ham shu yerda (admin-mahsulot-karta.mobil). */
+  /**
+   * «⋯»: to'xtatish yoki qayta yoqish, arxivlash (FE-25); telefonda — varaq, «Sotuvchi sifatida ko'rish» ham shu yerda
+   * (admin-mahsulot-karta.holatlar Ph1).
+   */
   const menuItems = [
     ...(phone ? [{ key: 'asSeller', icon: <Eye aria-hidden />, label: t('card.asSeller') }] : []),
     ...(product.status === 'ACTIVE'
@@ -110,18 +122,29 @@ export default function AdminProductDetailPage() {
         ? { key: 'resume', icon: <PlayCircle aria-hidden />, label: t('card.resume') }
         : { key: 'stop', icon: <PauseCircle aria-hidden />, label: t('card.stop'), danger: true }]
       : []),
+    ...(product.status === 'ARCHIVED' ? [] : [{ key: 'archive', icon: <Archive aria-hidden />, label: t('apf.menu.archive') }]),
   ];
+  const onMenu = (key: string) => {
+    if (key === 'asSeller') setDialog('asSeller');
+    if (key === 'stop') setDialog('stop');
+    if (key === 'resume') resume();
+    if (key === 'archive') setDialog('archive');
+  };
+  const menuLabel = t(phone ? 'apf.menu.label' : 'apf.menu.labelDesktop');
 
   const content: Record<CardTab, () => ReactNode> = {
     main: () => (
       <MainTab
+        key={product.id}
         product={product}
-        categoryName={categoryName}
         stock={stock}
         stockUpdatedAt={stockQuery.dataUpdatedAt}
         phone={phone}
         onStop={() => setDialog('stop')}
         onResume={resume}
+        onArchive={() => setDialog('archive')}
+        sku={stockQuery.data?.items.length === 1 ? { barcode: stockQuery.data.items[0].barcode, cell: stockQuery.data.items[0].cell } : null}
+        onDirtyChange={setDirty}
       />
     ),
     price: () => <section className={styles.priceCard} data-testid="price-tab"><PriceWorkbench product={product} phone={phone} allowChange /></section>,
@@ -146,20 +169,11 @@ export default function AdminProductDetailPage() {
         </div>
         <div className={styles.headerActions}>
           {phone ? null : <button type="button" className={styles.secondary} onClick={() => setDialog('asSeller')}><Eye aria-hidden />{t('card.asSeller')}</button>}
-          {menuItems.length ? (
-            <Dropdown
-              trigger={['click']}
-              placement="bottomRight"
-              menu={{
-                items: menuItems,
-                onClick: ({ key }) => {
-                  if (key === 'asSeller') setDialog('asSeller');
-                  if (key === 'stop') setDialog('stop');
-                  if (key === 'resume') resume();
-                },
-              }}
-            >
-              <button type="button" className={styles.moreButton} aria-label={t(phone ? 'card.morePhone' : 'card.more')} title={t(phone ? 'card.morePhone' : 'card.more')}><MoreHorizontal aria-hidden /></button>
+          {menuItems.length && phone ? (
+            <button type="button" className={styles.moreButton} aria-label={menuLabel} title={menuLabel} aria-haspopup="menu" onClick={() => setSheet(true)}><MoreHorizontal aria-hidden /></button>
+          ) : menuItems.length ? (
+            <Dropdown trigger={['click']} placement="bottomRight" menu={{ items: menuItems, onClick: ({ key }) => onMenu(key) }}>
+              <button type="button" className={styles.moreButton} aria-label={menuLabel} title={menuLabel}><MoreHorizontal aria-hidden /></button>
             </Dropdown>
           ) : null}
         </div>
@@ -208,6 +222,26 @@ export default function AdminProductDetailPage() {
           {null}
         </Dialog>
       ) : null}
+      {phone ? (
+        <Dialog
+          open={sheet}
+          onClose={() => setSheet(false)}
+          title={product.name}
+          description={`${t(`status.product.${productBadgeCode(product)}` as TranslationKey)} · ${onSale ? t('card.onSaleSince', { date: tashkentDay(since) }) : tashkentDateTime(since)}`}
+          icon={<MoreHorizontal />}
+          tone="neutral"
+          testId="product-sheet"
+        >
+          <ul className={styles.sheetMenu} role="menu">
+            {menuItems.map((item) => (
+              <li role="none" key={item.key}>
+                <button type="button" role="menuitem" data-danger={'danger' in item ? true : undefined} onClick={() => { setSheet(false); onMenu(item.key); }}>{item.icon}{item.label}</button>
+              </li>
+            ))}
+          </ul>
+        </Dialog>
+      ) : null}
+      {dialog === 'archive' ? <ArchiveProductDialog product={product} stock={stock} onClose={() => setDialog(null)} /> : null}
       {dialog === 'stop' ? <StopProductDialog product={asListItem} onClose={() => setDialog(null)} /> : null}
       {dialog === 'asSeller' ? <SellerPreviewDialog product={asListItem} categoryName={categoryName} onClose={() => setDialog(null)} /> : null}
     </div>

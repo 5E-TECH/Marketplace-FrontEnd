@@ -92,6 +92,10 @@
 
 .pageBody .text { max-width: 540px; }
 
+/* Sarlavha ustidagi blok nomi (admin-optoviklar.holatlar «Xato»): sarlavha bilan birga 8 px pastga tushadi. */
+.context { margin: 8px 0 0; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.context + .pageTitle { margin-top: 0; }
+
 .pageActions {
   display: flex;
   flex-wrap: wrap;

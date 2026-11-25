@@ -1,0 +1,76 @@
+/* «Yangi optovik» (admin-optovik-karta.holatlar §1, §6): forma va «Saqlagandan keyin». */
+/* Karkas sahifa ildiziga `column` beradi — bu yerda forma va «Saqlagandan keyin» yonma-yon. */
+.page { display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skeleton { height: 480px; border-radius: 16px; background: var(--color-sunken); }
+.tbd { color: var(--color-text-secondary); }
+
+.form { display: flex; flex: 1 1 600px; flex-direction: column; gap: 0; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.group { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 20px 0; border-bottom: 1px solid var(--color-border); }
+.group:first-of-type { padding-top: 0; }
+.group h3 { margin: 0; font-size: 15px; font-weight: 700; line-height: 22px; }
+.group h3 + .groupSub { margin-top: -14px; }
+.groupSub { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+
+.radios { margin: 0; padding: 0; border: 0; min-width: 0; }
+.radios legend { margin: 0 0 6px; padding: 0; font-size: 13px; font-weight: 600; line-height: 18px; }
+.radios > div { display: flex; flex-wrap: wrap; gap: 12px; }
+.radio { display: flex; flex: 1 1 220px; align-items: center; gap: 12px; min-width: 0; min-height: 64px; padding: 10px 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); cursor: pointer; }
+.radio[data-checked] { border: 1.5px solid var(--color-action); background: var(--color-action-soft); }
+.radio > input { display: block; flex: none; width: 20px; height: 20px; margin: 0; box-sizing: border-box; border: 1.5px solid var(--color-field-border); border-radius: 999px; background: var(--color-surface); cursor: pointer; appearance: none; }
+.radio > input:checked { border: 6px solid var(--color-action); }
+.radio > input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.radio > span { display: flex; flex-direction: column; min-width: 0; }
+.radio > span > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.radio > span > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.field { min-width: 0; }
+.label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+.label > span { color: var(--color-danger); }
+.control { display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); }
+.control:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.control[aria-invalid='true'] { border-color: var(--color-danger); }
+.control > input { flex: 1 1 auto; min-width: 0; height: 100%; margin: 0; padding: 0 14px; border: 0; outline: 0; background: transparent; color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; }
+.control > input::placeholder { color: var(--color-text-faint); }
+.hint { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; font-weight: 600; line-height: 16px; }
+.error > svg { flex: 0 0 14px; width: 14px; height: 14px; margin-top: 1px; }
+.link { display: inline-flex; align-items: center; gap: 2px; margin-top: 12px; color: var(--color-action); font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: none; }
+.link > svg { width: 14px; height: 14px; }
+.link:hover { text-decoration: underline; }
+.note { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding-top: 16px; }
+.secondary, .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; white-space: nowrap; text-decoration: none; cursor: pointer; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); }
+.primary:disabled { opacity: 0.6; cursor: progress; }
+.secondary:focus-visible, .primary:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.side { display: flex; flex: 0 1 344px; flex-direction: column; gap: 16px; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.side h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.steps { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.steps > li { position: relative; display: flex; gap: 12px; padding-bottom: 16px; }
+.steps > li:last-child { padding-bottom: 0; }
+.steps > li:not(:last-child)::before { position: absolute; top: 32px; bottom: 2px; left: 13px; width: 2px; border-radius: 2px; background: var(--color-border); content: ''; }
+.stepNumber { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 28px; box-sizing: border-box; border: 2px solid var(--color-border-strong); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font-size: 13px; font-weight: 700; line-height: 18px; }
+.stepBody { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 4px; }
+.stepBody > span:first-child { font-size: 14px; font-weight: 600; line-height: 20px; }
+.stepBody > span:last-child { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* Planshet: «Saqlagandan keyin» forma ostida, to'liq kenglikda. */
+@container content (max-width: 919.98px) {
+  .side { flex-basis: 100%; }
+}
+
+/* Telefon (holatlar §6): bir ustun, tugmalar pastki panelda. */
+@container content (max-width: 575px) {
+  .page { gap: 16px; }
+  .form, .side { padding: 16px; }
+  .pair { grid-template-columns: 1fr; }
+  .pair > [aria-hidden] { display: none; }
+  .control > input { font-size: 16px; }
+  .radios > div { flex-direction: column; }
+}

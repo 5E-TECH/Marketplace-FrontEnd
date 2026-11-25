@@ -5,7 +5,7 @@ import { tashkentDay } from '../../../shared/lib/tashkentTime';
 
 export const productHref = (product: Pick<AdminProductListItem, 'id'>) => `/admin/products/${encodeURIComponent(product.id)}`;
 
-export const PRODUCT_TABS: readonly ProductListTab[] = ['ALL', 'PENDING_REVIEW', 'ACTIVE', 'REJECTED', 'BLOCKED', 'DRAFT'];
+export const PRODUCT_TABS: readonly ProductListTab[] = ['ALL', 'PENDING_REVIEW', 'ACTIVE', 'REJECTED', 'BLOCKED', 'DRAFT', 'ARCHIVED'];
 export type Attention = 'OUT_OF_STOCK' | 'EXPIRY_SOON';
 export type Channel = 'cpa' | 'site';
 
@@ -16,6 +16,9 @@ const rank = (product: AdminProductListItem) => ORDER[product.isBlocked ? 'BLOCK
 export function sortProducts(items: readonly AdminProductListItem[]): AdminProductListItem[] {
   return [...items].sort((a, b) => rank(a) - rank(b) || b.createdAt.localeCompare(a.createdAt));
 }
+
+/** «Hammasi» — arxivsiz (backend holatsiz so'rovda arxivni ham qaytaradi); «Arxiv» — `status=ARCHIVED`. */
+export const visibleInTab = (tab: ProductListTab) => (product: AdminProductListItem) => tab !== 'ALL' || product.status !== 'ARCHIVED';
 
 /** Faol, lekin qoldiq 0 — «Qoldiq tugagan» belgisi va «Qoldiq 0» diqqat filtri. */
 export const isOutOfStock = (product: AdminProductListItem) =>

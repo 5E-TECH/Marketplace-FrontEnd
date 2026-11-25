@@ -19,7 +19,7 @@ async function openShipments(page: Page) {
   await page.getByLabel('Parol').fill('Secure123');
   await page.getByRole('button', { name: 'Kirish', exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/moderation$/);
-  await page.goto('/admin/wholesalers');
+  await page.goto('/admin/wholesalers?tab=shipments');
   await expect(page.getByTestId('declare-form')).toBeVisible();
 }
 

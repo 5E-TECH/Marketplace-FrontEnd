@@ -1,0 +1,209 @@
+/* admin-optoviklar (№146): ko'rsatkichlar, ro'yxat, «Diqqat talab qiladi», ishga tushish qadamlari (+ .planshet/.mobil). */
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── Ko'rsatkichlar ── */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; min-width: 0; }
+.kpi { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 16px 18px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.kpiLabel { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.kpiValue { font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kpiValue > span { color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0; }
+.kpiSub { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+/* ── Ro'yxat kartasi ── */
+.card, .listCard { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.listHead, .cardHead { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; min-width: 0; }
+.listHead h2, .cardHead h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; white-space: nowrap; }
+.cardSub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.loading { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.spinner { width: 16px; height: 16px; box-sizing: border-box; border: 2px solid var(--color-border-strong); border-top-color: var(--color-text-secondary); border-radius: 999px; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin: 0;
+  padding: 0 8px 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tab:hover { border-color: var(--color-border-strong); }
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; font-variant-numeric: tabular-nums; }
+.tab[aria-selected='true'] .count { background: var(--color-surface); color: var(--color-action); }
+
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.search { position: relative; display: block; flex: 0 1 280px; min-width: 0; }
+.search > svg { position: absolute; top: 50%; left: 16px; width: 18px; height: 18px; transform: translateY(-50%); color: var(--color-text-secondary); pointer-events: none; }
+.search input { display: block; width: 100%; height: 40px; margin: 0; padding: 0 16px 0 42px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; }
+.search input::placeholder { color: var(--color-text-faint); }
+.search input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-action-soft); }
+.resetButton, .linkButton { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 0 6px; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; cursor: pointer; }
+.resetButton { height: 40px; }
+.resetButton > svg { width: 16px; height: 16px; }
+.resetButton:hover, .linkButton:hover { text-decoration: underline; }
+.filtersButton { display: inline-flex; flex: none; align-items: center; gap: 8px; height: 44px; margin: 0; padding: 0 12px 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; }
+.filtersButton > svg { width: 18px; height: 18px; }
+
+/* ── Jadval ── */
+.tableWrap { min-width: 0; overflow-x: auto; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 18px; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+.table th[data-end], .table td[data-end] { text-align: right; }
+.table td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; text-align: left; white-space: nowrap; }
+.table tbody tr:last-child td { border-bottom: 0; }
+/* Uzun nom («Barakat Uy Jihozlari MChJ») qatorga o'tadi — «⋯» ustuni jadvaldan chiqib ketmaydi. */
+.table td:first-child { padding-top: 6px; padding-bottom: 6px; white-space: normal; }
+.table .actionsCol { width: 48px; padding: 0 8px 0 4px; text-align: right; }
+.row { cursor: pointer; }
+.row:hover td { background: var(--color-row-hover); }
+
+.stack { display: flex; flex-direction: column; }
+.stack[data-end] { align-items: flex-end; }
+.main { font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.sub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.name { color: var(--color-text); font-size: 14px; font-weight: 600; line-height: 20px; text-decoration: none; font-variant-numeric: tabular-nums; }
+.name:hover { color: var(--color-action); }
+.badgeStack { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.iconButton { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+.iconButton:focus-visible, .name:focus-visible, .cardLink:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.tabletOnly { display: none; }
+
+.skeletonRow td > span { display: block; width: 76%; height: 12px; margin: 0 0 8px; border-radius: 999px; background: var(--color-sunken); animation: pulse 1.2s ease-in-out infinite; }
+.skeletonRow td > span + span { width: 46%; margin: 0; }
+.skeletonRow td[data-end] > span { margin-left: auto; }
+.skeletonRow td[data-kind='pill'] > span { width: 64px; height: 24px; margin: 0; }
+.skeletonRow td[data-kind='pill'] > span + span, .skeletonRow td[data-kind='dot'] > span + span { display: none; }
+.skeletonRow td[data-kind='dot'] > span { width: 24px; height: 12px; margin: 0 0 0 auto; }
+@keyframes pulse { 50% { opacity: 0.55; } }
+
+.footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+/* Filtr natijasi bo'sh — jadval ichida ixcham qator (komponentlar-E §13). */
+.emptyCell { height: auto !important; padding: 20px 14px !important; white-space: normal !important; }
+.emptyRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--color-text); font-size: 14px; line-height: 20px; }
+.emptyRow > svg { width: 18px; height: 18px; flex: none; color: var(--color-text-secondary); }
+
+/* Hali optovik yo'q — markazda; yagona amal «Optovik qo'shish». */
+.empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 16px 44px; text-align: center; }
+.empty h3 { margin: 8px 0 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.empty p { max-width: 360px; margin: 0 0 12px; color: var(--color-text-secondary); font-size: 13px; line-height: 21px; }
+.emptyIcon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.emptyIcon > svg { width: 22px; height: 22px; }
+
+.primary, .barPrimary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border: 0; border-radius: 12px; background: var(--color-action); color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; white-space: nowrap; text-decoration: none; cursor: pointer; }
+.primary > svg, .barPrimary > svg { width: 18px; height: 18px; }
+.primary:hover, .barPrimary:hover { background: var(--color-action-hover); color: #fff; }
+.barPrimary { flex: 1 1 auto; height: 52px; font-size: 15px; }
+
+/* ── Diqqat va qadamlar ── */
+.overview { display: flex; flex-wrap: wrap; align-items: stretch; gap: 20px; min-width: 0; }
+.attention { flex: 1 1 560px; }
+.steps { flex: 1 1 400px; }
+.attentionList { margin: -12px 0 0; padding: 0; list-style: none; }
+.attentionList > li { display: flex; align-items: flex-start; gap: 12px; min-width: 0; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.attentionIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 999px; }
+.attentionIcon > svg { width: 16px; height: 16px; }
+.attentionIcon[data-tone='warning'] { background: var(--color-warning-soft); color: var(--color-warning); }
+.attentionIcon[data-tone='neutral'] { background: var(--color-sunken); color: var(--color-text-secondary); }
+.attentionIcon[data-tone='info'] { background: var(--color-info-soft); color: var(--color-info); }
+.attentionBody { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.attentionTitle { margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.attentionText { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.attentionLink { flex: none; padding-top: 1px; }
+.attentionLink > a { display: inline-flex; align-items: center; gap: 2px; min-height: 24px; color: var(--color-action); font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: none; white-space: nowrap; }
+.attentionLink > a > svg { width: 14px; height: 14px; }
+.attentionLink > a:hover { text-decoration: underline; }
+
+.stepList { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.stepList > li { position: relative; display: flex; gap: 12px; min-width: 0; padding-bottom: 16px; }
+.stepList > li:last-child { padding-bottom: 0; }
+.stepList > li:not(:last-child)::before { position: absolute; top: 32px; bottom: 2px; left: 13px; width: 2px; border-radius: 2px; background: var(--color-border); content: ''; }
+.stepNumber { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 28px; box-sizing: border-box; border: 2px solid var(--color-border-strong); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font-size: 13px; font-weight: 700; line-height: 18px; }
+.stepBody { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 4px; }
+.stepTitle { font-size: 14px; font-weight: 600; line-height: 20px; }
+.stepText { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.note { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* ── Telefon: kartalar va varaqlar ── */
+.phoneHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; min-height: 44px; }
+.phoneHead > p { min-width: 0; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.phoneHead strong { color: var(--color-text); font-weight: 600; }
+.phoneMenu { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; padding: 0; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); cursor: pointer; }
+.phoneMenu > svg { width: 20px; height: 20px; }
+
+.cardsBox { min-width: 0; overflow: hidden; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.cards { margin: 0; padding: 0; list-style: none; }
+.cards > li + li { border-top: 1px solid var(--color-border); }
+.cardLink { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; color: var(--color-text); text-decoration: none; }
+.cardTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.cardName { min-width: 0; font-size: 15px; font-weight: 700; line-height: 22px; font-variant-numeric: tabular-nums; }
+.cardLine { font-size: 15px; font-weight: 600; line-height: 22px; font-variant-numeric: tabular-nums; }
+.cardMuted { color: var(--color-text-secondary); font-weight: 400; }
+.cardBadgeLine { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; line-height: 18px; }
+.cardFoot { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; min-width: 0; }
+.cardMeta { min-width: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardMoney { display: flex; flex: none; flex-direction: column; align-items: flex-end; }
+.cardMoney > span { color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; }
+.cardMoney > strong { font-size: 15px; font-weight: 700; line-height: 22px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cardNote { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardsFooter { margin: 0; padding: 12px 16px 14px; border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 13px; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums; }
+.cardsEmpty { padding: 16px; }
+
+.sheetField { display: flex; flex-direction: column; gap: 6px; }
+.sheetField > label { font-size: 13px; font-weight: 600; line-height: 18px; }
+.sheetSelect { position: relative; display: block; }
+.sheetSelect > select { display: block; width: 100%; height: 48px; padding: 0 40px 0 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 16px; appearance: none; }
+.sheetSelect > svg { position: absolute; top: 15px; right: 14px; width: 18px; height: 18px; color: var(--color-text-secondary); pointer-events: none; }
+.sheetHint { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.sheetMenu { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.sheetMenu button { display: flex; align-items: center; gap: 12px; width: 100%; height: 48px; margin: 0; padding: 0 12px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text); font-family: inherit; font-size: 16px; font-weight: 500; line-height: 24px; text-align: left; cursor: pointer; }
+.sheetMenu button:hover { background: var(--color-sunken); }
+.sheetMenu svg { width: 20px; height: 20px; color: var(--color-text-secondary); }
+
+/* Planshet (admin-optoviklar.planshet): ustunlar — optovik, holat (+ shartnoma sanasi), omborda, to'lanadigan. */
+@container content (max-width: 919.98px) {
+  .table [data-wide] { display: none; }
+  .desktopOnly { display: none; }
+  .tabletOnly { display: revert; }
+  .stack .tabletOnly, .badgeStack .tabletOnly { display: block; }
+}
+
+/* Telefon (admin-optoviklar.mobil): yorliqlar suriladi, ro'yxat qutisiz, kartalar; ko'rsatkichlar 2 ustun. */
+@container content (max-width: 575px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .kpi { padding: 14px; }
+  .kpi[data-wide] { grid-column: 1 / -1; }
+  .kpiValue { font-size: 24px; line-height: 32px; }
+  .listCard { gap: 12px; margin: 0 -16px; padding: 0 16px; border: 0; border-radius: 0; background: transparent; }
+  .listHead { column-gap: 10px; }
+  .tabs { flex-wrap: nowrap; margin: 0 -16px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+  .tab { height: 44px; }
+  .filters { flex-wrap: nowrap; gap: 8px; }
+  .search { flex: 1 1 auto; }
+  .search input { height: 44px; border-radius: 12px; font-size: 16px; }
+  .card { gap: 16px; padding: 16px; }
+  .cardHead h2 { white-space: normal; }
+  .steps .cardHead { flex-direction: column; align-items: flex-start; }
+  .attentionList > li { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 12px; }
+  .attentionLink { grid-column: 2; margin-top: 4px; padding: 0; }
+  .attentionLink > a { min-height: 44px; margin: -10px 0; font-size: 14px; line-height: 20px; }
+}

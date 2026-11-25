@@ -1,4 +1,4 @@
-import { Archive, Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, Package, Pencil, TriangleAlert, Undo2, type LucideIcon } from 'lucide-react';
+import { Archive, Ban, CircleAlert, CircleCheck, CircleDot, CircleMinus, CirclePause, CircleX, Clock, FileCheck, Package, Pencil, TriangleAlert, Undo2, type LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '../../i18n/translations';
 import type { BadgeTone } from '../Badge/Badge';
 
@@ -104,6 +104,18 @@ export const STATUS_FAMILIES = {
     PICKED: { tone: 'info' },
     PACKED: { tone: 'success' },
     HANDED_OVER: { tone: 'success' },
+  },
+  /** Optovik (BE-07 `ShopStatus`, admin-optoviklar): «Tekshiruvda» — M2 da o'zi ro'yxatdan o'tgan. */
+  wholesaler: {
+    PENDING: { tone: 'warning', icon: Clock },
+    ACTIVE: { tone: 'success' },
+    SUSPENDED: { tone: 'neutral', icon: CirclePause },
+    REJECTED: { tone: 'danger' },
+  },
+  /** Komissiya shartnomasi (OPT-1): yo'q — mahsulot va postavka yopiq. */
+  contract: {
+    SIGNED: { tone: 'success', icon: FileCheck },
+    MISSING: { tone: 'warning', icon: TriangleAlert },
   },
 } as const satisfies Record<string, Record<string, StatusEntry>>;
 

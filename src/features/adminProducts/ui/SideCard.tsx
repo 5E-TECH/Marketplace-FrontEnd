@@ -1,4 +1,4 @@
-import { ChevronRight, CircleCheck, CircleX } from 'lucide-react';
+import { ChevronRight, CircleCheck, CircleMinus, CircleX, Clock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
@@ -57,6 +57,10 @@ export interface Condition {
   ok: boolean;
   title: string;
   hint?: string | null;
+  /** Hali kelmagan qadam (yangi mahsulot: «Kutilmoqda: yuborilgach») — soat belgisi. */
+  pending?: boolean;
+  /** Shu holatga tegishli emas («Kerak emas:» — arxivlash oynasi) — chiziqcha belgisi, kulrang. */
+  notNeeded?: boolean;
 }
 
 /** Bajarilgan / bajarilmagan shartlar (yashil yoki qizil belgi, ekran o'quvchiga matn bilan). */
@@ -68,9 +72,9 @@ export function ConditionList({ items, caption }: { items: readonly Condition[];
       <ul className={styles.conditions}>
         {items.map((item) => (
           <li key={item.title}>
-            {item.ok ? <CircleCheck aria-hidden data-ok /> : <CircleX aria-hidden />}
+            {item.ok ? <CircleCheck aria-hidden data-ok /> : item.notNeeded ? <CircleMinus aria-hidden data-na /> : item.pending ? <Clock aria-hidden data-pending /> : <CircleX aria-hidden />}
             <span>
-              <span><span className={styles.visuallyHidden}>{t(item.ok ? 'sellerView.done' : 'sellerView.notDone')} </span>{item.title}</span>
+              <span><span className={styles.visuallyHidden}>{t(item.ok ? 'sellerView.done' : item.notNeeded ? 'apf.notNeeded' : item.pending ? 'apf.pending' : 'sellerView.notDone')} </span>{item.title}</span>
               {item.hint ? <span>{item.hint}</span> : null}
             </span>
           </li>

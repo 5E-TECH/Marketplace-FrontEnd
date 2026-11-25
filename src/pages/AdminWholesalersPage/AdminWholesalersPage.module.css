@@ -2,6 +2,35 @@
 .page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+/* ── Sahifa yorliqlari va amallari (admin-optoviklar: chapda yorliqlar, o'ngda «Postavka arizasi» + «Optovik qo'shish») ── */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; min-width: 0; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; margin-left: auto; }
+
+.secondaryAction, .primaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.secondaryAction > svg, .primaryAction > svg { width: 18px; height: 18px; flex: none; }
+.secondaryAction { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.secondaryAction:hover { border-color: var(--color-border-hover); }
+.primaryAction { border: 0; background: var(--color-action); color: #fff; }
+.primaryAction:hover { background: var(--color-action-hover); color: #fff; }
+.secondaryAction:focus-visible, .primaryAction:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
 /* ── Yorliqlar (pill + son) ── */
 .tabs { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
 

@@ -214,6 +214,14 @@
 .system li { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; }
 .system svg { width: 16px; height: 16px; flex: 0 0 16px; color: var(--color-success); }
 .system li[data-fail] svg { color: var(--color-danger); }
+.system li { align-items: flex-start; }
+.system li > svg { margin-top: 1px; }
+.system li > span { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.systemLink { font-weight: 600; color: var(--color-action); text-decoration: none; }
+.systemLink:hover { text-decoration: underline; }
+/* Tizim tekshiruvi o'tmasa — «Mahsulotni tasdiqlash» o'chiq, sababi tugmalar ostida (BE-07, BE-41). */
+.blocked { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-danger); }
+.blocked > svg { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; }
 
 .reasonHead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; margin-bottom: 6px; }
 .reasonHead label { font-size: 13px; line-height: 18px; font-weight: 600; }

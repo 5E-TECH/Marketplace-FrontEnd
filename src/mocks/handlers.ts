@@ -9,15 +9,16 @@ import { operatorHandlers } from './handlers/operator';
 import { sellerAuthHandlers } from './handlers/sellerAuth';
 import { sellerProfileHandlers } from './handlers/sellerProfile';
 import { warehouseHandlers } from './handlers/warehouse';
+import { wholesalerHandlers } from './handlers/wholesalers';
 import { API, fail } from './utils';
 
 /**
  * Ishga tushishga (M1) kiradigan endpointlar uchun mock'lar — dev rejimi (`npm run dev`),
  * Vitest (`msw/node`) va Playwright (`tests/e2e/support/mockApi.ts`) bitta ro'yxatdan
- * foydalanadi. M2 bo'limlari (optovik, balans, sverka, softfon…) o'z kartasi bilan qo'shiladi.
+ * foydalanadi. M2 bo'limlari (balans, sverka, softfon…) o'z kartasi bilan qo'shiladi.
  */
 // Ombor (FE-16) admin'dan oldin: `admin/inventory/shipments|lots` umumiy `admin/inventory/:kind` dan ustun.
-export const handlers = [...authHandlers, ...sellerAuthHandlers, ...warehouseHandlers, ...fulfillmentHandlers, ...adminHandlers, ...commonHandlers, ...affiliateHandlers, ...sellerProfileHandlers, ...leadOrdersHandlers, ...operatorHandlers];
+export const handlers = [...authHandlers, ...sellerAuthHandlers, ...warehouseHandlers, ...wholesalerHandlers, ...fulfillmentHandlers, ...adminHandlers, ...commonHandlers, ...affiliateHandlers, ...sellerProfileHandlers, ...leadOrdersHandlers, ...operatorHandlers];
 
 /**
  * Dev rejimida mock'i yo'q API so'rovi jimgina haqiqiy serverga ketmasin: aniq 501

@@ -22,6 +22,10 @@ interface LoadErrorProps {
   /** `row`: sarlavha («Offerlarni yuklab bo‘lmadi») va matn oxiri («Sahifalaringiz ishlashda davom etadi.»). */
   title?: string;
   note?: string;
+  /** `page`: sarlavha ustidagi kichik yozuv — qaysi blok ochilmadi («Optoviklar ro‘yxati»). */
+  context?: string;
+  /** `page`: nima o'zgarmagani — «Optoviklar, shartnomalar va postavkalar o‘zgarmagan — faqat ro‘yxat ochilmadi.» */
+  text?: string;
 }
 
 /**
@@ -29,7 +33,7 @@ interface LoadErrorProps {
  * 60 soniyada o'zi qayta urinadi; «Xato raqami» — backend `requestId`.
  * 429 — kutish vaqti tugaguncha «Qayta urinish · 12» (holatlar «429»).
  */
-export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block', title, note }: LoadErrorProps) {
+export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block', title, note, text, context }: LoadErrorProps) {
   const { t } = useTranslation();
   const retryAfter = getRetryAfterSeconds(error);
   const requestId = getApiRequestId(error);
@@ -94,8 +98,9 @@ export function LoadError({ error, onRetry, lastSuccessAt = 0, variant = 'block'
       <section className={styles.page} role="alert" data-testid="load-error">
         <div className={styles.pageBody}>
           <span className={`${styles.badge} ${styles.badgeLarge}`} aria-hidden><CircleAlert /></span>
+          {context ? <p className={styles.context}>{context}</p> : null}
           <h2 className={styles.pageTitle}>{t('loadError.title')}</h2>
-          <p className={styles.text}>{t('loadError.text')}</p>
+          <p className={styles.text}>{text ?? t('loadError.text')}</p>
           <div className={styles.pageActions}>
             <button type="button" className={`${styles.button} ${styles.primary}`} onClick={onRetry}>
               <RefreshCw aria-hidden />

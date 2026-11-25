@@ -78,9 +78,9 @@ export function affiliateStatsRow(key: string): Schemas['AffiliateStatsRowDto'] 
 
 function operatorLeads(): Schemas['OperatorLeadListItemDto'][] {
   return [
-    { id: 'L-1284', status: 'BOOKED', customerName: 'Aziza', productName: PRODUCTS[0].name, bookedUntil: minutesFromNow(8), callbackAt: null, reminderDue: false },
-    { id: 'L-1255', status: 'CALLBACK', customerName: 'Muxlisa', productName: PRODUCTS[1].name, bookedUntil: null, callbackAt: minutesFromNow(4), reminderDue: true },
-    { id: 'L-1253', status: 'CALLBACK', customerName: 'Hilola', productName: PRODUCTS[2].name, bookedUntil: null, callbackAt: minutesFromNow(95), reminderDue: false },
+    { id: 'L-1284', status: 'BOOKED', customerName: 'Aziza', productName: PRODUCTS[0].name, bookedUntil: minutesFromNow(8), callbackAt: null, reminderDue: false, lastOutcome: null, lastComment: null, lastAttemptAt: null },
+    { id: 'L-1255', status: 'CALLBACK', customerName: 'Muxlisa', productName: PRODUCTS[1].name, bookedUntil: null, callbackAt: minutesFromNow(4), reminderDue: true, lastOutcome: null, lastComment: null, lastAttemptAt: null },
+    { id: 'L-1253', status: 'CALLBACK', customerName: 'Hilola', productName: PRODUCTS[2].name, bookedUntil: null, callbackAt: minutesFromNow(95), reminderDue: false, lastOutcome: null, lastComment: null, lastAttemptAt: null },
   ];
 }
 

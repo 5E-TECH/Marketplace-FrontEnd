@@ -1,6 +1,7 @@
 import { CircleCheck, CircleMinus, CircleX, Clock, Info, RefreshCw } from 'lucide-react';
 import { useId } from 'react';
-import { appliesTo, MODERATION_RULES, REJECT_REASON_MAX, SYSTEM_CHECKS } from '../../../features/adminProducts/ui/adminProductModerationConfig';
+import { Link } from 'react-router-dom';
+import { appliesTo, MODERATION_RULES, REJECT_REASON_MAX, SYSTEM_CHECKS, systemBlocked } from '../../../features/adminProducts/ui/adminProductModerationConfig';
 import { decisionProgress, emptyDecision, type DecisionState } from '../model/decision';
 import type { AdminProduct } from '../../../features/adminProducts/model/adminProductTypes';
 import { useTranslation } from '../../../shared/i18n/useTranslation';
@@ -24,6 +25,7 @@ export function DecisionPanel({ product, state, onChange, onApprove, onReject, c
   const { t } = useTranslation();
   const reasonId = useId();
   const progress = decisionProgress(product, state);
+  const blocked = systemBlocked(product);
   const shop = product.shop?.name || t('moderation.field.shop');
 
   return (
@@ -88,7 +90,10 @@ export function DecisionPanel({ product, state, onChange, onApprove, onReject, c
             return (
               <li key={check.key} data-fail={passes ? undefined : true}>
                 {passes ? <CircleCheck aria-hidden /> : <CircleX aria-hidden />}
-                {t(passes ? check.ok : check.fail)}
+                <span>
+                  {t(passes ? check.ok : check.fail)}
+                  {!passes && check.key === 'fiscal' ? <Link to={`/admin/products/${encodeURIComponent(product.id)}`} className={styles.systemLink}>{t('moderation.system.fiscalLink')}</Link> : null}
+                </span>
               </li>
             );
           })}
@@ -115,7 +120,7 @@ export function DecisionPanel({ product, state, onChange, onApprove, onReject, c
       <div className={styles.decide}>
         {phone ? null : (
           <div className={styles.actions}>
-            <button type="button" className={styles.approve} disabled={conflict || !progress.complete} onClick={onApprove} aria-keyshortcuts="Control+Enter">
+            <button type="button" className={styles.approve} disabled={conflict || !progress.complete || blocked} onClick={onApprove} aria-keyshortcuts="Control+Enter" aria-describedby={blocked ? `${reasonId}-blocked` : undefined}>
               {t('moderation.approve')}
               <kbd>Ctrl+Enter</kbd>
             </button>
@@ -123,6 +128,7 @@ export function DecisionPanel({ product, state, onChange, onApprove, onReject, c
             <button type="button" className={styles.cancel} disabled={conflict} onClick={() => onChange(emptyDecision())}>{t('moderation.cancel')}</button>
           </div>
         )}
+        {blocked && !conflict ? <p className={styles.blocked} id={`${reasonId}-blocked`}><CircleX aria-hidden />{t('moderation.systemBlocked')}</p> : null}
         <ul className={styles.notes}>
           <li><Info aria-hidden />{t('moderation.afterApprove')}</li>
           <li><Info aria-hidden />{t('moderation.afterApproveCatalog')}</li>

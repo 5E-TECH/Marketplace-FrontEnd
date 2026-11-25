@@ -21,6 +21,8 @@
 .conditions li:last-child { border-bottom: 0; }
 .conditions li > svg { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 1px; color: var(--color-danger); }
 .conditions li > svg[data-ok] { color: var(--color-success); }
+.conditions li > svg[data-pending] { color: var(--color-warning); }
+.conditions li > svg[data-na] { color: var(--color-text-secondary); }
 .conditions li > span { display: flex; flex-direction: column; min-width: 0; }
 .conditions li > span > span:first-child { font-size: 14px; line-height: 20px; font-weight: 600; }
 .conditions li > span > span:last-child:not(:first-child) { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }

@@ -40,8 +40,18 @@
 .smallButton > svg, .dangerSoft > svg { width: 16px; height: 16px; }
 .dangerSoft { border-color: var(--color-danger-soft); background: var(--color-danger-soft); color: var(--color-danger); }
 .dangerSoft:hover { border-color: var(--color-danger); }
+/* «Arxivlash» — ramkasiz kichik tugma (admin-mahsulot-karta «Holat»). */
+.plainButton { display: inline-flex; align-items: center; gap: 8px; height: 36px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.plainButton > svg { width: 16px; height: 16px; }
+.plainButton:hover { background: var(--color-sunken); color: var(--color-text); }
 .moreButton { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: 12px; background: transparent; color: var(--color-text-secondary); box-shadow: inset 0 0 0 1px var(--color-border-strong); cursor: pointer; }
 .moreButton > svg { width: 20px; height: 20px; }
+/* Telefon «⋯» varag'i (admin-mahsulot-karta.holatlar Ph1): band 48 px. */
+.sheetMenu { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.sheetMenu button { display: flex; align-items: center; gap: 12px; width: 100%; height: 48px; margin: 0; padding: 0 12px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text); font-family: inherit; font-size: 16px; font-weight: 500; line-height: 24px; text-align: left; cursor: pointer; }
+.sheetMenu button:hover { background: var(--color-sunken); }
+.sheetMenu button[data-danger] { color: var(--color-danger); }
+.sheetMenu svg { width: 20px; height: 20px; color: currentColor; }
 
 .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -68,9 +78,12 @@
 
 .tab:hover { border-color: var(--color-border-strong); }
 .tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+.tab[aria-disabled='true'] { opacity: 0.45; cursor: not-allowed; }
+.tab[aria-disabled='true']:hover { border-color: var(--color-border); }
 
 /* ── Asosiy ── */
 .columns { display: flex; align-items: flex-start; gap: 20px; min-width: 0; }
+.mainTab { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .mainColumn { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .sideColumn { flex: 0 0 360px; width: 360px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .dataCard { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; min-width: 0; overflow: hidden; }
@@ -251,6 +264,8 @@ a.smallButton { text-decoration: none; }
   .mainLayout > .sideColumn > :nth-child(2), .mainLayout > .sideColumn > :nth-child(3) { order: 3; grid-column: auto; }
   .mainLayout > .sideColumn > :nth-child(4) { order: 4; }
   .statusConditions ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+  /* «To'xtatish», «Arxivlash» — planshetda 44 px (admin-mahsulot-karta.planshet). */
+  .statusActions > button { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 14px; line-height: 20px; }
   .statusConditions li:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
 
   /* Offer: holat → kreativlar → Sotuvchi haqi | Narx → Landing ko'rinishi → natijalar (admin-offer.planshet). */
@@ -275,6 +290,8 @@ a.smallButton { text-decoration: none; }
   .headerActions { grid-column: 3; grid-row: 1; }
   .mainLayout, .offerLayout, .contentLayout { grid-template-columns: minmax(0, 1fr); }
   .statusConditions ul { display: block; }
+  /* Telefonda bu amallar «⋯» varag'ida (admin-mahsulot-karta.mobil, holatlar Ph1). */
+  .statusActions { display: none; }
   .statusConditions li:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid var(--color-border); }
   .dataBody { padding: 16px 16px 20px; }
   .strip { padding: 11px 16px; }

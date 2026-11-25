@@ -1,0 +1,214 @@
+/* admin-optovik-karta (№147): sarlavha, banner, yorliqlar, «Umumiy» kartalari, jadvallar (+ .planshet/.mobil/.holatlar). */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+.note { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.tbd { color: var(--color-text-secondary); font-weight: 400; }
+.skeleton { display: block; border-radius: 16px; background: var(--color-sunken); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.55; } }
+
+/* ── Tugmalar ── */
+.secondary, .primary, .outline, .outlineAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.secondary > svg, .primary > svg, .outline > svg, .outlineAction > svg { width: 18px; height: 18px; flex: none; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.secondary:hover:not(:disabled) { border-color: var(--color-border-hover); }
+.secondary:disabled { color: var(--color-text-faint); cursor: not-allowed; }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover { background: var(--color-action-hover); }
+.outline { height: 40px; padding: 0 16px; border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); font-size: 13px; }
+.outlineAction { height: 36px; padding: 0 14px; border: 1px solid var(--color-action); border-radius: 10px; background: var(--color-surface); color: var(--color-action); font-size: 13px; }
+.outline > svg, .outlineAction > svg { width: 16px; height: 16px; }
+.iconOutline { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; padding: 0; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-secondary); cursor: pointer; }
+.iconOutline > svg { width: 20px; height: 20px; }
+.iconOutline[aria-expanded='true'] { background: var(--color-sunken); }
+.ghost { display: inline-flex; align-items: center; gap: 8px; height: 36px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; cursor: pointer; }
+.ghost > svg { width: 16px; height: 16px; }
+.ghost:hover { background: var(--color-sunken); color: var(--color-text); }
+.tooltipWrap { display: inline-flex; }
+.tooltipWrap > button:disabled { pointer-events: none; }
+.secondary:focus-visible, .primary:focus-visible, .outline:focus-visible, .outlineAction:focus-visible, .iconOutline:focus-visible, .ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.link { display: inline-flex; align-items: center; gap: 2px; min-height: 24px; color: var(--color-action); font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: none; white-space: nowrap; }
+.link > svg { width: 14px; height: 14px; }
+.link:hover { text-decoration: underline; }
+
+/* ── Sarlavha ── */
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.headInfo { display: flex; flex: 1 1 420px; flex-direction: column; gap: 8px; min-width: 0; }
+.headBadges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.headMeta { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.headActions { display: flex; flex: 0 1 auto; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+/* ── Banner: shartnomasiz (sariq), to'xtatilgan (kulrang), M2 arizasi (ko'k) ── */
+.banner { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; }
+.banner > svg { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; }
+.banner > div { min-width: 0; }
+.banner p { margin: 2px 0 0; color: var(--color-text); font-size: 14px; line-height: 21px; }
+.banner .bannerTitle { margin: 0; font-size: 14px; font-weight: 700; line-height: 20px; }
+.banner[data-tone='warning'] { background: var(--color-warning-soft); }
+.banner[data-tone='warning'] > svg, .banner[data-tone='warning'] .bannerTitle { color: var(--color-warning); }
+.banner[data-tone='neutral'] { background: var(--color-sunken); box-shadow: inset 0 0 0 1px var(--color-border); }
+.banner[data-tone='neutral'] > svg { color: var(--color-text-secondary); }
+.banner[data-tone='info'] { background: var(--color-info-soft); }
+.banner[data-tone='info'] > svg, .banner[data-tone='info'] .bannerTitle { color: var(--color-info); }
+.bannerLink { display: inline-flex; align-items: center; height: 24px; margin: 6px 0 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: underline; cursor: pointer; }
+
+/* ── Yorliqlar ── */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.tab { display: inline-flex; flex: none; align-items: center; gap: 8px; height: 40px; margin: 0; padding: 0 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font-family: inherit; font-size: 14px; font-weight: 600; line-height: 20px; white-space: nowrap; cursor: pointer; }
+.tab[data-count] { padding-right: 8px; }
+.tab:hover { border-color: var(--color-border-strong); }
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 16px; font-variant-numeric: tabular-nums; }
+.tab[aria-selected='true'] .count { background: var(--color-surface); color: var(--color-action); }
+
+/* ── Kartalar ── */
+.general { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.topRow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 20px; min-width: 0; }
+.topRow > .card { flex: 1 1 320px; }
+.card { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.cardHead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
+.cardTitle { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; min-width: 0; }
+.cardTitle h2 { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; white-space: nowrap; }
+.cardSub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardAside { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+
+.facts { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.facts > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-width: 0; }
+.facts dt { flex: none; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.facts dd { min-width: 0; margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.inlineWarning { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--color-warning-soft); color: var(--color-warning); font-size: 13px; font-weight: 600; line-height: 18px; }
+.inlineWarning > svg { width: 16px; height: 16px; flex: none; }
+.inlineLink { margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+
+.files { margin: 0; padding: 0; list-style: none; }
+.files > li { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; box-sizing: border-box; border-bottom: 1px solid var(--color-border); }
+.files > li:last-child { border-bottom: 0; }
+.fileIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.fileIcon > svg { width: 18px; height: 18px; }
+.fileBody { display: flex; flex: 1 1 auto; flex-direction: column; gap: 3px; min-width: 0; }
+.fileTop { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0; }
+.fileTop > svg { width: 14px; height: 14px; color: var(--color-text-secondary); }
+.fileName { min-width: 0; font-size: 14px; font-weight: 600; line-height: 20px; overflow-wrap: anywhere; }
+.fileMeta { flex: none; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.fileState { display: inline-flex; align-items: flex-start; gap: 6px; color: var(--color-success); font-size: 12px; font-weight: 600; line-height: 16px; font-variant-numeric: tabular-nums; }
+.fileState > svg { width: 14px; height: 14px; flex: none; }
+.iconButton { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+
+/* ── Tovar holati va to'xtatilgan optovik raqamlari ── */
+.tiles, .suspendedTiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; min-width: 0; }
+.tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
+.tile[data-tone='sunken'] { border-color: var(--color-sunken); background: var(--color-sunken); }
+.tileLabel { color: var(--color-text-secondary); font-size: 13px; font-weight: 600; line-height: 18px; }
+.tileValue { font-size: 28px; font-weight: 700; line-height: 36px; letter-spacing: -0.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tileValue > span { color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0; }
+.tileSub { color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+/* ── Pul va aktlar ── */
+.moneyGrid { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.moneyMain { display: flex; flex: 1 1 440px; flex-direction: column; gap: 12px; min-width: 0; }
+.moneyBig { display: flex; flex-direction: column; gap: 2px; }
+.bar { display: flex; gap: 2px; min-width: 0; }
+.bar > span { display: block; flex: 1 1 0; min-width: 4px; height: 12px; border-radius: 4px; background: var(--color-nav); }
+.bar > span[data-tone='held'] { background: var(--color-text-faint); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.legend i { display: block; flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--color-nav); }
+.legend i[data-tone='held'] { background: var(--color-text-faint); }
+.actBox { flex: 1 1 380px; min-width: 0; padding: 14px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.actBox > .facts { margin-top: 12px; }
+.actHead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.actTitle { font-size: 14px; font-weight: 700; line-height: 20px; font-variant-numeric: tabular-nums; }
+.pdfButton, .pdf { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 0 auto; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; font-weight: 600; line-height: 18px; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.pdf { margin: 0; }
+.pdfButton > svg, .pdf > svg { width: 16px; height: 16px; }
+.actHead + .note { margin-top: 2px; }
+.divider { height: 1px; margin: 12px 0; background: var(--color-border); }
+.divider + .facts { margin-top: 0; }
+
+/* ── Jadvallar ── */
+.tableWrap { min-width: 0; overflow-x: auto; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; line-height: 18px; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.table th:first-child { border-radius: 12px 0 0 12px; }
+.table th:last-child { border-radius: 0 12px 12px 0; }
+.table td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table [data-end] { text-align: right; }
+.table tfoot td { border-bottom: 0; font-weight: 700; }
+.table tbody tr:last-child td { border-bottom: 1px solid var(--color-border); }
+.table:not(:has(tfoot)) tbody tr:last-child td { border-bottom: 0; }
+.clickRow { cursor: pointer; }
+.clickRow:hover td { background: var(--color-row-hover); }
+.stack { display: flex; flex-direction: column; }
+.main { font-size: 14px; font-weight: 600; line-height: 20px; }
+.sub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.name { color: var(--color-text); font-size: 14px; font-weight: 600; line-height: 20px; text-decoration: none; }
+.name:hover { color: var(--color-action); }
+.strong { font-weight: 600; }
+.badgeStack { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.actionCell { width: 1%; text-align: right; }
+.wrapCell { white-space: normal !important; min-width: 280px; }
+.footer { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+/* Telefon ro'yxati (mahsulotlar, postavkalar). */
+.rowList { margin: 0 -16px; padding: 0; list-style: none; }
+.rowList > li + li { border-top: 1px solid var(--color-border); }
+.rowLink { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px; color: var(--color-text); text-decoration: none; }
+.rowTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rowName { min-width: 0; font-size: 15px; font-weight: 600; line-height: 22px; }
+.rowSub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+.notFound { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 32px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.notFound h2 { margin: 0; font-size: 20px; line-height: 28px; }
+.notFound p { margin: 0 0 8px; color: var(--color-text-secondary); }
+
+.barPrimary { display: inline-flex; flex: 1 1 auto; align-items: center; justify-content: center; gap: 8px; height: 52px; margin: 0; padding: 0 20px; box-sizing: border-box; border: 0; border-radius: 12px; background: var(--color-action); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 22px; white-space: nowrap; cursor: pointer; }
+.barPrimary > svg { width: 18px; height: 18px; }
+.sheetMenu { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.sheetMenu button { display: flex; align-items: center; gap: 12px; width: 100%; height: 48px; margin: 0; padding: 0 12px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text); font-family: inherit; font-size: 16px; font-weight: 500; line-height: 24px; text-align: left; cursor: pointer; }
+.sheetMenu button[aria-disabled='true'] { color: var(--color-text-faint); cursor: not-allowed; }
+.sheetMenu button[data-danger] { color: var(--color-danger); }
+.sheetMenu svg { width: 20px; height: 20px; color: currentColor; }
+.sheetHint { margin: -4px 0 6px 44px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+/* Planshet (admin-optovik-karta.planshet): rekvizitlar to'liq kenglikda ikki ustun, shartnoma va kabinet yonma-yon;
+   mahsulotlar jadvalida — mahsulot, holat, bazaviy narx, omborda, mavjud, sotilgan. */
+@container content (max-width: 919.98px) {
+  .topRow > .requisites { flex-basis: 100%; }
+  .requisites .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 32px; }
+  .table [data-wide] { display: none; }
+}
+
+/* Telefon (admin-optovik-karta.mobil): bir ustun, yorliqlar suriladi. */
+@container content (max-width: 575px) {
+  .page { gap: 16px; }
+  .head { padding: 16px; align-items: flex-start; flex-wrap: nowrap; }
+  .headInfo { flex-basis: auto; }
+  .tabs { flex-wrap: nowrap; margin: 0 -16px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+  .tab { height: 44px; }
+  .card { gap: 14px; padding: 16px; }
+  .requisites .facts { display: flex; }
+  .tiles, .suspendedTiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tiles > .tile[data-tone='sunken'] { grid-column: 1 / -1; }
+  .tileValue { font-size: 24px; line-height: 32px; }
+  .cardHead { align-items: baseline; }
+  .cardTitle { flex-direction: column; align-items: flex-start; }
+}

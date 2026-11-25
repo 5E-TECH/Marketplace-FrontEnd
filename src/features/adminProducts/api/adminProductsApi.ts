@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { unwrapApiData } from '../../../shared/api/apiResponse';
 import { httpClient } from '../../../shared/api/httpClient';
+import { withOptionalBody } from '../../../shared/api/optionalParams';
 import { readDto, readDtoList } from '../../../shared/api/readDto';
+import { REQUEST_TIMEOUT } from '../../../shared/api/requestOptions';
 import { asRecord, readItems, readText } from '../../../shared/api/responseFields';
 import type {
   AdminProduct,
@@ -20,6 +22,7 @@ import type {
   ProductListTab,
   ProductPricing,
 } from '../model/adminProductTypes';
+import type { ProductBody } from '../model/productForm';
 
 /**
  * Admin: mahsulotlar, moderatsiya va offer sozlash (FE-12). BE-07/BE-09/BE-11 dagi endpointlar va
@@ -133,6 +136,86 @@ export async function reactivateProduct(id: string): Promise<AdminProduct> {
 /** «Qayerda sotiladi» va boshqa CPA maydonlari (BE-07 `AdminUpdateProductDto`). */
 export async function updateProduct({ id, patch }: { id: string; patch: { cpaEnabled?: boolean; isBad?: boolean } }): Promise<AdminProduct> {
   const { data } = await httpClient.patch<unknown>(`/admin/products/${encodeURIComponent(id)}`, patch);
+  return readProduct(data);
+}
+
+/** Taklif maydonlari (fe-25 §9): slug, qisqa tavsif, muddat kuzatilishi, videolar — backend rad etsa ularsiz saqlanadi. */
+const OPTIONAL_PRODUCT_FIELDS = ['slug', 'subtitle', 'expiryTracked', 'videos'] as const;
+
+/**
+ * Optovik nomidan mahsulot (BE-07 `POST /admin/products`, OPT-2): og'irlik, o'lchamlar va bazaviy narx majburiy, kamida
+ * bitta rasm; shartnomasiz optovik — 409. Holat — PENDING_REVIEW (moderatsiya navbati). `draft` — taklif §9: qoralama
+ * (yuborilmagan); backend bilmasa so'rov rad etiladi, mahsulot jimgina moderatsiyaga ketmaydi.
+ */
+export async function createAdminProduct({ wholesalerId, body, images, videos, draft }: { wholesalerId: string; body: ProductBody; images: string[]; videos: string[]; draft: boolean }): Promise<AdminProduct> {
+  const { data } = await withOptionalBody(
+    async (payload) => (await httpClient.post<unknown>('/admin/products', payload, { timeout: REQUEST_TIMEOUT.action })).data,
+    { ...body, wholesalerId, imageUrl: images[0], images, ...(videos.length ? { videos } : {}), ...(draft ? { draft: true } : {}) },
+    OPTIONAL_PRODUCT_FIELDS,
+  );
+  return readProduct(data);
+}
+
+/** Tahrir (BE-07 PATCH): faqat o'zgargan maydonlar; holat o'zgarmaydi. Sotuvdagi CPA mahsulotida MXIK va qadoq kodi — majburiy. */
+export async function updateAdminProduct({ id, changes }: { id: string; changes: Partial<ProductBody> }): Promise<AdminProduct> {
+  const { data } = await withOptionalBody(
+    async (payload) => (await httpClient.patch<unknown>(`/admin/products/${encodeURIComponent(id)}`, payload, { timeout: REQUEST_TIMEOUT.action })).data,
+    changes,
+    ['slug', 'subtitle', 'expiryTracked'],
+  );
+  return readProduct(data);
+}
+
+/** Taklif §9: qoralamani yoki rad etilgan (tuzatilgan) mahsulotni moderatsiyaga yuborish — PENDING_REVIEW. */
+export async function submitProduct(id: string): Promise<AdminProduct> {
+  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/submit`, {}, { timeout: REQUEST_TIMEOUT.action });
+  return readProduct(data);
+}
+
+export interface UploadedMedia {
+  url: string;
+  type: CreativeType;
+  fileName: string;
+}
+
+/**
+ * Taklif §9: yangi mahsulot (hali ID yo'q) rasmi va videosi — oldindan yuklash, javobda ochiq URL; mahsulot `images`
+ * bilan yaratiladi. Saqlangan mahsulotda — kreativlar (BE-08 `creatives/upload`).
+ */
+export async function uploadProductMedia(file: File, onProgress?: (percent: number) => void, signal?: AbortSignal): Promise<UploadedMedia> {
+  const form = new FormData();
+  form.append('file', file);
+  const { data } = await httpClient.post<unknown>('/admin/products/media', form, {
+    timeout: REQUEST_TIMEOUT.file,
+    signal,
+    onUploadProgress: (event) => onProgress?.(event.total ? Math.round((event.loaded / event.total) * 100) : 0),
+  });
+  return readDto<UploadedMedia>(data, ['url', 'type']);
+}
+
+/** «Yuklangan rasmni asosiy qilish» (saqlangan mahsulot): BE-07 PATCH `imageUrl` va `images` — yangi rasm birinchi. */
+export async function setMainImage({ id, url, images }: { id: string; url: string; images: readonly string[] }): Promise<AdminProduct> {
+  const { data } = await httpClient.patch<unknown>(`/admin/products/${encodeURIComponent(id)}`, { imageUrl: url, images: [url, ...images.filter((item) => item !== url)] });
+  return readProduct(data);
+}
+
+/** Taklif §10: sertifikat — yopiq fayl (multipart `file` + ixtiyoriy `note`); admin moderatsiyada ko'radi, sotuvchiga yopiq. */
+export async function uploadProductCertificate({ id, file, note }: { id: string; file: File; note: string }): Promise<AdminProduct> {
+  const form = new FormData();
+  form.append('file', file);
+  if (note.trim()) form.append('note', note.trim());
+  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/certificate`, form, { timeout: REQUEST_TIMEOUT.file });
+  return readProduct(data);
+}
+
+export async function deleteProductCertificate(id: string): Promise<AdminProduct> {
+  const { data } = await httpClient.delete<unknown>(`/admin/products/${encodeURIComponent(id)}/certificate`);
+  return readProduct(data);
+}
+
+/** Taklif §10: arxivlash — `ARCHIVED`; qoldig'i yoki ochiq buyurtmasi bor, sotuvdagi mahsulot — 409 (avval to'xtatiladi). */
+export async function archiveProduct(id: string): Promise<AdminProduct> {
+  const { data } = await httpClient.post<unknown>(`/admin/products/${encodeURIComponent(id)}/archive`, {}, { timeout: REQUEST_TIMEOUT.action });
   return readProduct(data);
 }
 

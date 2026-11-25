@@ -38,6 +38,8 @@ function parseStockItem(value: unknown): AdminStockItem {
     reserved: readNumber(row, ['reserved']),
     available: readNumber(row, ['available']),
     lowStockThreshold: readNumber(row, ['lowStockThreshold']),
+    barcode: nullableText(row, 'barcode'),
+    cell: nullableText(row, 'cell'),
   };
 }
 

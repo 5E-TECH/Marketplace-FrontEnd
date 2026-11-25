@@ -26,7 +26,14 @@ import {
   rejectProduct,
   saveOfferContent,
   updateProduct,
+  createAdminProduct,
+  updateAdminProduct,
+  submitProduct,
   type AdminProductsParams,
+  setMainImage,
+  uploadProductCertificate,
+  deleteProductCertificate,
+  archiveProduct,
 } from './adminProductsApi';
 
 /** Kalitlar bitta joyda: qaror va tahrirdan keyin ro'yxat, kartochka va hisoblagichlar birga yangilanadi. */
@@ -122,6 +129,13 @@ export const useRejectProductMutation = () => useProductMutation(rejectProduct);
 export const useHideProductMutation = () => useProductMutation(hideProduct);
 export const useReactivateProductMutation = () => useProductMutation(reactivateProduct);
 export const useUpdateProductMutation = () => useProductMutation(updateProduct);
+export const useCreateProductMutation = () => useProductMutation(createAdminProduct);
+export const useEditProductMutation = () => useProductMutation(updateAdminProduct);
+export const useSubmitProductMutation = () => useProductMutation(submitProduct);
+export const useSetMainImageMutation = () => useProductMutation(setMainImage);
+export const useUploadCertificateMutation = () => useProductMutation(uploadProductCertificate);
+export const useDeleteCertificateMutation = () => useProductMutation(deleteProductCertificate);
+export const useArchiveProductMutation = () => useProductMutation(archiveProduct);
 
 export function useChangeAffiliateFeeMutation() {
   const client = useQueryClient();

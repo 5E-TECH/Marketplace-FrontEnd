@@ -17,7 +17,7 @@ import {
 import { offerReadiness } from '../../features/adminProducts/lib/offerReadiness';
 import { formatStamp } from '../../features/adminProducts/lib/productFormat';
 import type { AdminProduct, AdminProductListItem } from '../../features/adminProducts/model/adminProductTypes';
-import { productBadgeCode } from '../../features/adminProducts/ui/adminProductModerationConfig';
+import { productBadgeCode, systemBlocked } from '../../features/adminProducts/ui/adminProductModerationConfig';
 import { ProductAudit } from '../../features/adminProducts/ui/ProductAudit';
 import { ProductSubmission } from '../../features/adminProducts/ui/ProductSubmission';
 import { useCurrentUserQuery } from '../../features/auth/api/useCurrentUserQuery';
@@ -205,7 +205,7 @@ export default function AdminModerationPage() {
     })
     : null;
   const openDialog = (kind: 'approve' | 'reject') => setDialog({ kind, key: Date.now() });
-  const canApprove = Boolean(product && !locked && progress?.complete);
+  const canApprove = Boolean(product && !locked && progress?.complete && !systemBlocked(product));
 
   // Ctrl+Enter — «Mahsulotni tasdiqlash» (desktop; tugmadagi belgi bilan).
   useEffect(() => {
@@ -347,7 +347,7 @@ export default function AdminModerationPage() {
         {product && !locked ? (
           <PageActionBar>
             <button type="button" className={styles.barSecondary} onClick={() => openDialog('reject')}>{t('moderation.reject')}</button>
-            <button type="button" className={styles.barPrimary} disabled={!progress?.complete} onClick={() => openDialog('approve')}>{t('moderation.approve')}</button>
+            <button type="button" className={styles.barPrimary} disabled={!canApprove} onClick={() => openDialog('approve')}>{t('moderation.approve')}</button>
           </PageActionBar>
         ) : null}
       </div>

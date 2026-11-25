@@ -65,7 +65,7 @@ test.beforeEach(async ({ context }) => {
 test('TC1: admin 100 dona e’lon qildi → omborchi 98 qabul, 2 brak → farq akti PDF, sonlar mos', async ({ page, browser }) => {
   test.setTimeout(180_000);
   await login(page, '900000007', /\/admin\/moderation$/);
-  await page.goto('/admin/wholesalers');
+  await page.goto('/admin/wholesalers?tab=shipments');
   const form = page.getByTestId('declare-form');
   await form.getByRole('combobox', { name: /Mahsulot/ }).click();
   await page.locator('[role="option"]:visible', { hasText: 'Simsiz quloqchinlar' }).click();

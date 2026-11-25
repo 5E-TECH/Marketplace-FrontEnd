@@ -129,6 +129,16 @@ export function ProductSubmission({ product, categoryName, creatives, pricing, p
             <dd>{product.basePrice === null ? t('moderation.noValue') : sum(product.basePrice)}</dd>
             {priceHint ? <dd className={styles.hint}>{priceHint}</dd> : null}
           </div>
+          {/* BE-41: fiskal chek — CPA mahsulotida majburiy (FE-25 formasida kiritiladi). */}
+          <div>
+            <dt>{t('apf.field.mxikCode')}</dt>
+            <dd>{product.mxikCode ?? t('moderation.noValue')}</dd>
+          </div>
+          <div>
+            <dt>{t('apf.field.packageCode')}</dt>
+            <dd>{product.packageCode ?? t('moderation.noValue')}</dd>
+            {product.cpaEnabled ? <dd className={styles.hint}>{t('apf.codesHint')}</dd> : null}
+          </div>
         </dl>
         <Link className={styles.priceLink} to={`/admin/moderation?tab=prices&product=${encodeURIComponent(product.id)}`}>
           <Tag aria-hidden />

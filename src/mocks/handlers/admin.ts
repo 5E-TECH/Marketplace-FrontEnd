@@ -4,9 +4,10 @@ import { creativesOf } from '../catalog';
 import { db } from '../db';
 import { categorySlug, SLUG_PATTERN } from '../../features/categories/lib/categorySlug';
 import { categoryTree, GLOBAL_POLICY, MOCK_SHOP, mockApprovalCurrent, mockDelivery, mockMarketCheck, mockPricing, TARIFF, type MockAdminProduct, type MockCategory } from '../fixtures/adminProducts';
+import { MOCK_PRODUCT_SALES } from '../fixtures/wholesalerFinance';
 import { API, fail, ok, pageOf } from '../utils';
 import { currentMockUser } from './auth';
-import { inboundProductRecords, warehouseStockRows, wholesalerDtos } from './warehouse';
+import { inboundProductRecords, warehouseStockRows } from './warehouse';
 
 /**
  * Admin: mahsulotlar, moderatsiya, offer sozlash (FE-12). Qoidalar backenddagidek (BE-07 `product.service.ts`,
@@ -23,6 +24,34 @@ const guard = (request: Request, cookies: Record<string, string>, roles = ADMIN_
 };
 
 const findProduct = (id: unknown) => db.adminProducts.find((product) => product.id === String(id));
+
+/** `AdminUpdateProductDto` maydonlari (+ taklif fe-25 §9: slug, subtitle, expiryTracked). */
+const PRODUCT_FIELDS = ['name', 'slug', 'categoryId', 'subtitle', 'description', 'weightGrams', 'lengthMm', 'widthMm', 'heightMm', 'basePrice', 'isBad', 'expiryTracked', 'mxikCode', 'packageCode', 'cpaEnabled', 'imageUrl', 'images'];
+
+/** class-validator xabarlari (BE-07 `CreateProductDto`, BE-41 kodlar); `partial` — PATCH (faqat berilganlari). */
+function productProblems(body: Record<string, unknown>, partial: boolean) {
+  const problems: { field: string; message: string }[] = [];
+  const check = (field: string, valid: (value: unknown) => boolean, message: string) => {
+    if (partial && !(field in body)) return;
+    if (!valid(body[field])) problems.push({ field, message });
+  };
+  const positiveInt = (value: unknown) => Number.isInteger(value) && Number(value) >= 1;
+  check('name', (value) => typeof value === 'string' && value.trim().length > 0, 'name bo‘sh bo‘lmasligi kerak');
+  check('basePrice', (value) => Number.isInteger(value) && Number(value) >= 0, 'basePrice butun son bo‘lishi kerak');
+  check('weightGrams', positiveInt, 'weightGrams must not be less than 1');
+  check('lengthMm', positiveInt, 'lengthMm must not be less than 1');
+  check('widthMm', positiveInt, 'widthMm must not be less than 1');
+  check('heightMm', positiveInt, 'heightMm must not be less than 1');
+  if (body.mxikCode !== undefined && body.mxikCode !== null && !(typeof body.mxikCode === 'string' && /^\d{17}$/.test(body.mxikCode))) problems.push({ field: 'mxikCode', message: 'MXIK kodi 17 raqamdan iborat bo‘lishi kerak' });
+  if (body.packageCode !== undefined && body.packageCode !== null && !(typeof body.packageCode === 'string' && /^\d{1,20}$/.test(body.packageCode))) problems.push({ field: 'packageCode', message: 'Qadoq kodi faqat raqamlardan iborat bo‘lishi kerak (1–20 belgi)' });
+  if (body.slug !== undefined && !(typeof body.slug === 'string' && SLUG_PATTERN.test(body.slug))) problems.push({ field: 'slug', message: 'slug faqat lotin kichik harf, raqam va chiziqcha' });
+  return problems;
+}
+
+const slugTaken = (slug: string) => {
+  const owner = db.adminProducts.find((item) => item.slug === slug);
+  return fail(409, 'CONFLICT', `Bu slug band: «${owner?.name ?? slug}» mahsulotida`, undefined, { details: [{ field: 'slug', message: 'taken' }], conflictWith: owner ? { id: owner.id, name: owner.name } : null });
+};
 /** Kategoriya narx qatlami (null — globaldan). */
 const layerOf = (product: MockAdminProduct) => db.categoryPolicies[product.categoryId ?? ''] ?? {};
 
@@ -43,6 +72,7 @@ function productResponse(product: MockAdminProduct, list = false) {
     stock: product.stock,
     results: product.results,
     hasVideo: creativesOf(product.id).some((creative) => creative.type === 'VIDEO'),
+    sales: MOCK_PRODUCT_SALES[product.id] ?? null,
     listPrice: {
       customer: product.approvedPrice ?? pricing.calculation.recommended, recommended: product.approvedPrice === null,
       delivery: mockDelivery(product).visibleCenter, deliveryMode: product.deliveryMode,
@@ -63,10 +93,11 @@ function touch(product: MockAdminProduct, statusChangedBy?: string) {
   }
 }
 
-const tabOf = (product: MockAdminProduct): ProductListTab => (product.isBlocked ? 'BLOCKED' : product.status === 'ARCHIVED' || product.status === 'OUT_OF_STOCK' ? 'ACTIVE' : product.status);
+const tabOf = (product: MockAdminProduct): ProductListTab => (product.isBlocked ? 'BLOCKED' : product.status === 'OUT_OF_STOCK' ? 'ACTIVE' : product.status);
 
 function summary(): ModerationSummary {
-  const byStatus: ModerationSummary['byStatus'] = { ALL: 0, PENDING_REVIEW: 0, ACTIVE: 0, REJECTED: 0, BLOCKED: 0, DRAFT: 0 };
+  // BE-27: ALL — hamma (arxiv ham); taklif fe-25 §10 — `ARCHIVED` soni alohida.
+  const byStatus: ModerationSummary['byStatus'] = { ALL: 0, PENDING_REVIEW: 0, ACTIVE: 0, REJECTED: 0, BLOCKED: 0, DRAFT: 0, ARCHIVED: 0 };
   db.adminProducts.forEach((product) => {
     byStatus.ALL += 1;
     byStatus[tabOf(product)] += 1;
@@ -188,12 +219,6 @@ export const adminHandlers = [
     return denied ?? ok([{ id: '1', ...TARIFF, effectiveFrom: '2026-11-01T00:00:00.000+05:00', isDeleted: false }]);
   }),
 
-  // Optoviklar (BE-07) — FE-16 fixture'idan; omborchi ham o'qiydi (taklif: arizasiz postavka, fe-16 §4).
-  http.get(`${API}/admin/wholesalers`, ({ request, cookies }) => {
-    const { denied } = guard(request, cookies, [...ADMIN_ROLES, 'WAREHOUSE']);
-    return denied ?? ok(pageOf(wholesalerDtos(), new URL(request.url)));
-  }),
-
   http.get(`${API}/admin/moderation/summary`, ({ request, cookies }) => {
     const { denied } = guard(request, cookies);
     return denied ?? ok(summary());
@@ -218,9 +243,13 @@ export const adminHandlers = [
     const { denied } = guard(request, cookies, [...ADMIN_ROLES, 'WAREHOUSE']);
     if (denied) return denied;
     const url = new URL(request.url);
-    // Boshqa optovik (FE-16 fixture'i: Namuna Farm, Barakat) — o'z SKU lari.
+    // Optovik bo'yicha: admin kiritgan mahsulotlari va (FE-16 fixture'i: Namuna Farm) faqat ombordagi SKU lari.
     const shopId = url.searchParams.get('shopId');
-    if (shopId && shopId !== MOCK_SHOP.id) return ok(pageOf(inboundProductRecords(shopId), url));
+    if (shopId && shopId !== MOCK_SHOP.id) {
+      const own = db.adminProducts.filter((product) => product.shopId === shopId);
+      const skus = inboundProductRecords(shopId).filter((record) => !own.some((product) => product.id === record.id));
+      return ok(pageOf([...own.map((product) => productResponse(product, true)), ...skus], url));
+    }
     const status = url.searchParams.get('status');
     const blocked = url.searchParams.get('blocked');
     const search = url.searchParams.get('search')?.trim().toLocaleLowerCase() ?? '';
@@ -228,6 +257,7 @@ export const adminHandlers = [
     const cpaEnabled = url.searchParams.get('cpaEnabled');
     const attention = url.searchParams.get('attention');
     const items = db.adminProducts
+      .filter((product) => !shopId || product.shopId === shopId)
       .filter((product) => !status || product.status === status)
       .filter((product) => blocked === null || String(product.isBlocked) === blocked)
       .filter((product) => !search || `${product.name} ${product.slug}`.toLocaleLowerCase().includes(search))
@@ -259,6 +289,12 @@ export const adminHandlers = [
       return fail(400, 'VALIDATION_ERROR', 'Tasdiqdan oldin bazaviy narx, og‘irlik va o‘lchamlarni kiriting');
     }
     if (product.shop?.hasContract === false) return fail(409, 'CONFLICT', 'Optovik faol emas yoki shartnomasi kiritilmagan — tasdiqlab bo‘lmaydi');
+    // BE-41: fiskal chek — CPA mahsulotida MXIK va qadoq kodi, optovikda STIR.
+    if (product.cpaEnabled && (!product.mxikCode || !product.packageCode)) {
+      return fail(400, 'VALIDATION_ERROR', 'CPA mahsuloti uchun MXIK va qadoq kodini kiriting (fiskal chek)', undefined, { details: [!product.mxikCode ? { field: 'mxikCode', message: 'required' } : null, !product.packageCode ? { field: 'packageCode', message: 'required' } : null].filter(Boolean) });
+    }
+    const wholesaler = db.inbound.wholesalers.find((item) => item.id === product.shopId);
+    if (product.cpaEnabled && wholesaler && !wholesaler.tin) return fail(409, 'CONFLICT', 'Optovik STIR i kiritilmagan — CPA mahsulotini tasdiqlab bo‘lmaydi (fiskal chek)');
     const from = product.status;
     product.status = 'ACTIVE';
     product.moderationNote = null;
@@ -313,18 +349,143 @@ export const adminHandlers = [
     return ok(productResponse(product));
   }),
 
+  // BE-07 `adminUpdate` (+ taklif fe-25 §9: slug, qisqa tavsif, muddat): holat o'zgarmaydi; sotuvdagi CPA mahsulotida
+  // MXIK va qadoq kodi bo'lishi shart (BE-41); slug takror — 409.
   http.patch(`${API}/admin/products/:id`, async ({ request, cookies, params }) => {
     const { denied, actor } = guard(request, cookies);
     if (denied) return denied;
     const product = findProduct(params.id);
     if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
-    const patch = (await request.json().catch(() => ({}))) as { cpaEnabled?: boolean; isBad?: boolean };
-    const unknown = Object.keys(patch).filter((key) => !['cpaEnabled', 'isBad'].includes(key));
-    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`);
-    if (typeof patch.cpaEnabled === 'boolean') product.cpaEnabled = patch.cpaEnabled;
-    if (typeof patch.isBad === 'boolean') product.isBad = patch.isBad;
+    const patch = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const unknown = Object.keys(patch).filter((key) => !PRODUCT_FIELDS.includes(key));
+    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`, undefined, { details: unknown.map((field) => ({ field, message: 'should not exist' })) });
+    const problems = productProblems(patch, true);
+    if (problems.length) return fail(400, 'VALIDATION_ERROR', problems[0].message, undefined, { details: problems });
+    if (typeof patch.slug === 'string' && db.adminProducts.some((item) => item.slug === patch.slug && item.id !== product.id)) return slugTaken(String(patch.slug));
+    const next: MockAdminProduct = { ...product, ...patch };
+    if (next.status === 'ACTIVE' && next.cpaEnabled && (!next.mxikCode || !next.packageCode)) {
+      return fail(400, 'VALIDATION_ERROR', 'CPA mahsuloti uchun MXIK va qadoq kodini kiriting (fiskal chek)', undefined, { details: [!next.mxikCode ? { field: 'mxikCode', message: 'required' } : null, !next.packageCode ? { field: 'packageCode', message: 'required' } : null].filter(Boolean) });
+    }
+    Object.assign(product, patch);
     touch(product);
     audit(product.id, 'product.update', actor, { changes: patch });
+    return ok(productResponse(product));
+  }),
+
+  // BE-07 `adminCreate` (FE-25): shartnomasiz optovik — 409; og'irlik, o'lcham, bazaviy narx va kamida bitta rasm
+  // majburiy; holat PENDING_REVIEW (taklif `draft` — DRAFT). Bitta SKU avtomatik (`PRODUCT-{id}-DEFAULT`).
+  http.post(`${API}/admin/products`, async ({ request, cookies }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const unknown = Object.keys(body).filter((key) => ![...PRODUCT_FIELDS, 'wholesalerId', 'imageUrl', 'images', 'videos', 'draft', 'affiliateFee'].includes(key));
+    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`, undefined, { details: unknown.map((field) => ({ field, message: 'should not exist' })) });
+    const problems = productProblems(body, false);
+    if (problems.length) return fail(400, 'VALIDATION_ERROR', problems[0].message, undefined, { details: problems });
+    const shop = db.inbound.wholesalers.find((item) => item.id === String(body.wholesalerId));
+    if (!shop) return fail(404, 'NOT_FOUND', 'Optovik topilmadi');
+    if (!shop.contractNumber || !shop.contractDate) return fail(409, 'CONFLICT', 'Optovik shartnomasi kiritilmagan — mahsulot qo‘shib bo‘lmaydi');
+    const images = (Array.isArray(body.images) ? body.images : [body.imageUrl]).filter((url): url is string => typeof url === 'string' && Boolean(url.trim()));
+    if (!images.length) return fail(400, 'VALIDATION_ERROR', 'Mahsulot yaratish uchun kamida bitta rasm majburiy', undefined, { details: [{ field: 'images', message: 'required' }] });
+    const slug = typeof body.slug === 'string' && body.slug ? body.slug : categorySlug(String(body.name));
+    if (db.adminProducts.some((item) => item.slug === slug)) return slugTaken(slug);
+    const id = String(Math.max(...db.adminProducts.map((item) => Number(item.id)), 600) + 1);
+    const now = new Date().toISOString();
+    const draft = body.draft === true;
+    const product: MockAdminProduct = {
+      id, shopId: shop.id, ownerUserId: shop.ownerUserId ?? '', name: String(body.name), slug, description: typeof body.description === 'string' ? body.description : '', price: Number(body.basePrice), oldPrice: null,
+      imageUrl: images[0], images, attributes: {}, hasVariants: false, moderationNote: null, affiliateFee: null, basePrice: Number(body.basePrice),
+      weightGrams: Number(body.weightGrams), lengthMm: Number(body.lengthMm), widthMm: Number(body.widthMm), heightMm: Number(body.heightMm),
+      approvedPrice: null, priceStatus: null, marketTotal: null, cpaEnabled: body.cpaEnabled !== false, isBad: body.isBad === true, isBlocked: false, rating: 0,
+      mxikCode: typeof body.mxikCode === 'string' ? body.mxikCode : null, packageCode: typeof body.packageCode === 'string' ? body.packageCode : null,
+      status: draft ? 'DRAFT' : 'PENDING_REVIEW', categoryId: typeof body.categoryId === 'string' ? body.categoryId : null,
+      createdAt: now, updatedAt: now, shop: { id: shop.id, name: shop.name, hasContract: true }, subtitle: typeof body.subtitle === 'string' ? body.subtitle : null,
+      submittedAt: draft ? null : now, statusChangedAt: now, blockReason: null, statusChangedBy: actor, createdByName: actor, expiryTracked: body.expiryTracked === true, certificate: null,
+      deliveryMode: 'PARTIAL', deliveryModeSource: 'GLOBAL', fixedMaxSalePrice: null, marketSource: null, marketCheckedAt: null, priceQueuedAt: draft ? null : now,
+      stock: null, results: null, hasVideo: Array.isArray(body.videos) && body.videos.length > 0,
+    };
+    db.adminProducts.unshift(product);
+    const videos = (Array.isArray(body.videos) ? body.videos : []).filter((url): url is string => typeof url === 'string');
+    db.creatives[id] = [
+      ...videos.map((url, index) => ({ id: `${id}-vid-${index + 1}`, productId: id, type: 'VIDEO' as const, url, mimeType: 'video/mp4', size: 12_000_000, position: index, createdAt: now, caption: null, durationSec: 30 })),
+      ...images.map((url, index) => ({ id: `${id}-img-${index + 1}`, productId: id, type: 'IMAGE' as const, url, mimeType: 'image/jpeg', size: 240_000, position: videos.length + index, createdAt: now, caption: index === 0 ? 'asosiy' : null, durationSec: null })),
+    ];
+    audit(id, 'product.create', actor, { wholesalerId: shop.id, status: product.status });
+    return ok(productResponse(product), 201);
+  }),
+
+  // Taklif fe-25 §9: qoralama yoki rad etilgan (tuzatilgan) mahsulot — moderatsiya navbatiga.
+  http.post(`${API}/admin/products/:id/submit`, ({ request, cookies, params }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const product = findProduct(params.id);
+    if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
+    if (product.status !== 'DRAFT' && product.status !== 'REJECTED') return fail(409, 'CONFLICT', `${product.status} holatidagi mahsulotni yuborib bo‘lmaydi`);
+    const from = product.status;
+    product.status = 'PENDING_REVIEW';
+    product.submittedAt = new Date().toISOString();
+    product.priceQueuedAt = product.submittedAt;
+    touch(product, actor);
+    audit(product.id, 'product.submit', actor, { from, to: 'PENDING_REVIEW' });
+    return ok(productResponse(product));
+  }),
+
+  // Taklif fe-25 §9: yangi mahsulot uchun rasm/video oldindan yuklash — ochiq URL.
+  http.post(`${API}/admin/products/media`, async ({ request, cookies }) => {
+    const { denied } = guard(request, cookies);
+    if (denied) return denied;
+    const form = await request.formData().catch(() => null);
+    const file = form?.get('file');
+    if (!file || typeof file !== 'object') return fail(400, 'VALIDATION_ERROR', 'Fayl tanlanmagan', undefined, { details: [{ field: 'file', message: 'required' }] });
+    const type = file.type.startsWith('video/') ? 'VIDEO' : file.type.startsWith('image/') ? 'IMAGE' : null;
+    if (!type || !['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'].includes(file.type)) return fail(400, 'VALIDATION_ERROR', 'Faqat JPG, PNG, WEBP rasm yoki MP4, WebM video', undefined, { details: [{ field: 'file', message: 'type' }] });
+    if (file.size > (type === 'VIDEO' ? 100 : 10) * 1024 * 1024) return fail(413, 'PAYLOAD_TOO_LARGE', type === 'VIDEO' ? 'Video 100 MB dan katta' : 'Rasm 10 MB dan katta');
+    const stamp = `${Date.now()}${Math.round(Math.random() * 1000)}`;
+    return ok({ url: `https://cdn.elchi.example/uploads/${stamp}.${type === 'VIDEO' ? 'mp4' : 'jpg'}`, type, fileName: file.name }, 201);
+  }),
+
+  // Taklif fe-25 §10: sertifikat — yopiq fayl (PDF, JPG, PNG, 10 MB gacha), izoh ixtiyoriy; o'chirish.
+  http.post(`${API}/admin/products/:id/certificate`, async ({ request, cookies, params }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const product = findProduct(params.id);
+    if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
+    const form = await request.formData().catch(() => null);
+    const file = form?.get('file');
+    if (!file || typeof file !== 'object') return fail(400, 'VALIDATION_ERROR', 'Fayl tanlanmagan', undefined, { details: [{ field: 'file', message: 'required' }] });
+    if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) return fail(400, 'VALIDATION_ERROR', 'Faqat PDF, JPG yoki PNG', undefined, { details: [{ field: 'file', message: 'type' }] });
+    if (file.size > 10 * 1024 * 1024) return fail(413, 'PAYLOAD_TOO_LARGE', 'Sertifikat 10 MB dan katta');
+    const note = form?.get('note');
+    product.certificate = { name: file.name, url: `https://cdn.elchi.example/certificates/${product.id}-${Date.now()}.pdf`, uploadedAt: new Date().toISOString() };
+    touch(product);
+    audit(product.id, 'product.certificate', actor, { fileName: file.name, note: typeof note === 'string' ? note : null });
+    return ok(productResponse(product), 201);
+  }),
+
+  http.delete(`${API}/admin/products/:id/certificate`, ({ request, cookies, params }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const product = findProduct(params.id);
+    if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
+    product.certificate = null;
+    touch(product);
+    audit(product.id, 'product.certificate.delete', actor);
+    return ok(productResponse(product));
+  }),
+
+  // Taklif fe-25 §10: arxivlash — sotuvdagi (to'xtatilmagan) yoki qoldig'i bor mahsulot arxivlanmaydi.
+  http.post(`${API}/admin/products/:id/archive`, ({ request, cookies, params }) => {
+    const { denied, actor } = guard(request, cookies);
+    if (denied) return denied;
+    const product = findProduct(params.id);
+    if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
+    if (product.status === 'ARCHIVED') return fail(409, 'INVALID_STATE', 'Mahsulot allaqachon arxivda');
+    if (product.status === 'ACTIVE' && !product.isBlocked) return fail(409, 'INVALID_STATE', 'Sotuvdagi mahsulot arxivlanmaydi — avval to‘xtating');
+    const stock = product.stock;
+    if (stock && (stock.onHand > 0 || stock.reserved > 0)) return fail(409, 'INVALID_STATE', 'Qoldig‘i yoki ochiq buyurtmasi bor mahsulot arxivlanmaydi');
+    product.status = 'ARCHIVED';
+    touch(product, actor);
+    audit(product.id, 'product.archive', actor);
     return ok(productResponse(product));
   }),
 
@@ -559,9 +720,12 @@ export const adminHandlers = [
     const { denied } = guard(request, cookies);
     if (denied) return denied;
     const product = params.kind === 'stock' ? findProduct(url.searchParams.get('productId')) : undefined;
+    // BE-07: mahsulotga bitta SKU avtomatik; shtrix-kod va yacheyka — ombordagi (FE-16) yozuvdan.
+    const warehouse = product ? db.inbound.skus.find((item) => item.productId === product.id) : undefined;
     const rows = product?.stock ? [{
       shopId: product.shopId, warehouseId: '1', warehouseName: 'Toshkent ombori', warehouseActive: true, variantId: `${product.id}01`,
       productName: product.name, variantName: null, sku: `4780012${product.id}677`, catalogMissing: false,
+      barcode: warehouse?.barcode ?? null, cell: warehouse?.cell ?? null,
       onHand: product.stock.onHand, reserved: product.stock.reserved, available: product.stock.available, lowStockThreshold: 5, updatedAt: product.updatedAt,
     }] : [];
     return ok({ ...pageOf(rows, url), warnings: [], searchTruncated: false });
