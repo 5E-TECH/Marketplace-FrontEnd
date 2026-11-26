@@ -11,14 +11,16 @@ interface AuthNoticeProps {
   text?: ReactNode;
   /** Blok ichidagi tugmalar («Ro‘yxatdan o‘tish»). */
   children?: ReactNode;
+  /** Ton ikonkasi o'rniga (umumiy-2fa blok: ✕ doira). */
+  icon?: ReactNode;
 }
 
 /** Kirish va ro'yxat formalaridagi holat bloki (umumiy-kirish, sotuvchi-royxat). */
-export function AuthNotice({ tone, title, text, children }: AuthNoticeProps) {
+export function AuthNotice({ tone, title, text, children, icon }: AuthNoticeProps) {
   const Icon = ICONS[tone];
   return (
     <div className={styles[tone]} role={tone === 'danger' ? 'alert' : 'status'}>
-      <Icon aria-hidden />
+      {icon ?? <Icon aria-hidden />}
       <div className={styles.noticeBody}>
         <p className={styles.noticeTitle}>{title}</p>
         {text ? <p className={styles.noticeText}>{text}</p> : null}

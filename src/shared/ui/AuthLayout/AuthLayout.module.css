@@ -110,6 +110,11 @@
   padding: 40px 24px 48px;
 }
 
+.tabletPage.centered .phoneMain {
+  align-items: center;
+  padding: 56px 24px 64px;
+}
+
 .tabletPage > aside {
   padding-inline: 24px;
 }

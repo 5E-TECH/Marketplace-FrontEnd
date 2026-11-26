@@ -20,9 +20,13 @@ function endsWithPath(url: string | undefined, path: string): boolean {
   return Boolean(url?.endsWith(path));
 }
 
-/** Kirish so'rovlari: parol, SMS kod va sotuvchi ro'yxati (FE-04) — token qo'shilmaydi, 401 da refresh yo'q. */
+/**
+ * Kirish so'rovlari: parol, SMS kod, sotuvchi ro'yxati (FE-04) va paroldan keyingi 2FA bosqichi (FE-27, BE-26:
+ * `challengeToken` bilan, sessiya hali yo'q) — token qo'shilmaydi, 401 da refresh yo'q.
+ */
+const LOGIN_PATHS = ['/auth/login', '/auth/otp/send', '/auth/otp/verify', '/auth/register/affiliate', '/auth/2fa/setup', '/auth/2fa/enable', '/auth/2fa/verify'];
 function isLoginRequest(url?: string): boolean {
-  return ['/auth/login', '/auth/otp/send', '/auth/otp/verify', '/auth/register/affiliate'].some((path) => endsWithPath(url, path));
+  return LOGIN_PATHS.some((path) => endsWithPath(url, path));
 }
 
 /**

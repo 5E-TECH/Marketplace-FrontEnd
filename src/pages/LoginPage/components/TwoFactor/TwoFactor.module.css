@@ -1,0 +1,110 @@
+/* Xodim 2FA (FE-27; umumiy-2fa, umumiy-2fa-ulash): kim kirayapti kartasi, sarlavha, havola-tugmalar, eslatmalar. */
+.identity { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; }
+.avatar { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 999px; background: var(--color-nav); color: var(--color-white); font-size: 13px; line-height: 18px; font-weight: 700; }
+.identityText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.identityName { overflow: hidden; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.identityName > span { color: var(--color-text-secondary); font-weight: 500; }
+.checked { display: inline-flex; align-items: center; gap: 4px; color: var(--color-success); font-size: 12px; line-height: 18px; font-weight: 600; }
+.checked > svg { width: 14px; height: 14px; flex: 0 0 14px; }
+
+.heading { display: flex; flex-direction: column; gap: 8px; }
+.lead { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+.textButton { display: inline; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.textButton:hover { color: var(--color-action-hover); }
+.textButton:focus-visible { border-radius: 4px; outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
+.plain { margin: 0; }
+.footnote { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 0; padding-top: 20px; border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+.footnote p { margin: 0; }
+.recoveryInput { letter-spacing: 0.08em; text-transform: uppercase; }
+/* Maydon xatosi oldida ✕ doira (umumiy-2fa.holatlar 1): 14 px, matn bilan bir rangda. */
+.fieldError :global(.ant-form-item-explain-error) { display: flex; align-items: flex-start; gap: 6px; }
+.fieldError :global(.ant-form-item-explain-error)::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  margin-top: 1px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.infoNote, .warnNote { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; }
+.infoNote { background: var(--color-sunken); }
+.warnNote { background: var(--color-warning-soft); }
+.infoNote > svg, .warnNote > svg { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 1px; }
+.infoNote > svg { color: var(--color-nav); }
+.warnNote > svg { color: var(--color-warning); }
+.noteTitle { margin: 0; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 700; }
+.noteText { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+.tbd { color: var(--color-text-secondary); font-weight: 500; white-space: nowrap; }
+
+.steps { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.steps > li { display: flex; align-items: flex-start; gap: 12px; }
+.stepNumber { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: 0 0 28px; box-sizing: border-box; border: 2px solid var(--color-nav); border-radius: 999px; color: var(--color-nav); font-size: 13px; line-height: 18px; font-weight: 700; }
+.stepTitle { margin: 0; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 600; }
+.stepText { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+
+/* Ilovani ulash va zaxira kodlar (umumiy-2fa-ulash): forma 520 px. */
+.wide { max-width: 520px; }
+
+.stepCard { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.stepHead { display: flex; align-items: center; gap: 10px; }
+.stepCardTitle { margin: 0; color: var(--color-text); font-size: 16px; line-height: 24px; font-weight: 700; }
+
+.qrRow { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 20px; }
+.qrBox { flex: none; padding: 8px; border: 1px solid var(--color-border); border-radius: 12px; background: #fff; }
+.qrBox :global(.ant-qrcode) { padding: 0; }
+.qrBox svg, .qrPlaceholder { display: block; width: 152px; height: 152px; }
+.qrPlaceholder { border-radius: 8px; background: var(--color-sunken); }
+.qrInfo { display: flex; flex: 1 1 200px; flex-direction: column; gap: 12px; min-width: 0; }
+.account { margin: 0; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere; }
+.keyLabel { margin: 0 0 6px; color: var(--color-text); font-size: 13px; line-height: 18px; font-weight: 600; }
+.keyBox { display: flex; align-items: center; gap: 4px; min-height: 44px; padding: 4px 4px 4px 14px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-sunken); }
+/* Kalit to'rtlik guruhlarda; sig'masa guruhlar orasida keyingi qatorga (backend kaliti 32 belgi). */
+.key { flex: 1 1 auto; min-width: 0; color: var(--color-text); font-family: inherit; font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.key > span { white-space: nowrap; }
+
+.codes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.codes > li { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; box-sizing: border-box; border-radius: 10px; background: var(--color-sunken); }
+.codes > li > span { width: 18px; flex: none; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.codes > li > code { min-width: 0; color: var(--color-text); font-family: inherit; font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.tool { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.tool:hover { border-color: var(--color-border-hover); }
+.tool:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.tool > svg { width: 18px; height: 18px; flex: 0 0 18px; }
+
+.saved { display: flex; align-items: center; gap: 12px; min-height: 44px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; cursor: pointer; }
+.saved :global(.ant-checkbox) + span { padding: 0; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 600; }
+
+.dialogText { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+/* Telefonda 2-qadam (umumiy-2fa-ulash.mobil, holatlar 8): «Ilovada ochish», kalit, ochiladigan QR. */
+.openApp { display: flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 20px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-size: 15px; line-height: 22px; font-weight: 600; text-decoration: none; }
+.openApp:hover { border-color: var(--color-border-hover); color: var(--color-text); }
+.openApp:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.openApp[aria-disabled='true'] { opacity: 0.5; pointer-events: none; }
+.openApp > svg { width: 18px; height: 18px; flex: 0 0 18px; }
+.accountHint { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; overflow-wrap: anywhere; }
+.accountHint > strong { color: var(--color-text); font-weight: 600; }
+.qrToggle { display: flex; flex-direction: column; gap: 4px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.qrToggle > p { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.qrToggle > button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin: 0; padding: 0 4px; box-sizing: border-box; border: 0; border-radius: 12px; background: transparent; color: var(--color-action); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; text-align: left; cursor: pointer; }
+.qrToggle > button:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.qrToggle > button > svg { width: 18px; height: 18px; flex: 0 0 18px; }
+.qrPanel { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 12px; border: 1px solid var(--color-border); border-radius: 12px; background: #fff; }
+.qrPanel[hidden] { display: none; }
+.qrPanel :global(.ant-qrcode) { padding: 0; }
+.qrPanel > p { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; text-align: center; }
+
+@media (max-width: 767.98px) {
+  .keyBox { min-height: 52px; padding: 6px 4px 6px 14px; }
+}
+
+/* Planshet va telefonda havolalar bosish uchun 44 px (umumiy-2fa.planshet/.mobil, R0). */
+@media (max-width: 1023.98px) {
+  .textButton { display: inline-flex; align-items: center; min-height: 44px; }
+}

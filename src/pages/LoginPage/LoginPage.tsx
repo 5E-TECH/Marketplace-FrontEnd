@@ -1,8 +1,9 @@
 import { App, Form } from 'antd';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
+import type { TwoFactorChallenge } from '../../features/auth/model/authTypes';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -11,12 +12,16 @@ import { LoginForm, type LoginFormValues, type LoginNotice } from './components/
 import { LoginMethods } from './components/LoginMethods/LoginMethods';
 import { RoleSwitch, type LoginMode } from './components/RoleSwitch/RoleSwitch';
 import { SellerLoginForm } from './components/SellerLoginForm/SellerLoginForm';
+import { TwoFactorCodeStep } from './components/TwoFactor/TwoFactorCodeStep';
+import { TwoFactorSetupFlow } from './components/TwoFactor/TwoFactorSetupFlow';
+import type { TwoFactorLeave } from './model/twoFactorView';
 import { AuthLayout } from '../../shared/ui/AuthLayout/AuthLayout';
 
 /**
  * Tizimga kirish (umumiy-kirish). Desktop: chapda navy «Kirish usuli», o'ngda forma;
  * telefon: navy sarlavha, forma, ostida usullar. «Kim sifatida kirasiz»: sotuvchi va
- * optovik — SMS kod (FE-04), platforma xodimi — telefon va parol (FE-01).
+ * optovik — SMS kod (FE-04), platforma xodimi — telefon va parol (FE-01); admin, superadmin
+ * va moliya — parol va ilovadagi kod (FE-27, umumiy-2fa).
  */
 export default function LoginPage() {
   const { message } = App.useApp();
@@ -27,6 +32,8 @@ export default function LoginPage() {
   const [form] = Form.useForm<LoginFormValues>();
   const [notice, setNotice] = useState<LoginNotice | null>(null);
   const [mode, setMode] = useState<LoginMode>('seller');
+  // FE-27: parol tekshirilgach 2FA bosqichi (BE-26).
+  const [challenge, setChallenge] = useState<TwoFactorChallenge | null>(null);
   // Foydalanuvchi tanlovni almashtirgan — yangi formadagi tanlov fokusni saqlaydi.
   const [modeChanged, setModeChanged] = useState(false);
 
@@ -65,11 +72,35 @@ export default function LoginPage() {
     loginMutation.mutate(
       { phone: normalizeUzPhone(values.phone), password: values.password },
       {
-        onSuccess: () => void message.success(t('auth.loginSuccess')),
+        onSuccess: (result) => {
+          // BE-26: admin, superadmin, moliya — sessiya o'rniga ilovadagi kod (yoki birinchi ulash).
+          if (result.kind === 'challenge') {
+            setChallenge(result.challenge);
+            return;
+          }
+          void message.success(t('auth.loginSuccess'));
+        },
         onError: showError,
       },
     );
   };
+
+  /**
+   * 2FA dan parol bosqichiga: «Boshqa hisob»/«Chiqish» — bo'sh forma; muddat o'tgan yoki 2FA boshqa joyda ulangan —
+   * raqam qoladi, sabab ko'rsatiladi.
+   */
+  const leaveTwoFactor = useCallback((reason: TwoFactorLeave) => {
+    setChallenge(null);
+    form.setFieldsValue({ password: '' });
+    if (reason === 'signOut') {
+      form.resetFields();
+      setNotice(null);
+      return;
+    }
+    setNotice(reason === 'expired'
+      ? { tone: 'warning', title: t('tfa.expiredTitle'), text: t('tfa.expiredText') }
+      : { tone: 'warning', title: t('tfa.alreadyEnabledTitle'), text: t('tfa.alreadyEnabledText') });
+  }, [form, t]);
 
   const roleSwitch = (
     <RoleSwitch
@@ -87,8 +118,17 @@ export default function LoginPage() {
     ? routeState.phone
     : undefined;
 
+  if (challenge?.setupRequired) return <TwoFactorSetupFlow key={challenge.token} challenge={challenge} onLeave={leaveTwoFactor} />;
+  if (challenge) {
+    return (
+      <AuthLayout centered renderAside={(tone, brand) => <LoginMethods tone={tone} brand={brand} active="admin" />}>
+        <TwoFactorCodeStep key={challenge.token} challenge={challenge} onLeave={leaveTwoFactor} />
+      </AuthLayout>
+    );
+  }
+
   return (
-    <AuthLayout renderAside={(tone, brand) => <LoginMethods tone={tone} brand={brand} active={mode} />}>
+    <AuthLayout centered renderAside={(tone, brand) => <LoginMethods tone={tone} brand={brand} active={mode} />}>
       {mode === 'seller' ? (
         <SellerLoginForm roleSwitch={roleSwitch} initialPhone={initialPhone} />
       ) : (
