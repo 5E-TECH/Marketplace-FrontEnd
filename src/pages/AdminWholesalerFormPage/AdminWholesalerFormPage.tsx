@@ -14,8 +14,9 @@ import {
   checkContractFile,
   digitsOnly,
   displayPhone,
+  hasContract,
   validateWholesaler,
-  wholesalerBody,
+  wholesalerChanges,
   wholesalerInput,
   type WholesalerField,
 } from '../../features/wholesalers/lib/wholesalerRules';
@@ -89,6 +90,11 @@ function WholesalerForm({ wholesaler }: { wholesaler: Wholesaler | null }) {
   const validate = (): Errors => {
     const found: Errors = {};
     for (const [field, kind] of Object.entries(validateWholesaler(input)) as [WholesalerField, 'required' | 'format'][]) found[field] = fieldError(field, kind);
+    // Imzolangan shartnomaning raqami va sanasi o'chirilmaydi — faqat yangisiga almashtiriladi (BE-07).
+    if (wholesaler && hasContract(wholesaler)) {
+      if (!input.contractNumber.trim()) found.contractNumber = t('whf.contractKeep');
+      if (!input.contractDate) found.contractDate = t('whf.contractKeep');
+    }
     if (file) {
       const problem = checkContractFile(file);
       if (problem) found.file = t(`whd.file.${problem}`);
@@ -104,7 +110,9 @@ function WholesalerForm({ wholesaler }: { wholesaler: Wholesaler | null }) {
   };
 
   const onServerError = (error: unknown) => {
-    if (axios.isAxiosError(error) && error.response?.status === 409) {
+    // 409: STIR takrori (`uq_catalog_shop_tin` — «Bu STIR bilan optovik allaqachon bor»); boshqa 409 (holat, nom) —
+    // server xabari bilan, STIR ostida emas.
+    if (axios.isAxiosError(error) && error.response?.status === 409 && /STIR/i.test(getApiErrorMessage(error))) {
       setServerDuplicate(tin);
       return;
     }
@@ -139,9 +147,7 @@ function WholesalerForm({ wholesaler }: { wholesaler: Wholesaler | null }) {
       create.mutate(input, { onSuccess: uploadThen, onError: onServerError });
       return;
     }
-    const body = wholesalerBody(input);
-    const before = wholesalerBody(initial);
-    const changes = Object.fromEntries(Object.entries(body).filter(([key, value]) => value !== before[key as keyof typeof before] && value !== undefined));
+    const changes = wholesalerChanges(input, initial);
     if (!Object.keys(changes).length) {
       uploadThen(wholesaler);
       return;

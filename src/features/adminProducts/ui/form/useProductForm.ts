@@ -16,14 +16,15 @@ function focusFirst(errors: ProductErrors) {
 
 /**
  * Mahsulot formasi holati: qiymatlar, saqlangan asos (o'zgarish — undan farq), maydon xatolari va «Saqlanmadi» xulosasi.
- * Slug nomdan avtomatik — qo'lda yozilguncha (saqlangan slug nomdan boshqacha bo'lsa — qo'lda yozilgan deb olinadi).
+ * Slug nomdan avtomatik faqat yangi mahsulotda (qo'lda yozilguncha); saqlangan mahsulot nomi tuzatilsa slug — saytdagi
+ * manzil — o'zgarmaydi, faqat admin o'zi o'zgartiradi.
  */
-export function useProductForm(initial: ProductFormValues) {
+export function useProductForm(initial: ProductFormValues, { autoSlug }: { autoSlug: boolean }) {
   const [baseline, setBaseline] = useState(initial);
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<ProductErrors>({});
   const [failed, setFailed] = useState(false);
-  const [slugTouched, setSlugTouched] = useState(Boolean(initial.slug) && initial.slug !== productSlug(initial.name));
+  const [slugTouched, setSlugTouched] = useState(!autoSlug || (Boolean(initial.slug) && initial.slug !== productSlug(initial.name)));
   const [conflictName, setConflictName] = useState<string | null>(null);
 
   const change = useCallback((patch: Partial<ProductFormValues>) => {

@@ -26,6 +26,8 @@ describe('mahsulot formasi (FE-25, OPT-2)', () => {
     expect(validateProductForm({ ...filled, weightKg: '0', lengthCm: 'abc', slug: 'Simsiz Kolonka' }, { isNew: true, requireCodes: false }))
       .toEqual({ weightKg: 'dimension', lengthCm: 'dimension', slug: 'slug' });
     expect(validateProductForm({ ...filled, images: [] }, { isNew: true, requireCodes: false })).toEqual({ images: 'image' });
+    // Butun gramm/mm ga aylanganda 0 bo'ladigan qiymat — saqlanmaydi (backend `>= 1`).
+    expect(validateProductForm({ ...filled, weightKg: '0.0004', heightCm: '0.04' }, { isNew: true, requireCodes: false })).toEqual({ weightKg: 'dimension', heightCm: 'dimension' });
     expect(validateProductForm({ ...filled, images: [] }, { isNew: false, requireCodes: false })).toEqual({});
     expect(validateProductForm(filled, { isNew: false, requireCodes: true })).toEqual({ mxikCode: 'required', packageCode: 'required' });
     expect(validateProductForm({ ...filled, mxikCode: '123', packageCode: '12a' }, { isNew: false, requireCodes: false })).toEqual({ mxikCode: 'mxik', packageCode: 'package' });
@@ -39,7 +41,7 @@ describe('mahsulot formasi (FE-25, OPT-2)', () => {
 
   it('server xatosi → maydon: slug 409, shartnoma 409, 400 details', () => {
     expect(productErrorsFromApi(409, ['slug'])).toEqual({ slug: 'slugTaken' });
-    expect(productErrorsFromApi(409, [])).toEqual({ wholesalerId: 'contract' });
+    expect(productErrorsFromApi(409, [])).toEqual({ wholesalerId: 'inactive' });
     expect(productErrorsFromApi(400, ['weightGrams', 'images', 'mxikCode', 'unknown'])).toEqual({ weightKg: 'weight', images: 'image', mxikCode: 'mxik' });
     expect(productErrorsFromApi(500, [])).toEqual({});
   });

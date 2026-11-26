@@ -1,6 +1,7 @@
 import type { Category } from '../../categories/model/categoryTypes';
 import { categorySlug } from '../../categories/lib/categorySlug';
 import type { TranslationKey } from '../../../shared/i18n/translations';
+import type { ProductBlock } from '../../wholesalers/lib/wholesalerRules';
 import type { AdminProduct } from './adminProductTypes';
 
 /**
@@ -76,12 +77,16 @@ export function formFromProduct(product: AdminProduct): ProductFormValues {
 /** Slug nomdan avtomatik (kategoriyadagi kabi); qo'lda o'zgartirilsa — o'sha. */
 export const productSlug = (name: string) => categorySlug(name);
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const positive = (value: string) => {
+/** Butun gramm yoki mm ga aylantirilgandan keyin kamida 1 (backend `>= 1`): «0.0004» kg — 0 g, saqlanmaydi. */
+const atLeastOne = (value: string, convert: (input: string) => number) => {
   const number = Number(decimal(value));
-  return value.trim() !== '' && Number.isFinite(number) && number > 0;
+  return value.trim() !== '' && Number.isFinite(number) && convert(value) >= 1;
 };
 
-export type ProductErrorCode = 'required' | 'weight' | 'dimension' | 'slug' | 'price' | 'mxik' | 'package' | 'image' | 'contract' | 'slugTaken';
+export type ProductErrorCode = 'required' | 'weight' | 'dimension' | 'slug' | 'price' | 'mxik' | 'package' | 'image' | 'contract' | 'suspended' | 'pending' | 'inactive' | 'slugTaken';
+
+/** Optovikka mahsulot qo'shib bo'lmasa (`productBlock`, OPT-1) — «Optovik» maydonidagi xato. */
+export const WHOLESALER_BLOCK_ERRORS: Record<NonNullable<ProductBlock>, ProductErrorCode> = { CONTRACT: 'contract', SUSPENDED: 'suspended', PENDING: 'pending' };
 
 /** Backend maydon nomi → forma maydoni (gramm va mm — kg va sm katakchalari). */
 const API_FIELDS: Record<string, ProductField> = {
@@ -94,11 +99,12 @@ const FIELD_CODES: Partial<Record<ProductField, ProductErrorCode>> = {
 };
 
 /**
- * Server xatosi → maydon xatolari: 409 va `slug` — «slug band» (BE-07 TC4), boshqa 409 — shartnomasiz optovik (OPT-1),
- * 400 `details[].field` — o'sha maydon. Hech biriga tushmasa — bo'sh (umumiy xabar ko'rsatiladi).
+ * Server xatosi → maydon xatolari: 409 va `slug` — «slug band» (BE-07 TC4), boshqa 409 — optovik faol emas yoki
+ * shartnomasi yo'q (BE-07 `adminCreate`, OPT-1), 400 `details[].field` — o'sha maydon. Hech biriga tushmasa — bo'sh
+ * (umumiy xabar ko'rsatiladi).
  */
 export function productErrorsFromApi(status: number | null, fields: readonly string[]): ProductErrors {
-  if (status === 409) return fields.includes('slug') ? { slug: 'slugTaken' } : { wholesalerId: 'contract' };
+  if (status === 409) return fields.includes('slug') ? { slug: 'slugTaken' } : { wholesalerId: 'inactive' };
   const errors: ProductErrors = {};
   for (const name of fields) {
     const field = API_FIELDS[name];
@@ -137,9 +143,9 @@ export function validateProductForm(values: ProductFormValues, options: { isNew:
   else if (!SLUG.test(values.slug.trim())) errors.slug = 'slug';
   if (!values.categoryId) errors.categoryId = 'required';
   if (!values.description.trim()) errors.description = 'required';
-  if (!positive(values.weightKg)) errors.weightKg = values.weightKg.trim() ? 'dimension' : 'weight';
+  if (!atLeastOne(values.weightKg, toGrams)) errors.weightKg = values.weightKg.trim() ? 'dimension' : 'weight';
   for (const field of ['lengthCm', 'widthCm', 'heightCm'] as const) {
-    if (!positive(values[field])) errors[field] = values[field].trim() ? 'dimension' : 'required';
+    if (!atLeastOne(values[field], toMm)) errors[field] = values[field].trim() ? 'dimension' : 'required';
   }
   if (!moneyDigits(values.basePrice) || Number(moneyDigits(values.basePrice)) <= 0) errors.basePrice = values.basePrice.trim() ? 'price' : 'required';
   if (values.mxikCode.trim() && !/^\d{17}$/.test(values.mxikCode.trim())) errors.mxikCode = 'mxik';

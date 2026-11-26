@@ -89,7 +89,7 @@ const uz = {
 
   'apf.error.required': '«{field}» — majburiy maydon.',
   'apf.error.weight': 'Og‘irlikni kiriting: usiz yetkazish narxi hisoblanmaydi. Og‘irliksiz mahsulot saqlanmaydi.',
-  'apf.error.dimension': '«{field}» — noldan katta son kiriting, masalan 12 yoki 0.5.',
+  'apf.error.dimension': '«{field}» — noldan katta son kiriting, masalan 12 yoki 0.5 (og‘irlik kamida 1 g, o‘lcham kamida 1 mm).',
   'apf.error.slug': 'Slug — faqat lotin kichik harf, raqam va chiziqcha, masalan simsiz-quloqchinlar.',
   'apf.error.slugTaken': 'Bu slug band: «{name}» mahsulotida. Boshqa slug yozing, masalan {slug}-2.',
   'apf.error.slugTakenShort': 'Bu slug band. Boshqa slug yozing, masalan {slug}-2.',
@@ -98,6 +98,9 @@ const uz = {
   'apf.error.package': 'Qadoq kodi — faqat raqamlar (20 tagacha).',
   'apf.error.image': 'Kamida bitta rasm yuklang — usiz mahsulot saqlanmaydi.',
   'apf.error.contract': 'Bu optovik bilan shartnoma imzolanmagan — mahsulot qo‘shib bo‘lmaydi.',
+  'apf.error.suspended': 'Optovik to‘xtatilgan — unga mahsulot qo‘shib bo‘lmaydi. Avval optovik kartasida faollashtiring.',
+  'apf.error.pending': 'Optovik arizasi hali tasdiqlanmagan — mahsulot qo‘shib bo‘lmaydi.',
+  'apf.error.inactive': 'Optovik faol emas yoki shartnomasi imzolanmagan — mahsulot qo‘shib bo‘lmaydi.',
 
   'apf.summary.title': 'Saqlanmadi: {count} ta maydonda xato',
   'apf.summary.required': '{field} — majburiy. Xato maydon ostida yozilgan.',
@@ -372,7 +375,7 @@ const ru: Record<Key, string> = {
 
   'apf.error.required': '«{field}» — обязательное поле.',
   'apf.error.weight': 'Укажите вес: без него не рассчитать доставку. Товар без веса не сохраняется.',
-  'apf.error.dimension': '«{field}» — введите число больше нуля, например 12 или 0.5.',
+  'apf.error.dimension': '«{field}» — введите число больше нуля, например 12 или 0.5 (вес не меньше 1 г, размер не меньше 1 мм).',
   'apf.error.slug': 'Slug — только строчные латинские буквы, цифры и дефис, например simsiz-quloqchinlar.',
   'apf.error.slugTaken': 'Этот slug занят товаром «{name}». Укажите другой, например {slug}-2.',
   'apf.error.slugTakenShort': 'Этот slug занят. Укажите другой, например {slug}-2.',
@@ -381,6 +384,9 @@ const ru: Record<Key, string> = {
   'apf.error.package': 'Код упаковки — только цифры (до 20).',
   'apf.error.image': 'Загрузите хотя бы одно фото — без него товар не сохраняется.',
   'apf.error.contract': 'С этим оптовиком не подписан договор — товар добавить нельзя.',
+  'apf.error.suspended': 'Оптовик остановлен — товар добавить нельзя. Сначала активируйте его в карточке оптовика.',
+  'apf.error.pending': 'Заявка оптовика ещё не одобрена — товар добавить нельзя.',
+  'apf.error.inactive': 'Оптовик не активен или договор не подписан — товар добавить нельзя.',
 
   'apf.summary.title': 'Не сохранено: ошибка в полях — {count}',
   'apf.summary.required': '{field} — обязательно. Ошибка указана под полем.',
@@ -653,7 +659,7 @@ const en: Record<Key, string> = {
 
   'apf.error.required': '“{field}” is required.',
   'apf.error.weight': 'Enter the weight: delivery can’t be calculated without it. A product without weight isn’t saved.',
-  'apf.error.dimension': '“{field}”: enter a number above zero, e.g. 12 or 0.5.',
+  'apf.error.dimension': '“{field}”: enter a number above zero, e.g. 12 or 0.5 (weight at least 1 g, size at least 1 mm).',
   'apf.error.slug': 'Slug: lowercase Latin letters, digits and hyphens only, e.g. simsiz-quloqchinlar.',
   'apf.error.slugTaken': 'This slug is taken by “{name}”. Enter another one, e.g. {slug}-2.',
   'apf.error.slugTakenShort': 'This slug is taken. Enter another one, e.g. {slug}-2.',
@@ -662,6 +668,9 @@ const en: Record<Key, string> = {
   'apf.error.package': 'Package code: digits only (up to 20).',
   'apf.error.image': 'Upload at least one photo — the product isn’t saved without it.',
   'apf.error.contract': 'No contract is signed with this wholesaler — products can’t be added.',
+  'apf.error.suspended': 'The wholesaler is suspended — products can’t be added. Activate it on the wholesaler card first.',
+  'apf.error.pending': 'The wholesaler’s application isn’t approved yet — products can’t be added.',
+  'apf.error.inactive': 'The wholesaler is inactive or has no signed contract — products can’t be added.',
 
   'apf.summary.title': 'Not saved: {count} field(s) with errors',
   'apf.summary.required': '{field} is required. The error is shown under the field.',

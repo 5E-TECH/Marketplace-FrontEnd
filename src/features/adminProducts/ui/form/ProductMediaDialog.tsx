@@ -127,7 +127,11 @@ export function ProductMediaDialog({ product, productName, counts, initialFiles,
     setSaving(true);
     try {
       const created = [];
-      for (const item of uploaded) created.push(await confirm.mutateAsync({ productId: product.id, objectKey: item.objectKey ?? '' }));
+      // Har biri tasdiqlangach ro'yxatdan olinadi: biri yiqilsa, qayta «Qo'shish» faqat qolganlarini yuboradi (dublikatsiz).
+      for (const item of uploaded) {
+        created.push(await confirm.mutateAsync({ productId: product.id, objectKey: item.objectKey ?? '' }));
+        setItems((current) => current.filter((entry) => entry.id !== item.id));
+      }
       const image = created.find((creative) => creative.type === 'IMAGE');
       if (makeMain && image) await setMain.mutateAsync({ id: product.id, url: image.url, images: product.images });
       notification.success({ title: t('apf.mediaDialog.added', { count: created.length }), placement: phone ? 'top' : 'bottomRight', duration: 4 });

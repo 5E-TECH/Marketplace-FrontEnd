@@ -62,11 +62,12 @@ export function workflowConditions(product: AdminProduct, pricing: ProductPricin
 }
 
 /** Yangi mahsulot (hali saqlanmagan): hamma shart «Kutilmoqda», optovik va maydonlar to'ldirilgach — bajarilgan. */
-export function newProductConditions(values: ProductFormValues, wholesaler: { name: string; signed: boolean } | null, t: Translate): Condition[] {
+/** `wholesaler.problem` — mahsulot qo'shib bo'lmasligi sababi (shartnomasiz, to'xtatilgan, tasdiqlanmagan), yo'q bo'lsa `null`. */
+export function newProductConditions(values: ProductFormValues, wholesaler: { name: string; problem: string | null } | null, t: Translate): Condition[] {
   const missing = missingFields(values, true, t);
   return [
     wholesaler
-      ? { ok: wholesaler.signed, title: t('apf.cond.contract'), hint: wholesaler.signed ? wholesaler.name : t('apf.wholesaler.unsigned').toLocaleLowerCase() }
+      ? { ok: !wholesaler.problem, title: t('apf.cond.contract'), hint: wholesaler.problem ?? wholesaler.name }
       : { ok: false, pending: true, title: t('apf.cond.contract'), hint: t('apf.cond.notChosen') },
     missing.length
       ? { ok: false, pending: true, title: t('apf.cond.fields'), hint: missing.join(', ') }

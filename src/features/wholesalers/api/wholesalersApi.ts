@@ -111,8 +111,9 @@ export async function getWholesalerAttention(signal?: AbortSignal): Promise<Whol
     const { data } = await httpClient.get<unknown>('/admin/wholesalers/attention', { signal });
     return readDtoList<WholesalerAttention>(data, ['kind', 'id', 'wholesalerId']);
   } catch (error) {
-    // Backend hali bermasa (yo'l `:id` ga tushib 404) — blok bo'sh ko'rinadi.
-    if (axios.isAxiosError(error) && [404, 405, 501].includes(error.response?.status ?? 0)) return [];
+    // Backend hali bermasa: yo'l `GET /admin/wholesalers/:id` ga tushadi — gateway `ParseLeadIdPipe` «attention» ga 400
+    // («id musbat son bo'lishi kerak»), xizmat 404 qaytaradi. Shunda blok bo'sh ko'rinadi.
+    if (axios.isAxiosError(error) && [400, 404, 405, 501].includes(error.response?.status ?? 0)) return [];
     throw error;
   }
 }

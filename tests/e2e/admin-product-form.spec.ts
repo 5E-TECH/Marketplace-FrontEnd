@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test';
+import { db } from '../../src/mocks/db';
 import { MOCK_OTP_CODE } from '../../src/mocks/handlers/sellerAuth';
 import { openStaffLogin } from './support/auth';
 import { installMockApi } from './support/mockApi';
@@ -428,4 +429,33 @@ test('BE-41: kodsiz CPA mahsuloti moderatsiyada tasdiqlanmaydi — kartada kodla
   await approve.click();
   await page.getByRole('dialog', { name: 'Mahsulotni tasdiqlaysizmi?' }).getByRole('button', { name: 'Tasdiqlash', exact: true }).click();
   await expect(page.getByText('Mahsulot tasdiqlandi', { exact: true })).toBeVisible();
+});
+
+test('saqlangan mahsulot nomi tuzatilsa slug (saytdagi manzil) o‘zgarmaydi', async ({ page }) => {
+  await signIn(page);
+  await page.goto('/admin/products/501');
+  await field(page, 'Nomi').fill('Simsiz quloqchinlar Pro');
+  await expect(field(page, 'Slug')).toHaveValue('simsiz-quloqchinlar');
+  const patched = page.waitForRequest((request) => request.method() === 'PATCH' && request.url().endsWith('/api/v1/admin/products/501'));
+  await page.getByTestId('product-form-footer').getByRole('button', { name: 'Saqlash' }).click();
+  expect((await patched).postDataJSON()).toEqual({ name: 'Simsiz quloqchinlar Pro' });
+});
+
+test('to‘xtatilgan optovik (havola bilan tanlangan) — mahsulot qo‘shilmaydi', async ({ page }) => {
+  const wholesaler = db.inbound.wholesalers.find((item) => item.id === '7');
+  if (wholesaler) wholesaler.status = 'SUSPENDED';
+  await signIn(page);
+  await page.goto('/admin/products/new?wholesaler=7');
+  await expect(page.getByRole('region', { name: 'Optovik' })).toContainText('Optovik to‘xtatilgan — unga mahsulot qo‘shib bo‘lmaydi.');
+  await expect(status(page)).toContainText('Bajarilmagan: Optovik va shartnomato‘xtatilgan');
+  await fillRequired(page, 'Simsiz kolonka');
+  await field(page, 'Og‘irlik').fill('0.8');
+  await expect(status(page).getByRole('button', { name: 'Moderatsiyaga yuborish' })).toBeDisabled();
+  let posted = 0;
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && request.url().endsWith('/api/v1/admin/products')) posted += 1;
+  });
+  await status(page).getByRole('button', { name: 'Qoralamani saqlash' }).click();
+  await expect(page.getByTestId('product-form-errors')).toContainText('Optovik — tekshiring.');
+  expect(posted).toBe(0);
 });

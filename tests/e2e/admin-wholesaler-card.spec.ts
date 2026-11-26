@@ -128,6 +128,23 @@ test('rekvizitlarni tahrirlash: faqat o‘zgargan maydon; ro‘yxatda ham yangil
   await expect(page.getByRole('region', { name: 'Rekvizitlar' })).toContainText('Asaka bank');
 });
 
+test('tahrir: tozalangan manzil saqlanadi (bo‘sh satr); imzolangan shartnoma raqamini o‘chirib bo‘lmaydi', async ({ page }) => {
+  await openCard(page, '7');
+  await page.getByRole('region', { name: 'Rekvizitlar' }).getByRole('button', { name: 'Tahrirlash' }).click();
+  const form = page.getByTestId('wholesaler-form');
+  await form.getByLabel(/Shartnoma raqami/).fill('');
+  await form.getByRole('button', { name: 'O‘zgarishlarni saqlash' }).click();
+  await expect(form).toContainText('Imzolangan shartnoma raqami va sanasi o‘chirilmaydi — faqat yangisiga almashtiriladi');
+  await form.getByLabel(/Shartnoma raqami/).fill('K-2027/014');
+
+  await form.getByLabel(/Yuridik manzil/).fill('');
+  const patched = page.waitForRequest((request) => request.method() === 'PATCH' && request.url().endsWith('/api/v1/admin/wholesalers/7'));
+  await form.getByRole('button', { name: 'O‘zgarishlarni saqlash' }).click();
+  expect((await patched).postDataJSON()).toEqual({ address: '' });
+  await expect(page).toHaveURL(/\/admin\/wholesalers\/7$/);
+  await expect(page.getByRole('region', { name: 'Rekvizitlar' })).not.toContainText('Yashnobod');
+});
+
 test('to‘xtatish: sabab majburiy → banner sabab bilan; faollashtirish', async ({ page }) => {
   await openCard(page, '7', '?dialog=suspend');
   const dialog = page.getByTestId('suspend-dialog');
