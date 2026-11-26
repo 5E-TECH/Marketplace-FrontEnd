@@ -1,6 +1,7 @@
 import type { components } from '../generated/api-types';
 import type { CreativeType, PriceDecision } from '../features/adminProducts/model/adminProductTypes';
 import { mockAdminProducts, mockCategories, mockCategoryPolicies, mockCreatives, mockOfferContents, mockPolicyAudit, mockProductAudit } from './fixtures/adminProducts';
+import { mockTwoFactor } from './fixtures/twoFactor';
 import { mockFulfillment } from './fixtures/fulfillment';
 import { mockInbound } from './fixtures/inbound';
 import { mockOffers } from './fixtures/offers';
@@ -127,6 +128,8 @@ function createMockDb() {
     // Ombor (FE-16): optoviklar, SKU lar, postavkalar va skan jurnali.
     inbound: mockInbound(),
     fulfillment: mockFulfillment(),
+    // Xodim 2FA (FE-27, BE-26): `ADMIN_2FA` bayrog'i va ulangan ilovalar.
+    twoFactor: mockTwoFactor(),
   };
 }
 

@@ -8,6 +8,7 @@ import { orderCardTranslations } from './orderCardTranslations';
 import { wholesalerCardTranslations } from './wholesalerCardTranslations';
 import { wholesalersTranslations } from './wholesalersTranslations';
 import { productFormTranslations } from './productFormTranslations';
+import { twoFactorTranslations } from './twoFactorTranslations';
 import { adminProductsTranslations } from './adminProductsTranslations';
 import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
@@ -76,6 +77,7 @@ export const translations = {
     ...wholesalersTranslations.uz,
     ...wholesalerCardTranslations.uz,
     ...productFormTranslations.uz,
+    ...twoFactorTranslations.uz,
     ...operatorWorkspaceTranslations.uz,
     ...statusTranslations.uz,
     ...sharedUiTranslations.uz,
@@ -129,6 +131,7 @@ export const translations = {
     ...wholesalersTranslations.ru,
     ...wholesalerCardTranslations.ru,
     ...productFormTranslations.ru,
+    ...twoFactorTranslations.ru,
     ...operatorWorkspaceTranslations.ru,
     ...statusTranslations.ru,
     ...sharedUiTranslations.ru,
@@ -182,6 +185,7 @@ export const translations = {
     ...wholesalersTranslations.en,
     ...wholesalerCardTranslations.en,
     ...productFormTranslations.en,
+    ...twoFactorTranslations.en,
     ...operatorWorkspaceTranslations.en,
     ...statusTranslations.en,
     ...sharedUiTranslations.en,

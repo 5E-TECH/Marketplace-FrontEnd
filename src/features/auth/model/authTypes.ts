@@ -57,6 +57,31 @@ export interface AuthSession extends LoginResponse {
   /** `null` — rol noma'lum: sessiya bor, profilni `/auth/me` qayta tekshiradi. */
   user: AuthUser | null;
 }
+
+/**
+ * BE-26 (FE-27): admin, superadmin va moliya — paroldan keyin sessiya o'rniga 2FA bosqichi. `token` — 5 daqiqalik
+ * `challengeToken` (sessiya emas); keyingi qadamlar shu bilan.
+ */
+export interface TwoFactorChallenge {
+  token: string;
+  /** 2FA hali ulanmagan (birinchi kirish yoki superadmin tiklagan) — avval QR bilan ulash (umumiy-2fa-ulash). */
+  setupRequired: boolean;
+  /** Parol kiritilgan raqam — karta va zaxira kodlar faylida. */
+  phone: string;
+  /** Taklif (fe-27 §2): kim kirayapti — «Nodira K. · Admin»; kelmasa karta telefonni ko'rsatadi. */
+  user: { name: string; role: UserRole } | null;
+  /** Taklif (fe-27 §2): superadmin tiklagan — «2FA tiklandi» xabari. */
+  reset: { by: string; at: string } | null;
+}
+
+/** Parol bosqichi natijasi: sessiya ochildi yoki 2FA kerak. */
+export type LoginResult = { kind: 'session'; session: AuthSession } | { kind: 'challenge'; challenge: TwoFactorChallenge };
+
+/** `POST /auth/2fa/setup`: QR shu `otpauthUrl` dan chiziladi, `secret` — qo'lda kiritish uchun kalit. */
+export interface TwoFactorSetup {
+  secret: string;
+  otpauthUrl: string;
+}
 export interface AuthDeviceSession { id: string; userAgent: string; ipAddress: string; createdAt: string; lastUsedAt: string | null; current: boolean }
 
 /** `POST /admin/users/:id/impersonate` natijasi (15 daqiqalik, refresh qilinmaydigan token). */

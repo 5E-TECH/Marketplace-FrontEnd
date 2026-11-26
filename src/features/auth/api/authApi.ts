@@ -6,11 +6,15 @@ import {
   type AuthSession,
   type LoginCredentials,
   type LoginResponse,
+  type LoginResult,
+  type TwoFactorChallenge,
   type UpdateAuthProfilePayload,
   type UserRole,
   type AuthDeviceSession,
 } from '../model/authTypes';
+import { TwoFactorRequiredError } from '../lib/twoFactorRequiredError';
 import { UnknownRoleError } from '../lib/unknownRoleError';
+import { readTwoFactorChallenge } from './twoFactorApi';
 
 interface LoginApiResponse {
   accessToken?: unknown;
@@ -84,10 +88,11 @@ function parseLoginResponse(value: unknown): LoginResponse {
   };
 }
 
-async function login(credentials: LoginCredentials): Promise<LoginResponse> {
+/** Parol bosqichi: sessiya yoki (BE-26: admin, superadmin, moliya) 2FA bosqichi. */
+async function login(credentials: LoginCredentials): Promise<LoginResponse | TwoFactorChallenge> {
   const { data } = await httpClient.post<unknown>('/auth/login', credentials);
 
-  return parseLoginResponse(data);
+  return readTwoFactorChallenge(data, credentials.phone) ?? parseLoginResponse(data);
 }
 
 export async function getCurrentUser(
@@ -107,10 +112,20 @@ export async function getCurrentUser(
   return parseAuthUser(candidate);
 }
 
+/** Parol bilan kirish: sessiya ochiladi yoki 2FA bosqichi qaytadi (kod qadami, FE-27). */
+export async function signIn(credentials: LoginCredentials): Promise<LoginResult> {
+  const result = await login(credentials);
+  if ('setupRequired' in result) return { kind: 'challenge', challenge: result };
+  return { kind: 'session', session: await openSession(result) };
+}
+
+/** Faqat sessiya kutadigan joylar uchun: 2FA kerak bo'lsa — `TwoFactorRequiredError` (bosqich ichida). */
 export async function authenticate(
   credentials: LoginCredentials,
 ): Promise<AuthSession> {
-  return openSession(await login(credentials));
+  const result = await signIn(credentials);
+  if (result.kind === 'challenge') throw new TwoFactorRequiredError(result.challenge);
+  return result.session;
 }
 
 /** Token olindi (parol yoki SMS kod, FE-04) — profilni yuklab sessiyani ochadi. */

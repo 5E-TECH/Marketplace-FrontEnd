@@ -13,17 +13,19 @@ interface AuthLayoutProps {
    */
   renderAside: (tone: 'navy' | 'light', brand: ReactNode) => ReactNode;
   children: ReactNode;
+  /** Planshetda forma bo'sh joy markazida (umumiy-kirish.planshet, umumiy-2fa); sukut — tepada (sotuvchi-royxat). */
+  centered?: boolean;
 }
 
 /** Kirish va ro'yxat sahifalari karkasi: navy ustun + markazdagi 400 px forma. */
-export function AuthLayout({ renderAside, children }: AuthLayoutProps) {
+export function AuthLayout({ renderAside, children, centered = false }: AuthLayoutProps) {
   // Telefon va planshet (< 1024): tepada navy qator (56 / 64 px), forma, ostida och blok — .mobil, .planshet.
   const compact = useMediaQuery('(max-width: 1023.98px)');
   const phone = useMediaQuery('(max-width: 767.98px)');
 
   if (compact) {
     return (
-      <div className={`${styles.phonePage} ${phone ? '' : styles.tabletPage}`.trim()} data-auth-layout={phone ? 'phone' : 'tablet'}>
+      <div className={[styles.phonePage, phone ? '' : styles.tabletPage, centered ? styles.centered : ''].filter(Boolean).join(' ')} data-auth-layout={phone ? 'phone' : 'tablet'}>
         <header className={styles.phoneHeader}>
           <span className={styles.brand}>
             <img src={BRAND_ICON} alt="" width={32} height={32} />
