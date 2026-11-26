@@ -51,7 +51,7 @@ export function MainTab({ product, stock, stockUpdatedAt, phone, onStop, onResum
   const creatives = useCreativesQuery(product.id).data ?? [];
   const audit = useProductAuditQuery(product.id);
   const edit = useEditProductMutation();
-  const form = useProductForm(formFromProduct(product));
+  const form = useProductForm(formFromProduct(product), { autoSlug: false });
   const [dialog, setDialog] = useState<'submit' | null>(null);
   const videos = creatives.filter((creative) => creative.type === 'VIDEO').length;
   const readiness = offerReadiness(product, { videos, stock: stock?.available ?? null });

@@ -5,14 +5,14 @@ import { useAppSelector } from '../../app/store/hooks';
 import { selectAuthUser } from '../../features/auth/model/authSlice';
 import { useCreateProductMutation } from '../../features/adminProducts/api/adminProductsQueries';
 import { missingFields, newProductConditions } from '../../features/adminProducts/lib/productConditions';
-import { emptyProductForm, productBody } from '../../features/adminProducts/model/productForm';
+import { emptyProductForm, productBody, WHOLESALER_BLOCK_ERRORS } from '../../features/adminProducts/model/productForm';
 import { ProductErrorSummary } from '../../features/adminProducts/ui/form/ProductFormParts';
 import { ProductFormSections } from '../../features/adminProducts/ui/form/ProductFormSections';
 import { useProductForm } from '../../features/adminProducts/ui/form/useProductForm';
 import formStyles from '../../features/adminProducts/ui/form/ProductForm.module.css';
 import { ConditionList, SideCard } from '../../features/adminProducts/ui/SideCard';
 import { useWholesalersQuery } from '../../features/wholesalers/api/wholesalersQueries';
-import { hasContract } from '../../features/wholesalers/lib/wholesalerRules';
+import { productBlock } from '../../features/wholesalers/lib/wholesalerRules';
 import { getApiErrorMessage } from '../../shared/api/apiError';
 import type { TranslationKey } from '../../shared/i18n/translations';
 import { useTranslation } from '../../shared/i18n/useTranslation';
@@ -42,19 +42,23 @@ export default function AdminProductNewPage() {
   const user = useAppSelector(selectAuthUser);
   const wholesalers = useWholesalersQuery();
   const create = useCreateProductMutation();
-  const form = useProductForm(emptyProductForm(params.get('wholesaler') ?? ''));
+  const form = useProductForm(emptyProductForm(params.get('wholesaler') ?? ''), { autoSlug: true });
   const guard = useLeaveGuard(form.dirty && !create.isPending);
   usePageTitle(t('apf.newTitle'));
 
   const selected = wholesalers.data?.find((item) => item.id === form.values.wholesalerId) ?? null;
-  const signed = selected ? hasContract(selected) : false;
-  const complete = Boolean(selected) && signed && !missingFields(form.values, true, t).length;
-  const conditions = newProductConditions(form.values, selected ? { name: selected.name, signed } : null, t);
+  // OPT-1: shartnomasiz, to'xtatilgan yoki tasdiqlanmagan optovikka mahsulot qo'shilmaydi (optovik kartasidagi qoida).
+  const block = selected ? productBlock(selected) : null;
+  const problem = !selected || !block ? null : block === 'CONTRACT'
+    ? t('apf.wholesaler.unsigned').toLocaleLowerCase()
+    : t(`status.wholesaler.${selected.status}` as TranslationKey).toLocaleLowerCase();
+  const complete = Boolean(selected) && !block && !missingFields(form.values, true, t).length;
+  const conditions = newProductConditions(form.values, selected ? { name: selected.name, problem } : null, t);
   const who = user?.name ? shortPersonName(user.name) : t('moderation.audit.system');
 
   const save = (draft: boolean) => {
     if (create.isPending) return;
-    if (!form.validate({ isNew: true, requireCodes: false }, selected && !signed ? { wholesalerId: 'contract' } : {})) return;
+    if (!form.validate({ isNew: true, requireCodes: false }, block ? { wholesalerId: WHOLESALER_BLOCK_ERRORS[block] } : {})) return;
     create.mutate({ wholesalerId: form.values.wholesalerId, body: productBody(form.values), images: form.values.images, videos: form.values.videos, draft }, {
       onSuccess: (saved) => {
         notification.success({ title: t(draft ? 'apf.createdDraft' : 'apf.created', { name: saved.name }), placement: phone ? 'top' : 'bottomRight', duration: 4 });

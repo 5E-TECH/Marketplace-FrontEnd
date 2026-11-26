@@ -6,7 +6,7 @@ import { useCategoryPoliciesQuery, useGlobalPolicyQuery } from '../../../categor
 import { useAdminCategoriesQuery } from '../../../categories/api/categoryQueries';
 import type { Category } from '../../../categories/model/categoryTypes';
 import { useWholesalersQuery } from '../../../wholesalers/api/wholesalersQueries';
-import { hasContract } from '../../../wholesalers/lib/wholesalerRules';
+import { hasContract, productBlock } from '../../../wholesalers/lib/wholesalerRules';
 import { getApiErrorMessage } from '../../../../shared/api/apiError';
 import type { TranslationKey } from '../../../../shared/i18n/translations';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
@@ -23,7 +23,7 @@ import type { AdminProduct, Creative } from '../../model/adminProductTypes';
 import { DeleteCreativeDialog } from '../CreativeDialogs';
 import { CertificateDialog } from './CertificateDialog';
 import { ProductMediaDialog, type AddedMedia } from './ProductMediaDialog';
-import { errorText, inheritedFlag, moneyDigits, productSlug, type ProductErrors, type ProductField, type ProductFormValues } from '../../model/productForm';
+import { errorText, inheritedFlag, moneyDigits, productSlug, WHOLESALER_BLOCK_ERRORS, type ProductErrors, type ProductField, type ProductFormValues } from '../../model/productForm';
 import styles from './ProductForm.module.css';
 
 export interface ProductFormSectionsProps {
@@ -98,8 +98,9 @@ export function ProductFormSections(props: ProductFormSectionsProps) {
   const tree = categories.data ?? [];
   const err = (field: ProductField) => errorText(field, errors[field], t, { conflictName, slug: values.slug });
   const selected = wholesalers.data?.find((item) => item.id === values.wholesalerId) ?? null;
-  const noContract = Boolean(selected && !hasContract(selected));
-  const wholesalerError = err('wholesalerId') ?? (noContract ? t('apf.error.contract') : undefined);
+  // Yangi mahsulot: shartnomasiz, to'xtatilgan yoki tasdiqlanmagan optovikka qo'shib bo'lmaydi (OPT-1, `productBlock`).
+  const block = selected && !product ? productBlock(selected) : null;
+  const wholesalerError = err('wholesalerId') ?? (block ? errorText('wholesalerId', WHOLESALER_BLOCK_ERRORS[block], t) : undefined);
 
   const input = (field: ProductField, id: string, extra: { placeholder?: string; unit?: string; inputMode?: 'decimal' | 'numeric'; onValue?: (value: string) => void } = {}) => (
     <div className={styles.control} data-unit={extra.unit ? true : undefined}>

@@ -93,6 +93,21 @@ export function getApiErrorFields(error: unknown): string[] {
   });
 }
 
+/**
+ * Backend tanimaydigan maydonlar: global `ValidationPipe` `forbidNonWhitelisted` → 400, `details[]` da
+ * `{ field, error: 'property X should not exist' }`. Oddiy validatsiya xatosi (qiymat noto'g'ri) bu ro'yxatga kirmaydi.
+ */
+export function getApiUnknownFields(error: unknown): string[] {
+  const data = getResponseData(error);
+  if (typeof data !== 'object' || data === null || !('details' in data) || !Array.isArray(data.details)) return [];
+  return (data.details as unknown[]).flatMap((item) => {
+    if (typeof item !== 'object' || item === null) return [];
+    const record = item as Record<string, unknown>;
+    const text = [record.error, record.message].find((value): value is string => typeof value === 'string') ?? '';
+    return typeof record.field === 'string' && record.field && /should not exist/i.test(text) ? [record.field] : [];
+  });
+}
+
 export function getApiErrorCode(error: unknown): ApiErrorCode | null {
   const data = getResponseData(error);
   if (typeof data !== 'object' || data === null || !('errorCode' in data)) {

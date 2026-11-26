@@ -83,6 +83,22 @@ export function validateWholesaler(input: WholesalerInput): Partial<Record<Whole
   return errors;
 }
 
+/**
+ * Tahrir (PATCH): faqat o'zgargan maydonlar. Tozalangan rahbar va manzil — bo'sh satr (`UpdateWholesalerDto` `null` ni
+ * qabul qilmaydi, `""` — ha); shartnoma raqami va sanasi o'chirilmaydi (backend `skipNullProperties: false`, shartnoma
+ * majburiy) — forma buni oldindan tekshiradi.
+ */
+const CLEARABLE = ['directorName', 'address'] as const;
+export function wholesalerChanges(input: WholesalerInput, initial: WholesalerInput): Partial<ReturnType<typeof wholesalerBody>> {
+  const body = wholesalerBody(input);
+  const before = wholesalerBody(initial);
+  return Object.fromEntries(Object.entries(body).flatMap(([key, value]) => {
+    if (value === before[key as keyof typeof before]) return [];
+    if (value === undefined) return (CLEARABLE as readonly string[]).includes(key) ? [[key, '']] : [];
+    return [[key, value]];
+  }));
+}
+
 /** API tanasi: raqamli maydonlar faqat raqam, telefon `+998XXXXXXXXX`; bo'sh ixtiyoriy maydon yuborilmaydi. */
 export function wholesalerBody(input: WholesalerInput) {
   const optional = (value: string) => (value.trim() ? value.trim() : undefined);

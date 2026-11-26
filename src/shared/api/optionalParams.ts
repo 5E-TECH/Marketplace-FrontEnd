@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getApiErrorFields } from './apiError';
+import { getApiErrorFields, getApiUnknownFields } from './apiError';
 
 type Params = Record<string, string | number | boolean | undefined>;
 
@@ -28,8 +28,9 @@ export async function withOptionalParams<T>(
 }
 
 /**
- * Taklif maydonli so'rov tanasi: backend noma'lum maydonni rad etsa (400, `details[].field` shu maydon), so'rov
- * ularsiz qayta yuboriladi — asosiy ma'lumot saqlanadi, taklif maydoni backend qo'shgach ishlaydi.
+ * Taklif maydonli so'rov tanasi: backend noma'lum maydonni rad etsa (400, `details[]` — «property X should not
+ * exist»), so'rov ularsiz qayta yuboriladi — asosiy ma'lumot saqlanadi, taklif maydoni backend qo'shgach ishlaydi.
+ * Maydon qiymati noto'g'ri bo'lsa (backend uni biladi) — xato o'zi qaytadi, jimgina tashlab yuborilmaydi.
  */
 export async function withOptionalBody<T, B extends Record<string, unknown>>(
   request: (body: Partial<B>) => Promise<T>,
@@ -41,8 +42,9 @@ export async function withOptionalBody<T, B extends Record<string, unknown>>(
   try {
     return { data: await request(clean), dropped: [] };
   } catch (error) {
-    const fields = getApiErrorFields(error);
-    const rejected = sent.length > 0 && axios.isAxiosError(error) && error.response?.status === 400 && fields.length > 0 && fields.every((field) => sent.includes(field));
+    const unknown = getApiUnknownFields(error);
+    const rejected = sent.length > 0 && axios.isAxiosError(error) && error.response?.status === 400 && unknown.length > 0
+      && getApiErrorFields(error).every((field) => unknown.includes(field) && sent.includes(field));
     if (!rejected) throw error;
     const base = Object.fromEntries(Object.entries(clean).filter(([key]) => !sent.includes(key))) as Partial<B>;
     return { data: await request(base), dropped: sent };

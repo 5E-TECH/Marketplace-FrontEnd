@@ -358,7 +358,7 @@ export const adminHandlers = [
     if (!product) return fail(404, 'NOT_FOUND', 'Mahsulot topilmadi');
     const patch = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const unknown = Object.keys(patch).filter((key) => !PRODUCT_FIELDS.includes(key));
-    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`, undefined, { details: unknown.map((field) => ({ field, message: 'should not exist' })) });
+    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`, undefined, { details: unknown.map((field) => ({ field, error: `property ${field} should not exist` })) });
     const problems = productProblems(patch, true);
     if (problems.length) return fail(400, 'VALIDATION_ERROR', problems[0].message, undefined, { details: problems });
     if (typeof patch.slug === 'string' && db.adminProducts.some((item) => item.slug === patch.slug && item.id !== product.id)) return slugTaken(String(patch.slug));
@@ -379,7 +379,7 @@ export const adminHandlers = [
     if (denied) return denied;
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const unknown = Object.keys(body).filter((key) => ![...PRODUCT_FIELDS, 'wholesalerId', 'imageUrl', 'images', 'videos', 'draft', 'affiliateFee'].includes(key));
-    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`, undefined, { details: unknown.map((field) => ({ field, message: 'should not exist' })) });
+    if (unknown.length) return fail(400, 'VALIDATION_ERROR', `property ${unknown[0]} should not exist`, undefined, { details: unknown.map((field) => ({ field, error: `property ${field} should not exist` })) });
     const problems = productProblems(body, false);
     if (problems.length) return fail(400, 'VALIDATION_ERROR', problems[0].message, undefined, { details: problems });
     const shop = db.inbound.wholesalers.find((item) => item.id === String(body.wholesalerId));
