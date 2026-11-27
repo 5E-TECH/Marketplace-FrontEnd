@@ -17,9 +17,11 @@ export function SessionActions({ onSignOut, children }: { onSignOut: () => void;
   );
 }
 
-export function SessionPrimary({ submit = false, busy = false, onClick, children }: {
+export function SessionPrimary({ submit = false, busy = false, disabled = false, onClick, children }: {
   submit?: boolean;
   busy?: boolean;
+  /** Yopiq, aylanuvchi ikonkasiz (2FA bloki — 15 daqiqa). */
+  disabled?: boolean;
   onClick?: () => void;
   children: ReactNode;
 }) {
@@ -28,7 +30,7 @@ export function SessionPrimary({ submit = false, busy = false, onClick, children
       type={submit ? 'submit' : 'button'}
       className={`${styles.button} ${styles.primary}`}
       onClick={onClick}
-      disabled={busy}
+      disabled={busy || disabled}
       aria-busy={busy || undefined}
     >
       {busy ? <LoaderCircle className={styles.spin} aria-hidden /> : null}

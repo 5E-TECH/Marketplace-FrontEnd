@@ -82,12 +82,12 @@ test('foydalanuvchi menyusi: sarlavha, Profil, Til va Chiqish', async ({ page })
 test('ichki sahifa: «‹ Bo‘lim» havolasi h1 dan oldin, menyuda bo‘lim faol', async ({ page }) => {
   await installAuthenticatedSession(page, adminUser);
   await mockAdminPages(page);
-  await page.goto('/admin/users/new');
+  await page.goto('/admin/products/new');
 
-  await expect(pageTitle(page)).toHaveText('Yangi foydalanuvchi');
-  await expect(mainNav(page).locator('[aria-current="page"]')).toHaveText('Foydalanuvchilar');
-  await page.getByRole('link', { name: 'Orqaga: Foydalanuvchilar' }).click();
-  await expect(page).toHaveURL(/\/admin\/users$/);
+  await expect(pageTitle(page)).toHaveText('Yangi mahsulot');
+  await expect(mainNav(page).locator('[aria-current="page"]')).toHaveText('Mahsulotlar');
+  await page.getByRole('link', { name: 'Orqaga: Mahsulotlar' }).click();
+  await expect(page).toHaveURL(/\/admin\/products$/);
 });
 
 test('planshet (900 px): menyu chap panelda, yuqori qatorda menyu tugmasi va avatar', async ({ page }) => {

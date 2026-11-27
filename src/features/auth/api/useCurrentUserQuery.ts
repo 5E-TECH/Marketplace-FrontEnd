@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '../../../app/store/hooks';
 import { shouldRetry } from '../../../shared/api/queryClient';
 import { UnknownRoleError } from '../lib/unknownRoleError';
-import { currentUserLoaded, selectIsAuthenticated } from '../model/authSlice';
+import { currentUserLoaded, selectIsAuthenticated, unknownRoleSeen } from '../model/authSlice';
 import { getCurrentUser } from './authApi';
 
 export function useCurrentUserQuery() {
@@ -12,7 +12,11 @@ export function useCurrentUserQuery() {
   return useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async ({ signal }) => {
-      const user = await getCurrentUser(undefined, signal);
+      const user = await getCurrentUser(undefined, signal).catch((error: unknown) => {
+        // Keyin rol berilsa, qayta kirgach «Rolingiz o‘zgardi» — «Oldin: Noma’lum rol» (umumiy-sessiya 9).
+        if (error instanceof UnknownRoleError) dispatch(unknownRoleSeen(error.userId));
+        throw error;
+      });
 
       dispatch(currentUserLoaded(user));
       return user;

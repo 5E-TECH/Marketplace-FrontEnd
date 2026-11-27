@@ -7,6 +7,7 @@ import {
   type LoginCredentials,
   type LoginResponse,
   type LoginResult,
+  type RoleChangeInfo,
   type TwoFactorChallenge,
   type UpdateAuthProfilePayload,
   type UserRole,
@@ -18,6 +19,20 @@ import { readTwoFactorChallenge } from './twoFactorApi';
 
 interface LoginApiResponse {
   accessToken?: unknown;
+}
+
+/** Taklif (fe-15 §15): `roleChange: { before, after, at, by: { name, role } }`; noma'lum oldingi rol — `null`. */
+function parseRoleChange(value: unknown): RoleChangeInfo | null {
+  if (typeof value !== 'object' || value === null) return null;
+  const item = value as Record<string, unknown>;
+  if (!isUserRole(item.after)) return null;
+  const by = typeof item.by === 'object' && item.by !== null ? (item.by as Record<string, unknown>) : {};
+  return {
+    before: isUserRole(item.before) ? item.before : null,
+    after: item.after,
+    at: typeof item.at === 'string' && item.at ? item.at : null,
+    by: typeof by.name === 'string' && by.name.trim() ? { name: by.name.trim(), role: isUserRole(by.role) ? by.role : null } : null,
+  };
 }
 
 function parseAuthUser(value: unknown): AuthUser {
@@ -50,7 +65,13 @@ function parseAuthUser(value: unknown): AuthUser {
 
   if (!valid) throw new Error('Foydalanuvchi ma’lumoti noto‘g‘ri formatda');
 
+  const roleChange = 'roleChange' in value ? parseRoleChange(value.roleChange) : null;
+  const team = 'team' in value && typeof value.team === 'object' && value.team !== null && 'supervisorName' in value.team && typeof value.team.supervisorName === 'string' && value.team.supervisorName.trim()
+    ? { supervisorName: value.team.supervisorName.trim() }
+    : null;
   return {
+    ...(roleChange ? { roleChange } : {}),
+    ...(team ? { team } : {}),
     id: value.id as string,
     role: value.role as UserRole,
     name: value.name as string,

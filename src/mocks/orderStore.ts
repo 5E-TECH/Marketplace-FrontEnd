@@ -64,17 +64,20 @@ type MockActivity = { kind: 'IN_CALL' | 'RINGING' | 'WRAP_UP' | 'CONNECTING' | '
 
 /**
  * Operatorlar (admin-lidlar «O'tkazish» oynasi namunasi). Dilnoza R. holati — operator ish joyidagi holat
- * (`db.operator.state`); qolganlari doimiy. `activity` va `scheduled` — taklif maydonlari (queue-summary).
+ * (`db.operator.state`); qolganlari doimiy. ID — xodimlar ro'yxatidagi hisob (FE-15 «Operatorlar jamoasi»).
+ * `since` — holat necha daqiqadan beri (taklif); `activity` — telefoniya bosqichi.
  */
-export const MOCK_OPERATORS: ReadonlyArray<{ id: string; name: string; state?: 'ONLINE' | 'BREAK' | 'OFFLINE'; bookings: number; scheduled: number; activity: MockActivity | null }> = [
+export const MOCK_OPERATORS: ReadonlyArray<{ id: string; name: string; state?: 'ONLINE' | 'BREAK' | 'OFFLINE'; since?: number; bookings: number; scheduled: number; activity: MockActivity | null }> = [
   { id: 'U-0003', name: 'Dilnoza R.', bookings: 0, scheduled: 2, activity: null },
-  { id: 'U-0031', name: 'Feruza Y.', state: 'BREAK', bookings: 0, scheduled: 1, activity: null },
-  { id: 'U-0032', name: 'Shohruh M.', state: 'ONLINE', bookings: 2, scheduled: 4, activity: { kind: 'IN_CALL', leadId: 'L-1249', seconds: 185 } },
-  { id: 'U-0033', name: 'Umida S.', state: 'ONLINE', bookings: 1, scheduled: 1, activity: { kind: 'WRAP_UP', leadId: 'L-1256', seconds: 20 } },
-  { id: 'U-0034', name: 'Lola A.', state: 'OFFLINE', bookings: 0, scheduled: 0, activity: null },
-  { id: 'U-0035', name: 'Jamshid E.', state: 'BREAK', bookings: 0, scheduled: 0, activity: null },
-  { id: 'U-0036', name: 'Sabina X.', state: 'ONLINE', bookings: 1, scheduled: 2, activity: { kind: 'RINGING', leadId: 'L-1254', seconds: 8 } },
-  { id: 'U-0037', name: 'Temur K.', state: 'ONLINE', bookings: 1, scheduled: 2, activity: { kind: 'IN_CALL', leadId: 'L-1246', seconds: 132 } },
+  { id: 'U-1066', name: 'Feruza Y.', state: 'BREAK', since: 22, bookings: 0, scheduled: 1, activity: null },
+  { id: 'U-1059', name: 'Shohruh M.', state: 'ONLINE', since: 330, bookings: 2, scheduled: 4, activity: { kind: 'IN_CALL', leadId: 'L-1249', seconds: 185 } },
+  { id: 'U-1061', name: 'Umida S.', state: 'ONLINE', since: 110, bookings: 1, scheduled: 1, activity: { kind: 'WRAP_UP', leadId: 'L-1256', seconds: 20 } },
+  { id: 'U-1054', name: 'Lola A.', state: 'OFFLINE', since: 17, bookings: 0, scheduled: 0, activity: null },
+  { id: 'U-1053', name: 'Jamshid E.', state: 'BREAK', since: 6, bookings: 0, scheduled: 0, activity: null },
+  { id: 'U-1057', name: 'Sabina X.', state: 'ONLINE', since: 337, bookings: 1, scheduled: 2, activity: { kind: 'RINGING', leadId: 'L-1254', seconds: 8 } },
+  { id: 'U-1062', name: 'Temur K.', state: 'ONLINE', since: 333, bookings: 1, scheduled: 2, activity: { kind: 'IN_CALL', leadId: 'L-1246', seconds: 132 } },
+  { id: 'U-1058', name: 'Bekzod A.', state: 'ONLINE', since: 120, bookings: 2, scheduled: 3, activity: { kind: 'IN_CALL', leadId: 'L-1257', seconds: 44 } },
+  { id: 'U-1060', name: 'Nilufar S.', state: 'ONLINE', since: 95, bookings: 1, scheduled: 2, activity: { kind: 'CONNECTING', leadId: 'L-1267', seconds: 3 } },
 ];
 
 /** O'tkazilgan lidlar operator bronlari va rejalashtirilgan qo'ng'iroqlariga qo'shiladi (mock sessiyasi davomida). */

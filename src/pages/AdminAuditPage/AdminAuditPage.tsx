@@ -25,6 +25,8 @@ export default function AdminAuditPage() {
   const [actorId, setActorId] = useState('');
   // Boshqa sahifadan filtr bilan ochilishi mumkin (kategoriya paneli «To‘liq tarix»: `?action=pricing.policy.update`).
   const [action, setAction] = useState(() => new URLSearchParams(window.location.search).get('action') ?? '');
+  // «Foydalanuvchilar» → «Audit: rol va bloklash»: `?entityType=User` (BE-27).
+  const [entityType, setEntityType] = useState(() => new URLSearchParams(window.location.search).get('entityType') ?? '');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
@@ -35,6 +37,7 @@ export default function AdminAuditPage() {
     limit: TABLE_PAGE_SIZE,
     ...(debouncedActorId ? { actorId: debouncedActorId } : {}),
     ...(debouncedAction ? { action: debouncedAction } : {}),
+    ...(entityType ? { entityType } : {}),
     ...(dateFrom ? { dateFrom } : {}),
     ...(dateTo ? { dateTo } : {}),
   });
@@ -74,6 +77,7 @@ export default function AdminAuditPage() {
   const clearFilters = () => {
     setActorId('');
     setAction('');
+    setEntityType('');
     setDateFrom('');
     setDateTo('');
     setPage(1);
@@ -103,7 +107,7 @@ export default function AdminAuditPage() {
           onChange={([from, to]) => { setDateFrom(from); setDateTo(to); setPage(1); }}
         />
         <ResetFiltersButton
-          disabled={!actorId && !action && !dateFrom && !dateTo}
+          disabled={!actorId && !action && !entityType && !dateFrom && !dateTo}
           onClick={clearFilters}
         />
       </FilterPanel>

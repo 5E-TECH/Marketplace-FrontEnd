@@ -1,6 +1,8 @@
 import { Button, Form, type FormInstance } from 'antd';
 import { CircleAlert, TriangleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
+import type { AccountLock } from '../../../../features/auth/lib/accountLock';
+import { LoginLockCard } from '../../../../features/auth/ui/AccountLock/LoginLockCard';
 import { PasswordInput } from '../../../../shared/ui/PasswordInput/PasswordInput';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
 import styles from '../../../../shared/ui/AuthLayout/authForm.module.css';
@@ -26,13 +28,26 @@ interface LoginFormProps {
   onChange: () => void;
   /** «Kim sifatida kirasiz» tanlovi — sarlavha ostida (FE-04). */
   roleSwitch?: ReactNode;
+  /** Parol to'g'ri, hisob yopiq (umumiy-kirish 12): maydonlar o'rnida sabab va «Boshqa hisob bilan kirish». */
+  lock?: AccountLock | null;
+  onOtherAccount?: () => void;
 }
 
 const PHONE_NUMBER_PATTERN = /^\d{9}$/;
 
 /** Platforma xodimi: telefon raqami va parol (umumiy-kirish §3). */
-export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange, roleSwitch }: LoginFormProps) {
+export function LoginForm({ form, isSubmitting, notice, onSubmit, onChange, roleSwitch, lock, onOtherAccount }: LoginFormProps) {
   const { t } = useTranslation();
+  if (lock) {
+    return (
+      <section className={styles.form} aria-labelledby="login-title">
+        <h1 id="login-title" className={styles.title}>{t('login.title')}</h1>
+        {roleSwitch}
+        <LoginLockCard lock={lock} />
+        <Button className={styles.submit} size="large" block onClick={onOtherAccount}>{t('lock.login.other')}</Button>
+      </section>
+    );
+  }
   return (
     <Form<LoginFormValues>
       form={form}

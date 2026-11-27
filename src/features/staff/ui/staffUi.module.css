@@ -1,0 +1,182 @@
+/* Xodim UI (FE-15; admin-foydalanuvchilar, admin-foydalanuvchi-karta): belgilar, avatar, oynalardagi kim qatori,
+   rol kartalari, oqibatlar ro'yxati, «Sabab» maydoni. Ranglar — global tokenlar (E). */
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.dash { color: var(--color-text-secondary); font-weight: 500; }
+.stack { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.subtle { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+.tfaLine { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.tfaLine > svg { width: 14px; height: 14px; flex: 0 0 14px; color: var(--color-success); }
+.tfaLine[data-tone='warning'] > svg { color: var(--color-warning); }
+.tfaLine[data-tone='warning'] { font-weight: 600; color: var(--color-warning); }
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+.avatar[data-size='36'] { width: 36px; height: 36px; }
+.avatar[data-size='48'] { width: 48px; height: 48px; font-size: 15px; }
+/* Rol panelidagi odam (admin-rollar.holatlar): to'q fon, oq harf. */
+.avatar[data-tone='dark'] { background: var(--color-nav); color: var(--color-white); box-shadow: none; }
+
+/* ── Oynalar ── */
+.person { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.personText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.personTitle { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); }
+.personSub { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+.legend { margin: 0 0 8px; padding: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text); }
+.required { color: var(--color-danger); }
+.fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+
+.option {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.option[data-selected] { justify-content: flex-start; padding: 12px 14px; border: 2px solid var(--color-action); }
+.option[data-disabled] { background: var(--color-sunken); }
+.optionRow { display: flex; align-items: center; gap: 12px; min-height: 44px; }
+.option[data-selected] .optionRow { min-height: 24px; }
+.optionLabel { display: flex; flex: 1 1 auto; align-items: center; gap: 12px; min-width: 0; min-height: 44px; box-sizing: border-box; cursor: pointer; }
+.option[data-selected] .optionLabel { margin: -10px 0; }
+.option[data-disabled] .optionLabel { cursor: not-allowed; }
+.optionName { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); }
+.option[data-disabled] .optionName { color: var(--color-text-secondary); }
+.optionTag { margin-left: auto; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); white-space: nowrap; }
+.optionText { margin: 2px 0 0 32px; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.optionBox { display: flex; flex-direction: column; gap: 12px; margin: 12px 0 0 32px; padding: 12px; border-radius: 12px; background: var(--color-sunken); }
+.optionBox p { margin: 0; }
+.boxLabel { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); }
+.boxValue { margin-top: 2px !important; font-size: 13px; line-height: 18px; color: var(--color-text); }
+
+.radio { position: relative; display: inline-flex; flex: none; width: 20px; height: 20px; }
+.radio input {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-field-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  cursor: pointer;
+  appearance: none;
+}
+.radio input:checked { border: 2px solid var(--color-action); }
+.radio input:checked + span { position: absolute; top: 5px; left: 5px; width: 10px; height: 10px; border-radius: 999px; background: var(--color-action); pointer-events: none; }
+.radio input:disabled { cursor: not-allowed; }
+.option[data-disabled] .radio { opacity: 0.45; }
+.radio input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.labelRow label { font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; color: var(--color-text); }
+.select { position: relative; display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); }
+.select select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 40px 0 14px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 21px;
+  cursor: pointer;
+  appearance: none;
+}
+.select > svg { position: absolute; right: 12px; width: 18px; height: 18px; color: var(--color-text-secondary); pointer-events: none; }
+.select:focus-within { border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.note { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.note > svg { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; }
+
+.after { min-width: 0; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.after > p { margin: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); }
+.after dl { min-width: 0; margin: -10px 0; }
+.after dl > div { display: flex; gap: 16px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.after dl > div:last-child { border-bottom: 0; }
+.after dt { flex: 0 0 80px; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); }
+.after dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+
+.alert { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-danger-soft); }
+.alert > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--color-danger); }
+.alert p { margin: 0; }
+.alertTitle { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--color-danger); }
+.alertText { margin-top: 2px !important; font-size: 14px; line-height: 21px; color: var(--color-text); }
+
+.consequences { padding: 12px 14px; border-radius: 12px; background: var(--color-danger-soft); }
+.consequences ul { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.consequences li { display: flex; align-items: flex-start; gap: 8px; }
+.consequences li > svg { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 2px; color: var(--color-danger); }
+.consequences strong { font-weight: 700; }
+
+.textarea {
+  display: block;
+  width: 100%;
+  height: 76px;
+  margin: 0;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-field-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 21px;
+  resize: vertical;
+}
+.textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.textarea[aria-invalid='true'] { border-color: var(--color-danger); }
+.hint { margin: 6px 0 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.error { margin: 6px 0 0; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-danger); }
+
+@media (max-width: 767.98px) {
+  .textarea, .select select { font-size: 16px; }
+}
+
+/* ── Parol, 2FA va sessiya oynalari (karta D4–D6) ── */
+.facts { min-width: 0; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.facts dl { min-width: 0; margin: -10px 0; }
+.facts dl > div { display: flex; gap: 16px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.facts dl > div:last-child { border-bottom: 0; }
+.facts dt { flex: 0 0 96px; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.placeholder { color: var(--color-text-secondary); }
+.dialogText { margin: 0; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.noteWarning { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--color-warning-soft); color: var(--color-warning); font-size: 13px; line-height: 18px; font-weight: 600; }
+.noteWarning > svg { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; }
+.secret { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.secretLabel { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-weight: 600; }
+.secret code { flex: 1 1 auto; min-width: 0; color: var(--color-text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: 0.04em; overflow-wrap: anywhere; }
+
+.sessionBox { padding: 12px 14px; border-radius: 12px; background: var(--color-sunken); }
+.session { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sessionIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.sessionBox .sessionIcon { background: var(--color-surface); }
+.sessionIcon > svg { width: 18px; height: 18px; }
+.sessionText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.sessionName { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); }
+.sessionLine { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }

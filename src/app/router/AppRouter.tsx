@@ -14,6 +14,7 @@ const AppShell = lazy(() => import('../../layouts/AppShell/AppShell'));
 const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
 const RegisterPage = lazy(() => import('../../pages/RegisterPage/RegisterPage'));
 const NotFoundPage = lazy(() => import('../../pages/NotFoundPage/NotFoundPage'));
+const AccountBlockedPage = lazy(() => import('../../pages/AccountBlockedPage/AccountBlockedPage'));
 const SharedUiTestPage = import.meta.env.DEV
   ? lazy(() => import('../../pages/__test__/SharedUiTestPage'))
   : null;
@@ -40,6 +41,8 @@ export function AppRouter() {
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
           </Route>
+          {/* Hisob yopilgan (FE-15): sessiya yo'q, karkassiz — `ACCOUNT_BLOCKED_PATH`. */}
+          <Route path="account-blocked" element={<AccountBlockedPage />} />
 
           {/* Kirmagan foydalanuvchi har qanday manzildan login'ga; kirgani — panel ichida 404. */}
           <Route element={<ProtectedRoute />}>

@@ -1,6 +1,7 @@
 import type { components } from '../generated/api-types';
 import type { CreativeType, PriceDecision } from '../features/adminProducts/model/adminProductTypes';
 import { mockAdminProducts, mockCategories, mockCategoryPolicies, mockCreatives, mockOfferContents, mockPolicyAudit, mockProductAudit } from './fixtures/adminProducts';
+import { mockStaffAudit, mockTeams } from './fixtures/staff';
 import { mockTwoFactor } from './fixtures/twoFactor';
 import { mockFulfillment } from './fixtures/fulfillment';
 import { mockInbound } from './fixtures/inbound';
@@ -130,6 +131,9 @@ function createMockDb() {
     fulfillment: mockFulfillment(),
     // Xodim 2FA (FE-27, BE-26): `ADMIN_2FA` bayrog'i va ulangan ilovalar.
     twoFactor: mockTwoFactor(),
+    // Xodimlar (FE-15): operatorlar jamoasi (taklif) va foydalanuvchi audit jurnali (BE-27).
+    teams: mockTeams(),
+    userAudit: mockStaffAudit(),
   };
 }
 

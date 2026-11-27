@@ -8,28 +8,29 @@ const admin = {
   isActive: true, isDeleted: false,
 } as const;
 
-test('detail sahifa admin content kengligidan bir xil foydalanadi', async ({ page }) => {
+test('foydalanuvchi kartasi bilan sahifa admin content kengligidan bir xil foydalanadi', async ({ page }) => {
   await installAuthenticatedSession(page, admin);
-  await page.route('**/api/v1/admin/users/11', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ data: {
-      id: '11', name: 'QA Buyurtma', phone: '+998901063014', email: null,
-      role: 'BUYER', isActive: true, isBlocked: false, isDeleted: false,
-      shopId: null, createdAt: '2026-09-01T08:00:00.000Z', updatedAt: '2026-09-02T08:00:00.000Z',
-    } }),
-  }));
+  const user = {
+    id: '11', name: 'QA Moliya', phone: '+998901063014', role: 'FINANCE', isActive: true, isBlocked: false,
+    isDeleted: false, totpEnabledAt: '2026-09-01T08:00:00.000Z', createdAt: '2026-09-01T08:00:00.000Z',
+  };
+  await page.route('**/api/v1/admin/users**', (route) => {
+    const { pathname } = new URL(route.request().url());
+    if (pathname.endsWith('/admin/users/11')) return route.fulfill({ status: 200, json: { data: user } });
+    if (pathname.endsWith('/admin/users')) return route.fulfill({ status: 200, json: { data: { items: [user], total: 1, page: 1, limit: 100, totalPages: 1 } } });
+    return route.fulfill({ status: 404, json: { message: 'Not found' } });
+  });
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/admin/users/11');
 
-  const detailPage = page.getByTestId('detail-page');
-  await expect(detailPage).toBeVisible();
+  const usersPage = page.getByTestId('admin-users');
+  await expect(usersPage.getByTestId('staff-card').getByRole('heading', { level: 2 })).toHaveText('QA M.');
 
   const contentBox = await page.locator('[data-app-main]').boundingBox();
-  const detailBox = await detailPage.boundingBox();
+  const pageBox = await usersPage.boundingBox();
   expect(contentBox).not.toBeNull();
-  expect(detailBox).not.toBeNull();
-  expect(detailBox!.width / contentBox!.width).toBeGreaterThan(0.9);
+  expect(pageBox).not.toBeNull();
+  expect(pageBox!.width / contentBox!.width).toBeGreaterThan(0.9);
 });
 
 test('kategoriya va audit shared panelda, menyu va audit matni o‘qiladigan o‘lchamda', async ({ page }) => {

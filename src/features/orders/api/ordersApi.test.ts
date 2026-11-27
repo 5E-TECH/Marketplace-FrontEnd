@@ -94,12 +94,12 @@ describe('FE-26 lidlar va buyurtmalar + MSW', () => {
     expect(supervisor.items).toHaveLength(0);
     // BE-42: faqat «Ishda» operatorga; vaqti kelmagan qo'ng'iroq yangi operatorda shu vaqt bilan qoladi (taklif).
     expect(getApiErrorFields(await rejected(transferLead({ id: 'L-1279', operatorId: '' })))).toEqual(['operatorId']);
-    expect(getApiErrorCode(await rejected(transferLead({ id: 'L-1279', operatorId: 'U-0031' })))).toBe('OPERATOR_ON_BREAK');
-    expect(getApiErrorCode(await rejected(transferLead({ id: 'L-1279', operatorId: 'U-0034' })))).toBe('OPERATOR_OFFLINE');
-    expect(getApiErrorCode(await rejected(transferLead({ id: 'L-1268', operatorId: 'U-0033' })))).toBe('LEAD_NOT_TRANSFERABLE');
-    await transferLead({ id: 'L-1279', operatorId: 'U-0033' });
+    expect(getApiErrorCode(await rejected(transferLead({ id: 'L-1279', operatorId: 'U-1066' })))).toBe('OPERATOR_ON_BREAK');
+    expect(getApiErrorCode(await rejected(transferLead({ id: 'L-1279', operatorId: 'U-1054' })))).toBe('OPERATOR_OFFLINE');
+    expect(getApiErrorCode(await rejected(transferLead({ id: 'L-1268', operatorId: 'U-1061' })))).toBe('LEAD_NOT_TRANSFERABLE');
+    await transferLead({ id: 'L-1279', operatorId: 'U-1061' });
     expect((await getAdminLeads({ search: 'L-1279' })).items[0]).toMatchObject({ operatorName: 'Umida S.', status: 'CALLBACK' });
-    const umida = (await getTransferOperators()).find((item) => item.id === 'U-0033');
+    const umida = (await getTransferOperators()).find((item) => item.id === 'U-1061');
     expect(umida).toMatchObject({ state: 'ONLINE', activeBookings: 1, scheduledCalls: 2, maxBookings: 5 });
   });
 

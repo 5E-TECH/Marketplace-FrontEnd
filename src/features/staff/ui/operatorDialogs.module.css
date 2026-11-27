@@ -1,0 +1,50 @@
+/* «Operatorlar jamoasi» oynalari (admin-operatorlar-jamoasi.holatlar «Oynalar»): forma maydonlari va ma'lumot bloklari. */
+.form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.field { min-width: 0; }
+.input { display: block; width: 100%; height: 44px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; }
+.input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.input[aria-invalid='true'] { border-color: var(--color-danger); }
+.input:disabled { border-color: var(--color-border); background: var(--color-sunken); color: var(--color-text-secondary); letter-spacing: 0.02em; }
+.phone { height: 44px; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; line-height: 16px; font-weight: 600; }
+.error > svg { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 1px; }
+.info { margin: 0; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); font-size: 13px; line-height: 19px; }
+.stage { margin-left: auto; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; }
+.optionMeta { margin-left: auto; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.empty { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.footLink { display: inline-flex; align-items: center; gap: 4px; margin-right: auto; color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.footLink > svg { width: 16px; height: 16px; }
+.footLink:hover { text-decoration: underline; }
+.footLink:focus-visible { outline: none; border-radius: 6px; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.subValue { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 500; }
+.decision { color: var(--color-text-secondary); font-weight: 500; }
+.chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text); font-size: 12px; line-height: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Softfon oynasi: «Hisob», «Holat» … ustuni 120 px (admin-operatorlar-jamoasi.holatlar). */
+.wideFacts dt { flex-basis: 120px !important; }
+.status { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text); }
+.status::before { content: ''; display: block; flex: none; width: 8px; height: 8px; border-radius: 999px; background: var(--color-text-secondary); }
+.status[data-tone='REGISTERED']::before { background: var(--color-success); }
+.status[data-tone='DISABLED']::before { background: var(--color-danger); }
+.labelStage { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; }
+.busy { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--color-warning-soft); }
+.busy > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--color-warning); }
+.busy p { margin: 0; }
+.busyTitle { color: var(--color-warning); font-size: 14px; line-height: 20px; font-weight: 700; }
+.busyText { margin-top: 2px !important; font-size: 14px; line-height: 21px; color: var(--color-text); }
+
+@media (max-width: 767.98px) {
+  .names { grid-template-columns: minmax(0, 1fr); }
+  .input, .phone { font-size: 16px; }
+}
+
+/* Nazoratchi oynalari (nazoratchi-jamoa.holatlar): nofaol qilish oqibatlari — sariq; checkbox; o'zgarishlar tarixi. */
+.warningBox { background: var(--color-warning-soft) !important; }
+.warningBox li > svg { color: var(--color-warning) !important; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; line-height: 20px; cursor: pointer; }
+.check input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--color-action); cursor: pointer; }
+.history { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.history > li { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.history > li:last-child { border-bottom: 0; }
+.historyTitle { font-size: 14px; line-height: 20px; font-weight: 600; }
+.historyMeta { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }

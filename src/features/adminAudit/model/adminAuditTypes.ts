@@ -1,6 +1,8 @@
 export interface AdminAuditListParams {
   actorId?: string;
   action?: string;
+  /** BE-27: ob'ekt turi (`User` — rol berish, bloklash; FE-15 «Audit: rol va bloklash»). */
+  entityType?: string;
   dateFrom?: string;
   dateTo?: string;
   page: number;

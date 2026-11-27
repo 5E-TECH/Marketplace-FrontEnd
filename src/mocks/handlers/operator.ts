@@ -331,6 +331,8 @@ export function mockQueueOperator(item: (typeof MOCK_OPERATORS)[number]) {
     maxBookings: db.operator.maxBookings,
     scheduledCalls: (mineNow ? mine().filter((lead) => lead.status === 'CALLBACK').length : item.scheduled) + load.scheduled,
     activity: item.activity ? { kind: item.activity.kind, leadId: item.activity.leadId, since: new Date(Date.now() - item.activity.seconds * 1000).toISOString() } : null,
+    // Taklif (fe-15 §13): holat qachondan — «13:15 dan», «tanaffus 22 daq».
+    since: mineNow ? current().stateSince : item.since === undefined ? null : new Date(Date.now() - item.since * 60_000).toISOString(),
   };
 }
 export const mockOwnedByMe = (id: string) => current().owned.has(id);

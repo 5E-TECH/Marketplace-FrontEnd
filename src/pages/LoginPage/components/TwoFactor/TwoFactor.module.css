@@ -30,21 +30,12 @@
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-.infoNote, .warnNote { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; }
-.infoNote { background: var(--color-sunken); }
-.warnNote { background: var(--color-warning-soft); }
-.infoNote > svg, .warnNote > svg { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 1px; }
-.infoNote > svg { color: var(--color-nav); }
-.warnNote > svg { color: var(--color-warning); }
+.infoNote { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.infoNote > svg { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 1px; color: var(--color-nav); }
 .noteTitle { margin: 0; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 700; }
 .noteText { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
-.tbd { color: var(--color-text-secondary); font-weight: 500; white-space: nowrap; }
 
-.steps { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
-.steps > li { display: flex; align-items: flex-start; gap: 12px; }
 .stepNumber { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: 0 0 28px; box-sizing: border-box; border: 2px solid var(--color-nav); border-radius: 999px; color: var(--color-nav); font-size: 13px; line-height: 18px; font-weight: 700; }
-.stepTitle { margin: 0; color: var(--color-text); font-size: 14px; line-height: 20px; font-weight: 600; }
-.stepText { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
 
 /* Ilovani ulash va zaxira kodlar (umumiy-2fa-ulash): forma 520 px. */
 .wide { max-width: 520px; }

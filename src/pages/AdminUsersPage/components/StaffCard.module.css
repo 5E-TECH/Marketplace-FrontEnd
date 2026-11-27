@@ -1,0 +1,130 @@
+/* Xodim kartasi (admin-foydalanuvchi-karta №166): desktop — ro'yxat yonida 440 px panel; planshet — drawer ichida;
+   telefon — ichki sahifa, bo'limlar alohida kartalarda (R8), kalit-qiymat ustma-ust. */
+.card { display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; background: var(--color-surface); }
+.card[data-variant='panel'] { flex: 0 0 440px; width: 440px; max-width: 100%; border: 1px solid var(--color-border); border-radius: 16px; }
+.card[data-variant='page'] { gap: 16px; background: transparent; }
+.card[data-variant='drawer'] { min-height: 100%; }
+
+.head { display: flex; align-items: flex-start; gap: 14px; padding: 20px 16px 18px 20px; border-bottom: 1px solid var(--color-border); }
+.headText { display: flex; flex: 1 1 auto; flex-direction: column; gap: 6px; min-width: 0; }
+.headText h2 { margin: 0; font-size: 20px; line-height: 28px; font-weight: 700; color: var(--color-text); }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.code { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.close { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.close > svg { width: 20px; height: 20px; }
+.close:hover { background: var(--color-sunken); color: var(--color-text); }
+.closeRow { display: flex; justify-content: flex-end; padding: 12px 12px 0; }
+
+.noteWrap { padding: 16px 20px; border-bottom: 1px solid var(--color-border); }
+.note { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; }
+.note > svg { width: 20px; height: 20px; flex: 0 0 20px; }
+.note > div { min-width: 0; }
+.note p { margin: 0; }
+.note[data-tone='info'] { background: var(--color-info-soft); }
+.note[data-tone='info'] > svg, .note[data-tone='info'] .noteTitle { color: var(--color-info); }
+.note[data-tone='danger'] { background: var(--color-danger-soft); }
+.note[data-tone='danger'] > svg, .note[data-tone='danger'] .noteTitle { color: var(--color-danger); }
+.note[data-tone='neutral'] { background: var(--color-sunken); box-shadow: inset 0 0 0 1px var(--color-border); }
+.note[data-tone='neutral'] > svg, .note[data-tone='neutral'] .noteTitle { color: var(--color-text-secondary); }
+.noteTitle { font-size: 14px; line-height: 20px; font-weight: 700; }
+.noteText { margin-top: 2px !important; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.noteAction { margin-top: 6px; }
+.linkButton { display: inline-flex; align-items: center; height: 24px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.linkButton:disabled { opacity: 0.5; cursor: progress; }
+
+.section { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 18px 20px; border-bottom: 1px solid var(--color-border); }
+.sectionHead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.sectionHead > div { min-width: 0; }
+.sectionHead h3 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 700; color: var(--color-text); }
+.sectionHead p { margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 13px; line-height: 20px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.link > svg { width: 16px; height: 16px; }
+.link:hover { text-decoration: underline; }
+.dangerLink { display: inline-flex; align-items: center; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-danger); font-family: inherit; font-size: 13px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.dangerLink:hover { text-decoration: underline; }
+.actionBelow { margin-top: 6px; }
+
+.facts { min-width: 0; margin: -10px 0; }
+.facts > div { display: flex; gap: 16px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.facts > div:last-child { border-bottom: 0; }
+.facts dt { flex: 0 0 118px; font-size: 13px; line-height: 20px; color: var(--color-text-secondary); }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.ddHint { display: block; margin-top: 2px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-text-secondary); }
+.muted { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-weight: 500; }
+.facts .muted { font-size: inherit; line-height: inherit; }
+
+.roleText { display: flex; flex-direction: column; gap: 4px; }
+.roleText p { margin: 0; }
+.strong { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); }
+.menuBox { min-width: 0; padding: 10px 12px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.menuBox p { margin: 0; }
+.boxLabel { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-text-secondary); }
+.boxValue { margin-top: 2px !important; font-size: 13px; line-height: 18px; color: var(--color-text); }
+.actionStack { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.why { margin: 0; font-size: 12px; line-height: 16px; color: var(--color-text-secondary); }
+.whyRow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin-top: -4px; }
+
+.secondary { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 8px; height: 36px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.secondary > svg { width: 16px; height: 16px; }
+.secondary:hover:not(:disabled) { border-color: var(--color-border-hover); }
+.secondary:disabled { color: var(--color-text-faint); background: var(--color-sunken); cursor: not-allowed; }
+.secondary:focus-visible, .footerDanger:focus-visible, .footerSecondary:focus-visible, .dangerLink:focus-visible, .linkButton:focus-visible, .close:focus-visible, .link:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.row[data-divided] { padding-top: 12px; border-top: 1px solid var(--color-border); }
+.rowText { display: flex; flex-direction: column; min-width: 0; }
+.rowText[data-gap] { gap: 4px; }
+.small { font-size: 12px; line-height: 16px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.inline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lockNote { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; }
+.lockNote > svg { width: 14px; height: 14px; }
+
+.list { margin: -10px 0; padding: 0; list-style: none; }
+.list > li { padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.list > li:last-child { border-bottom: 0; }
+
+.log { margin: -8px 0; padding: 0; list-style: none; }
+.log > li { display: flex; align-items: flex-start; gap: 10px; min-width: 0; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+.log > li:last-child { border-bottom: 0; }
+.logTime { flex: 0 0 86px; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.logIcon { display: inline-flex; flex: none; margin-top: 2px; color: var(--color-danger); }
+.logIcon[data-ok] { color: var(--color-success); }
+.logIcon > svg { width: 16px; height: 16px; }
+.logText { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.logTitle { color: var(--color-text); font-size: 13px; line-height: 20px; font-weight: 600; }
+.logTitle[data-error] { color: var(--color-danger); }
+
+.footer { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; }
+.footerDanger, .footerSecondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.footerDanger > svg, .footerSecondary > svg { width: 18px; height: 18px; }
+.footerDanger { border: 0; background: var(--color-danger-soft); color: var(--color-danger); }
+.footerDanger:hover:not(:disabled) { background: color-mix(in srgb, var(--color-danger-soft) 70%, var(--color-danger) 12%); }
+.footerSecondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.footerDanger:disabled, .footerSecondary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.stateBox { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 20px; }
+.stateTitle { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+
+/* Telefon (admin-foydalanuvchi-karta.mobil): sarlavha yuqori qatorda; har bo'lim — alohida karta 16 / r16. */
+.card[data-variant='page'] > .head,
+.card[data-variant='page'] > .noteWrap,
+.card[data-variant='page'] > .section,
+.card[data-variant='page'] > .footer {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+.card[data-variant='page'] > .head { align-items: center; }
+.card[data-variant='page'] .facts > div { flex-direction: column; gap: 2px; }
+.card[data-variant='page'] .facts dt { flex: none; font-size: 13px; line-height: 18px; }
+.card[data-variant='page'] .facts dd { font-size: 15px; line-height: 22px; }
+.card[data-variant='page'] .row[data-divided] .lockNote { flex-basis: 100%; }
+
+@media (max-width: 767.98px) {
+  .secondary { height: 44px; padding: 0 16px; font-size: 14px; }
+  .footerDanger, .footerSecondary { height: 52px; font-size: 15px; }
+  .link { min-height: 44px; }
+  .dangerLink { min-height: 32px; }
+}

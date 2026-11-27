@@ -9,6 +9,8 @@ import { wholesalerCardTranslations } from './wholesalerCardTranslations';
 import { wholesalersTranslations } from './wholesalersTranslations';
 import { productFormTranslations } from './productFormTranslations';
 import { twoFactorTranslations } from './twoFactorTranslations';
+import { staffTranslations } from './staffTranslations';
+import { accessTranslations } from './accessTranslations';
 import { adminProductsTranslations } from './adminProductsTranslations';
 import { accountTranslations } from './accountTranslations';
 import { commerceTranslations } from './commerceTranslations';
@@ -78,6 +80,8 @@ export const translations = {
     ...wholesalerCardTranslations.uz,
     ...productFormTranslations.uz,
     ...twoFactorTranslations.uz,
+    ...staffTranslations.uz,
+    ...accessTranslations.uz,
     ...operatorWorkspaceTranslations.uz,
     ...statusTranslations.uz,
     ...sharedUiTranslations.uz,
@@ -132,6 +136,8 @@ export const translations = {
     ...wholesalerCardTranslations.ru,
     ...productFormTranslations.ru,
     ...twoFactorTranslations.ru,
+    ...staffTranslations.ru,
+    ...accessTranslations.ru,
     ...operatorWorkspaceTranslations.ru,
     ...statusTranslations.ru,
     ...sharedUiTranslations.ru,
@@ -186,6 +192,8 @@ export const translations = {
     ...wholesalerCardTranslations.en,
     ...productFormTranslations.en,
     ...twoFactorTranslations.en,
+    ...staffTranslations.en,
+    ...accessTranslations.en,
     ...operatorWorkspaceTranslations.en,
     ...statusTranslations.en,
     ...sharedUiTranslations.en,

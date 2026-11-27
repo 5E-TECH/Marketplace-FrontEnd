@@ -12,7 +12,7 @@ import { shortPersonName } from '../../../../shared/lib/personName';
 import { AuthNotice } from '../../../../shared/ui/AuthLayout/AuthNotice';
 import authStyles from '../../../../shared/ui/AuthLayout/authForm.module.css';
 import type { TwoFactorLeave } from '../../model/twoFactorView';
-import { useAttemptGuard } from '../../model/useAttemptGuard';
+import { useAttemptGuard } from '../../../../features/auth/lib/useAttemptGuard';
 import { BlockedView } from './BlockedView';
 import { IdentityCard } from './IdentityCard';
 import { KeyStep } from './KeyStep';

@@ -9,7 +9,8 @@ import { useCurrentUserQuery } from '../../features/auth/api/useCurrentUserQuery
 import { useLogoutMutation } from '../../features/auth/api/useLogoutMutation';
 import { ROLE_LABEL_KEYS } from '../../features/auth/lib/roleLabels';
 import { UnknownRoleError } from '../../features/auth/lib/unknownRoleError';
-import { selectAuthUser, selectSessionExpired } from '../../features/auth/model/authSlice';
+import { selectAccountLock, selectAuthUser, selectSessionExpired } from '../../features/auth/model/authSlice';
+import { AccountLockDialog } from '../../features/auth/ui/AccountLock/AccountLockDialog';
 import { SessionExpiredDialog } from '../../features/auth/ui/SessionExpiredDialog/SessionExpiredDialog';
 import { NotificationBell } from '../../features/notifications/ui/NotificationBell/NotificationBell';
 import { OperatorBookingsClock, OperatorStateSwitch } from '../../features/operator/ui/OperatorStatusBar';
@@ -45,13 +46,14 @@ export default function AppShell() {
   const { pathname } = useLocation();
   const user = useAppSelector(selectAuthUser);
   const sessionExpired = useAppSelector(selectSessionExpired);
+  const accountLock = useAppSelector(selectAccountLock);
   const currentUserQuery = useCurrentUserQuery();
   const logoutMutation = useLogoutMutation();
   const shell = user ? getRoleShell(user.role) : null;
   const layout = useShellLayout(shell?.variant);
   const [pageTitle, setPageTitle] = useState<string | null>(null);
   const [pageStatus, setPageStatus] = useState<PageStatus | null>(null);
-  const [pageBack, setPageBack] = useState<PageBack | null>(null);
+  const [pageBack, setPageBack] = useState<PageBack | 'none' | null>(null);
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   // Panel qaysi manzilda ochilgan bo'lsa, faqat o'sha yerda ochiq: boshqa sahifaga o'tganda o'zi yopiladi.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export default function AppShell() {
 
   const route = findRoute(pathname);
   const section = route?.section ? findNavSection(pathname) : undefined;
-  const back = pageBack ?? (section ? { path: section.path, label: t(section.label) } : undefined);
+  const back = pageBack === 'none' ? undefined : pageBack ?? (section ? { path: section.path, label: t(section.label) } : undefined);
   const title = pageTitle ?? (route ? t(route.label) : '');
   const usesDrawer = layout === 'tablet' || layout === 'phone';
   const touch = layout !== 'desktop';
@@ -139,7 +141,7 @@ export default function AppShell() {
           }
         />
         <ConnectionBanner />
-        {sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
+        {accountLock ? <AccountLockDialog lock={accountLock} /> : sessionExpired ? <SessionExpiredDialog panelName={title} /> : null}
         <main className={styles.main} data-app-main>
           <PageTitleContext value={setPageTitle}>
             <PageBackContext value={setPageBack}>

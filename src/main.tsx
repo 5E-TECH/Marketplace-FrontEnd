@@ -5,9 +5,11 @@ import { AppProviders } from './app/providers/AppProviders';
 import { AppRouter } from './app/router/AppRouter';
 import { store } from './app/store/store';
 import { refreshAccessToken } from './features/auth/api/authApi';
+import { lockAccountOf, readAccountLock } from './features/auth/lib/accountLock';
 import { listenToPeers, requestSessionFromPeers, sessionHint, withRefreshLock } from './features/auth/lib/sessionSync';
 import {
   accessTokenRefreshed,
+  accountLocked,
   authenticated,
   impersonationEnded,
   loggedOut,
@@ -40,8 +42,8 @@ const ejectHttpInterceptors = setupHttpInterceptors({
     store.dispatch(accessTokenRefreshed({ accessToken }));
     return accessToken;
   },
-  onUnauthorized: () => {
-    const { accessToken, cookieSession, impersonation } = store.getState().auth;
+  onUnauthorized: (error) => {
+    const { accessToken, cookieSession, impersonation, user } = store.getState().auth;
     if (impersonation) {
       store.dispatch(impersonationEnded('expired'));
       return;
@@ -50,8 +52,15 @@ const ejectHttpInterceptors = setupHttpInterceptors({
       return;
     }
 
+    // Hisob bloklangan yoki nofaol (taklif `errorCode`, FE-15): qayta kirish o'rniga sabab — oyna yoki sahifa.
+    const lock = readAccountLock(error, lockAccountOf(user));
+    if (lock) {
+      store.dispatch(accountLocked(lock));
+      return;
+    }
+
     // Foydalanuvchi ma'lum bo'lsa sahifa yopilmaydi — ustida qayta kirish oynasi (umumiy-sessiya).
-    if (store.getState().auth.user) {
+    if (user) {
       store.dispatch(sessionExpired());
       return;
     }

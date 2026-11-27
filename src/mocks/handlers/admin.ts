@@ -698,9 +698,17 @@ export const adminHandlers = [
     if (denied) return denied;
     const url = new URL(request.url);
     const entityId = url.searchParams.get('entityId');
+    const entityType = url.searchParams.get('entityType');
+    const actorId = url.searchParams.get('actorId');
     const action = url.searchParams.get('action');
     // Narx sozlamasi tarixi: backend `action` filtri bilan (kategoriya ekranda ajratiladi).
     if (action === 'pricing.policy.update') return ok(pageOf(db.policyAudit, url, 20));
+    // Foydalanuvchi yozuvlari (FE-15, BE-27): rol, blok, tiklash; xodim kartasida — `actorId` (oxirgi amallari).
+    if (actorId || entityType === 'User' || (!entityId && !entityType)) {
+      const rows = db.userAudit.filter((entry) => (!actorId || entry.actorId === actorId) && (!entityType || entry.entityType === entityType)
+        && (!entityId || entry.entityId === entityId) && (!action || entry.action === action));
+      return ok(pageOf(rows, url, 50));
+    }
     const items = entityId
       ? db.productAudit.filter((entry) => entry.entityId === entityId).map((entry) => ({
         id: entry.id, createdAt: entry.at, actorName: entry.actorName, action: entry.action, meta: entry.meta, entityType: 'Product', entityId: entry.entityId,

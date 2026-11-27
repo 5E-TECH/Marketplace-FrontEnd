@@ -79,6 +79,41 @@
   line-height: 18px;
 }
 
+/* Admin 2-qadam (holatlar 3, 12): «Parol tekshirildi», kod maydoni, havolalar va «2/2». */
+.checked { display: inline-flex; align-items: center; gap: 4px; color: var(--color-success); font-size: 12px; font-weight: 600; line-height: 18px; }
+.checked svg { display: block; flex: 0 0 14px; width: 14px; height: 14px; }
+
+.codeInput:global(.ant-input) {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+.textButton {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-action);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.textButton:hover { color: var(--color-action-hover); text-decoration: underline; }
+.step { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.step strong { color: var(--color-text); font-weight: 600; }
+
 .sentTo { margin: 0; font-size: 14px; line-height: 21px; }
 .sentTo strong { font-weight: 600; font-variant-numeric: tabular-nums; }
 
@@ -119,10 +154,18 @@
 .primary[aria-busy='true'] { opacity: 1; cursor: progress; }
 .spin { animation: spin 0.9s linear infinite; }
 
-/* Telefon varag'i: «Chiqish» / «Kirish» 50/50 (holatlar 10). */
+/*
+ * Telefon varag'i (holatlar 10, 12, 14): majburiy — ikonkasiz sarlavha 18/24, chetlar 16, kod maydoni 52, havolalar 44;
+ * tugmalar 50/50, balandligi 44.
+ */
 @media (max-width: 767.98px) {
-  .actions { flex-wrap: nowrap; }
-  .actions .button { flex: 1 1 0; height: 48px; font-size: 16px; }
+  .root.root :global(.ant-modal-container) { padding: 22px 16px calc(12px + env(safe-area-inset-bottom)); }
+  .icon { display: none; }
+  .headText h3 { font-size: 18px; line-height: 24px; }
+  .codeInput:global(.ant-input) { height: 52px; }
+  .textButton { min-height: 44px; }
+  .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 0; padding-top: 12px; }
+  .actions .button { width: 100%; }
 }
 
 @keyframes spin {

@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { AccountLock } from '../lib/accountLock';
 import { authStorage } from '../lib/authStorage';
-import type { AuthUser, ImpersonationEndReason, ImpersonationGrant, ImpersonationSession, LoginResponse } from './authTypes';
+import type { AuthUser, ImpersonationEndReason, ImpersonationGrant, ImpersonationSession, LoginResponse, UserRole } from './authTypes';
 
 interface AuthState {
   sessionVersion: number;
@@ -23,6 +24,18 @@ interface AuthState {
    * ustida qayta kirish oynasi chiqadi — kiritilgan ish yo'qolmaydi (umumiy-sessiya §1–2).
    */
   sessionExpired: boolean;
+  /**
+   * Hisob yopildi (FE-15, umumiy-sessiya 6–8): admin blokladi yoki nazoratchi nofaol qildi. Tokenlar o'chgan;
+   * sahifa ochiq bo'lsa ustida «Hisobingiz bloklandi» oynasi, aks holda karkassiz sahifa.
+   */
+  accountLock: AccountLock | null;
+  /** Shu odamning roli o'zgardi (umumiy-sessiya 9): «Rolingiz o‘zgardi» sahifasi, «Ish joyini ochish» gacha. */
+  roleChange: { before: UserRole | null; after: UserRole } | null;
+  /**
+   * Bu tabda oxirgi ko'rilgan hisob (`role: null` — noma'lum rol): qayta kirgach roli boshqa bo'lsa — rol o'zgargan.
+   * Sessiya tugaganda saqlanadi (backend rol o'zgarganda sessiyalarni bekor qiladi), qo'lda chiqishda o'chadi.
+   */
+  knownAccount: { id: string; role: UserRole | null } | null;
 }
 
 const persistedAccessToken = authStorage.getAccessToken();
@@ -40,6 +53,9 @@ const initialState: AuthState = {
   impersonationEnd: null,
   manualLogout: false,
   sessionExpired: false,
+  accountLock: null,
+  roleChange: null,
+  knownAccount: null,
 };
 
 const authSlice = createSlice({
@@ -54,6 +70,7 @@ const authSlice = createSlice({
       state.impersonationEnd = null;
       state.manualLogout = false;
       state.sessionExpired = false;
+      state.accountLock = null;
     },
     /**
      * Token yangilandi (refresh cookie orqali). Bu login emas — yuklangan
@@ -68,12 +85,26 @@ const authSlice = createSlice({
       state.cookieSession = action.payload.accessToken === null;
     },
     currentUserLoaded(state, action: PayloadAction<AuthUser>) {
+      const { id, role } = action.payload;
+      const known = state.knownAccount;
+      if (known?.id === id && known.role !== role) state.roleChange = { before: known.role, after: role };
+      state.knownAccount = { id, role };
       state.user = action.payload;
+    },
+    /** Backend frontend bilmagan rol qaytardi (UnknownRoleShell): keyin rol berilsa — «Oldin: Noma’lum rol». */
+    unknownRoleSeen(state, action: PayloadAction<string | null>) {
+      if (action.payload) state.knownAccount = { id: action.payload, role: null };
+    },
+    roleChangeSeen(state) {
+      state.roleChange = null;
     },
     /** `remote` — boshqa tabda chiqildi; bu tab xabarni qayta tarqatmaydi. */
     loggedOut(state, action: PayloadAction<{ manual?: boolean; remote?: boolean } | undefined>) {
       state.manualLogout = action.payload?.manual === true;
       state.sessionExpired = false;
+      state.accountLock = null;
+      state.roleChange = null;
+      if (state.manualLogout) state.knownAccount = null;
       state.sessionVersion += 1;
       state.accessToken = null;
       state.cookieSession = false;
@@ -88,6 +119,17 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.cookieSession = false;
       state.sessionExpired = true;
+    },
+    /**
+     * Hisob yopildi: tokenlar o'chadi, foydalanuvchi joyida — sahifa ustida oyna (u bo'lmasa — karkassiz sahifa).
+     * Ochiq «Sessiya tugadi» oynasi o'rniga chiqadi.
+     */
+    accountLocked(state, action: PayloadAction<AccountLock>) {
+      state.sessionVersion += 1;
+      state.accessToken = null;
+      state.cookieSession = false;
+      state.sessionExpired = false;
+      state.accountLock = action.payload;
     },
     /** Oynada o'sha foydalanuvchi qayta kirdi — sahifa qayta yuklanmaydi. */
     sessionRestored(state, action: PayloadAction<LoginResponse>) {
@@ -128,26 +170,33 @@ const authSlice = createSlice({
     selectImpersonationEnd: (state) => state.impersonationEnd,
     selectManualLogout: (state) => state.manualLogout,
     selectSessionExpired: (state) => state.sessionExpired,
+    selectAccountLock: (state) => state.accountLock,
+    selectRoleChange: (state) => state.roleChange,
   },
 });
 
 export const {
   accessTokenRefreshed,
+  accountLocked,
   authenticated,
   currentUserLoaded,
   impersonationEndHandled,
   impersonationEnded,
   impersonationStarted,
   loggedOut,
+  roleChangeSeen,
   sessionExpired,
   sessionRestored,
+  unknownRoleSeen,
 } = authSlice.actions;
 export const {
+  selectAccountLock,
   selectAuthUser,
   selectImpersonation,
   selectImpersonationEnd,
   selectIsAuthenticated,
   selectManualLogout,
+  selectRoleChange,
   selectSessionExpired,
 } = authSlice.selectors;
 export const authReducer = authSlice.reducer;

@@ -1,0 +1,125 @@
+/* Karkassiz sahifa (umumiy-sessiya 7–9, 15): tepada 64 px qator, markazda 600 px karta. */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 24px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand img { display: block; width: 32px; height: 32px; border-radius: 9px; }
+.brand span { color: var(--color-text-secondary); font-size: 14px; font-weight: 600; line-height: 20px; white-space: nowrap; }
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px 56px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 600px;
+  padding: 32px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+}
+
+.head { display: flex; align-items: flex-start; gap: 16px; }
+
+.icon {
+  display: inline-flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+}
+
+.icon svg { display: block; width: 24px; height: 24px; }
+.icon[data-tone='danger'] { background: var(--color-danger-soft); color: var(--color-danger); }
+.icon[data-tone='action'] { background: var(--color-action-soft); color: var(--color-nav); }
+
+.headText { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.headText h1 { margin: 0; font-size: 24px; font-weight: 700; line-height: 32px; letter-spacing: -0.01em; }
+.headText p { margin: 0; color: var(--color-text-secondary); font-size: 15px; line-height: 23px; }
+
+.facts { display: flex; flex-direction: column; margin: 0; }
+.facts > div { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-top: 1px solid var(--color-border); }
+.facts > div:first-child { padding-top: 0; border-top: 0; }
+.facts dt { flex: 0 0 170px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; font-weight: 600; line-height: 21px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+.section { display: flex; flex-direction: column; gap: 10px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.sectionTitle { margin: 0; font-size: 14px; font-weight: 700; line-height: 20px; }
+.text { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+.pending { color: var(--color-text-secondary); font-weight: 500; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.secondary:hover { border-color: var(--color-border-hover); }
+.primary { border: 0; background: var(--color-action); color: var(--color-white); }
+.primary:hover { background: var(--color-action-hover); }
+
+/* Telefon (umumiy-sessiya 15): qator 56, karta 20 px, ikonka matn ustida, qatorlar va tugmalar ustma-ust. */
+@media (max-width: 767.98px) {
+  .header { height: 56px; padding: 0 6px 0 16px; }
+  .language { height: 44px; }
+  .body { display: block; padding: 16px 16px 24px; }
+  .card { gap: 16px; padding: 20px; border-radius: 16px; }
+  .head { flex-direction: column; gap: 16px; }
+  .icon { flex-basis: 48px; width: 48px; height: 48px; }
+  .headText h1 { font-size: 22px; line-height: 28px; }
+  .headText p { font-size: 14px; line-height: 21px; }
+  .facts > div { flex-direction: column; align-items: stretch; gap: 2px; }
+  .facts dt { flex: none; }
+  .actions { flex-direction: column; flex-wrap: nowrap; padding-top: 16px; }
+  .button { width: 100%; }
+}

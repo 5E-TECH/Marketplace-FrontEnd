@@ -3,7 +3,7 @@ import { digitsOf, findMockUser, mockTokenFor, registerMockAffiliate } from '../
 import { isUzMobileNumber } from '../../shared/lib/phone';
 import { samplePdf } from '../samplePdf';
 import { API, fail, ok } from '../utils';
-import { sessionCookie } from './auth';
+import { accountLockResponse, sessionCookie } from './auth';
 import { recordMockRegistration } from './sellerProfile';
 
 /**
@@ -91,6 +91,10 @@ export const sellerAuthHandlers = [
     }
     const account = findMockUser(digits);
     if (!account) return fail(404, 'ACCOUNT_NOT_FOUND', 'Bu raqam bilan hisob topilmadi');
+    // Backend: bloklangan yoki nofaol — kod yuborilmaydi (404, hisob borligi oshkor qilinmaydi). Taklif (fe-15 §15): kod
+    // yuboriladi, to'g'ri kod raqam egasi ekanini isbotlagach — `ACCOUNT_BLOCKED` va sabab (karkassiz sahifa).
+    const locked = accountLockResponse(account);
+    if (locked) return locked;
     return ok({ accessToken: mockTokenFor(account) }, 200, { 'Set-Cookie': sessionCookie(account) });
   }),
 

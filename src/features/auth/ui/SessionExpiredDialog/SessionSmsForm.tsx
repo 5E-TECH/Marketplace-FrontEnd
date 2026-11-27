@@ -19,6 +19,8 @@ interface SessionSmsFormProps {
   phone: string;
   onSignedIn: (session: AuthSession) => void;
   onSignOut: () => void;
+  /** Kod to'g'ri, lekin hisob yopilgan (taklif `ACCOUNT_BLOCKED`) — `true` bo'lsa xato shu yerda ko'rsatilmaydi. */
+  onLocked: (error: unknown) => boolean;
 }
 
 /**
@@ -26,7 +28,7 @@ interface SessionSmsFormProps {
  * xodimlar — parol). Kod qoidalari kirish sahifasidagidek: 5 daqiqa, 3 xato — 15 daqiqa.
  * Kod o'zi yuborilmaydi — foydalanuvchi qaytganda «Kod olish» ni bosadi (SMS behuda ketmasin).
  */
-export function SessionSmsForm({ phone, onSignedIn, onSignOut }: SessionSmsFormProps) {
+export function SessionSmsForm({ phone, onSignedIn, onSignOut, onLocked }: SessionSmsFormProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm<{ code?: string }>();
   const local = getUzLocalPhone(phone);
@@ -46,7 +48,7 @@ export function SessionSmsForm({ phone, onSignedIn, onSignOut }: SessionSmsFormP
     try {
       onSignedIn(await openSession(await loginWithOtp(`+998${local}`, otpCodeDigits(code))));
     } catch (error) {
-      flow.handleVerifyError(error);
+      if (!onLocked(error)) flow.handleVerifyError(error);
     } finally {
       setVerifying(false);
     }

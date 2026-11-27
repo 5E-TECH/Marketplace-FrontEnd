@@ -113,6 +113,8 @@ const leads = () => import('../../pages/AdminLeadsPage/AdminLeadsPage');
 const lead = () => import('../../pages/AdminLeadPage/AdminLeadPage');
 const orders = () => import('../../pages/AdminOrdersPage/AdminOrdersPage');
 const order = () => import('../../pages/AdminOrderPage/AdminOrderPage');
+// Foydalanuvchilar ro'yxati, xodim kartasi va «Yangi xodim» — bitta sahifa (FE-15).
+const users = () => import('../../pages/AdminUsersPage/AdminUsersPage');
 
 export const appRoutes: readonly AppRoute[] = [
   // ── Sotuvchi (karkas-E 2.1) ────────────────────────────────────────────────
@@ -142,7 +144,7 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/supervisor/leads/:leadId', load: lead, roles: ['SUPERVISOR'], label: 'nav.leads', section: '/supervisor/leads' },
   { path: '/supervisor/orders', load: orders, roles: ['SUPERVISOR'], label: 'nav.orders', navIcon: <ShoppingBag /> },
   { path: '/supervisor/orders/:orderId', load: order, roles: ['SUPERVISOR'], label: 'nav.orders', section: '/supervisor/orders' },
-  { path: '/supervisor/operators', load: pending, roles: ['SUPERVISOR'], label: 'nav.operators', navIcon: <Headset /> },
+  { path: '/supervisor/operators', load: () => import('../../pages/SupervisorOperatorsPage/SupervisorOperatorsPage'), roles: ['SUPERVISOR'], label: 'nav.operators', navIcon: <Headset /> },
   { path: '/supervisor/recordings', load: pending, roles: ['SUPERVISOR'], label: 'nav.callRecordings', navIcon: <AudioLines /> },
 
   // ── Omborchi (2.6) ─────────────────────────────────────────────────────────
@@ -194,9 +196,10 @@ export const appRoutes: readonly AppRoute[] = [
   { path: '/admin/wholesalers/shipments/:shipmentId', load: () => import('../../pages/AdminShipmentPage/AdminShipmentPage'), roles: ADMIN_ROLES, label: 'nav.wholesalers', section: '/admin/wholesalers' },
   { path: '/admin/recordings', load: pending, roles: ADMIN_ROLES, label: 'nav.callRecordings', navIcon: <AudioLines />, navGroup: 'navGroup.control' },
   { path: '/admin/audit-logs', load: () => import('../../pages/AdminAuditPage/AdminAuditPage'), roles: ADMIN_ROLES, label: 'nav.auditJournal', navIcon: <History />, navGroup: 'navGroup.control' },
-  { path: '/admin/users', load: () => import('../../pages/AdminUsersPage/AdminUsersPage'), roles: ADMIN_ROLES, label: 'adminNav.users', navIcon: <Users />, navGroup: 'navGroup.system' },
-  { path: '/admin/users/new', load: () => import('../../pages/AdminUserCreatePage/AdminUserCreatePage'), roles: ADMIN_ROLES, label: 'adminNav.users', section: '/admin/users' },
-  { path: '/admin/users/:userId', load: () => import('../../pages/AdminUserDetailPage/AdminUserDetailPage'), roles: ADMIN_ROLES, label: 'adminNav.users', section: '/admin/users' },
+  { path: '/admin/users', load: users, roles: ADMIN_ROLES, label: 'adminNav.users', navIcon: <Users />, navGroup: 'navGroup.system' },
+  // «Yangi xodim» va xodim kartasi (FE-15, admin-foydalanuvchi-karta): ro'yxat yonida panel, telefonda ichki sahifa.
+  { path: '/admin/users/new', load: users, roles: ADMIN_ROLES, label: 'adminNav.users', section: '/admin/users' },
+  { path: '/admin/users/:userId', load: users, roles: ADMIN_ROLES, label: 'adminNav.users', section: '/admin/users' },
   { path: '/admin/integrations', load: pending, roles: ADMIN_ROLES, label: 'nav.integrations', navIcon: <Plug />, navGroup: 'navGroup.system' },
   { path: '/admin/settings', load: pending, roles: ADMIN_ROLES, label: 'nav.settings', navIcon: <Settings />, navGroup: 'navGroup.system' },
   { path: '/admin/profile', load: profile, roles: ADMIN_ROLES, label: 'nav.profile' },

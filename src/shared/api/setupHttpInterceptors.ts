@@ -8,7 +8,8 @@ interface HttpInterceptorOptions {
    * qaytaradi; cookie rejimida `null` — tokenni server cookie'da yangilaydi.
    */
   refreshAccessToken: () => Promise<string | null>;
-  onUnauthorized: () => void;
+  /** Sessiya tugadi: oxirgi 401 xatosi (refresh yoki so'rovning o'zi) — hisob bloklangan bo'lsa tafsiloti shunda. */
+  onUnauthorized: (error: unknown) => void;
 }
 
 /** Refresh urinishidan keyin bir marta qayta yuborilganini belgilaydi. */
@@ -88,7 +89,7 @@ export function setupHttpInterceptors({
 
       if (!config || config.retriedAfterRefresh || skipsRefresh(config.url)) {
         if (!isLoginRequest(config?.url)) {
-          onUnauthorized();
+          onUnauthorized(error);
         }
 
         return Promise.reject(toError(error));
@@ -102,7 +103,7 @@ export function setupHttpInterceptors({
         else config.headers.delete('Authorization');
       } catch (refreshError) {
         if (axios.isAxiosError(refreshError) && refreshError.response?.status === 401) {
-          onUnauthorized();
+          onUnauthorized(refreshError);
         }
         return Promise.reject(toError(refreshError));
       }

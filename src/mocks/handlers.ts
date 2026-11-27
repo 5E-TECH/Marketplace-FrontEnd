@@ -8,6 +8,8 @@ import { leadOrdersHandlers } from './handlers/leadOrders';
 import { operatorHandlers } from './handlers/operator';
 import { sellerAuthHandlers } from './handlers/sellerAuth';
 import { sellerProfileHandlers } from './handlers/sellerProfile';
+import { staffHandlers } from './handlers/staff';
+import { supervisorTeamHandlers } from './handlers/supervisorTeam';
 import { warehouseHandlers } from './handlers/warehouse';
 import { wholesalerHandlers } from './handlers/wholesalers';
 import { API, fail } from './utils';
@@ -18,7 +20,7 @@ import { API, fail } from './utils';
  * foydalanadi. M2 bo'limlari (balans, sverka, softfon…) o'z kartasi bilan qo'shiladi.
  */
 // Ombor (FE-16) admin'dan oldin: `admin/inventory/shipments|lots` umumiy `admin/inventory/:kind` dan ustun.
-export const handlers = [...authHandlers, ...sellerAuthHandlers, ...warehouseHandlers, ...wholesalerHandlers, ...fulfillmentHandlers, ...adminHandlers, ...commonHandlers, ...affiliateHandlers, ...sellerProfileHandlers, ...leadOrdersHandlers, ...operatorHandlers];
+export const handlers = [...authHandlers, ...sellerAuthHandlers, ...warehouseHandlers, ...wholesalerHandlers, ...fulfillmentHandlers, ...staffHandlers, ...supervisorTeamHandlers, ...adminHandlers, ...commonHandlers, ...affiliateHandlers, ...sellerProfileHandlers, ...leadOrdersHandlers, ...operatorHandlers];
 
 /**
  * Dev rejimida mock'i yo'q API so'rovi jimgina haqiqiy serverga ketmasin: aniq 501

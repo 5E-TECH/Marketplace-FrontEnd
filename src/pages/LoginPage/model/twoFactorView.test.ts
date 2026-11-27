@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { formatRecoveryInput, otpauthAccount, recoveryCodesText, secretGroups } from './twoFactorView';
+import { formatRecoveryInput } from '../../../features/auth/api/twoFactorApi';
+import { otpauthAccount, recoveryCodesText, secretGroups } from './twoFactorView';
 
 describe('2FA ko‘rinish yordamchilari (FE-27)', () => {
   it('kalit to‘rtlik guruhlarda: backend 32 belgili siri 8 guruh', () => {

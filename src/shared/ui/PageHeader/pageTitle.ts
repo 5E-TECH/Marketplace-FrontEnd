@@ -13,21 +13,23 @@ export interface PageBack {
   label: string;
 }
 
-export const PageBackContext = createContext<((back: PageBack | null) => void) | null>(null);
+export const PageBackContext = createContext<((back: PageBack | 'none' | null) => void) | null>(null);
 
 /**
  * Sahifa «orqaga» manzilini beradi (masalan, `/admin/moderation?tab=prices` — «Narx navbati»): bo'lim manzili
- * boshqa yorliqni ochadigan bo'lsa. `null` — bo'lim manzili.
+ * boshqa yorliqni ochadigan bo'lsa. `null` — bo'lim manzili; `'none'` — havola yo'q (ichki sahifa ro'yxat yonida
+ * panelda ochilgan: admin-foydalanuvchi-karta desktop va planshetda).
  */
-export function usePageBack(back: PageBack | null): void {
+export function usePageBack(back: PageBack | 'none' | null): void {
   const setBack = useContext(PageBackContext);
-  const path = back?.path ?? null;
-  const label = back?.label ?? null;
+  const none = back === 'none';
+  const path = back && back !== 'none' ? back.path : null;
+  const label = back && back !== 'none' ? back.label : null;
   useLayoutEffect(() => {
     if (!setBack) return;
-    setBack(path && label ? { path, label } : null);
+    setBack(none ? 'none' : path && label ? { path, label } : null);
     return () => setBack(null);
-  }, [setBack, path, label]);
+  }, [setBack, none, path, label]);
 }
 
 /** Karkas ichidami — PageHeader o'z `h1` ini chizmasligi uchun. */

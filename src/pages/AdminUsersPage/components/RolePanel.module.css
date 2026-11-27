@@ -1,0 +1,68 @@
+/* Rol paneli (admin-rollar.holatlar «Rol tanlandi»): o'ngda 480 px — sarlavha, aylanadigan mazmun, pastki qator. */
+.panel { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: var(--color-surface); }
+
+.head { display: flex; align-items: flex-start; gap: 12px; padding: 20px 20px 14px; border-bottom: 1px solid var(--color-border); }
+.headIcon, .pageIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.headIcon > svg, .pageIcon > svg { width: 18px; height: 18px; }
+.headText { flex: 1 1 auto; min-width: 0; }
+.title { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.sub { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.close { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 32px; height: 32px; margin: -4px -4px 0 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.close > svg { width: 18px; height: 18px; }
+.close:hover { background: var(--color-sunken); color: var(--color-text); }
+
+.scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 20px; }
+.body { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+.facts { margin: -10px 0; min-width: 0; }
+.facts > div { display: flex; gap: 16px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.facts > div:last-child { border-bottom: 0; }
+.facts dt { flex: 0 0 110px; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+.facts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.blockTitle { margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.perms { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.perms li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; line-height: 20px; }
+.perms li > svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--color-success); }
+.permSuffix { color: var(--color-text-secondary); font-weight: 500; }
+.permReason { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.menu { margin: -4px 0 0; padding: 0; list-style: none; }
+.menu li { display: flex; align-items: center; gap: 10px; height: 40px; box-sizing: content-box; border-bottom: 1px solid var(--color-border); }
+.menu li:last-child { border-bottom: 0; }
+.menuIcon { display: inline-flex; flex: none; color: var(--color-text-secondary); }
+.menuIcon svg { width: 18px; height: 18px; }
+.menuLabel { flex: 1 1 auto; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 500; }
+
+.people { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.person { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.personText { flex: 1 1 auto; min-width: 0; }
+.personName { display: block; font-size: 14px; line-height: 20px; font-weight: 600; }
+.personSub { display: block; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.summary { display: flex; flex-direction: column; align-items: flex-start; }
+.summaryText { margin: 0 0 6px; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+
+.note { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.note > svg { flex: none; width: 16px; height: 16px; margin-top: 1px; }
+
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--color-border); }
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.link > svg { width: 16px; height: 16px; }
+.link:hover { text-decoration: underline; }
+.summary .link { min-height: 44px; margin: -12px 0; }
+.outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface); color: var(--color-text); font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.outline:hover { border-color: var(--color-border-hover); color: var(--color-text); }
+.close:focus-visible, .link:focus-visible, .outline:focus-visible, .pageAction:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); border-radius: 10px; }
+
+/* Telefon (admin-rollar.holatlar «Telefon, 390 — rol sahifasi»): sarlavha yuqori qatorda, mazmun kartada. */
+.page { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pageHead { display: flex; align-items: center; gap: 12px; }
+.pageIcon { width: 40px; height: 40px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
+.pageSub { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.pageCode { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.card { min-width: 0; padding: 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.pageActions { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.pageAction { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 0 16px; box-sizing: border-box; color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; }
+.pageAction + .pageAction { border-top: 1px solid var(--color-border); }
+.pageAction > svg { width: 18px; height: 18px; flex: none; }

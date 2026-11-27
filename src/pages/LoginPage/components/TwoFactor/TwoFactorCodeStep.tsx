@@ -1,17 +1,17 @@
 import { App, Button, Form, Input } from 'antd';
 import { useState } from 'react';
 import { useTokenSignInMutation } from '../../../../features/auth/api/useLoginMutation';
-import { normalizeRecoveryCode, readTwoFactorFailure, verifyTwoFactor } from '../../../../features/auth/api/twoFactorApi';
+import { formatRecoveryInput, normalizeRecoveryCode, readTwoFactorFailure, verifyTwoFactor } from '../../../../features/auth/api/twoFactorApi';
 import type { TwoFactorChallenge } from '../../../../features/auth/model/authTypes';
 import { normalizeOtpCode, otpCodeDigits, pendingLoading } from '../../../../features/sellerAuth/lib/fieldRules';
 import { useTranslation } from '../../../../shared/i18n/useTranslation';
 import { AuthNotice } from '../../../../shared/ui/AuthLayout/AuthNotice';
 import authStyles from '../../../../shared/ui/AuthLayout/authForm.module.css';
-import { formatRecoveryInput, type TwoFactorLeave } from '../../model/twoFactorView';
-import { useAttemptGuard } from '../../model/useAttemptGuard';
+import type { TwoFactorLeave } from '../../model/twoFactorView';
+import { useAttemptGuard } from '../../../../features/auth/lib/useAttemptGuard';
 import { BlockedView } from './BlockedView';
 import { IdentityCard } from './IdentityCard';
-import { LostPhoneDialog } from './LostPhoneDialog';
+import { LostPhoneDialog } from '../../../../features/auth/ui/TwoFactor/LostPhoneDialog';
 import styles from './TwoFactor.module.css';
 
 interface CodeStepProps {

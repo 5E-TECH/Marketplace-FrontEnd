@@ -33,7 +33,8 @@ const fresh = (): MockTwoFactorAccount => ({ secret: null, enabledAt: null, last
 export function mockTwoFactor() {
   return {
     enabled: false,
-    accounts: { '900000006': fresh(), '900000007': enrolled(), '900000008': enrolled() } as Record<string, MockTwoFactorAccount>,
+    // Moliya Ozoda Botirova (FE-15, 2FA tiklash namunasi) — ilova ulangan.
+    accounts: { '900000006': fresh(), '900000007': enrolled(), '900000008': enrolled(), '911001009': enrolled() } as Record<string, MockTwoFactorAccount>,
     /** `challengeToken` → telefon va muddat (backend: alohida sir bilan JWT, 5 daqiqa). */
     challenges: new Map<string, { digits: string; expiresAt: number }>(),
   };

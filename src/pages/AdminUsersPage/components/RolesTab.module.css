@@ -1,0 +1,187 @@
+/* admin-rollar (№168): faqat ko'rish — eslatma, «Sakkiz rol», «Kim nima qila oladi», «Qoidalar». */
+.tab { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nowrap { white-space: nowrap; }
+
+/* «Rollar: faqat ko‘rish» — desktopda yuqori qatorda h1 yonida, planshet va telefonda yorliqlar ostida. */
+.readonly { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; white-space: nowrap; }
+.readonly > svg { width: 14px; height: 14px; }
+.readonly > span { color: var(--color-text); font-weight: 600; }
+.narrowBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-width: 0; }
+.narrowBar .link { min-height: 44px; margin: -12px 0; }
+
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.link > svg { width: 16px; height: 16px; }
+.link:hover { text-decoration: underline; }
+
+.note { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); box-shadow: inset 0 0 0 1px var(--color-border); }
+.note > svg { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--color-text-secondary); }
+.note > div { min-width: 0; }
+.noteTitle { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 20px; font-weight: 700; }
+.noteText { margin: 2px 0 0; font-size: 14px; line-height: 21px; }
+
+.section { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.sectionHead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; min-width: 0; }
+.sectionText { flex: 1 1 260px; min-width: 0; }
+.sectionTitle { margin: 0; font-size: 16px; line-height: 24px; font-weight: 700; }
+.sectionSub { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.outlineButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.outlineButton > svg { width: 16px; height: 16px; }
+.outlineButton:hover { border-color: var(--color-border-hover); }
+
+/* ── Sakkiz rol ── */
+/* `relative` — ichidagi yashirin matn (`visuallyHidden`, absolute) skroll ichida qoladi, sahifani kengaytirmaydi. */
+.tableWrap { position: relative; min-width: 0; overflow-x: auto; }
+.table, .whoTable { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table thead th, .whoTable thead th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.table thead th:first-child, .whoTable thead th:first-child { border-radius: 12px 0 0 12px; }
+.table thead th:last-child, .whoTable thead th:last-child { border-radius: 0 12px 12px 0; }
+.table td { height: 52px; padding: 10px 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; text-align: left; white-space: nowrap; }
+.table tr[data-last] td { border-bottom: 0; }
+.table .end { text-align: right; }
+.table .wrap { white-space: normal; }
+.whoCol { max-width: 200px; }
+.jobCol { max-width: 320px; }
+.groupRow td { height: 36px; padding: 0 14px; background: var(--color-row-hover); color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: normal; }
+
+.roleStack { display: flex; flex-direction: column; }
+.roleName { font-size: 14px; line-height: 20px; font-weight: 700; }
+.roleCode { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.02em; }
+.roleButton { display: inline-flex; flex-direction: column; align-items: flex-start; margin: -4px -6px; padding: 4px 6px; border: 0; border-radius: 8px; background: transparent; color: var(--color-action); font-family: inherit; text-align: left; cursor: pointer; }
+.roleButton .roleName { color: var(--color-action); }
+.roleButton:hover .roleName { text-decoration: underline; }
+.roleButton[aria-pressed='true'] { background: var(--color-action-soft); }
+/* Planshet (admin-rollar.planshet): 5 ustun, kataklar tepadan, rol nomi — panelni ochadigan tugma. */
+.tableTablet { table-layout: fixed; }
+.tableTablet thead th { height: 48px; padding: 0 10px; }
+.tableTablet thead th:first-child { padding-left: 14px; }
+.tableTablet thead th:last-child { padding-right: 14px; }
+.tableTablet .colRole { width: 128px; }
+.tableTablet .colLogin { width: 140px; }
+.tableTablet .colMenu { width: 84px; }
+.tableTablet .colPeople { width: 118px; }
+.tableTablet td { height: auto; padding: 10px; vertical-align: top; white-space: normal; }
+.tableTablet td:first-child { padding-left: 14px; }
+.tableTablet td:last-child { padding-right: 14px; }
+.tableTablet .groupRow td { height: 36px; padding: 0 14px; vertical-align: middle; }
+.tableTablet .unknownCell { padding: 12px 14px !important; }
+.tableTablet .stackSub { white-space: normal; text-align: right; }
+.tableTablet .login { display: flex; align-items: flex-start; }
+.tableTablet .login > svg { margin-top: 2px; }
+.tableTablet .roleButton { display: flex; justify-content: center; min-height: 44px; margin: -6px 0; padding: 0; border-radius: 6px; }
+.tableTablet .roleButton[aria-pressed='true'] { background: transparent; }
+.whoLine { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+
+.login { display: inline-flex; align-items: center; gap: 6px; }
+.login > svg { flex: none; width: 16px; height: 16px; color: var(--color-text-secondary); }
+.decision { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 500; }
+
+.stack { display: flex; flex-direction: column; }
+.stackEnd { align-items: flex-end; }
+.stackMain { font-size: 14px; line-height: 20px; font-weight: 500; }
+.stackCount { font-size: 14px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stackSub { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; white-space: nowrap; }
+
+.unknownCell { padding: 10px 14px !important; white-space: normal !important; }
+.unknown { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.unknownText { flex: 1 1 320px; min-width: 0; font-size: 14px; line-height: 20px; }
+.unknownText strong { font-weight: 600; }
+.unknownLink { margin-left: auto; }
+
+/* Telefon: rollar kartalari (admin-rollar.mobil). */
+.roleCards { margin: 0 -16px -16px; padding: 0; border-top: 1px solid var(--color-border); list-style: none; }
+.cardGroup { padding: 10px 16px; border-bottom: 1px solid var(--color-border); background: var(--color-row-hover); color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.cardItem { border-bottom: 1px solid var(--color-border); }
+.cardItem:last-child { border-bottom: 0; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; color: var(--color-text); text-decoration: none; }
+.card:hover { background: var(--color-row-hover); color: var(--color-text); }
+.cardTop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cardName { min-width: 0; font-size: 15px; line-height: 22px; font-weight: 700; }
+.cardCount { flex: none; font-size: 15px; line-height: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cardMeta { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: -4px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.cardPeople { flex: 0 1 auto; max-width: 46%; text-align: right; font-variant-numeric: tabular-nums; }
+.cardJob { font-size: 14px; line-height: 21px; }
+.cardLogin { display: flex; align-items: flex-start; gap: 6px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardLogin > svg { flex: none; width: 16px; height: 16px; margin-top: 1px; }
+.cardUnknown { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--color-border); background: var(--color-warning-soft); }
+.cardUnknown .unknownText { font-size: 14px; line-height: 21px; }
+.cardUnknown .link { min-height: 44px; margin: -12px 0; }
+
+/* ── Kim nima qila oladi ── */
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.legendItem { display: inline-flex; align-items: center; gap: 8px; }
+.yes { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: var(--color-success-soft); color: var(--color-success); }
+.yes > svg { width: 16px; height: 16px; }
+.no { color: var(--color-text-faint); font-weight: 600; }
+.ownChip { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 9px; box-sizing: border-box; border-radius: 999px; background: var(--color-sunken); color: var(--color-text); box-shadow: inset 0 0 0 1px var(--color-border-strong); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; cursor: help; }
+.ownChip > svg { width: 14px; height: 14px; color: var(--color-text-secondary); }
+.ownChip:focus-visible { outline: none; box-shadow: inset 0 0 0 1px var(--color-border-strong), 0 0 0 3px var(--color-focus-ring); }
+.tooltip :global(.ant-tooltip-container) { min-height: 0; max-width: 260px; padding: 6px 10px; border-radius: 8px; color: var(--color-bg); font-size: 12px; line-height: 18px; font-weight: 600; }
+
+.matrixWrap { position: relative; overflow-x: auto; min-width: 0; }
+.matrix { width: 100%; min-width: 1060px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+.matrix thead th { height: 56px; box-sizing: border-box; background: var(--color-sunken); }
+.actionCol { padding: 0 14px; border-radius: 12px 0 0 12px; color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; }
+.roleCol { width: 106px; padding: 0 4px; text-align: center; vertical-align: middle; }
+.roleCol:last-child { border-radius: 0 12px 12px 0; }
+.matrix thead th[data-selected], .matrix td[data-selected] { background: var(--color-action-soft); }
+.colButton { display: inline-flex; flex-direction: column; align-items: center; margin: 0; padding: 4px 2px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; cursor: pointer; }
+.colButton:hover .colName { color: var(--color-action); }
+.colButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.colName { color: var(--color-text); font-size: 12px; line-height: 18px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.colButton[aria-pressed='true'] .colName { color: var(--color-action); }
+.colCount { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.matrix tbody th, .matrix tbody td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; }
+.matrix tbody tr:last-child th, .matrix tbody tr:last-child td { border-bottom: 0; }
+.matrix tbody td { text-align: center; white-space: nowrap; }
+.actionCell { font-weight: 600; text-align: left; white-space: normal; }
+.actionNote { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-weight: 500; }
+
+/* Planshet va telefon: har amal yonida — uni bajaradigan rollar. */
+.whoTable { table-layout: fixed; }
+.whoTable thead th { height: 48px; padding: 0 10px; }
+.whoTable thead th:first-child { width: 280px; padding-left: 14px; }
+.whoTable tbody th, .whoTable tbody td { padding: 10px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); font-size: 14px; line-height: 21px; text-align: left; vertical-align: top; }
+.whoTable tbody th { padding-left: 14px; font-weight: 600; }
+.whoTable tbody tr:last-child th, .whoTable tbody tr:last-child td { border-bottom: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.roleChip, .ownRoleChip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; box-sizing: border-box; border-radius: 999px; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.roleChip { background: var(--color-success-soft); color: var(--color-success); }
+.roleChip > svg { width: 14px; height: 14px; }
+.ownRoleChip { padding: 0 10px; background: var(--color-sunken); color: var(--color-text); box-shadow: inset 0 0 0 1px var(--color-border-strong); }
+.ownReason { display: block; margin-top: 6px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.permList { margin: 0 -16px -16px; padding: 0; border-top: 1px solid var(--color-border); list-style: none; }
+.permList > li { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--color-border); }
+.permList > li:last-child { border-bottom: 0; }
+.permTitle { font-size: 15px; line-height: 22px; font-weight: 600; }
+
+/* ── Qoidalar ── */
+.rules { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.rule { display: flex; gap: 12px; min-width: 0; padding: 14px 16px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
+.ruleIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.ruleIcon > svg { width: 18px; height: 18px; }
+.rule > div { min-width: 0; }
+.ruleTitle { margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; }
+.ruleText { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+
+.link:focus-visible, .roleButton:focus-visible, .card:focus-visible, .outlineButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); border-radius: 8px; }
+
+@media (max-width: 1023.98px) {
+  .section { padding: 16px 20px; }
+  .rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767.98px) {
+  .section { padding: 16px; }
+  .rules { grid-template-columns: minmax(0, 1fr); }
+  .outlineButton { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 14px; line-height: 20px; }
+}
+
+/* «Chop etish»: faqat «Kim nima qila oladi» bo'limi. */
+@media print {
+  :global(body *) { visibility: hidden; }
+  .printable, .printable * { visibility: visible; }
+  .printable { position: absolute; top: 0; left: 0; width: 100%; border: 0; }
+  .printable .outlineButton { display: none; }
+}

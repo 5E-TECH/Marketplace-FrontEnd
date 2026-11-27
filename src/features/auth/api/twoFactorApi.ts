@@ -61,6 +61,12 @@ export async function verifyTwoFactor({ challengeToken, code, recoveryCode }: { 
 
 /** Zaxira kod backendda aynan berilganidek tekshiriladi: tire va bo'shliqlar olib tashlanadi, katta harf. */
 export const normalizeRecoveryCode = (value: string) => value.replace(/[^0-9a-z]/gi, '').toUpperCase();
+/** Zaxira kod maydoni: katta harf, faqat harf va raqam, «K7QM2-XPA4D» ko'rinishida (backend: 10 belgi). */
+export function formatRecoveryInput(value: unknown): string {
+  const clean = (typeof value === 'string' ? value : '').replace(/[^0-9a-z]/gi, '').toUpperCase().slice(0, 20);
+  return clean.length > 5 ? `${clean.slice(0, 5)}-${clean.slice(5)}` : clean;
+}
+
 /** Ekranda o'qish oson bo'lishi uchun «K7QM2-XPA4D» (backend: 10 belgi, tiresiz). */
 export const formatRecoveryCode = (code: string) => (code.length > 5 ? `${code.slice(0, Math.ceil(code.length / 2))}-${code.slice(Math.ceil(code.length / 2))}` : code);
 

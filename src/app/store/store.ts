@@ -3,6 +3,7 @@ import { authStorage } from '../../features/auth/lib/authStorage';
 import { broadcastLogout, sessionHint } from '../../features/auth/lib/sessionSync';
 import {
   accessTokenRefreshed,
+  accountLocked,
   authenticated,
   authReducer,
   impersonationEnded,
@@ -77,14 +78,16 @@ authPersistence.startListening({
   },
 });
 
-// Sessiya tugadi: token tozalanadi, sahifa va kesh joyida (qayta kirish oynasi).
-authPersistence.startListening({
-  actionCreator: sessionExpired,
-  effect: () => {
-    authStorage.clear();
-    sessionHint.clear();
-  },
-});
+// Sessiya tugadi yoki hisob yopildi (FE-15): token tozalanadi, sahifa va kesh joyida (ustida oyna).
+for (const actionCreator of [sessionExpired, accountLocked]) {
+  authPersistence.startListening({
+    actionCreator,
+    effect: () => {
+      authStorage.clear();
+      sessionHint.clear();
+    },
+  });
+}
 
 export const store = configureStore({
   reducer: {

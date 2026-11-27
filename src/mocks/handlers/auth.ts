@@ -10,7 +10,7 @@ import {
   TWO_FACTOR_ROLES,
   type MockTwoFactorAccount,
 } from '../fixtures/twoFactor';
-import { digitsOf, findMockUser, MOCK_WRONG_PASSWORD, mockTokenFor, userFromMockToken, type MockAccount } from '../fixtures/users';
+import { allMockAccounts, digitsOf, findMockUser, findMockUserById, MOCK_WRONG_PASSWORD, mockTokenFor, recordMockLogin, userFromMockToken, type MockAccount } from '../fixtures/users';
 import { verifyTotp } from '../totp';
 import { API, bearerToken, fail, ok } from '../utils';
 
@@ -20,12 +20,68 @@ import { API, bearerToken, fail, ok } from '../utils';
  */
 const SESSION_COOKIE = 'elchi_mock_session';
 
-export const sessionCookie = (user: Pick<MockAccount, 'phone'>) => `${SESSION_COOKIE}=${user.phone.slice(-9)}; Path=/; SameSite=Lax`;
+/** Refresh cookie: telefonning 9 raqami va sessiyalar avlodi (backend sessiyalarni bekor qilsa — eski cookie yaroqsiz). */
+export function sessionCookie(user: Pick<MockAccount, 'phone'>): string {
+  const epoch = findMockUser(user.phone)?.sessionEpoch ?? 0;
+  return `${SESSION_COOKIE}=${user.phone.slice(-9)}${epoch ? `.${epoch.toString()}` : ''}; Path=/; SameSite=Lax`;
+}
 const clearedCookie = `${SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
 
-/** Bearer token (body rejimi) yoki mock cookie — qaysi foydalanuvchi so'rayapti. */
+/** Cookie egasi va sessiyasi hali amaldami (bekor qilinmagan, hisob o'chirilmagan). */
+function sessionFromCookie(value: string | undefined): { account: MockAccount; revoked: boolean } | null {
+  const match = /^(\d{9})(?:\.(\d+))?$/.exec(value ?? '');
+  const account = match ? findMockUser(match[1]) : null;
+  if (!match || !account || account.isDeleted) return null;
+  return { account, revoked: Number(match[2] ?? 0) !== account.sessionEpoch };
+}
+
+/**
+ * Bearer token (body rejimi) yoki mock cookie — qaysi foydalanuvchi so'rayapti. Token kelgan bo'lsa faqat u
+ * tekshiriladi: bloklangan yoki roli o'zgargan xodimning eski tokeni darhol rad etiladi (backend `CurrentRoleGuard`).
+ */
 export function currentMockUser(request: Request, cookies: Record<string, string>): MockAccount | null {
-  return userFromMockToken(bearerToken(request)) ?? (cookies[SESSION_COOKIE] ? findMockUser(cookies[SESSION_COOKIE]) : null);
+  const token = bearerToken(request);
+  if (token) return userFromMockToken(token);
+  const session = sessionFromCookie(cookies[SESSION_COOKIE]);
+  return session && !session.revoked && !session.account.isBlocked ? session.account : null;
+}
+
+/** Operator jamoasining nazoratchisi (taklif fe-15 §15: `/auth/me` `team`, blok sahifasidagi «Nazoratchi»). */
+function supervisorNameOf(account: MockAccount): string | null {
+  const teamId = account.staff?.teamId;
+  const team = teamId ? db.teams.find((item) => item.id === teamId) : null;
+  return team ? findMockUserById(team.supervisorId)?.name ?? null : null;
+}
+
+/**
+ * Hisob yopiq — taklif (fe-15 §15): 401 `ACCOUNT_BLOCKED` | `ACCOUNT_INACTIVE` va `account` tafsiloti (kim, qachon,
+ * kim qaror qildi, sabab; sotuvchida dalil, asos, sahifalar va pul). Backend hozir: login «Hisobingiz bloklangan»,
+ * refresh «Hisob faol emas», SMS kod — «hisob topilmadi». Faqat parol yoki kod to'g'ri bo'lgach beriladi.
+ */
+export function accountLockResponse(account: MockAccount) {
+  if (!account.isBlocked && account.isActive) return null;
+  const base = { id: account.id, name: account.name, role: account.role, supervisorName: account.role === 'OPERATOR_LEAD' ? supervisorNameOf(account) : null };
+  if (!account.isBlocked) {
+    const inactive = account.staff?.inactive;
+    return fail(401, 'ACCOUNT_INACTIVE', 'Hisob faol emas', undefined, {
+      account: { ...base, at: inactive?.at ?? null, by: inactive ? { name: inactive.by, role: 'SUPERVISOR' } : null, reason: inactive?.reason ?? null },
+    });
+  }
+  const block = account.staff?.block ?? account.seller?.block ?? null;
+  const actor = block ? allMockAccounts().find((item) => item.name === block.by) : null;
+  const seller = account.role === 'AFFILIATE' || account.role === 'WHOLESALER';
+  return fail(401, 'ACCOUNT_BLOCKED', 'Hisobingiz bloklangan', undefined, {
+    account: {
+      ...base,
+      at: block?.at ?? null,
+      by: block ? { name: block.by, role: actor?.role ?? 'ADMIN' } : null,
+      reason: block?.reason ?? null,
+      evidence: account.seller?.block?.evidence ?? null,
+      basis: seller ? 'oferta' : null,
+      // Taklif §11: blok sotuvchi sahifalarini to'xtatadi; ushlab turilgan haq bekor, balans — mock 0.
+      seller: seller ? { pagesStopped: true, heldBonus: { amount: 0, cancelled: true }, balance: 0 } : null,
+    },
+  });
 }
 
 /**
@@ -87,11 +143,19 @@ export const authHandlers = [
   http.post(`${API}/auth/login`, async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as { phone?: unknown; password?: unknown };
     const user = typeof body.phone === 'string' ? findMockUser(body.phone) : null;
-    if (!user || typeof body.password !== 'string' || !body.password || body.password === MOCK_WRONG_PASSWORD) {
+    if (!user || user.isDeleted || typeof body.password !== 'string' || !body.password || body.password === MOCK_WRONG_PASSWORD) {
+      if (user) recordMockLogin(user, request, 'WRONG_PASSWORD', 'PASSWORD');
       return fail(401, 'UNAUTHENTICATED', 'Telefon yoki parol xato');
+    }
+    // Backend: parol to'g'ri bo'lgach — bloklangan hisob kirmaydi. Taklif (fe-15 §14–15): nofaol ham; `errorCode` va tafsilot.
+    const locked = accountLockResponse(user);
+    if (locked) {
+      recordMockLogin(user, request, 'BLOCKED', 'PASSWORD');
+      return locked;
     }
     // BE-26: `ADMIN_2FA=on` — admin, superadmin va moliya sessiya o'rniga 2FA bosqichini oladi (cookie yozilmaydi).
     if (db.twoFactor.enabled && TWO_FACTOR_ROLES.includes(user.role)) return ok(challengeFor(user));
+    recordMockLogin(user, request, 'SUCCESS', 'PASSWORD');
     return ok({ accessToken: mockTokenFor(user) }, 200, { 'Set-Cookie': sessionCookie(user) });
   }),
 
@@ -117,6 +181,7 @@ export const authHandlers = [
     if (typeof step !== 'number') return step;
     Object.assign(account, { enabledAt: new Date().toISOString(), lastStep: step, recovery: [...MOCK_NEW_RECOVERY_CODES], failed: 0, blockedUntil: null, reset: null });
     db.twoFactor.challenges.delete(subject.token);
+    recordMockLogin(user, request, 'SUCCESS', 'PASSWORD_CODE');
     return ok({ recoveryCodes: [...MOCK_NEW_RECOVERY_CODES], accessToken: mockTokenFor(user) }, 200, { 'Set-Cookie': sessionCookie(user) });
   }),
 
@@ -132,41 +197,55 @@ export const authHandlers = [
       if (blocked) return blocked;
       // Backend kodni aynan kelganidek HMAC qiladi — tire, bo'shliq yoki kichik harf mos kelmaydi.
       const index = account.recovery.indexOf(body.recoveryCode);
-      if (index < 0) return wrongCode(account, 'Tiklash kodi noto‘g‘ri');
+      if (index < 0) {
+        recordMockLogin(user, request, 'WRONG_CODE', 'RECOVERY_CODE');
+        return wrongCode(account, 'Tiklash kodi noto‘g‘ri');
+      }
       account.recovery.splice(index, 1);
       Object.assign(account, { failed: 0, blockedUntil: null });
     } else {
       const step = checkCode(account, typeof body.code === 'string' ? body.code : '');
-      if (typeof step !== 'number') return step;
+      if (typeof step !== 'number') {
+        recordMockLogin(user, request, 'WRONG_CODE', 'PASSWORD_CODE');
+        return step;
+      }
       Object.assign(account, { lastStep: step, failed: 0, blockedUntil: null });
     }
     db.twoFactor.challenges.delete(subject.token);
+    recordMockLogin(user, request, 'SUCCESS', typeof body.recoveryCode === 'string' && body.recoveryCode ? 'RECOVERY_CODE' : 'PASSWORD_CODE');
     return ok({ accessToken: mockTokenFor(user) }, 200, { 'Set-Cookie': sessionCookie(user) });
-  }),
-
-  // BE-26 (FE-15 ekrani): superadmin xodimning 2FA sini nolga tushiradi — keyingi kirishda qayta ulaydi.
-  http.post(`${API}/admin/users/:id/2fa/reset`, ({ request, cookies, params }) => {
-    const actor = currentMockUser(request, cookies);
-    if (!actor) return fail(401, 'UNAUTHENTICATED', 'Sessiya tugagan');
-    if (actor.role !== 'SUPERADMIN') return fail(403, 'FORBIDDEN', '2FA ni faqat superadmin nolga tushiradi');
-    const target = Object.entries(db.twoFactor.accounts).find(([digits]) => findMockUser(digits)?.id === params.id);
-    if (!target) return fail(404, 'NOT_FOUND', 'Foydalanuvchi topilmadi');
-    db.twoFactor.accounts[target[0]] = { ...freshTwoFactorAccount(), reset: { by: actor.name, at: new Date().toISOString() } };
-    return ok({ reset: true });
   }),
 
   http.get(`${API}/auth/me`, ({ request, cookies }) => {
     const user = currentMockUser(request, cookies);
-    return user ? ok(user) : fail(401, 'UNAUTHENTICATED', 'Sessiya tugagan');
+    if (!user) return fail(401, 'UNAUTHENTICATED', 'Token bekor qilingan, qayta tizimga kiring');
+    // Backend `CurrentUserDto`: hisob maydonlari va `totpEnabledAt` (karta ma'lumoti va sessiya avlodi — mock ichki holati).
+    const { id, role, name, phone, email, avatarUrl, isActive, isDeleted, isBlocked, authVersion, staff } = user;
+    const supervisorName = role === 'OPERATOR_LEAD' ? supervisorNameOf(user) : null;
+    return ok({
+      id, role, name, phone, email, avatarUrl, isActive, isDeleted, isBlocked, authVersion,
+      firstName: staff?.firstName ?? null, lastName: staff?.lastName ?? null, totpEnabledAt: db.twoFactor.accounts[digitsOf(phone)]?.enabledAt ?? null,
+      // Taklif (fe-15 §15): oxirgi rol o'zgarishi va operator jamoasi — «Rolingiz o‘zgardi» sahifasi.
+      roleChange: user.lastRoleChange ?? null,
+      team: supervisorName ? { id: staff?.teamId, supervisorName } : null,
+    });
   }),
 
+  // Backend: bloklangan — «Hisob faol emas»; sessiyalar bekor qilingan (rol, 2FA tiklash) — «Sessiya bekor qilingan».
+  // Taklif (fe-15 §15): bloklangan yoki nofaol — sessiya bekor qilingan bo'lsa ham `ACCOUNT_*` va tafsilot.
   http.post(`${API}/auth/refresh`, ({ cookies }) => {
-    const user = cookies[SESSION_COOKIE] ? findMockUser(cookies[SESSION_COOKIE]) : null;
-    if (!user) return fail(401, 'UNAUTHENTICATED', 'Refresh token topilmadi');
-    return ok({ accessToken: mockTokenFor(user) }, 200, { 'Set-Cookie': sessionCookie(user) });
+    const session = sessionFromCookie(cookies[SESSION_COOKIE]);
+    if (!session) return fail(401, 'UNAUTHENTICATED', 'Refresh token topilmadi');
+    const locked = accountLockResponse(session.account);
+    if (locked) return locked;
+    if (session.revoked) return fail(401, 'UNAUTHENTICATED', 'Sessiya bekor qilingan');
+    return ok({ accessToken: mockTokenFor(session.account) }, 200, { 'Set-Cookie': sessionCookie(session.account) });
   }),
 
-  http.post(`${API}/auth/logout`, () => {
+  // Backend chiqishda foydalanuvchining hamma refresh sessiyasini bekor qiladi; mock — shu brauzer sessiyasi.
+  http.post(`${API}/auth/logout`, ({ request, cookies }) => {
+    const user = currentMockUser(request, cookies) ?? sessionFromCookie(cookies[SESSION_COOKIE])?.account;
+    if (user?.staff) user.staff.sessions = user.staff.sessions.filter((item) => !item.live);
     return ok(null, 200, { 'Set-Cookie': clearedCookie });
   }),
 

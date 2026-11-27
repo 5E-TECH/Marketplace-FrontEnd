@@ -1,0 +1,181 @@
+/* «Xodimlar» (admin-foydalanuvchilar №165 + .planshet/.mobil/.holatlar): banner, filtrlar, guruhlangan jadval,
+   telefon kartalari, bo'sh natija, izohlar. */
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tabletOnly { display: none; }
+
+/* ── Roli noma'lum xodim banneri ── */
+.banner { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-warning-soft); }
+.banner > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--color-warning); }
+.banner > div { min-width: 0; }
+.banner p { margin: 0; }
+.bannerTitle { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--color-warning); }
+.bannerText { margin-top: 2px !important; font-size: 14px; line-height: 21px; color: var(--color-text); }
+.bannerAction { margin-top: 6px; }
+.bannerLink { display: inline-flex; align-items: center; height: 24px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+
+/* ── Panel va filtrlar ── */
+.panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 20px; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.search { position: relative; display: block; flex: 0 1 300px; min-width: 0; }
+.search > svg { position: absolute; top: 50%; left: 16px; width: 18px; height: 18px; transform: translateY(-50%); color: var(--color-text-secondary); pointer-events: none; }
+.search input { display: block; width: 100%; height: 40px; margin: 0; padding: 0 16px 0 42px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; }
+.search input::placeholder { color: var(--color-text-faint); }
+.search input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.resetButton, .ghostButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.resetButton > svg { width: 16px; height: 16px; }
+.resetButton:hover, .ghostButton:hover { background: var(--color-action-soft); }
+
+/* ── Jadval ── */
+/* `relative` — ichidagi yashirin matn (`visuallyHidden`, absolute) skroll ichida qoladi, sahifani kengaytirmaydi. */
+.tableWrap { position: relative; min-width: 0; overflow-x: auto; }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.colStaff { width: 20%; }
+.colLogin { width: 12%; }
+.colTfa { width: 24%; }
+.colLast { width: 14%; }
+.colActions { width: 36px; }
+.table thead th { height: 44px; padding: 0 14px; box-sizing: border-box; background: var(--color-sunken); color: var(--color-text-secondary); font-size: 12px; line-height: 18px; font-weight: 600; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.table thead th:first-child { border-radius: 12px 0 0 12px; }
+.table thead th:last-child { border-radius: 0 12px 12px 0; }
+.sortButton { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-text-secondary); font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.sortButton > svg { width: 14px; height: 14px; }
+.sortButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); border-radius: 4px; }
+
+.groupRow th { padding: 18px 14px 8px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-weight: 400; text-align: left; font-variant-numeric: tabular-nums; }
+.groupRow strong { color: var(--color-text); font-weight: 700; }
+.groupHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.groupLink, .cardsGroupLink { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.groupLink > svg, .cardsGroupLink > svg { width: 16px; height: 16px; }
+.groupLink:hover, .cardsGroupLink:hover { text-decoration: underline; }
+/* Sarlavha qatorida, o'ngda: «‹Sotuvchilar› bo‘limi ›». */
+.sectionLink { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.sectionLink > svg { width: 16px; height: 16px; }
+.sectionLink:hover { text-decoration: underline; }
+.sectionLink:focus-visible, .groupLink:focus-visible { outline: none; border-radius: 4px; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.table td { height: 52px; padding: 0 14px; box-sizing: border-box; border-bottom: 1px solid var(--color-border); color: var(--color-text); font-size: 14px; line-height: 21px; text-align: left; white-space: nowrap; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.row { cursor: pointer; }
+.row:hover td { background: var(--color-row-hover); }
+.row[aria-selected='true'] td { background: var(--color-action-soft); }
+/* Karta ochiq (admin-foydalanuvchi-karta): xodim 40% · oxirgi kirish · holat. */
+.table[data-compact] .colStaff { width: 28%; }
+.table[data-compact] .colLast { width: 23%; }
+.tfaCell { padding-top: 6px !important; padding-bottom: 6px !important; }
+/* «Sotuvchilar»: holat ostida «14.01.2027 dan»; sarlavhadagi saralash (oxirgi kirish, kamayish) — o'zgarmas. */
+.since { display: block; margin-top: 3px; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.sortStatic { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text); }
+.sortStatic > svg { width: 14px; height: 14px; }
+.endCol { text-align: right !important; }
+.rowEnd { display: inline-flex; align-items: center; gap: 4px; }
+.ownerName { font-size: 14px; line-height: 20px; font-weight: 500; }
+.numeric { font-variant-numeric: tabular-nums; }
+.actionsCol { width: 36px; padding-left: 4px !important; text-align: right !important; }
+
+.person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.personText { display: flex; flex-direction: column; min-width: 0; }
+.personName { font-size: 14px; line-height: 20px; font-weight: 600; }
+.you { color: var(--color-text-secondary); font-weight: 500; }
+.personCode { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.loginStack { display: flex; flex-direction: column; }
+.loginStack > span { color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+
+.statusCell { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.statusCell[data-stacked] { flex-direction: column; align-items: flex-start; gap: 4px; }
+.outlineSmall { display: inline-flex; align-items: center; justify-content: center; height: 32px; margin: 0; padding: 0 12px; box-sizing: border-box; border: 1px solid var(--color-action); border-radius: 10px; background: var(--color-surface); color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.outlineSmall:hover { background: var(--color-action-soft); }
+.inlineLink { display: inline-flex; align-items: center; height: 20px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-action); font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.inlineLink:hover { text-decoration: underline; }
+
+.iconButton { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; box-sizing: border-box; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.iconButton > svg { width: 18px; height: 18px; }
+.iconButton:hover { background: var(--color-sunken); color: var(--color-text); }
+.iconButton:focus-visible, .outlineSmall:focus-visible, .inlineLink:focus-visible, .bannerLink:focus-visible, .cardLink:focus-visible, .ghostButton:focus-visible, .resetButton:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.menu :global(.ant-dropdown-menu) { min-width: 240px; }
+
+/* Bo'sh natija (qidiruv yoki filtr): ikonka doirasi, matn, «Qidiruvni tozalash». */
+.emptyCell { height: auto !important; padding: 0 14px !important; border-bottom: 0 !important; white-space: normal !important; }
+.emptyRow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 0 18px; white-space: normal; }
+.emptyIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--color-sunken); color: var(--color-text-secondary); }
+.emptyIcon > svg { width: 20px; height: 20px; }
+.emptyText { display: flex; flex: 1 1 280px; flex-direction: column; min-width: 0; }
+.emptyTitle { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-text); }
+.emptyHint { font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+
+.skeletonRow td > span { display: block; width: 70%; height: 12px; margin: 0 0 8px; border-radius: 999px; background: var(--color-sunken); }
+.skeletonRow td > span + span { width: 40%; margin: 0; }
+
+.note { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.note > svg { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; }
+.footnote { max-width: 900px; margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 20px; }
+
+/* ── Telefon (admin-foydalanuvchilar.mobil) ── */
+.phoneFilters { display: flex; gap: 8px; min-width: 0; }
+.phoneFilters .search { flex: 1 1 auto; }
+.phoneFilters .search input { height: 44px; border-radius: 12px; font-size: 16px; }
+.filtersButton { display: inline-flex; flex: none; align-items: center; gap: 8px; height: 44px; margin: 0; padding: 0 12px 0 14px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; cursor: pointer; }
+.filtersButton > svg { width: 18px; height: 18px; }
+.filtersCount { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: var(--color-action-soft); color: var(--color-action); font-size: 12px; line-height: 16px; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; height: 44px; padding: 0 0 0 14px; box-sizing: border-box; border: 1px solid var(--color-action); border-radius: 999px; background: var(--color-action-soft); color: var(--color-action); font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chip > button { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -1px -1px -1px 0; padding: 0; border: 0; border-radius: 999px; background: transparent; color: var(--color-action); cursor: pointer; }
+.chip > button > svg { width: 18px; height: 18px; }
+
+.cardsBox { min-width: 0; padding: 0; overflow: hidden; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.cardsBox > .emptyRow { padding: 16px; }
+.cards { margin: 0; padding: 0; list-style: none; }
+.cardsGroup { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 14px 16px 8px; border-bottom: 1px solid var(--color-border); background: var(--color-sunken); color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardsGroup strong { color: var(--color-text); font-weight: 700; }
+.cardsGroupLink { min-height: 44px; margin: -12px 0; }
+.cardItem { border-bottom: 1px solid var(--color-border); }
+.cardItem:last-child, .cardItem:has(+ .cardsGroup) { border-bottom: 0; }
+.cardLink { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; color: var(--color-text); text-decoration: none; }
+.cardBody { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; }
+.cardTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.cardName { min-width: 0; font-size: 15px; line-height: 22px; font-weight: 700; }
+.cardLine { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.cardAction { padding: 0 16px 14px 64px; }
+.outlineFull { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border: 1px solid var(--color-action); border-radius: 12px; background: var(--color-surface); color: var(--color-action); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.more { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid var(--color-border); }
+.more p { margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums; }
+.moreButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; cursor: pointer; }
+.moreButton > svg { width: 18px; height: 18px; }
+
+.barPrimary, .sheetPrimary { display: inline-flex; flex: 1 1 auto; align-items: center; justify-content: center; gap: 8px; min-width: 0; height: 52px; margin: 0; padding: 0 20px; box-sizing: border-box; border: 0; border-radius: 12px; background: var(--color-action); color: #fff; font-family: inherit; font-size: 15px; line-height: 22px; font-weight: 600; white-space: nowrap; text-decoration: none; cursor: pointer; }
+.barPrimary > svg { width: 18px; height: 18px; }
+.barPrimary:hover, .sheetPrimary:hover { background: var(--color-action-hover); color: #fff; }
+.sheetPrimary { height: 44px; font-size: 14px; line-height: 20px; padding: 0 12px; }
+
+.sheetField { display: flex; flex-direction: column; min-width: 0; }
+.sheetField > label { margin: 0 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; }
+.sheetField > p { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 16px; }
+.sheetSelect { position: relative; display: block; }
+.sheetSelect select { display: block; width: 100%; height: 44px; margin: 0; padding: 0 44px 0 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 16px; line-height: 24px; appearance: none; cursor: pointer; }
+.sheetSelect > svg { position: absolute; top: 50%; right: 14px; width: 18px; height: 18px; transform: translateY(-50%); color: var(--color-text-secondary); pointer-events: none; }
+
+/* ── Planshet (admin-foydalanuvchilar.planshet): «Kirish» ustuni yo'q, katak 10 / 56, filtrlar 44 ── */
+@media (max-width: 1023.98px) {
+  .panel { padding: 16px; }
+  .search { flex: 1 1 240px; }
+  .search input { height: 44px; font-size: 16px; }
+  .filters :global(select) { min-height: 44px; }
+  .loginCol { display: none; }
+  .colStaff { width: 30%; }
+  .colTfa { width: 30%; }
+  .colLast { width: 18%; }
+  .colActions { width: 44px; }
+  .table thead th { height: 48px; padding: 0 10px; }
+  .table td { height: 56px; padding: 0 10px; }
+  .groupRow th { padding: 16px 10px 8px; }
+  .tfaCell { padding-top: 8px !important; padding-bottom: 8px !important; }
+  .actionsCol { width: 44px; padding: 0 2px 0 0 !important; }
+  .iconButton { width: 44px; height: 44px; }
+  /* Planshet: holat ustida belgi va «Rol berish» (44) ustma-ust. */
+  .statusCell[data-unknown] { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .statusCell[data-unknown] .outlineSmall { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 14px; line-height: 20px; }
+  .tabletOnly { display: inline; }
+}
+
+@media (max-width: 767.98px) {
+  .tabletOnly { display: none; }
+}

@@ -1,62 +1,108 @@
-.toolbar {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) 180px 180px auto;
-  gap: var(--space-3);
-}
+/* admin-foydalanuvchilar (№165): yorliqlar (pill + son, hisoblar va jamoa/rollar orasida ajratgich) va yorliq amali. */
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
-.userLink {
-  padding: 0;
-  color: var(--color-text);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 650;
-  text-align: left;
-}
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 
-.userLink:hover {
-  color: var(--color-action);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.userLink:focus-visible {
-  color: var(--color-action);
-  border-radius: 3px;
-  outline: 2px solid var(--color-action);
-  outline-offset: 3px;
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.detailButton {
+.tab {
   display: inline-flex;
-  height: 36px;
-  padding-inline: var(--space-2) !important;
+  flex: none;
   align-items: center;
-  gap: var(--space-1);
-  font-weight: 650;
+  gap: 8px;
+  height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tab[data-count] { padding: 0 8px 0 16px; }
+.tab:hover { border-color: var(--color-border-strong); }
+.tab[aria-selected='true'] { border-color: var(--color-action-soft); background: var(--color-action-soft); color: var(--color-action); }
+.tab:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--color-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tab[aria-selected='true'] .count { background: var(--color-surface); color: var(--color-action); }
+
+.divider { display: block; flex: none; align-self: center; width: 1px; height: 24px; margin: 0 4px; background: var(--color-border-strong); }
+
+.primaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-action);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.primaryAction > svg { width: 18px; height: 18px; flex: none; }
+
+/* «Audit: rol va bloklash» (admin-rollar): yorliqlar qatori o'ngida havola. */
+.sectionLink { display: inline-flex; align-items: center; gap: 4px; color: var(--color-action); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.sectionLink > svg { width: 16px; height: 16px; }
+.sectionLink:hover { text-decoration: underline; }
+.sectionLink:focus-visible { outline: none; border-radius: 4px; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.primaryAction:hover { background: var(--color-action-hover); color: #fff; }
+.primaryAction:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+/* Planshet (admin-foydalanuvchilar.planshet): yorliqlar bir qatorda suriladi, amal — ostida o'ngda; balandlik 44. */
+@media (max-width: 1023.98px) {
+  /* `nowrap`: ko'p qatorli flex ustunida qator kengligi kontentdan olinadi — yorliqlar sahifani kengaytirib yuboradi. */
+  .toolbar { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 12px; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { height: 44px; }
+  .divider { height: 28px; margin: 0; }
+  .actions { justify-content: flex-end; }
 }
 
-@container content (max-width: 767px) {
-  .toolbar {
-    grid-template-columns: 1fr 1fr;
-  }
+/* Telefon (R3): yorliqlar qatori chetma-chet suriladi; sahifa oralig'i 16. */
+@media (max-width: 767.98px) {
+  .page { gap: 16px; }
+  .tabs { margin: 0 -16px; padding: 0 16px; }
 }
 
-@container content (max-width: 575px) {
-  .toolbar {
-    grid-template-columns: 1fr;
-  }
+/* Karta yoki «Yangi xodim» ochiq (admin-foydalanuvchi-karta): ro'yxat (1 1 520) va o'ngda 440 px panel. */
+.split { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; min-width: 0; }
+.listColumn { display: flex; flex: 1 1 520px; flex-direction: column; gap: 20px; min-width: 0; }
 
-  .toolbar :global(.ant-select),
-  .toolbar :global(.ant-btn) {
-    width: 100%;
-  }
-}
+/* Planshet (admin-foydalanuvchi-karta.planshet): o'ngdan drawer 440 px (eng ko'pi 86%), fon qoraytiriladi. */
+.drawer :global(.ant-drawer-mask) { background: rgba(16, 23, 51, 0.45); }
+.drawer :global(.ant-drawer-header) { display: none; }
+.drawer :global(.ant-drawer-body) { padding: 0; }

@@ -1,0 +1,51 @@
+/* «Yangi xodim» (admin-foydalanuvchi-karta K1): panel 440 — sarlavha (ikonka 48), forma, pastda tugmalar;
+   telefonda — bitta karta, tugmalar pastki panelda (R8). */
+.panel { display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; background: var(--color-surface); }
+.panel[data-variant='panel'] { flex: 0 0 440px; width: 440px; max-width: 100%; border: 1px solid var(--color-border); border-radius: 16px; }
+.panel[data-variant='page'] { background: transparent; }
+
+.head { display: flex; align-items: flex-start; gap: 14px; padding: 20px 16px 18px 20px; border-bottom: 1px solid var(--color-border); }
+.headIcon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--color-action-soft); color: var(--color-nav); }
+.headIcon > svg { width: 22px; height: 22px; }
+.headText { flex: 1 1 auto; min-width: 0; }
+.headText h2 { margin: 0; font-size: 20px; line-height: 28px; font-weight: 700; color: var(--color-text); }
+.headText p { margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--color-text-secondary); }
+.close { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.close > svg { width: 20px; height: 20px; }
+.close:hover { background: var(--color-sunken); color: var(--color-text); }
+
+.form { display: flex; flex-direction: column; margin: 0; }
+.body { display: flex; flex-direction: column; gap: 16px; padding: 18px 20px; }
+.panel[data-variant='page'] .body { padding: 16px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.field { min-width: 0; }
+.labelRow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.labelRow label { font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; color: var(--color-text); }
+.required { color: var(--color-danger); }
+.input { display: block; width: 100%; height: 44px; margin: 0; padding: 0 14px; box-sizing: border-box; border: 1px solid var(--color-field-border); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-family: inherit; font-size: 14px; line-height: 21px; font-variant-numeric: tabular-nums; }
+.input:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.input[aria-invalid='true'] { border-color: var(--color-danger); }
+.phone { height: 44px; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--color-danger); font-size: 12px; line-height: 16px; font-weight: 600; }
+.error > svg { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 1px; }
+
+.info { min-width: 0; padding: 12px 14px; box-sizing: border-box; border-radius: 12px; background: var(--color-sunken); }
+.info p { margin: 0; }
+.infoTitle { margin-bottom: 4px !important; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text); }
+.infoText { font-size: 13px; line-height: 19px; color: var(--color-text); }
+
+.footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--color-border); }
+.secondary, .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; margin: 0; padding: 0 18px; box-sizing: border-box; border-radius: 12px; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.secondary { border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.primary { border: 0; background: var(--color-action); color: #fff; }
+.primary:hover:not(:disabled) { background: var(--color-action-hover); }
+.secondary:disabled, .primary:disabled { opacity: 0.6; cursor: progress; }
+.secondary:focus-visible, .primary:focus-visible, .close:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+
+@media (max-width: 767.98px) {
+  .names { grid-template-columns: minmax(0, 1fr); }
+  .input { font-size: 16px; }
+  .secondary, .primary { height: 52px; font-size: 15px; }
+  .secondary { flex: 0 0 auto; }
+  .primary { flex: 1 1 auto; min-width: 0; padding: 0 20px; }
+}

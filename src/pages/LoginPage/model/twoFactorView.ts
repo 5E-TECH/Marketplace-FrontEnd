@@ -7,15 +7,19 @@ import { formatUzPhone } from '../../../shared/lib/phone';
 
 type Translate = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
+/** «Sessiya tugadi» oynasidan kelgan 2FA bosqichi (2FA tiklangan — ilovani qayta ulash), `location.state.challenge`. */
+export function challengeFromState(state: unknown): TwoFactorChallenge | null {
+  const value = typeof state === 'object' && state !== null && 'challenge' in state ? state.challenge : null;
+  if (typeof value !== 'object' || value === null) return null;
+  const challenge = value as Partial<TwoFactorChallenge>;
+  return typeof challenge.token === 'string' && challenge.token && typeof challenge.phone === 'string' && typeof challenge.setupRequired === 'boolean'
+    ? { token: challenge.token, phone: challenge.phone, setupRequired: challenge.setupRequired, user: challenge.user ?? null, reset: challenge.reset ?? null }
+    : null;
+}
+
 /** «Nodira K. · Admin» (blok taymeri ostida); ism kelmasa (taklif fe-27 §2) — telefon raqami. */
 export function identityLine(challenge: TwoFactorChallenge, t: Translate): string {
   return challenge.user ? `${shortPersonName(challenge.user.name)} · ${t(ROLE_LABEL_KEYS[challenge.user.role])}` : formatUzPhone(challenge.phone);
-}
-
-/** Zaxira kod maydoni: katta harf, faqat harf va raqam, «K7QM2-XPA4D» ko'rinishida (backend: 10 belgi). */
-export function formatRecoveryInput(value: unknown): string {
-  const clean = (typeof value === 'string' ? value : '').replace(/[^0-9a-z]/gi, '').toUpperCase().slice(0, 20);
-  return clean.length > 5 ? `${clean.slice(0, 5)}-${clean.slice(5)}` : clean;
 }
 
 /** Kalit to'rtlik guruhlarda — «MZXW 6YTB OI4D …» (umumiy-2fa-ulash); telefonda guruhlar orasida qatorga bo'linadi. */

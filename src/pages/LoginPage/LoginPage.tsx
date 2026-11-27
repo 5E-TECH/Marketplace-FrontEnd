@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/api/useLoginMutation';
+import { lockAccountOf, readAccountLock, type AccountLock } from '../../features/auth/lib/accountLock';
 import type { TwoFactorChallenge } from '../../features/auth/model/authTypes';
 import { authStorage } from '../../features/auth/lib/authStorage';
 import { getApiErrorMessage } from '../../shared/api/apiError';
@@ -14,7 +15,7 @@ import { RoleSwitch, type LoginMode } from './components/RoleSwitch/RoleSwitch';
 import { SellerLoginForm } from './components/SellerLoginForm/SellerLoginForm';
 import { TwoFactorCodeStep } from './components/TwoFactor/TwoFactorCodeStep';
 import { TwoFactorSetupFlow } from './components/TwoFactor/TwoFactorSetupFlow';
-import type { TwoFactorLeave } from './model/twoFactorView';
+import { challengeFromState, type TwoFactorLeave } from './model/twoFactorView';
 import { AuthLayout } from '../../shared/ui/AuthLayout/AuthLayout';
 
 /**
@@ -33,7 +34,10 @@ export default function LoginPage() {
   const [notice, setNotice] = useState<LoginNotice | null>(null);
   const [mode, setMode] = useState<LoginMode>('seller');
   // FE-27: parol tekshirilgach 2FA bosqichi (BE-26).
-  const [challenge, setChallenge] = useState<TwoFactorChallenge | null>(null);
+  // «Sessiya tugadi» oynasidan: 2FA tiklangan — ulash oqimi shu bosqichdan (parol qayta so'ralmaydi).
+  const [challenge, setChallenge] = useState<TwoFactorChallenge | null>(() => challengeFromState(location.state));
+  // Parol to'g'ri, hisob bloklangan yoki nofaol (umumiy-kirish 12) — forma o'rnida sabab.
+  const [lock, setLock] = useState<AccountLock | null>(null);
   // Foydalanuvchi tanlovni almashtirgan — yangi formadagi tanlov fokusni saqlaydi.
   const [modeChanged, setModeChanged] = useState(false);
 
@@ -49,7 +53,12 @@ export default function LoginPage() {
     }
   }, [location.state, message, navigate]);
 
-  const showError = (error: unknown) => {
+  const showError = (error: unknown, phone: string) => {
+    const accountLock = readAccountLock(error, lockAccountOf(null, phone));
+    if (accountLock) {
+      setLock(accountLock);
+      return;
+    }
     const status = axios.isAxiosError(error) ? error.response?.status : undefined;
     // Parol xato yoki raqam ro'yxatda yo'q — bir xil matn: hisob borligi oshkor qilinmaydi.
     if (status === 401) {
@@ -69,8 +78,9 @@ export default function LoginPage() {
 
   const handleSubmit = (values: LoginFormValues) => {
     setNotice(null);
+    const phone = normalizeUzPhone(values.phone);
     loginMutation.mutate(
-      { phone: normalizeUzPhone(values.phone), password: values.password },
+      { phone, password: values.password },
       {
         onSuccess: (result) => {
           // BE-26: admin, superadmin, moliya — sessiya o'rniga ilovadagi kod (yoki birinchi ulash).
@@ -80,7 +90,7 @@ export default function LoginPage() {
           }
           void message.success(t('auth.loginSuccess'));
         },
-        onError: showError,
+        onError: (error) => showError(error, phone),
       },
     );
   };
@@ -109,6 +119,7 @@ export default function LoginPage() {
       onChange={(next) => {
         setMode(next);
         setModeChanged(true);
+        setLock(null);
       }}
     />
   );
@@ -139,6 +150,11 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
           onChange={() => setNotice(null)}
           roleSwitch={roleSwitch}
+          lock={lock}
+          onOtherAccount={() => {
+            setLock(null);
+            form.resetFields();
+          }}
         />
       )}
     </AuthLayout>

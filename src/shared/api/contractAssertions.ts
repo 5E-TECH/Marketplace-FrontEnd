@@ -50,7 +50,13 @@ type Check<T extends true> = T;
  * `is_blocked` ustuni bor (identity migratsiyasi), lekin DTO uni oshkor
  * qilmaydi; frontend yo'q bo'lsa `false` deb hisoblaydi.
  */
-type AuthUserDerived = 'isBlocked';
+type AuthUserDerived = 'isBlocked' | AuthUserProposed;
+
+/**
+ * FE-15 taklifi (docs/api-taklif/fe-15-admin-foydalanuvchilar.md, §15): `/auth/me` da oxirgi rol o'zgarishi va
+ * operator jamoasi — «Rolingiz o‘zgardi» sahifasi uchun; kelmasa qatorlar ko'rsatilmaydi.
+ */
+type AuthUserProposed = 'roleChange' | 'team';
 
 /**
  * FE-12 taklifi (docs/api-taklif/fe-12-admin-moderatsiya.md, 9-bo'lim): kategoriyaning BAD va «muddat kuzatiladi»

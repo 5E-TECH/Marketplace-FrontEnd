@@ -141,6 +141,9 @@ test('sessiya tugadi → sahifa joyida, oynada parol bilan qayta kirish', async 
 test('aloqa uzildi → banner «… dan beri», tiklanganda «Aloqa tiklandi» va 4 s da yopiladi', async ({ context, page }) => {
   await signIn(page, '900000001');
   await expect(pageTitle(page)).toHaveText('Bosh sahifa');
+  // Sarlavha karkasda sahifa modulidan oldin chiqadi: modullar yuklanib bo'lmasdan aloqa uzilsa, ilova sahifani qayta
+  // yuklaydi va banner yo'qoladi. Sahifa bloki chizilgach — hamma modul yuklangan.
+  await expect(page.getByRole('region', { name: 'Bugungi xabarlar' })).toBeVisible();
 
   await context.setOffline(true);
   const banner = page.getByTestId('connection-banner');

@@ -1,0 +1,50 @@
+/* «Hisobingiz bloklandi» oynasi (umumiy-sessiya 6): 440, sessiya oynasi uslubida; qizil ikonka doirasi. */
+.dialogRoot .dangerIcon { background: var(--color-danger-soft); color: var(--color-danger); }
+
+.dialogFacts { display: flex; flex-direction: column; margin: 0; }
+.dialogFacts > div { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-top: 1px solid var(--color-border); }
+.dialogFacts > div:first-child { padding-top: 0; border-top: 0; }
+.dialogFacts dt { flex: 0 0 150px; color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.dialogFacts dd { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 14px; font-weight: 600; line-height: 21px; font-variant-numeric: tabular-nums; }
+
+.note { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+/* Telefon varag'i (14): sarlavha va tugmalar — sessiya oynasi uslubida; qatorlar ustma-ust. */
+@media (max-width: 767.98px) {
+  .dialogFacts > div { flex-direction: column; align-items: stretch; gap: 2px; }
+  .dialogFacts dt { flex: none; }
+}
+
+/* Kirish sahifasi (umumiy-kirish 12): xodim bloklangan — forma o'rnida karta. */
+.loginCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.loginHead { display: flex; align-items: flex-start; gap: 14px; }
+
+.loginIcon {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.loginIcon svg { display: block; width: 22px; height: 22px; }
+.loginTitle { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+.loginText { margin: 4px 0 0; color: var(--color-text-secondary); font-size: 14px; line-height: 21px; }
+
+.loginFacts { display: flex; flex-direction: column; gap: 8px; margin: 0; padding-top: 14px; border-top: 1px solid var(--color-border); }
+.loginFacts > div { display: flex; justify-content: space-between; gap: 16px; }
+.loginFacts dt { color: var(--color-text-secondary); font-size: 13px; line-height: 18px; }
+.loginFacts dd { margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; text-align: right; }

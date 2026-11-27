@@ -1,7 +1,10 @@
 import { App, Button, Form } from 'antd';
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../../../app/store/hooks';
 import { useTokenSignInMutation } from '../../../../features/auth/api/useLoginMutation';
+import { ACCOUNT_BLOCKED_PATH, lockAccountOf, readAccountLock } from '../../../../features/auth/lib/accountLock';
+import { accountLocked } from '../../../../features/auth/model/authSlice';
 import { loginWithOtp } from '../../../../features/sellerAuth/api/sellerAuthApi';
 import { otpCodeDigits, pendingLoading } from '../../../../features/sellerAuth/lib/fieldRules';
 import { useCountdown } from '../../../../features/sellerAuth/lib/useCountdown';
@@ -34,6 +37,8 @@ const CODE_ID = 'seller-login-code';
 export function SellerLoginForm({ roleSwitch, initialPhone }: SellerLoginFormProps) {
   const { message } = App.useApp();
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [form] = Form.useForm<SellerLoginValues>();
   const flow = useOtpFlow('LOGIN');
   const { state } = flow;
@@ -56,6 +61,13 @@ export function SellerLoginForm({ roleSwitch, initialPhone }: SellerLoginFormPro
       {
         onSuccess: () => void message.success(t('auth.loginSuccess')),
         onError: (error) => {
+          // Kod to'g'ri, hisob bloklangan (taklif `ACCOUNT_BLOCKED`) — karkassiz sahifa: sabab, pul, murojaat (umumiy-sessiya 7).
+          const lock = readAccountLock(error, lockAccountOf(null, `+998${state.phone}`));
+          if (lock) {
+            dispatch(accountLocked(lock));
+            void navigate(ACCOUNT_BLOCKED_PATH);
+            return;
+          }
           flow.handleVerifyError(error);
         },
       },

@@ -33,6 +33,9 @@ export function isUserRole(value: unknown): value is UserRole {
   return typeof value === 'string' && (USER_ROLES as readonly string[]).includes(value);
 }
 
+/** BE-26 (`two-factor.gate`): parol va ilovadagi kod bilan kiradigan rollar (`ADMIN_2FA=on` bo'lganda). */
+export const TWO_FACTOR_ROLES: readonly UserRole[] = ['ADMIN', 'SUPERADMIN', 'FINANCE'];
+
 export interface AuthUser {
   id: string;
   role: UserRole;
@@ -43,6 +46,18 @@ export interface AuthUser {
   isActive: boolean;
   isDeleted: boolean;
   isBlocked: boolean;
+  /** Taklif (fe-15 §15): oxirgi rol o'zgarishi — «Rolingiz o‘zgardi» sahifasidagi «O‘zgartirdi» qatori. */
+  roleChange?: RoleChangeInfo | null;
+  /** Taklif (fe-15 §15): operator jamoasi — «Jamoa: nazoratchi Rustam Q.». */
+  team?: { supervisorName: string } | null;
+}
+
+/** Rol o'zgarishi: `before` — `null`, agar oldin frontend bilmagan rol bo'lgan («Noma’lum rol»). */
+export interface RoleChangeInfo {
+  before: UserRole | null;
+  after: UserRole;
+  at: string | null;
+  by: { name: string; role: UserRole | null } | null;
 }
 
 /** `PATCH /auth/profile` — barcha maydon ixtiyoriy (UpdateProfileDto). */
